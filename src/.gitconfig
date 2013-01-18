@@ -1,0 +1,63 @@
+
+[user]
+	name = Fabrice Niessen
+	email = fniessen@pirilampo.org
+
+[core]
+	editor = emacsclient
+	pager = less
+	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+
+[color]
+	ui = auto
+	branch = auto
+	diff = auto
+	status = auto
+	interactive = auto
+
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
+
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan
+
+[color "grep"]
+	filename = bold yellow reverse
+	linenumber = magenta bold
+	match = green reverse bold
+	separator = red bold
+	selected = white bold
+	context = black
+	function = red
+
+[alias]
+	y = diff "@{yesterday}"
+	w = whatchanged
+	st = status
+	ci = commit
+	br = branch
+	co = checkout
+	df = diff
+	dc = diff --cached
+	lg = log -p
+	lol = log --graph --decorate --pretty=oneline --abbrev-commit
+	lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+	ls = ls-files
+
+	# Show files ignored by git:
+	ign = ls-files -o -i --exclude-standard
+
+[push]
+	# default = simple # default for Git 1.8.0+
+	default = matching

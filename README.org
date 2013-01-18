@@ -1,0 +1,134 @@
+# Hey Emacs, this is a -*- org -*- # file ...
+#+TITLE:     Git configuration file
+#+AUTHOR:    Fabrice Niessen
+#+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
+#+Time-stamp: <2013-01-18 Fri 14:12>
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en_US
+
+#+PROPERTY:  tangle src/.gitconfig
+
+* User
+
+#+begin_src conf
+[user]
+	name = Fabrice Niessen
+	email = fniessen@pirilampo.org
+#+end_src
+
+* Core
+
+#+begin_src conf
+[core]
+	editor = emacsclient
+	pager = less
+	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+#+end_src
+
+* Color
+
+#+begin_src conf
+[color]
+	ui = auto
+	branch = auto
+	diff = auto
+	status = auto
+	interactive = auto
+#+end_src
+
+** Branch
+
+#+begin_src conf
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+#+end_src
+
+** Diff
+
+#+begin_src conf
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
+#+end_src
+
+** Status
+
+#+begin_src conf
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan
+#+end_src
+
+** Grep
+
+#+begin_src conf
+[color "grep"]
+	filename = bold yellow reverse
+	linenumber = magenta bold
+	match = green reverse bold
+	separator = red bold
+	selected = white bold
+	context = black
+	function = red
+#+end_src
+
+* Alias
+
+#+begin_src conf
+[alias]
+	y = diff "@{yesterday}"
+	w = whatchanged
+	st = status
+	ci = commit
+	br = branch
+	co = checkout
+	df = diff
+	dc = diff --cached
+	lg = log -p
+	lol = log --graph --decorate --pretty=oneline --abbrev-commit
+	lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+	ls = ls-files
+
+	# Show files ignored by git:
+	ign = ls-files -o -i --exclude-standard
+#+end_src
+
+* Format
+
+#+begin_src conf :tangle no
+[format] # applied to `git log'
+	# see https://bitbucket.org/rivanvx/beamer/changesets: author, commit, message, date
+	# see http://git-scm.com/book/ch2-3.html for options
+
+	# see https://github.com/djbobke/dotfiles/blob/master/gitconfig
+	pretty = format:%C(blue)%C(ul)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset
+
+	# see http://www.kunday.com/post/29594688306/git-config-hacks
+	pretty = format:%C(green)%an%Creset %C(yellow bold ul)%h%Creset %s %Cgreen(%cr)%Creset
+#+end_src
+
+* Push
+
+#+begin_src conf
+[push]
+	# default = simple # default for Git 1.8.0+
+	default = matching
+#+end_src
+
+* Install environment
+  :PROPERTIES:
+  :tangle:   src/install-gitconfig-file
+  :END:
+
+Symlink the files.
+
+#+begin_src sh :results silent :padline no :shebang #!/bin/bash
+ln -f -s $(pwd)/.gitconfig ~/.gitconfig
+#+end_src
