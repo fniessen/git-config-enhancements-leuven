@@ -1,8 +1,7 @@
-# Hey Emacs, this is a -*- org -*- # file ...
 #+TITLE:     Git configuration file
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
-#+Time-stamp: <2013-01-18 Fri 14:12>
+#+Time-stamp: <2013-03-08 Fri 11:38>
 #+DESCRIPTION:
 #+KEYWORDS:
 #+LANGUAGE:  en_US
@@ -81,38 +80,66 @@
 
 * Alias
 
+Common shortcuts:
+
 #+begin_src conf
 [alias]
-	y = diff "@{yesterday}"
-	w = whatchanged
 	st = status
 	ci = commit
 	br = branch
 	co = checkout
 	df = diff
-	dc = diff --cached
 	lg = log -p
-	lol = log --graph --decorate --pretty=oneline --abbrev-commit
-	lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+#+end_src
+
+#+begin_src conf
+[alias]
+	lgr = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=relative --graph
+	lga = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(yellow)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=short --graph
+	y = diff "@{yesterday}"
+	w = whatchanged
+	who = shortlog -s --
+	dc = diff --cached
 	ls = ls-files
 
 	# Show files ignored by git:
 	ign = ls-files -o -i --exclude-standard
 #+end_src
 
-* Format
+** Cherrypick style recording
 
-#+begin_src conf :tangle no
-[format] # applied to `git log'
-	# see https://bitbucket.org/rivanvx/beamer/changesets: author, commit, message, date
-	# see http://git-scm.com/book/ch2-3.html for options
+Ask interactively which patch hunk to commit, and then do the commit:
 
-	# see https://github.com/djbobke/dotfiles/blob/master/gitconfig
-	pretty = format:%C(blue)%C(ul)%ad%Creset %C(yellow)%h%C(green)%d%Creset %C(blue)%s %C(magenta) [%an]%Creset
-
-	# see http://www.kunday.com/post/29594688306/git-config-hacks
-	pretty = format:%C(green)%an%Creset %C(yellow bold ul)%h%Creset %s %Cgreen(%cr)%Creset
+#+begin_src conf
+[alias]
+	record = ! sh -c '(git add -p -- $@ && git commit) || git reset' --
 #+end_src
+
+It will not only do =git add -p= (with an optional file list), but it will also
+immediately do the =commit=. Upon abandonment of either the add or the commit it
+will =reset= the index.
+
+**  Getting the diff of a branch since it forked from another branch, or since the last merge
+
+To see the changes in a branch since it was forked from another branch, or
+since the last merge with the origin branch, you can add this alias:
+
+#+begin_src conf
+[alias]
+	forkdiff = !bash -c 'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" ' -
+#+end_src
+
+It uses =git merge-base= to determine the fork-point (the commit that is common
+to both the branches) and does a =git diff= between that commit and the second
+branch.
+
+Usage
+
+: git forkdiff <forked from branch> <forked branch> [git-diff-options]
+
+Example
+
+: git forkdiff origin/master my_forked_branch --stat
 
 * Push
 
@@ -132,3 +159,7 @@ Symlink the files.
 #+begin_src sh :results silent :padline no :shebang #!/bin/bash
 ln -f -s $(pwd)/.gitconfig ~/.gitconfig
 #+end_src
+
+* References
+
+- [[https://git.wiki.kernel.org/index.php/Aliases][Git SCM Wiki - Aliases]]
