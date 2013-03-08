@@ -51,7 +51,7 @@
 
 [alias]
 	lgr = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=relative --graph
-	lga = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(yellow)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=short --graph
+	lga = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=short --graph
 	y = diff "@{yesterday}"
 	w = whatchanged
 	who = shortlog -s --

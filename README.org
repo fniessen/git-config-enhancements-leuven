@@ -1,7 +1,7 @@
 #+TITLE:     Git configuration file
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
-#+Time-stamp: <2013-03-08 Fri 11:38>
+#+Time-stamp: <2013-03-08 Fri 15:14>
 #+DESCRIPTION:
 #+KEYWORDS:
 #+LANGUAGE:  en_US
@@ -95,7 +95,7 @@ Common shortcuts:
 #+begin_src conf
 [alias]
 	lgr = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=relative --graph
-	lga = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(yellow)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=short --graph
+	lga = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=short --graph
 	y = diff "@{yesterday}"
 	w = whatchanged
 	who = shortlog -s --
