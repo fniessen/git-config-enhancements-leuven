@@ -1,4 +1,3 @@
-
 [user]
 	name = Fabrice Niessen
 	email = fniessen@pirilampo.org
@@ -50,8 +49,8 @@
 	lg = log -p
 
 [alias]
-	lgr = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=relative --graph
-	lga = log --decorate --all --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=short --graph
+	lgr = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=relative --graph
+	lga = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=short --graph
 	y = diff "@{yesterday}"
 	w = whatchanged
 	who = shortlog -s --
