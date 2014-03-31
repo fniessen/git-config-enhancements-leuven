@@ -1,6 +1,6 @@
 [user]
-	name = Fabrice Niessen
-	email = fniessen@pirilampo.org
+	name = John Doe
+	email = johndoe@example.com
 
 [core]
 	editor = emacsclient

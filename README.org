@@ -1,20 +1,23 @@
 #+TITLE:     Git configuration file
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
-#+Time-stamp: <2014-02-03 Mon 15:34>
+#+Time-stamp: <2014-03-31 Mon 15:28>
 #+DESCRIPTION:
 #+KEYWORDS:
 #+LANGUAGE:  en
 
 #+PROPERTY:  tangle src/.gitconfig
+#+PROPERTY:  eval no
 
 * User
 
 #+begin_src conf
 [user]
-	name = Fabrice Niessen
-	email = fniessen@pirilampo.org
+	name = John Doe
+	email = johndoe@example.com
 #+end_src
+
+Override the above with your personal details.
 
 * Core
 
