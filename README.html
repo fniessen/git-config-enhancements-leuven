@@ -1,0 +1,387 @@
+<!-- <xml version="1.0" encoding="utf-8"> -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Cygwin (vers 1st September 2004), see www.w3.org" />
+
+  <title>Git configuration file</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="generator" content="Org-mode" />
+  <meta name="author" content="Fabrice Niessen" />
+</head>
+
+<body>
+  <div id="content">
+    <h1 class="title">Git configuration file</h1>
+
+    <div id="table-of-contents">
+      <h2>Table of Contents</h2>
+
+      <div id="text-table-of-contents">
+        <ul>
+          <li><a href="#sec-1">1. Overview</a></li>
+
+          <li>
+            <a href="#sec-2">2. Tasks</a>
+
+            <ul>
+              <li><a href="#sec-2-1">2.1. <span class="todo TODO">TODO</span>
+              Outsource and include private entries in .gitconfig</a></li>
+
+              <li><a href="#sec-2-2">2.2. <span class="todo TODO">TODO</span>
+              Mix professional and personal git configurations</a></li>
+            </ul>
+          </li>
+
+          <li><a href="#sec-3">3. User</a></li>
+
+          <li><a href="#sec-4">4. Core</a></li>
+
+          <li>
+            <a href="#sec-5">5. Color</a>
+
+            <ul>
+              <li><a href="#sec-5-1">5.1. Branch</a></li>
+
+              <li><a href="#sec-5-2">5.2. Diff</a></li>
+
+              <li><a href="#sec-5-3">5.3. Status</a></li>
+
+              <li><a href="#sec-5-4">5.4. Grep</a></li>
+            </ul>
+          </li>
+
+          <li>
+            <a href="#sec-6">6. Alias</a>
+
+            <ul>
+              <li><a href="#sec-6-1">6.1. Cherrypick style recording</a></li>
+
+              <li><a href="#sec-6-2">6.2. Getting the diff of a branch since it
+              forked from another branch, or since the last merge</a></li>
+            </ul>
+          </li>
+
+          <li><a href="#sec-7">7. Push</a></li>
+
+          <li><a href="#sec-8">8. References</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="outline-container-sec-1" class="outline-2">
+      <h2 id="sec-1"><span class="section-number-2">1</span> Overview</h2>
+
+      <div class="outline-text-2" id="text-1">
+        <p>The following configures interesting global settings for Git. These
+        are stored in the <code>.gitconfig</code> file located in the user home
+        directory.</p>
+
+        <div class="warning">
+          <p>Note that tangling this file will override whichever
+          <code>~/.gitconfig</code> file you might have. So <b>be extremely
+          careful</b>!</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="outline-container-sec-2" class="outline-2">
+      <h2 id="sec-2"><span class="section-number-2">2</span> Tasks</h2>
+
+      <div class="outline-text-2" id="text-2"></div>
+
+      <div id="outline-container-sec-2-1" class="outline-3">
+        <h3 id="sec-2-1"><span class="section-number-3">2.1</span> <span class=
+        "todo TODO">TODO</span> Outsource and include private entries in
+        .gitconfig</h3>
+
+        <div class="outline-text-3" id="text-2-1">
+          <p>Git (1.7.10+) now supports this syntax in .gitconfig:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+[<span class="org-type">include</span>]
+    <span class="org-variable-name">path</span> = /path/to/file
+</pre>
+          </div>
+
+          <p>So you can split your gitconfig configurations across multiple
+          files, e.g. you can have a .gitconfig file for your nonsensitive
+          information and a git ignored .githubconfig file containing your
+          private github token.</p>
+
+          <p>See <a href=
+          "http://travisjeffery.com/b/2012/03/using-gits-include-for-private-information-like-github-tokens/">
+          http://travisjeffery.com/b/2012/03/using-gits-include-for-private-information-like-github-tokens/</a></p>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-2-2" class="outline-3">
+        <h3 id="sec-2-2"><span class="section-number-3">2.2</span> <span class=
+        "todo TODO">TODO</span> Mix professional and personal git
+        configurations</h3>
+
+        <div class="outline-text-3" id="text-2-2">
+          <p><a href=
+          "http://monkeypatch.me/blog/mixing-professional-and-personal-git-configurations.html">
+          http://monkeypatch.me/blog/mixing-professional-and-personal-git-configurations.html</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="outline-container-sec-3" class="outline-2">
+      <h2 id="sec-3"><span class="section-number-2">3</span> User</h2>
+
+      <div class="outline-text-2" id="text-3">
+        <p>Setting your user name and e-mail address is important because Git
+        stores the committer and author of a change in every commit.</p>
+
+        <div class="org-src-container">
+          <pre class="src src-conf">
+[<span class="org-type">user</span>]
+        <span class="org-variable-name">name</span> = Fabrice Niessen
+        <span class="org-variable-name">email</span> = fniessen@pirilampo.org
+</pre>
+        </div>
+
+        <p>You should “override” the above with your personal details.</p>
+      </div>
+    </div>
+
+    <div id="outline-container-sec-4" class="outline-2">
+      <h2 id="sec-4"><span class="section-number-2">4</span> Core</h2>
+
+      <div class="outline-text-2" id="text-4">
+        <div class="org-src-container">
+          <pre class="src src-conf">
+[<span class="org-type">core</span>]
+        <span class="org-variable-name">editor</span> = emacsclient
+        <span class="org-variable-name">pager</span> = less
+        <span class=
+"org-variable-name">whitespace</span> = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+</pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="outline-container-sec-5" class="outline-2">
+      <h2 id="sec-5"><span class="section-number-2">5</span> Color</h2>
+
+      <div class="outline-text-2" id="text-5">
+        <div class="org-src-container">
+          <pre class="src src-conf">
+[<span class="org-type">color</span>]
+        <span class="org-variable-name">ui</span> = auto
+        <span class="org-variable-name">branch</span> = auto
+        <span class="org-variable-name">diff</span> = auto
+        <span class="org-variable-name">status</span> = auto
+        <span class="org-variable-name">interactive</span> = auto
+</pre>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-5-1" class="outline-3">
+        <h3 id="sec-5-1"><span class="section-number-3">5.1</span> Branch</h3>
+
+        <div class="outline-text-3" id="text-5-1">
+          <div class="org-src-container">
+            <pre class="src src-conf">
+[color <span class="org-string">"branch"</span>]
+        <span class="org-variable-name">current</span> = yellow reverse
+        <span class="org-variable-name">local</span> = yellow
+        <span class="org-variable-name">remote</span> = green
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-5-2" class="outline-3">
+        <h3 id="sec-5-2"><span class="section-number-3">5.2</span> Diff</h3>
+
+        <div class="outline-text-3" id="text-5-2">
+          <div class="org-src-container">
+            <pre class="src src-conf">
+[color <span class="org-string">"diff"</span>]
+        <span class="org-variable-name">meta</span> = yellow bold
+        <span class="org-variable-name">frag</span> = magenta bold
+        <span class="org-variable-name">old</span> = red bold
+        <span class="org-variable-name">new</span> = green bold
+        <span class="org-variable-name">whitespace</span> = red reverse
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-5-3" class="outline-3">
+        <h3 id="sec-5-3"><span class="section-number-3">5.3</span> Status</h3>
+
+        <div class="outline-text-3" id="text-5-3">
+          <div class="org-src-container">
+            <pre class="src src-conf">
+[color <span class="org-string">"status"</span>]
+        <span class="org-variable-name">added</span> = yellow
+        <span class="org-variable-name">changed</span> = green
+        <span class="org-variable-name">untracked</span> = cyan
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-5-4" class="outline-3">
+        <h3 id="sec-5-4"><span class="section-number-3">5.4</span> Grep</h3>
+
+        <div class="outline-text-3" id="text-5-4">
+          <div class="org-src-container">
+            <pre class="src src-conf">
+[color <span class="org-string">"grep"</span>]
+        <span class="org-variable-name">filename</span> = bold yellow reverse
+        <span class="org-variable-name">linenumber</span> = magenta bold
+        <span class="org-variable-name">match</span> = green reverse bold
+        <span class="org-variable-name">separator</span> = red bold
+        <span class="org-variable-name">selected</span> = white bold
+        <span class="org-variable-name">context</span> = black
+        <span class="org-variable-name">function</span> = red
+</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="outline-container-sec-6" class="outline-2">
+      <h2 id="sec-6"><span class="section-number-2">6</span> Alias</h2>
+
+      <div class="outline-text-2" id="text-6">
+        <p>Common shortcuts:</p>
+
+        <div class="org-src-container">
+          <pre class="src src-conf">
+[<span class="org-type">alias</span>]
+        <span class="org-variable-name">st</span> = status
+        <span class="org-variable-name">ci</span> = commit
+        <span class="org-variable-name">br</span> = branch
+        <span class="org-variable-name">co</span> = checkout
+        <span class="org-variable-name">df</span> = diff
+        <span class="org-variable-name">lg</span> = log -p
+</pre>
+        </div>
+
+        <div class="org-src-container">
+          <pre class="src src-conf">
+[<span class="org-type">alias</span>]
+        <span class=
+"org-variable-name">lgr</span> = log --decorate --pretty=format:<span class=
+"org-string">'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --abbrev-commit --date=relative --graph
+        <span class=
+"org-variable-name">lga</span> = log --decorate --pretty=format:<span class=
+"org-string">'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --abbrev-commit --date=short --graph
+        <span class="org-variable-name">y</span> = diff <span class=
+"org-string">"@{yesterday}"</span>
+        <span class="org-variable-name">w</span> = whatchanged
+        <span class="org-variable-name">who</span> = shortlog -s --
+        <span class="org-variable-name">dc</span> = diff --cached
+        <span class="org-variable-name">ls</span> = ls-files
+
+        # Show files ignored by git:
+        <span class=
+"org-variable-name">ign</span> = ls-files -o -i --exclude-standard
+</pre>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-6-1" class="outline-3">
+        <h3 id="sec-6-1"><span class="section-number-3">6.1</span> Cherrypick
+        style recording</h3>
+
+        <div class="outline-text-3" id="text-6-1">
+          <p>Ask interactively which patch hunk to commit, and then do the
+          commit:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+[<span class="org-type">alias</span>]
+        <span class="org-variable-name">record</span> = ! sh -c <span class=
+"org-string">'(git add -p -- $@ &amp;&amp; git commit) || git reset'</span> --
+</pre>
+          </div>
+
+          <p>It will not only do <code>git add -p</code> (with an optional file
+          list), but it will also immediately do the <code>commit</code>. Upon
+          abandonment of either the add or the commit it will
+          <code>reset</code> the index.</p>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-6-2" class="outline-3">
+        <h3 id="sec-6-2"><span class="section-number-3">6.2</span> Getting the
+        diff of a branch since it forked from another branch, or since the last
+        merge</h3>
+
+        <div class="outline-text-3" id="text-6-2">
+          <p>To see the changes in a branch since it was forked from another
+          branch, or since the last merge with the origin branch, you can add
+          this alias:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+[<span class="org-type">alias</span>]
+        <span class="org-variable-name">forkdiff</span> = !bash -c <span class=
+"org-string">'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" '</span> -
+</pre>
+          </div>
+
+          <p>It uses <code>git merge-base</code> to determine the fork-point
+          (the commit that is common to both the branches) and does a <code>git
+          diff</code> between that commit and the second branch.</p>
+
+          <p>Usage</p>
+          <pre class="example">
+git forkdiff &lt;forked from branch&gt; &lt;forked branch&gt; [git-diff-options]
+</pre>
+
+          <p>Example</p>
+          <pre class="example">
+git forkdiff origin/master my_forked_branch --stat
+</pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="outline-container-sec-7" class="outline-2">
+      <h2 id="sec-7"><span class="section-number-2">7</span> Push</h2>
+
+      <div class="outline-text-2" id="text-7">
+        <div class="org-src-container">
+          <pre class="src src-conf">
+[<span class="org-type">push</span>]
+        <span class=
+"org-variable-name"># default</span> = simple # default for Git 1.8.0+
+        <span class="org-variable-name">default</span> = matching
+</pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="outline-container-sec-8" class="outline-2">
+      <h2 id="sec-8"><span class="section-number-2">8</span> References</h2>
+
+      <div class="outline-text-2" id="text-8">
+        <ul class="org-ul">
+          <li><a href="https://git.wiki.kernel.org/index.php/Aliases">Git SCM
+          Wiki - Aliases</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="postamble" class="status">
+    <div id="footer">
+      <div id="copyright">
+        Copyright © Fabrice Niessen
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,23 +1,57 @@
 #+TITLE:     Git configuration file
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
-#+Time-stamp: <2014-03-31 Mon 15:28>
+#+Time-stamp: <2014-07-24 Thu 16:49>
 #+DESCRIPTION:
 #+KEYWORDS:
 #+LANGUAGE:  en
 
-#+PROPERTY:  tangle src/.gitconfig
+#+PROPERTY:  tangle ~/.gitconfig
 #+PROPERTY:  eval no
+
+* Overview
+
+The following configures interesting global settings for Git. These are stored
+in the =.gitconfig= file located in the user home directory.
+
+#+begin_warning
+Note that tangling this file will override whichever =~/.gitconfig= file you
+might have. So *be extremely careful*!
+#+end_warning
+
+* Tasks
+
+** TODO Outsource and include private entries in .gitconfig
+
+Git (1.7.10+) now supports this syntax in .gitconfig:
+
+#+begin_src conf :tangle no
+[include]
+    path = /path/to/file
+#+end_src
+
+So you can split your gitconfig configurations across multiple files, e.g. you
+can have a .gitconfig file for your nonsensitive information and a git ignored
+.githubconfig file containing your private github token.
+
+See http://travisjeffery.com/b/2012/03/using-gits-include-for-private-information-like-github-tokens/
+
+** TODO Mix professional and personal git configurations
+
+http://monkeypatch.me/blog/mixing-professional-and-personal-git-configurations.html
 
 * User
 
+Setting your user name and e-mail address is important because Git stores the
+committer and author of a change in every commit.
+
 #+begin_src conf
 [user]
-	name = John Doe
-	email = johndoe@example.com
+	name = Fabrice Niessen
+	email = fniessen@pirilampo.org
 #+end_src
 
-Override the above with your personal details.
+You should "override" the above with your personal details.
 
 * Core
 
@@ -150,17 +184,6 @@ Example
 [push]
 	# default = simple # default for Git 1.8.0+
 	default = matching
-#+end_src
-
-* Install environment
-  :PROPERTIES:
-  :tangle:   src/install-gitconfig-file
-  :END:
-
-Symlink the files.
-
-#+begin_src sh :results silent :padline no :shebang #!/bin/bash
-ln -f -s $(pwd)/.gitconfig ~/.gitconfig
 #+end_src
 
 * References
