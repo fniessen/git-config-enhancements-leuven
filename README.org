@@ -1,7 +1,6 @@
 #+TITLE:     Git configuration file
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
-#+Time-stamp: <2014-09-23 Tue 10:13>
 #+DESCRIPTION:
 #+KEYWORDS:
 #+LANGUAGE:  en
