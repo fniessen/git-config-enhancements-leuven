@@ -47,7 +47,7 @@ committer and author of a change in every commit.
 #+begin_src conf
 [user]
 	name = Fabrice Niessen
-	email = (concat "fniessen" at-sign "pirilampo.org")
+	email = (concat \"fniessen\" at-sign \"pirilampo.org\")
 #+end_src
 
 You should "override" the above with your personal details.
@@ -130,8 +130,9 @@ Common shortcuts:
 
 #+begin_src conf
 [alias]
-	lgr = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=relative --graph
-	lga = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --abbrev-commit --date=short --graph
+	lg = log --decorate --oneline --graph
+	lgr = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=relative --graph
+	lga = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=short --graph
 	y = diff "@{yesterday}"
 	w = whatchanged
 	who = shortlog -s --

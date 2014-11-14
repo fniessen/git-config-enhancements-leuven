@@ -145,9 +145,8 @@
           <pre class="src src-conf">
 [<span class="org-type">user</span>]
         <span class="org-variable-name">name</span> = Fabrice Niessen
-        <span class="org-variable-name">email</span> = (concat <span class=
-"org-string">"fniessen"</span> at-sign <span class=
-"org-string">"pirilampo.org"</span>)
+        <span class=
+"org-variable-name">email</span> = (concat \"fniessen\" at-sign \"pirilampo.org\")
 </pre>
         </div>
 
@@ -276,11 +275,13 @@
           <pre class="src src-conf">
 [<span class="org-type">alias</span>]
         <span class=
+"org-variable-name">lg</span> = log --decorate --oneline --graph
+        <span class=
 "org-variable-name">lgr</span> = log --decorate --pretty=format:<span class=
-"org-string">'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --abbrev-commit --date=relative --graph
+"org-string">'%C(yellow)%h%Creset %C(auto)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --date=relative --graph
         <span class=
 "org-variable-name">lga</span> = log --decorate --pretty=format:<span class=
-"org-string">'%C(yellow)%h%Creset %C(bold cyan)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --abbrev-commit --date=short --graph
+"org-string">'%C(yellow)%h%Creset %C(auto)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --date=short --graph
         <span class="org-variable-name">y</span> = diff <span class=
 "org-string">"@{yesterday}"</span>
         <span class="org-variable-name">w</span> = whatchanged
