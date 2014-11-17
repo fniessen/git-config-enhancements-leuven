@@ -83,6 +83,13 @@ You should "override" the above with your personal details.
 	fullname = true
 #+end_src
 
+* Pull
+
+#+begin_src conf
+[pull]
+	rebase = true
+#+end_src
+
 * Push
 
 #+begin_src conf
