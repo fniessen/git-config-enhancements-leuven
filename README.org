@@ -58,7 +58,36 @@ You should "override" the above with your personal details.
 [core]
 	editor = emacsclient
 	pager = less
-	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+#+end_src
+
+* Diff
+
+#+begin_src conf
+[diff]
+	renames = copies
+	algorithm = patience
+#+end_src
+
+* Merge
+
+#+begin_src conf
+[merge]
+	stat = true
+#+end_src
+
+* Grep
+
+#+begin_src conf
+[grep]
+	fullname = true
+#+end_src
+
+* Push
+
+#+begin_src conf
+[push]
+	default = current
 #+end_src
 
 * Color
@@ -152,9 +181,9 @@ Ask interactively which patch hunk to commit, and then do the commit:
 	record = ! sh -c '(git add -p -- $@ && git commit) || git reset' --
 #+end_src
 
-It will not only do =git add -p= (with an optional file list), but it will also
-immediately do the =commit=. Upon abandonment of either the add or the commit it
-will =reset= the index.
+It will not only do ~git add -p~ (with an optional file list), but it will also
+immediately do the ~commit~. Upon abandonment of either the add or the commit it
+will ~reset~ the index.
 
 **  Getting the diff of a branch since it forked from another branch, or since the last merge
 
@@ -166,8 +195,8 @@ since the last merge with the origin branch, you can add this alias:
 	forkdiff = !bash -c 'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" ' -
 #+end_src
 
-It uses =git merge-base= to determine the fork-point (the commit that is common
-to both the branches) and does a =git diff= between that commit and the second
+It uses ~git merge-base~ to determine the fork-point (the commit that is common
+to both the branches) and does a ~git diff~ between that commit and the second
 branch.
 
 Usage
@@ -177,14 +206,6 @@ Usage
 Example
 
 : git forkdiff origin/master my_forked_branch --stat
-
-* Push
-
-#+begin_src conf
-[push]
-	# default = simple # default for Git 1.8.0+
-	default = matching
-#+end_src
 
 * References
 
