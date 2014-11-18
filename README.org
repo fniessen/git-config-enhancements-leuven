@@ -173,7 +173,6 @@ Common shortcuts:
 	br = branch
 	co = checkout
 	df = diff
-	lg = log -p
 #+end_src
 
 #+begin_src conf
