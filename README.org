@@ -164,19 +164,25 @@ pull.
 
 * Alias
 
+** Abbreviations
+
 Common shortcuts:
 
 #+begin_src conf
 [alias]
 	st = status
-	ci = commit
 	br = branch
-	co = checkout
 	df = diff
 #+end_src
 
+#+begin_src conf :tangle no
+	ci = commit                     # or `co'
+	co = checkout                   # or `ch'
+#+end_src
+
+** Pretty log
+
 #+begin_src conf
-[alias]
 	lg = log --decorate --oneline --graph
 	lgr = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=relative --graph
 	lga = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=short --graph
@@ -195,7 +201,6 @@ Common shortcuts:
 Ask interactively which patch hunk to commit, and then do the commit:
 
 #+begin_src conf
-[alias]
 	record = ! sh -c '(git add -p -- $@ && git commit) || git reset' --
 #+end_src
 
@@ -209,7 +214,6 @@ To see the changes in a branch since it was forked from another branch, or
 since the last merge with the origin branch, you can add this alias:
 
 #+begin_src conf
-[alias]
 	forkdiff = !bash -c 'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" ' -
 #+end_src
 
