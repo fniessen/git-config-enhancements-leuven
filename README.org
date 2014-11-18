@@ -85,9 +85,21 @@ You should "override" the above with your personal details.
 
 * Pull
 
+Configure Git to do the ~--rebase~ part automatically.
+
 #+begin_src conf
 [pull]
 	rebase = true
+#+end_src
+
+* Rebase
+
+Also set ~rebase.stat = true~, so the ~diffstat~ output is still shown when they
+pull.
+
+#+begin_src conf
+[rebase]
+	stat = true
 #+end_src
 
 * Push

@@ -50,34 +50,36 @@
 
           <li><a href="#sec-8">8. Pull</a></li>
 
-          <li><a href="#sec-9">9. Push</a></li>
+          <li><a href="#sec-9">9. Rebase</a></li>
+
+          <li><a href="#sec-10">10. Push</a></li>
 
           <li>
-            <a href="#sec-10">10. Color</a>
+            <a href="#sec-11">11. Color</a>
 
             <ul>
-              <li><a href="#sec-10-1">10.1. Branch</a></li>
+              <li><a href="#sec-11-1">11.1. Branch</a></li>
 
-              <li><a href="#sec-10-2">10.2. Diff</a></li>
+              <li><a href="#sec-11-2">11.2. Diff</a></li>
 
-              <li><a href="#sec-10-3">10.3. Status</a></li>
+              <li><a href="#sec-11-3">11.3. Status</a></li>
 
-              <li><a href="#sec-10-4">10.4. Grep</a></li>
+              <li><a href="#sec-11-4">11.4. Grep</a></li>
             </ul>
           </li>
 
           <li>
-            <a href="#sec-11">11. Alias</a>
+            <a href="#sec-12">12. Alias</a>
 
             <ul>
-              <li><a href="#sec-11-1">11.1. Cherrypick style recording</a></li>
+              <li><a href="#sec-12-1">12.1. Cherrypick style recording</a></li>
 
-              <li><a href="#sec-11-2">11.2. Getting the diff of a branch since
+              <li><a href="#sec-12-2">12.2. Getting the diff of a branch since
               it forked from another branch, or since the last merge</a></li>
             </ul>
           </li>
 
-          <li><a href="#sec-12">12. References</a></li>
+          <li><a href="#sec-13">13. References</a></li>
         </ul>
       </div>
     </div>
@@ -222,6 +224,9 @@
       <h2 id="sec-8"><span class="section-number-2">8</span> Pull</h2>
 
       <div class="outline-text-2" id="text-8">
+        <p>Configure Git to do the <code>--rebase</code> part
+        automatically.</p>
+
         <div class="org-src-container">
           <pre class="src src-conf">
 [<span class="org-type">pull</span>]
@@ -232,9 +237,25 @@
     </div>
 
     <div id="outline-container-sec-9" class="outline-2">
-      <h2 id="sec-9"><span class="section-number-2">9</span> Push</h2>
+      <h2 id="sec-9"><span class="section-number-2">9</span> Rebase</h2>
 
       <div class="outline-text-2" id="text-9">
+        <p>Also set <code>rebase.stat = true</code>, so the
+        <code>diffstat</code> output is still shown when they pull.</p>
+
+        <div class="org-src-container">
+          <pre class="src src-conf">
+[<span class="org-type">rebase</span>]
+        <span class="org-variable-name">stat</span> = true
+</pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="outline-container-sec-10" class="outline-2">
+      <h2 id="sec-10"><span class="section-number-2">10</span> Push</h2>
+
+      <div class="outline-text-2" id="text-10">
         <div class="org-src-container">
           <pre class="src src-conf">
 [<span class="org-type">push</span>]
@@ -244,10 +265,10 @@
       </div>
     </div>
 
-    <div id="outline-container-sec-10" class="outline-2">
-      <h2 id="sec-10"><span class="section-number-2">10</span> Color</h2>
+    <div id="outline-container-sec-11" class="outline-2">
+      <h2 id="sec-11"><span class="section-number-2">11</span> Color</h2>
 
-      <div class="outline-text-2" id="text-10">
+      <div class="outline-text-2" id="text-11">
         <div class="org-src-container">
           <pre class="src src-conf">
 [<span class="org-type">color</span>]
@@ -260,11 +281,11 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-10-1" class="outline-3">
-        <h3 id="sec-10-1"><span class="section-number-3">10.1</span>
+      <div id="outline-container-sec-11-1" class="outline-3">
+        <h3 id="sec-11-1"><span class="section-number-3">11.1</span>
         Branch</h3>
 
-        <div class="outline-text-3" id="text-10-1">
+        <div class="outline-text-3" id="text-11-1">
           <div class="org-src-container">
             <pre class="src src-conf">
 [color <span class="org-string">"branch"</span>]
@@ -276,10 +297,10 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-10-2" class="outline-3">
-        <h3 id="sec-10-2"><span class="section-number-3">10.2</span> Diff</h3>
+      <div id="outline-container-sec-11-2" class="outline-3">
+        <h3 id="sec-11-2"><span class="section-number-3">11.2</span> Diff</h3>
 
-        <div class="outline-text-3" id="text-10-2">
+        <div class="outline-text-3" id="text-11-2">
           <div class="org-src-container">
             <pre class="src src-conf">
 [color <span class="org-string">"diff"</span>]
@@ -293,11 +314,11 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-10-3" class="outline-3">
-        <h3 id="sec-10-3"><span class="section-number-3">10.3</span>
+      <div id="outline-container-sec-11-3" class="outline-3">
+        <h3 id="sec-11-3"><span class="section-number-3">11.3</span>
         Status</h3>
 
-        <div class="outline-text-3" id="text-10-3">
+        <div class="outline-text-3" id="text-11-3">
           <div class="org-src-container">
             <pre class="src src-conf">
 [color <span class="org-string">"status"</span>]
@@ -309,10 +330,10 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-10-4" class="outline-3">
-        <h3 id="sec-10-4"><span class="section-number-3">10.4</span> Grep</h3>
+      <div id="outline-container-sec-11-4" class="outline-3">
+        <h3 id="sec-11-4"><span class="section-number-3">11.4</span> Grep</h3>
 
-        <div class="outline-text-3" id="text-10-4">
+        <div class="outline-text-3" id="text-11-4">
           <div class="org-src-container">
             <pre class="src src-conf">
 [color <span class="org-string">"grep"</span>]
@@ -329,10 +350,10 @@
       </div>
     </div>
 
-    <div id="outline-container-sec-11" class="outline-2">
-      <h2 id="sec-11"><span class="section-number-2">11</span> Alias</h2>
+    <div id="outline-container-sec-12" class="outline-2">
+      <h2 id="sec-12"><span class="section-number-2">12</span> Alias</h2>
 
-      <div class="outline-text-2" id="text-11">
+      <div class="outline-text-2" id="text-12">
         <p>Common shortcuts:</p>
 
         <div class="org-src-container">
@@ -372,11 +393,11 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-11-1" class="outline-3">
-        <h3 id="sec-11-1"><span class="section-number-3">11.1</span> Cherrypick
+      <div id="outline-container-sec-12-1" class="outline-3">
+        <h3 id="sec-12-1"><span class="section-number-3">12.1</span> Cherrypick
         style recording</h3>
 
-        <div class="outline-text-3" id="text-11-1">
+        <div class="outline-text-3" id="text-12-1">
           <p>Ask interactively which patch hunk to commit, and then do the
           commit:</p>
 
@@ -395,12 +416,12 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-11-2" class="outline-3">
-        <h3 id="sec-11-2"><span class="section-number-3">11.2</span> Getting
+      <div id="outline-container-sec-12-2" class="outline-3">
+        <h3 id="sec-12-2"><span class="section-number-3">12.2</span> Getting
         the diff of a branch since it forked from another branch, or since the
         last merge</h3>
 
-        <div class="outline-text-3" id="text-11-2">
+        <div class="outline-text-3" id="text-12-2">
           <p>To see the changes in a branch since it was forked from another
           branch, or since the last merge with the origin branch, you can add
           this alias:</p>
@@ -430,10 +451,10 @@ git forkdiff origin/master my_forked_branch --stat
       </div>
     </div>
 
-    <div id="outline-container-sec-12" class="outline-2">
-      <h2 id="sec-12"><span class="section-number-2">12</span> References</h2>
+    <div id="outline-container-sec-13" class="outline-2">
+      <h2 id="sec-13"><span class="section-number-2">13</span> References</h2>
 
-      <div class="outline-text-2" id="text-12">
+      <div class="outline-text-2" id="text-13">
         <ul class="org-ul">
           <li><a href="https://git.wiki.kernel.org/index.php/Aliases">Git SCM
           Wiki - Aliases</a></li>
