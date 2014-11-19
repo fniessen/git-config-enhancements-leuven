@@ -173,27 +173,52 @@ Common shortcuts:
 	st = status
 	br = branch
 	df = diff
+	ci = commit
+	co = checkout
+
+	w = whatchanged
+	dc = diff --cached
+	ls = ls-files
 #+end_src
 
-#+begin_src conf :tangle no
-	ci = commit                     # or `co'
-	co = checkout                   # or `ch'
+** Dangling
+
+- Dangling blob = Change(s) that made it to the staging area/index but never got
+  committed. One thing that is amazing with Git is that once it gets added to
+  the staging area, you can always get it back because these blobs behave like
+  commits!!
+
+- Dangling commit = A commit that isn't linked to any branch or tag either
+  directly or by any of its ancestors. You can get these back too!
+
+#+begin_src conf
+	lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 #+end_src
 
 ** Pretty log
+
+XXX %cd or %ad? See default of git log!
 
 #+begin_src conf
 	lg = log --decorate --oneline --graph
 	lgr = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=relative --graph
 	lga = log --decorate --pretty=format:'%C(yellow)%h%Creset %C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=short --graph
 	y = diff "@{yesterday}"
-	w = whatchanged
-	who = shortlog -s --
-	dc = diff --cached
-	ls = ls-files
+	who = shortlog -sn --
 
 	# Show files ignored by git:
 	ign = ls-files -o -i --exclude-standard
+#+end_src
+
+#+begin_src conf
+	head = !"git log -n1"
+	heads = !"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen<%an>%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
+
+	# prettier and concise whatchanged
+	what = log --pretty=format:'%C(yellow)%h %C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%cd)%Creset' --date=short --stat
+
+	# prettier whatchanged with full diffs based on text search
+	whatwhen = log --pretty=format:'%C(yellow)%h %C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%cd)%Creset' --date=iso -p -S
 #+end_src
 
 ** Cherrypick style recording
