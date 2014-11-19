@@ -176,7 +176,6 @@ Common shortcuts:
 	ci = commit
 	co = checkout
 
-	w = whatchanged
 	dc = diff --cached
 	ls = ls-files
 #+end_src
