@@ -188,13 +188,9 @@ Basic shortcuts:
 	co = checkout
 	cp = cherry-pick
 	dc = diff --cached
+	df = diff
 	ls = ls-files
 	st = status
-#+end_src
-
-#+begin_src conf :tangle no
-	df = diff
-	diff = diff --word-dif
 #+end_src
 
 ** Pretty log
