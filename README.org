@@ -197,47 +197,6 @@ Basic shortcuts:
 	diff = diff --word-dif
 #+end_src
 
-** Reset Commands
-
-#+begin_src conf
-	r = reset
-	r1 = reset HEAD^
-	r2 = reset HEAD^^
-	rh = reset --hard
-	rh1 = reset HEAD^ --hard
-	rh2 = reset HEAD^^ --hard
-#+end_src
-
-** Stash operations
-
-#+begin_src conf
-	sl = stash list
-	sa = stash apply
-	ss = stash save
-#+end_src
-
-** Tags
-
-List tags using (better) version sorting (if your sort supports it):
-
-#+begin_src conf
-	tags = !sh -c 'git tag | sort -V'
-#+end_src
-
-** Dangling
-
-- Dangling blob = Change(s) that made it to the staging area/index but never got
-  committed. One thing that is amazing with Git is that once it gets added to
-  the staging area, you can always get it back because these blobs behave like
-  commits!!
-
-- Dangling commit = A commit that isn't linked to any branch or tag either
-  directly or by any of its ancestors. You can get these back too!
-
-#+begin_src conf
-	lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
-#+end_src
-
 ** Pretty log
 
 XXX %cd or %ad? See default of git log!
@@ -263,6 +222,27 @@ XXX %cd or %ad? See default of git log!
 	# prettier whatchanged with full diffs based on text search
 	whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%cd)%Creset' --date=iso -p -S
 #+end_src
+
+** Getting the diff of a branch since it forked from another branch, or since the last merge
+
+To see the changes in a branch since it was forked from another branch, or
+since the last merge with the origin branch, you can add this alias:
+
+#+begin_src conf
+	forkdiff = !bash -c 'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" ' -
+#+end_src
+
+It uses ~git merge-base~ to determine the fork-point (the commit that is common
+to both the branches) and does a ~git diff~ between that commit and the second
+branch.
+
+Usage
+
+: git forkdiff <forked from branch> <forked branch> [git-diff-options]
+
+Example
+
+: git forkdiff origin/master my_forked_branch --stat
 
 ** Search
 
@@ -296,6 +276,26 @@ I think you'd want this with --all as well (whether using -S or -G).
 
 ~git grep~
 
+XXX works only on files in Git (bypassing ignored files)?
+
+** Tags
+
+List tags using (better) version sorting (if your sort supports it):
+
+#+begin_src conf
+	tags = !sh -c 'git tag | sort -V'
+#+end_src
+
+** Merge aliases
+
+If you're the Branch/Integration manager, you can use these aliases to merge
+stuff:
+
+#+begin_src conf
+	ours = "!f() { git co --ours $@ && git add $@; }; f"
+	theirs = "!f() { git co --theirs $@ && git add $@; }; f"
+#+end_src
+
 ** Cherrypick style recording
 
 Ask interactively which patch hunk to commit, and then do the commit:
@@ -308,26 +308,38 @@ It will not only do ~git add -p~ (with an optional file list), but it will also
 immediately do the ~commit~. Upon abandonment of either the add or the commit it
 will ~reset~ the index.
 
-**  Getting the diff of a branch since it forked from another branch, or since the last merge
-
-To see the changes in a branch since it was forked from another branch, or
-since the last merge with the origin branch, you can add this alias:
+** Reset Commands
 
 #+begin_src conf
-	forkdiff = !bash -c 'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" ' -
+	r = reset
+	r1 = reset HEAD^
+	r2 = reset HEAD^^
+	rh = reset --hard
+	rh1 = reset HEAD^ --hard
+	rh2 = reset HEAD^^ --hard
 #+end_src
 
-It uses ~git merge-base~ to determine the fork-point (the commit that is common
-to both the branches) and does a ~git diff~ between that commit and the second
-branch.
+** Stash operations
 
-Usage
+#+begin_src conf
+	sl = stash list
+	sa = stash apply
+	ss = stash save
+#+end_src
 
-: git forkdiff <forked from branch> <forked branch> [git-diff-options]
+** Dangling
 
-Example
+- Dangling blob = Change(s) that made it to the staging area/index but never got
+  committed. One thing that is amazing with Git is that once it gets added to
+  the staging area, you can always get it back because these blobs behave like
+  commits!!
 
-: git forkdiff origin/master my_forked_branch --stat
+- Dangling commit = A commit that isn't linked to any branch or tag either
+  directly or by any of its ancestors. You can get these back too!
+
+#+begin_src conf
+	lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+#+end_src
 
 * References
 
