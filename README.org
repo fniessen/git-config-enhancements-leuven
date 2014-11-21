@@ -167,7 +167,7 @@ pull.
 	function = red
 #+end_src
 
-* Alias
+* Aliases
 
 If you forget your aliases and don't want to open =.gitconfig= just to check, type
 ~git alias~:
@@ -190,7 +190,7 @@ Basic shortcuts:
 	dc = diff --cached
 	df = diff
 	ls = ls-files
-	st = status
+	st = status -s
 #+end_src
 
 ** Pretty log
@@ -340,3 +340,4 @@ will ~reset~ the index.
 * References
 
 - [[https://git.wiki.kernel.org/index.php/Aliases][Git SCM Wiki - Aliases]]
+- [[https://ochronus.com/git-tips-from-the-trenches/][Git tips from the trenches]]
