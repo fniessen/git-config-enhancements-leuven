@@ -61,6 +61,11 @@ You should "override" the above with your personal details.
 	whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
 #+end_src
 
+#+begin_src conf :tangle no
+	autocrlf = input
+	safecrlf = true
+#+end_src
+
 * Diff
 
 #+begin_src conf
@@ -164,20 +169,59 @@ pull.
 
 * Alias
 
-** Abbreviations
-
-Common shortcuts:
+If you forget your aliases and don't want to open =.gitconfig= just to check, type
+~git alias~:
 
 #+begin_src conf
 [alias]
-	st = status
-	br = branch
-	df = diff
-	ci = commit
-	co = checkout
+	alias = "!git config -l | grep alias | cut -c 7-"
+#+end_src
 
+** Abbreviations
+
+Basic shortcuts:
+
+#+begin_src conf
+	br = branch
+	ci = commit
+	cl = clone
+	co = checkout
+	cp = cherry-pick
 	dc = diff --cached
 	ls = ls-files
+	st = status
+#+end_src
+
+#+begin_src conf :tangle no
+	df = diff
+	diff = diff --word-dif
+#+end_src
+
+** Reset Commands
+
+#+begin_src conf
+	r = reset
+	r1 = reset HEAD^
+	r2 = reset HEAD^^
+	rh = reset --hard
+	rh1 = reset HEAD^ --hard
+	rh2 = reset HEAD^^ --hard
+#+end_src
+
+** Stash operations
+
+#+begin_src conf
+	sl = stash list
+	sa = stash apply
+	ss = stash save
+#+end_src
+
+** Tags
+
+List tags using (better) version sorting (if your sort supports it):
+
+#+begin_src conf
+	tags = !sh -c 'git tag | sort -V'
 #+end_src
 
 ** Dangling
@@ -203,7 +247,7 @@ XXX %cd or %ad? See default of git log!
 	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=relative --graph
 	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=short --graph
 	y = diff "@{yesterday}"
-	who = shortlog -sn --
+	who = shortlog -n -s --
 
 	# Show files ignored by git:
 	ign = ls-files -o -i --exclude-standard
@@ -219,6 +263,38 @@ XXX %cd or %ad? See default of git log!
 	# prettier whatchanged with full diffs based on text search
 	whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%cd)%Creset' --date=iso -p -S
 #+end_src
+
+** Search
+
+git log
+
+*** Commit message
+
+If you want to find all commits where /commit message/ contains given word, use
+~--grep~.
+
+#+begin_src conf
+#+end_src
+
+*** Commit contents (Diff)
+
+If you want to find all commits where a *string* was added or removed in the /file
+contents/ (to be more exact: where its *number of occurrences changed*),
+i.e. search the /commit contents/, use ~-S~.
+
+By default, ~-S~ accepts a string, but can be modified to accept a regexp with
+~--pickaxe-regex~.
+
+~-G~ looks for *differences* whose added or removed *line* matches the given *regexp*.
+
+I think you'd want this with --all as well (whether using -S or -G).
+
+#+begin_src conf
+#+end_src
+
+*** Code base
+
+~git grep~
 
 ** Cherrypick style recording
 
