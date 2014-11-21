@@ -249,6 +249,7 @@
           <pre class="src src-conf">
 [<span class="org-type">grep</span>]
         <span class="org-variable-name">fullname</span> = true
+        <span class="org-variable-name">linenumber</span> = true
 </pre>
         </div>
       </div>
@@ -509,6 +510,25 @@ git forkdiff origin/master my_forked_branch --stat
         Search</h3>
 
         <div class="outline-text-3" id="text-12-4">
+          <div class="org-src-container">
+            <pre class="src src-shell">
+<span class="org-comment-delimiter"># </span><span class=
+"org-comment">Git Search</span>
+<span class="org-builtin">alias</span> <span class=
+"org-variable-name">ggFind</span>=<span class=
+"org-string">'git log -g --pretty=format:%h -S'</span>
+<span class="org-builtin">alias</span> <span class=
+"org-variable-name">gFind</span>=<span class=
+"org-string">'git log --pretty=format:%h -S'</span>
+<span class="org-builtin">alias</span> <span class=
+"org-variable-name">gGFing</span>=<span class=
+"org-string">'git log --pretty=format:%h -G'</span>
+<span class="org-builtin">alias</span> <span class=
+"org-variable-name">gCFind</span>=<span class=
+"org-string">'git log --grep="string in a commit message" --all --pretty=format:%h'</span>
+</pre>
+          </div>
+
           <p>git log</p>
         </div>
 
@@ -545,11 +565,6 @@ git forkdiff origin/master my_forked_branch --stat
 
             <p>I think you’d want this with –all as well (whether using -S or
             -G).</p>
-
-            <div class="org-src-container">
-              <pre class="src src-conf">
-</pre>
-            </div>
           </div>
         </div>
 
@@ -559,6 +574,15 @@ git forkdiff origin/master my_forked_branch --stat
 
           <div class="outline-text-4" id="text-12-4-3">
             <p><code>git grep</code></p>
+
+            <p>… better speed.</p>
+
+            <div class="org-src-container">
+              <pre class="src src-conf">
+        <span class="org-variable-name">gr</span> = <span class=
+"org-string">"grep --break --heading"</span>
+</pre>
+            </div>
 
             <p>XXX works only on files in Git (bypassing ignored files)?</p>
           </div>
@@ -652,6 +676,9 @@ git forkdiff origin/master my_forked_branch --stat
         <span class="org-variable-name">ss</span> = stash save
 </pre>
           </div>
+
+          <p>XXX What about <code>git stash --include-untracked</code> and
+          <code>git stash pop</code>?</p>
         </div>
       </div>
 

@@ -86,6 +86,7 @@ You should "override" the above with your personal details.
 #+begin_src conf
 [grep]
 	fullname = true
+	linenumber = true
 #+end_src
 
 * Pull
@@ -242,6 +243,14 @@ Example
 
 ** Search
 
+#+begin_src shell :tangle no
+# Git Search
+alias ggFind='git log -g --pretty=format:%h -S'
+alias gFind='git log --pretty=format:%h -S'
+alias gGFing='git log --pretty=format:%h -G'
+alias gCFind='git log --grep="string in a commit message" --all --pretty=format:%h'
+#+END_SRC
+
 git log
 
 *** Commit message
@@ -265,12 +274,15 @@ By default, ~-S~ accepts a string, but can be modified to accept a regexp with
 
 I think you'd want this with --all as well (whether using -S or -G).
 
-#+begin_src conf
-#+end_src
-
 *** Code base
 
 ~git grep~
+
+... better speed.
+
+#+begin_src conf
+	gr = "grep --break --heading"
+#+end_src
 
 XXX works only on files in Git (bypassing ignored files)?
 
@@ -322,6 +334,8 @@ will ~reset~ the index.
 	sa = stash apply
 	ss = stash save
 #+end_src
+
+XXX What about ~git stash --include-untracked~ and ~git stash pop~?
 
 ** Dangling
 
