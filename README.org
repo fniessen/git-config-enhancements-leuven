@@ -188,13 +188,11 @@ Basic shortcuts:
 	cl = clone
 	co = checkout
 	cp = cherry-pick
-	dc = diff --cached
-	df = diff
 	ls = ls-files
 	st = status -s
 #+end_src
 
-** Pretty log
+** Log
 
 XXX %cd or %ad? See default of git log!
 
@@ -203,8 +201,19 @@ XXX %cd or %ad? See default of git log!
 	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=relative --graph
 	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=short --graph
 	y = diff "@{yesterday}"
-	who = shortlog -n -s --
+#+end_src
 
+Show a "top contributors list".
+
+#+begin_src conf
+	who = shortlog -n -s --
+#+end_src
+
+#+begin_note
+The ~--~ signals the end of options, that the rest of the parameters are limiters.
+#+end_note
+
+#+begin_src conf
 	# Show files ignored by git:
 	ign = ls-files -o -i --exclude-standard
 #+end_src
@@ -220,7 +229,31 @@ XXX %cd or %ad? See default of git log!
 	whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%cd)%Creset' --date=iso -p -S
 #+end_src
 
-** Getting the diff of a branch since it forked from another branch, or since the last merge
+** Unpushed
+
+What is left to push to origin:
+
+#+begin_src conf
+	unpushed = "log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cr)%Creset' --abbrev-commit"
+#+end_src
+
+** Diff
+
+Differences between the *unstaged* files and the *last commit*:
+
+#+begin_src conf
+	df = diff
+#+end_src
+
+Just before committing the staged changes, check what your commit changes
+(differences between the *staged* files and the *last commit*):
+
+#+begin_src conf
+	dc = diff --cached
+#+end_src
+
+Getting the diff of a branch since it forked from another branch, or since the
+last merge.
 
 To see the changes in a branch since it was forked from another branch, or
 since the last merge with the origin branch, you can add this alias:
@@ -251,14 +284,13 @@ alias gGFing='git log --pretty=format:%h -G'
 alias gCFind='git log --grep="string in a commit message" --all --pretty=format:%h'
 #+END_SRC
 
-git log
-
-*** Commit message
+*** Commit messages
 
 If you want to find all commits where /commit message/ contains given word, use
 ~--grep~.
 
-#+begin_src conf
+#+begin_src conf :tangle no
+	git log --grep
 #+end_src
 
 *** Commit contents (Diff)
@@ -272,19 +304,22 @@ By default, ~-S~ accepts a string, but can be modified to accept a regexp with
 
 ~-G~ looks for *differences* whose added or removed *line* matches the given *regexp*.
 
-I think you'd want this with --all as well (whether using -S or -G).
+I think you'd want this with ~--all~ as well (whether using ~-S~ or ~-G~).
 
 *** Code base
 
-~git grep~
+The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
+your project files (i.e. no files in =.git=), but also that is allows you to
+interface with your repository's Git database; for example, for searching:
 
-... better speed.
+- for your regexp in some files from another branch,
+- files registered in the index, rather than the working tree.
 
 #+begin_src conf
 	gr = "grep --break --heading"
 #+end_src
 
-XXX works only on files in Git (bypassing ignored files)?
+XXX works only on files really in Git (bypassing ignored files)?
 
 ** Tags
 
@@ -292,6 +327,12 @@ List tags using (better) version sorting (if your sort supports it):
 
 #+begin_src conf
 	tags = !sh -c 'git tag | sort -V'
+#+end_src
+
+Show the last tag:
+
+#+begin_src conf
+	lasttag = 'describe --tags --abbrev=0'
 #+end_src
 
 ** Merge aliases
@@ -318,13 +359,10 @@ will ~reset~ the index.
 
 ** Reset Commands
 
+Undo the last commit:
+
 #+begin_src conf
-	r = reset
-	r1 = reset HEAD^
-	r2 = reset HEAD^^
-	rh = reset --hard
-	rh1 = reset HEAD^ --hard
-	rh2 = reset HEAD^^ --hard
+	undo = reset --hard HEAD~1
 #+end_src
 
 ** Stash operations
