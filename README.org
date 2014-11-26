@@ -203,7 +203,7 @@ XXX %cd or %ad? See default of git log!
 	y = diff "@{yesterday}"
 #+end_src
 
-Show a "top contributors list".
+Show a "top contributors" list.
 
 #+begin_src conf
 	who = shortlog -n -s --
