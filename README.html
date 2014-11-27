@@ -396,6 +396,13 @@
         <div class="org-src-container">
           <pre class="src src-conf">
 [<span class="org-type">alias</span>]
+</pre>
+        </div>
+
+        <p>Print the current list of Git aliases.</p>
+
+        <div class="org-src-container">
+          <pre class="src src-conf">
         <span class="org-variable-name">alias</span> = <span class=
 "org-string">"!git config -l | grep alias | cut -c 7- | sort"</span>
 </pre>
@@ -427,18 +434,26 @@
         <h3 id="sec-12-2"><span class="section-number-3">12.2</span> Log</h3>
 
         <div class="outline-text-3" id="text-12-2">
-          <p>XXX %cd or %ad? See default of git log!</p>
-
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class=
 "org-variable-name">lg</span> = log --decorate --oneline --graph
         <span class=
 "org-variable-name">lgr</span> = log --decorate --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --date=relative --graph
+"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%ad)%Creset'</span> --date=relative --graph
         <span class=
 "org-variable-name">lga</span> = log --decorate --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --date=short --graph
+"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%ad)%Creset'</span> --date=short --graph
+</pre>
+          </div>
+
+          <div class="note">
+            <p>The <code>git log</code> command shows, by default, the “author
+            date” (not the “committer date”).</p>
+          </div>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
         <span class="org-variable-name">y</span> = diff <span class=
 "org-string">"@{yesterday}"</span>
 </pre>
@@ -475,12 +490,12 @@
         # prettier and concise whatchanged
         <span class=
 "org-variable-name">what</span> = log --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%cd)%Creset'</span> --date=short --stat
+"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ad)%Creset'</span> --date=short --stat
 
         # prettier whatchanged with full diffs based on text search
         <span class=
 "org-variable-name">whatwhen</span> = log --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%cd)%Creset'</span> --date=iso -p -S
+"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ad)%Creset'</span> --date=iso -p -S
 </pre>
           </div>
         </div>

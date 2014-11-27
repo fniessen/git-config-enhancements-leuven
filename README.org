@@ -175,6 +175,11 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 
 #+begin_src conf
 [alias]
+#+end_src
+
+Print the current list of Git aliases.
+
+#+begin_src conf
 	alias = "!git config -l | grep alias | cut -c 7- | sort"
 #+end_src
 
@@ -194,12 +199,18 @@ Basic shortcuts:
 
 ** Log
 
-XXX %cd or %ad? See default of git log!
-
 #+begin_src conf
 	lg = log --decorate --oneline --graph
-	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=relative --graph
-	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cd)%Creset' --date=short --graph
+	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%ad)%Creset' --date=relative --graph
+	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%ad)%Creset' --date=short --graph
+#+end_src
+
+#+begin_note
+The ~git log~ command shows, by default, the "author date" (not the "committer
+date").
+#+end_note
+
+#+begin_src conf
 	y = diff "@{yesterday}"
 #+end_src
 
@@ -223,10 +234,10 @@ The ~--~ signals the end of options, that the rest of the parameters are limiter
 	heads = !"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen<%an>%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
 
 	# prettier and concise whatchanged
-	what = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%cd)%Creset' --date=short --stat
+	what = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --stat
 
 	# prettier whatchanged with full diffs based on text search
-	whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%cd)%Creset' --date=iso -p -S
+	whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=iso -p -S
 #+end_src
 
 ** Unpushed
