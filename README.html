@@ -316,17 +316,18 @@
       <h2 id="sec-10"><span class="section-number-2">10</span> Push</h2>
 
       <div class="outline-text-2" id="text-10">
-        <p>Push only the <b>current branch</b> to its tracking branch (sane
-        pushing – instead of pushing all branches).</p>
+        <p>Push <b>only</b> the <b>current working branch</b> (sane pushing –
+        instead of pushing all branches), with an added safety: only if it is
+        <i>tracking</i> a remote upstream branch with the <i>same name</i>.</p>
 
         <div class="org-src-container">
           <pre class="src src-conf">
 [<span class="org-type">push</span>]
-        <span class="org-variable-name">default</span> = current
+        <span class="org-variable-name">default</span> = simple
 </pre>
         </div>
 
-        <p>XXX or `matching’?</p>
+        <p>(<code>simple</code> is the default in Git 2.x)</p>
       </div>
     </div>
 

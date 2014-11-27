@@ -116,15 +116,16 @@ pull.
 
 * Push
 
-Push only the *current branch* to its tracking branch (sane pushing -- instead of
-pushing all branches).
+Push *only* the *current working branch* (sane pushing -- instead of pushing all
+branches), with an added safety: only if it is /tracking/ a remote upstream branch
+with the /same name/.
 
 #+begin_src conf
 [push]
-	default = current
+	default = simple
 #+end_src
 
-XXX or `matching'?
+(~simple~ is the default in Git 2.x)
 
 * Color
 
