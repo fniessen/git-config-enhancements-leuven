@@ -130,6 +130,7 @@ Push only the current branch (sane pushing).
 
 ** Branch
 
+
 #+begin_src conf
 [color "branch"]
 	current = yellow reverse
