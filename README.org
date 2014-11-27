@@ -154,7 +154,7 @@ Push only the current branch (sane pushing).
 [color "status"]
 	added = yellow
 	changed = green
-	untracked = cyan
+	untracked = bold red
 #+end_src
 
 ** Grep
