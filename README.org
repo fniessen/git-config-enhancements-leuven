@@ -175,7 +175,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 
 #+begin_src conf
 [alias]
-	alias = "!git config -l | grep alias | cut -c 7-"
+	alias = "!git config -l | grep alias | cut -c 7- | sort"
 #+end_src
 
 ** Abbreviations

@@ -397,7 +397,7 @@
           <pre class="src src-conf">
 [<span class="org-type">alias</span>]
         <span class="org-variable-name">alias</span> = <span class=
-"org-string">"!git config -l | grep alias | cut -c 7-"</span>
+"org-string">"!git config -l | grep alias | cut -c 7- | sort"</span>
 </pre>
         </div>
       </div>
@@ -435,16 +435,16 @@
 "org-variable-name">lg</span> = log --decorate --oneline --graph
         <span class=
 "org-variable-name">lgr</span> = log --decorate --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %&lt;(80,trunc)%s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --date=relative --graph
+"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --date=relative --graph
         <span class=
 "org-variable-name">lga</span> = log --decorate --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %&lt;(80,trunc)%s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --date=short --graph
+"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cd)%Creset'</span> --date=short --graph
         <span class="org-variable-name">y</span> = diff <span class=
 "org-string">"@{yesterday}"</span>
 </pre>
           </div>
 
-          <p>Show a “top contributors list”.</p>
+          <p>Show a “top contributors” list.</p>
 
           <div class="org-src-container">
             <pre class="src src-conf">
@@ -470,17 +470,17 @@
         <span class="org-variable-name">head</span> = !<span class=
 "org-string">"git log -n1"</span>
         <span class="org-variable-name">heads</span> = !<span class=
-"org-string">"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%&lt;(80,trunc)%s %Cgreen&lt;%an&gt;%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"</span>
+"org-string">"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen&lt;%an&gt;%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"</span>
 
         # prettier and concise whatchanged
         <span class=
 "org-variable-name">what</span> = log --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %&lt;(80,trunc)%s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%cd)%Creset'</span> --date=short --stat
+"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%cd)%Creset'</span> --date=short --stat
 
         # prettier whatchanged with full diffs based on text search
         <span class=
 "org-variable-name">whatwhen</span> = log --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %&lt;(80,trunc)%s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%cd)%Creset'</span> --date=iso -p -S
+"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%cd)%Creset'</span> --date=iso -p -S
 </pre>
           </div>
         </div>
@@ -496,7 +496,7 @@
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class="org-variable-name">unpushed</span> = <span class=
-"org-string">"log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %&lt;(80,trunc)%s %Cgreen&lt;%an&gt; %C(bold blue)(%cr)%Creset' --abbrev-commit"</span>
+"org-string">"log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt; %C(bold blue)(%cr)%Creset' --abbrev-commit"</span>
 </pre>
           </div>
         </div>
@@ -766,7 +766,7 @@ git forkdiff origin/master my_forked_branch --stat
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class="org-variable-name">lost</span> = !<span class=
-"org-string">"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %&lt;(80,trunc)%s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"</span>
+"org-string">"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"</span>
 </pre>
           </div>
         </div>
