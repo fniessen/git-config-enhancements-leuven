@@ -207,6 +207,21 @@ Basic shortcuts.
 	st = status -s
 #+end_src
 
+** Initialize a Git repository
+
+#+begin_src conf
+	this = !git init && git add . && git commit -m \"Initial commit\"
+#+end_src
+
+** Remove deleted files
+
+Removing multiple files from a Git repo that have already been deleted from
+disk:
+
+#+begin_src conf
+	r = !git ls-files --deleted -z | xargs -0 git rm
+#+end_src
+
 ** Log
 
 #+begin_src conf
@@ -251,12 +266,28 @@ Show files ignored by Git:
 	whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=iso -p -S
 #+end_src
 
-** Unpushed
-
-What is left to push to origin:
+** Unpulled
 
 #+begin_src conf
-	unpushed = "log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cr)%Creset' --abbrev-commit"
+	in = pull --dry-run
+#+end_src
+
+** Unpushed
+
+What is left to push to ~origin~:
+
+#+begin_src conf
+	out = log --branches --not --remotes
+	unpushed = log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cr)%Creset' --abbrev-commit
+#+end_src
+
+** Amend
+
+Amend with the same message (without your editor prompting you for the message
+you've already entered).
+
+#+begin_src conf
+	amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
 #+end_src
 
 ** Diff
@@ -345,16 +376,16 @@ XXX works only on files really in Git (bypassing ignored files)?
 
 ** Tags
 
-List tags using (better) version sorting (if your sort supports it):
+List tags using (better) version sorting (if your ~sort~ supports it):
 
 #+begin_src conf
-	tags = !sh -c 'git tag | sort -V'
+	tags = !git tag | sort -V
 #+end_src
 
 Show the last tag:
 
 #+begin_src conf
-	lasttag = 'describe --tags --abbrev=0'
+	lasttag = describe --tags --abbrev=0
 #+end_src
 
 ** Merge aliases
@@ -372,7 +403,7 @@ stuff:
 Ask interactively which patch hunk to commit, and then do the commit:
 
 #+begin_src conf
-	record = ! sh -c '(git add -p -- $@ && git commit) || git reset' --
+	record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 #+end_src
 
 It will not only do ~git add -p~ (with an optional file list), but it will also
@@ -385,6 +416,12 @@ Undo the last commit:
 
 #+begin_src conf
 	undo = reset --hard HEAD~1
+#+end_src
+
+Unstage changes from the index:
+
+#+begin_src conf
+	unstage = reset HEAD --
 #+end_src
 
 ** Stash operations
@@ -408,7 +445,7 @@ XXX What about ~git stash --include-untracked~ and ~git stash pop~?
   directly or by any of its ancestors. You can get these back too!
 
 #+begin_src conf
-	lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+	lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 #+end_src
 
 * References
