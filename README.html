@@ -120,6 +120,8 @@
               <li><a href="#sec-12-17">12.17. Dangling</a></li>
 
               <li><a href="#sec-12-18">12.18. Save a repo as a tarball</a></li>
+
+              <li><a href="#sec-12-19">12.19. SVN</a></li>
             </ul>
           </li>
 
@@ -465,15 +467,17 @@
         <span class="org-variable-name">co</span> = checkout
         <span class="org-variable-name">cp</span> = cherry-pick
         <span class="org-variable-name">ls</span> = ls-files
-        <span class="org-variable-name">st</span> = status -s
+        <span class="org-variable-name">st</span> = status -s -b
 </pre>
           </div>
 
-          <p>Checkout master branch (useful if you keep feature branches):</p>
+          <p>Checkout common branches (useful if you have feature
+          branches):</p>
 
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class="org-variable-name">master</span> = checkout master
+        <span class="org-variable-name">develop</span> = checkout develop
 </pre>
           </div>
         </div>
@@ -515,15 +519,6 @@
         files</h3>
 
         <div class="outline-text-3" id="text-12-4">
-          <p>Show files ignored by Git:</p>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
-        <span class=
-"org-variable-name">ignored</span> = ls-files -o -i --exclude-standard
-</pre>
-          </div>
-
           <p>XXX Quickly add a file or directory to
           <code>.gitignore</code>:</p>
 
@@ -531,6 +526,31 @@
             <pre class="src src-conf">
         <span class=
 "org-variable-name">ignore</span> = !([ ! -e .gitignore ] &amp;&amp; touch .gitignore) | echo $1 &gt;&gt; .gitignore
+</pre>
+          </div>
+
+          <p>Ignore/unignore file without <code>.gitignore</code>:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class=
+"org-variable-name">untrack</span> = update-index --assume-unchanged
+</pre>
+          </div>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class=
+"org-variable-name">unignore</span> = update-index --no-assume-unchanged
+</pre>
+          </div>
+
+          <p>Show files ignored by Git:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class=
+"org-variable-name">ignored</span> = ls-files -o -i --exclude-standard
 </pre>
           </div>
         </div>
@@ -580,8 +600,7 @@
 
           <div class="org-src-container">
             <pre class="src src-conf">
-        <span class="org-variable-name">head</span> = !<span class=
-"org-string">"git log -n1"</span>
+        <span class="org-variable-name">last</span> = log -n 1
         <span class="org-variable-name">heads</span> = !<span class=
 "org-string">"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen&lt;%an&gt;%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"</span>
 
@@ -655,6 +674,12 @@
             <pre class="src src-conf">
         <span class="org-variable-name">amend</span> = <span class=
 "org-string">"!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"</span>
+</pre>
+          </div>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">amend</span> = commit --amend --no-edit
 </pre>
           </div>
         </div>
@@ -838,14 +863,15 @@ git forkdiff origin/master my_forked_branch --stat
 
         <div class="outline-text-3" id="text-12-13">
           <p>If you’re the Branch/Integration manager, you can use these
-          aliases to merge stuff:</p>
+          aliases to <b>merge</b> stuff (to select the entirety of either our
+          or their file in a 3 way merge):</p>
 
           <div class="org-src-container">
             <pre class="src src-conf">
-        <span class="org-variable-name">ours</span> = <span class=
-"org-string">"!f() { git co --ours $@ &amp;&amp; git add $@; }; f"</span>
+        <span class="org-variable-name">ours</span>   = <span class=
+"org-string">"!f() { git checkout --ours $@ &amp;&amp; git add $@; }; f"</span>
         <span class="org-variable-name">theirs</span> = <span class=
-"org-string">"!f() { git co --theirs $@ &amp;&amp; git add $@; }; f"</span>
+"org-string">"!f() { git checkout --theirs $@ &amp;&amp; git add $@; }; f"</span>
 </pre>
           </div>
         </div>
@@ -899,6 +925,12 @@ git forkdiff origin/master my_forked_branch --stat
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class="org-variable-name">undo</span> = reset --hard HEAD~1
+</pre>
+          </div>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">undo</span> = checkout --
 </pre>
           </div>
         </div>
@@ -956,6 +988,21 @@ git forkdiff origin/master my_forked_branch --stat
             <pre class="src src-conf">
         <span class=
 "org-variable-name">export</span> = archive -o latest.tar.gz -9 --prefix=latest/
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-12-19" class="outline-3">
+        <h3 id="sec-12-19"><span class="section-number-3">12.19</span> SVN</h3>
+
+        <div class="outline-text-3" id="text-12-19">
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">spull</span> = <span class=
+"org-string">"svn rebase"</span>
+        <span class="org-variable-name">spush</span> = <span class=
+"org-string">"svn dcommit"</span>
 </pre>
           </div>
         </div>

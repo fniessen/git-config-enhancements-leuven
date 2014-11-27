@@ -5,6 +5,7 @@
 #+KEYWORDS:
 #+LANGUAGE:  en
 
+#+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  tangle ~/.gitconfig
 #+PROPERTY:  eval no
 
@@ -214,13 +215,14 @@ Basic shortcuts.
 	co = checkout
 	cp = cherry-pick
 	ls = ls-files
-	st = status -s
+	st = status -s -b
 #+end_src
 
-Checkout master branch (useful if you keep feature branches):
+Checkout common branches (useful if you have feature branches):
 
 #+begin_src conf
 	master = checkout master
+	develop = checkout develop
 #+end_src
 
 ** Initialize a Git repository
@@ -240,16 +242,26 @@ disk:
 
 ** Ignored files
 
-Show files ignored by Git:
-
-#+begin_src conf
-	ignored = ls-files -o -i --exclude-standard
-#+end_src
-
 XXX Quickly add a file or directory to =.gitignore=:
 
 #+begin_src conf
 	ignore = !([ ! -e .gitignore ] && touch .gitignore) | echo $1 >> .gitignore
+#+end_src
+
+Ignore/unignore file without =.gitignore=:
+
+#+begin_src conf
+	untrack = update-index --assume-unchanged
+#+end_src
+
+#+begin_src conf
+	unignore = update-index --no-assume-unchanged
+#+end_src
+
+Show files ignored by Git:
+
+#+begin_src conf
+	ignored = ls-files -o -i --exclude-standard
 #+end_src
 
 ** Log
@@ -280,7 +292,7 @@ The ~--~ signals the end of options, that the rest of the parameters are limiter
 #+end_note
 
 #+begin_src conf
-	head = !"git log -n1"
+	last = log -n 1
 	heads = !"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen<%an>%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
 
 	# prettier and concise whatchanged
@@ -318,6 +330,10 @@ you've already entered).
 
 #+begin_src conf
 	amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
+#+end_src
+
+#+begin_src conf
+	amend = commit --amend --no-edit
 #+end_src
 
 ** Diff
@@ -420,12 +436,12 @@ Show the last tag:
 
 ** Merge aliases
 
-If you're the Branch/Integration manager, you can use these aliases to merge
-stuff:
+If you're the Branch/Integration manager, you can use these aliases to *merge*
+stuff (to select the entirety of either our or their file in a 3 way merge):
 
 #+begin_src conf
-	ours = "!f() { git co --ours $@ && git add $@; }; f"
-	theirs = "!f() { git co --theirs $@ && git add $@; }; f"
+	ours   = "!f() { git checkout --ours $@ && git add $@; }; f"
+	theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 #+end_src
 
 ** Cherrypick style recording
@@ -460,6 +476,10 @@ Undo the last commit:
 	undo = reset --hard HEAD~1
 #+end_src
 
+#+begin_src conf :tangle no
+	undo = checkout --
+#+end_src
+
 ** Stash operations
 
 #+begin_src conf
@@ -488,6 +508,13 @@ XXX What about ~git stash --include-untracked~ and ~git stash pop~?
 
 #+begin_src conf
 	export = archive -o latest.tar.gz -9 --prefix=latest/
+#+end_src
+
+** SVN
+
+#+begin_src conf
+	spull = "svn rebase"
+	spush = "svn dcommit"
 #+end_src
 
 * References
