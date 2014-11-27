@@ -225,8 +225,8 @@ disk:
 
 #+begin_src conf
 	lg = log --decorate --oneline --graph
-	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%ad)%Creset' --date=relative --graph
-	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%ad)%Creset' --date=short --graph
+	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=relative --graph
+	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --graph
 #+end_src
 
 #+begin_note
@@ -271,13 +271,19 @@ Show files ignored by Git:
 	in = pull --dry-run
 #+end_src
 
+** Pull all
+
+#+begin_src conf
+	pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
+#+end_src
+
 ** Unpushed
 
 What is left to push to ~origin~:
 
 #+begin_src conf
 	out = log --branches --not --remotes
-	unpushed = log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an> %C(bold blue)(%cr)%Creset' --abbrev-commit
+	unpushed = log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --abbrev-commit
 #+end_src
 
 ** Amend
