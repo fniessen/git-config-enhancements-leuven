@@ -26,7 +26,7 @@ Git (1.7.10+) now supports this syntax in .gitconfig:
 
 #+begin_src conf :tangle no
 [include]
-    path = /path/to/file
+	path = /path/to/file
 #+end_src
 
 So you can split your gitconfig configurations across multiple files, e.g. you
@@ -46,11 +46,16 @@ committer and author of a change in every commit.
 
 #+begin_src conf
 [user]
-	name = Fabrice Niessen
-	email = (concat \"fniessen\" at-sign \"pirilampo.org\")
+	name = John Doe
+	email = johndoe@example.com
 #+end_src
 
-You should "override" the above with your personal details.
+You should "override" the above with your personal details:
+
+#+begin_src conf
+[include]
+	path = .gitconfig.user
+#+end_src
 
 * Core
 
@@ -110,12 +115,15 @@ pull.
 
 * Push
 
-Push only the current branch (sane pushing).
+Push only the *current branch* to its tracking branch (sane pushing -- instead of
+pushing all branches).
 
 #+begin_src conf
 [push]
 	default = current
 #+end_src
+
+XXX or `matching'?
 
 * Color
 
@@ -152,9 +160,12 @@ Push only the current branch (sane pushing).
 
 #+begin_src conf
 [color "status"]
+	updated = green
 	added = yellow
-	changed = green
+	changed = yellow
 	untracked = bold red
+	branch = green
+	nobranch = red reverse
 #+end_src
 
 ** Grep
@@ -206,6 +217,12 @@ Basic shortcuts.
 	st = status -s
 #+end_src
 
+Checkout master branch (useful if you keep feature branches):
+
+#+begin_src conf
+	master = checkout master
+#+end_src
+
 ** Initialize a Git repository
 
 #+begin_src conf
@@ -219,6 +236,20 @@ disk:
 
 #+begin_src conf
 	r = !git ls-files --deleted -z | xargs -0 git rm
+#+end_src
+
+** Ignored files
+
+Show files ignored by Git:
+
+#+begin_src conf
+	ignored = ls-files -o -i --exclude-standard
+#+end_src
+
+XXX Quickly add a file or directory to =.gitignore=:
+
+#+begin_src conf
+	ignore = !([ ! -e .gitignore ] && touch .gitignore) | echo $1 >> .gitignore
 #+end_src
 
 ** Log
@@ -247,12 +278,6 @@ Show a "top contributors" list:
 #+begin_note
 The ~--~ signals the end of options, that the rest of the parameters are limiters.
 #+end_note
-
-Show files ignored by Git:
-
-#+begin_src conf
-	ign = ls-files -o -i --exclude-standard
-#+end_src
 
 #+begin_src conf
 	head = !"git log -n1"
@@ -417,16 +442,22 @@ will ~reset~ the index.
 
 ** Reset Commands
 
+Remove changes from the index:
+
+#+begin_src conf
+	unstage = reset HEAD --
+#+end_src
+
+Go back before last commit, with files in uncommitted state:
+
+#+begin_src conf
+	uncommit = reset --soft HEAD~1
+#+end_src
+
 Undo the last commit:
 
 #+begin_src conf
 	undo = reset --hard HEAD~1
-#+end_src
-
-Unstage changes from the index:
-
-#+begin_src conf
-	unstage = reset HEAD --
 #+end_src
 
 ** Stash operations
