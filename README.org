@@ -35,7 +35,7 @@ can have a .gitconfig file for your nonsensitive information and a git ignored
 
 See http://travisjeffery.com/b/2012/03/using-gits-include-for-private-information-like-github-tokens/
 
-** TODO Mix professional and personal git configurations
+** TODO Mix professional and personal Git configurations
 
 http://monkeypatch.me/blog/mixing-professional-and-personal-git-configurations.html
 
@@ -110,6 +110,8 @@ pull.
 
 * Push
 
+Push only the current branch (sane pushing).
+
 #+begin_src conf
 [push]
 	default = current
@@ -177,7 +179,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 [alias]
 #+end_src
 
-Print the current list of Git aliases.
+Print the current list of Git aliases:
 
 #+begin_src conf
 	alias = "!git config -l | grep alias | cut -c 7- | sort"
@@ -214,7 +216,7 @@ date").
 	y = diff "@{yesterday}"
 #+end_src
 
-Show a "top contributors" list.
+Show a "top contributors" list:
 
 #+begin_src conf
 	who = shortlog -n -s --
@@ -224,8 +226,9 @@ Show a "top contributors" list.
 The ~--~ signals the end of options, that the rest of the parameters are limiters.
 #+end_note
 
+Show files ignored by Git:
+
 #+begin_src conf
-	# Show files ignored by git:
 	ign = ls-files -o -i --exclude-standard
 #+end_src
 
