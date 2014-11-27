@@ -416,11 +416,22 @@
         Abbreviations</h3>
 
         <div class="outline-text-3" id="text-12-1">
-          <p>Basic shortcuts:</p>
+          <p>Basic shortcuts.</p>
+
+          <ul class="org-ul">
+            <li>List all branches (both remote-tracking and local), showing
+            sha1 and commit subject line for each head, along with the name of
+            the upstream branch (if any).</li>
+          </ul>
 
           <div class="org-src-container">
             <pre class="src src-conf">
-        <span class="org-variable-name">br</span> = branch
+        <span class="org-variable-name">br</span> = branch -a -vv
+</pre>
+          </div>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
         <span class="org-variable-name">ci</span> = commit
         <span class="org-variable-name">cl</span> = clone
         <span class="org-variable-name">co</span> = checkout

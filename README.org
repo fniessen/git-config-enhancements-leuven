@@ -187,10 +187,17 @@ Print the current list of Git aliases:
 
 ** Abbreviations
 
-Basic shortcuts:
+Basic shortcuts.
+
+- List all branches (both remote-tracking and local), showing sha1 and commit
+  subject line for each head, along with the name of the upstream branch (if
+  any).
 
 #+begin_src conf
-	br = branch
+	br = branch -a -vv
+#+end_src
+
+#+begin_src conf
 	ci = commit
 	cl = clone
 	co = checkout
