@@ -518,16 +518,8 @@ git forkdiff origin/master my_forked_branch --stat
             <div class="org-src-container">
               <pre class="src src-conf">
         <span class="org-variable-name">amend</span> = commit --amend --no-edit
-        <span class="org-variable-name">amend</span> = commit -a --amend
 </pre>
             </div>
-
-            <p>XXX Choose one!</p>
-
-            <p>The <code>-a</code> adds any modifications and deletions of
-            existing files to the commit but ignores brand new files. The
-            <code>--amend</code> launches your default commit editor and lets
-            you change the commit message of the most recent commit.</p>
           </div>
         </div>
 
@@ -707,6 +699,39 @@ git forkdiff origin/master my_forked_branch --stat
         <span class="org-variable-name">br</span> = branch -a -vv
 </pre>
           </div>
+
+          <p><code>git bclean</code> is meant to be run from your master (or
+          default) branch and does the cleanup of merged branches.</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">bclean</span> = <span class=
+"org-string">"!f() { git branch --merged ${1-master} | grep -v "</span> ${1-master}$<span class="org-string">" | xargs -r git branch -d; }; f"</span>
+</pre>
+          </div>
+
+          <p>When I’m done with this topic branch and I want to clean
+          everything up on my local machine, I use git bdone:</p>
+
+          <ol class="org-ol">
+            <li>Switch to master (though you can specify a different default
+            branch)</li>
+
+            <li>Run git up to bring master up to speed with the origin</li>
+
+            <li>Delete all branches already merged into master using another
+            alias, git bclean</li>
+          </ol>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">bdone</span> = <span class=
+"org-string">"!f() { git checkout ${1-master} &amp;&amp; git up &amp;&amp; git bclean ${1-master}; }; f"</span>
+</pre>
+          </div>
+
+          <p>See <a href=
+          "http://haacked.com/archive/2014/07/28/github-flow-aliases/">http://haacked.com/archive/2014/07/28/github-flow-aliases/</a>.</p>
         </div>
       </div>
 
@@ -824,8 +849,62 @@ git stash clear
           <p>XXX What about <code>git stash --include-untracked</code> and
           <code>git stash pop</code>?</p>
 
-          <p>Alternative: do a regular <code>commit</code> and a <code>reset
-          --soft</code> instead.</p>
+          <p>Alternative to <code>stash</code> (writing a commit with a default
+          message):</p>
+
+          <ol class="org-ol">
+            <li>
+              <p>Do a regular <code>commit</code>:</p>
+
+              <div class="org-src-container">
+                <pre class="src src-shell">
+git add -A &amp;&amp; git commit -m <span class=
+"org-string">'WIP'</span>       <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">Add all changes (including untracked files).</span>
+</pre>
+              </div>
+            </li>
+
+            <li>Do some other work…</li>
+
+            <li>
+              <p>Return to previous work:</p>
+
+              <div class="org-src-container">
+                <pre class="src src-shell">
+git reset --mixed                       <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">Reset the previous commit (but</span>
+                                        <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">keeps all the changes from that</span>
+                                        <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">commit in the working directory).</span>
+
+git reset --soft                        <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">or this one???</span>
+</pre>
+              </div>
+
+              <p>Or, if I merely need to modify the previous commit:</p>
+
+              <div class="org-src-container">
+                <pre class="src src-shell">
+git commit -a --amend
+</pre>
+              </div>
+
+              <p>The <code>-a</code> adds any modifications and deletions of
+              existing files to the commit but ignores brand new files.</p>
+
+              <p>The <code>--amend</code> launches your default commit editor
+              and lets you change the commit message of the most recent
+              commit.</p>
+            </li>
+          </ol>
         </div>
       </div>
 

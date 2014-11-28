@@ -372,12 +372,7 @@ Modify the previous commit:
 
 #+begin_src conf
 	amend = commit --amend --no-edit
-	amend = commit -a --amend
 #+end_src
-
-The ~-a~ adds any modifications and deletions of existing files to the commit but
-ignores brand new files. The ~--amend~ launches your default commit editor and
-lets you change the commit message of the most recent commit.
 
 *** Unstage a staged file
 
@@ -482,6 +477,26 @@ subject line for each head, along with the name of the upstream branch (if any).
 	br = branch -a -vv
 #+end_src
 
+~git bclean~ is meant to be run from your master (or default) branch and does the
+cleanup of merged branches.
+
+#+begin_src conf
+	bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; f"
+#+end_src
+
+When I'm done with this topic branch and I want to clean everything up on my
+local machine, I use git bdone:
+
+1. Switch to master (though you can specify a different default branch)
+2. Run git up to bring master up to speed with the origin
+3. Delete all branches already merged into master using another alias, git bclean
+
+#+begin_src conf
+	bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+#+end_src
+
+See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
+
 ** Merge
 
 If you're the Branch/Integration manager, you can use these aliases to *merge*
@@ -553,7 +568,37 @@ You can operate on the 'stash' ref as if it were any other ref.
 
 XXX What about ~git stash --include-untracked~ and ~git stash pop~?
 
-Alternative: do a regular ~commit~ and a ~reset --soft~ instead.
+Alternative to ~stash~ (writing a commit with a default message):
+
+1. Do a regular ~commit~:
+
+   #+begin_src shell :tangle no
+   git add -A && git commit -m 'WIP'       # Add all changes (including untracked files).
+   #+end_src
+
+2. Do some other work...
+
+3. Return to previous work:
+
+   #+begin_src shell :tangle no
+   git reset --mixed                       # Reset the previous commit (but
+                                           # keeps all the changes from that
+                                           # commit in the working directory).
+
+   git reset --soft                        # or this one???
+   #+end_src
+
+   Or, if I merely need to modify the previous commit:
+
+   #+begin_src shell :tangle no
+   git commit -a --amend
+   #+end_src
+
+   The ~-a~ adds any modifications and deletions of existing files to the commit
+   but ignores brand new files.
+
+   The ~--amend~ launches your default commit editor and lets you change the
+   commit message of the most recent commit.
 
 ** Search
 
