@@ -220,13 +220,6 @@ Basic shortcuts.
 	ls = ls-files
 #+end_src
 
-Checkout common branches (useful if you have feature branches):
-
-#+begin_src conf
-	master = checkout master
-	develop = checkout develop
-#+end_src
-
 ** Getting a Git repository
 
 *** Initialize a repository
@@ -286,6 +279,10 @@ Just before committing the staged changes, check what your commit changes
 	dc = diff --cached
 #+end_src
 
+#+begin_src conf
+	y = diff "@{yesterday}"
+#+end_src
+
 Getting the diff of a branch since it forked from another branch, or since the
 last merge.
 
@@ -325,31 +322,17 @@ disk:
 	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --graph
 #+end_src
 
+#+begin_src conf
+	heads = !"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen<%an>%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
+#+end_src
+
 #+begin_note
 The ~git log~ command shows, by default, the "author date" (not the "committer
 date").
 #+end_note
 
 #+begin_src conf
-	y = diff "@{yesterday}"
-#+end_src
-
-Show a "top contributors" list:
-
-#+begin_src conf
-	who = shortlog -n -s --
-#+end_src
-
-#+begin_note
-The ~--~ signals the end of options, that the rest of the parameters are limiters.
-#+end_note
-
-#+begin_src conf
 	last = log -n 1
-#+end_src
-
-#+begin_src conf
-	heads = !"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen<%an>%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
 #+end_src
 
 Prettier and concise ~whatchanged~:
@@ -363,6 +346,16 @@ Prettier ~whatchanged~ with full diffs based on text search:
 #+begin_src conf
 	whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=iso -p -S
 #+end_src
+
+Show a "top contributors" list:
+
+#+begin_src conf
+	who = shortlog -n -s --
+#+end_src
+
+#+begin_note
+The ~--~ signals the end of options, that the rest of the parameters are limiters.
+#+end_note
 
 ** Undo things
 
@@ -399,6 +392,8 @@ Remove the specified files from the index (next commit):
 #+begin_src conf
 	undo = checkout --
 #+end_src
+
+*** XXX
 
 Go back before last commit, with files in uncommitted state:
 
@@ -472,6 +467,13 @@ Show the last tag:
 #+begin_src conf
 	co = checkout
 	cob = checkout -b
+#+end_src
+
+Checkout common branches (useful if you have feature branches):
+
+#+begin_src conf
+	master = checkout master
+	develop = checkout develop
 #+end_src
 
 List all branches (both remote-tracking and local), showing sha1 and commit

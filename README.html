@@ -93,6 +93,8 @@
 
                   <li><a href="#sec-12-8-3">12.8.3. Unmodify a modified
                   file</a></li>
+
+                  <li><a href="#sec-12-8-4">12.8.4. XXX</a></li>
                 </ul>
               </li>
 
@@ -249,16 +251,6 @@
         <span class="org-variable-name">ls</span> = ls-files
 </pre>
           </div>
-
-          <p>Checkout common branches (useful if you have feature
-          branches):</p>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
-        <span class="org-variable-name">master</span> = checkout master
-        <span class="org-variable-name">develop</span> = checkout develop
-</pre>
-          </div>
         </div>
       </div>
 
@@ -374,6 +366,13 @@
 </pre>
           </div>
 
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">y</span> = diff <span class=
+"org-string">"@{yesterday}"</span>
+</pre>
+          </div>
+
           <p>Getting the diff of a branch since it forked from another branch,
           or since the last merge.</p>
 
@@ -439,6 +438,13 @@ git forkdiff origin/master my_forked_branch --stat
 </pre>
           </div>
 
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">heads</span> = !<span class=
+"org-string">"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen&lt;%an&gt;%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"</span>
+</pre>
+          </div>
+
           <div class="note">
             <p>The <code>git log</code> command shows, by default, the “author
             date” (not the “committer date”).</p>
@@ -446,34 +452,7 @@ git forkdiff origin/master my_forked_branch --stat
 
           <div class="org-src-container">
             <pre class="src src-conf">
-        <span class="org-variable-name">y</span> = diff <span class=
-"org-string">"@{yesterday}"</span>
-</pre>
-          </div>
-
-          <p>Show a “top contributors” list:</p>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
-        <span class="org-variable-name">who</span> = shortlog -n -s --
-</pre>
-          </div>
-
-          <div class="note">
-            <p>The <code>--</code> signals the end of options, that the rest of
-            the parameters are limiters.</p>
-          </div>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
         <span class="org-variable-name">last</span> = log -n 1
-</pre>
-          </div>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
-        <span class="org-variable-name">heads</span> = !<span class=
-"org-string">"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen&lt;%an&gt;%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"</span>
 </pre>
           </div>
 
@@ -496,6 +475,19 @@ git forkdiff origin/master my_forked_branch --stat
 "org-variable-name">whatwhen</span> = log --pretty=format:<span class=
 "org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ad)%Creset'</span> --date=iso -p -S
 </pre>
+          </div>
+
+          <p>Show a “top contributors” list:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">who</span> = shortlog -n -s --
+</pre>
+          </div>
+
+          <div class="note">
+            <p>The <code>--</code> signals the end of options, that the rest of
+            the parameters are limiters.</p>
           </div>
         </div>
       </div>
@@ -562,7 +554,14 @@ git forkdiff origin/master my_forked_branch --stat
         <span class="org-variable-name">undo</span> = checkout --
 </pre>
             </div>
+          </div>
+        </div>
 
+        <div id="outline-container-sec-12-8-4" class="outline-4">
+          <h4 id="sec-12-8-4"><span class="section-number-4">12.8.4</span>
+          XXX</h4>
+
+          <div class="outline-text-4" id="text-12-8-4">
             <p>Go back before last commit, with files in uncommitted state:</p>
 
             <div class="org-src-container">
@@ -686,6 +685,16 @@ git forkdiff origin/master my_forked_branch --stat
             <pre class="src src-conf">
         <span class="org-variable-name">co</span> = checkout
         <span class="org-variable-name">cob</span> = checkout -b
+</pre>
+          </div>
+
+          <p>Checkout common branches (useful if you have feature
+          branches):</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">master</span> = checkout master
+        <span class="org-variable-name">develop</span> = checkout develop
 </pre>
           </div>
 
