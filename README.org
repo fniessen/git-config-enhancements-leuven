@@ -21,7 +21,7 @@ might have. So *be extremely careful*!
 
 * Tasks
 
-** TODO Outsource and include private entries in .gitconfig
+** TODO Outsource and include private entries in .gitconfig            :ARCHIVE:
 
 Git (1.7.10+) now supports this syntax in .gitconfig:
 
@@ -36,11 +36,11 @@ can have a .gitconfig file for your nonsensitive information and a git ignored
 
 See http://travisjeffery.com/b/2012/03/using-gits-include-for-private-information-like-github-tokens/
 
-** TODO Mix professional and personal Git configurations
+Mix professional and personal Git configurations:
 
 http://monkeypatch.me/blog/mixing-professional-and-personal-git-configurations.html
 
-* User
+* User                                                                 :ARCHIVE:
 
 Setting your user name and e-mail address is important because Git stores the
 committer and author of a change in every commit.
@@ -58,7 +58,7 @@ You should "override" the above with your personal details:
 	path = .gitconfig.user
 #+end_src
 
-* Core
+* Core                                                                 :ARCHIVE:
 
 #+begin_src conf
 [core]
@@ -72,7 +72,7 @@ You should "override" the above with your personal details:
 	safecrlf = true
 #+end_src
 
-* Diff
+* Diff                                                                 :ARCHIVE:
 
 #+begin_src conf
 [diff]
@@ -80,14 +80,14 @@ You should "override" the above with your personal details:
 	algorithm = patience
 #+end_src
 
-* Merge
+* Merge                                                                :ARCHIVE:
 
 #+begin_src conf
 [merge]
 	stat = true
 #+end_src
 
-* Grep
+* Grep                                                                 :ARCHIVE:
 
 #+begin_src conf
 [grep]
@@ -95,7 +95,7 @@ You should "override" the above with your personal details:
 	linenumber = true
 #+end_src
 
-* Pull
+* Pull                                                                 :ARCHIVE:
 
 Configure Git to do the ~--rebase~ part automatically.
 
@@ -104,7 +104,7 @@ Configure Git to do the ~--rebase~ part automatically.
 	rebase = true
 #+end_src
 
-* Rebase
+* Rebase                                                               :ARCHIVE:
 
 Also set ~rebase.stat = true~, so the ~diffstat~ output is still shown when they
 pull.
@@ -114,7 +114,7 @@ pull.
 	stat = true
 #+end_src
 
-* Push
+* Push                                                                 :ARCHIVE:
 
 Push *only* the *current working branch* (sane pushing -- instead of pushing all
 branches), with an added safety: only if it is /tracking/ a remote upstream branch
@@ -127,7 +127,7 @@ with the /same name/.
 
 (~simple~ is the default in Git 2.x)
 
-* Color
+* Color                                                                :ARCHIVE:
 
 #+begin_src conf
 [color]
@@ -221,12 +221,13 @@ Basic shortcuts.
 
 #+begin_src conf
 	ci = commit
-	cl = clone
+#+end_src
+
+#+begin_src conf
 	co = checkout
 	cob = checkout -b
 	cp = cherry-pick
 	ls = ls-files
-	st = status -s -b
 #+end_src
 
 Checkout common branches (useful if you have feature branches):
@@ -236,22 +237,27 @@ Checkout common branches (useful if you have feature branches):
 	develop = checkout develop
 #+end_src
 
-** Initialize a Git repository
+** Getting a Git repository
+
+*** Initialize a repository
 
 #+begin_src conf
 	this = !git init && git add . && git commit -m \"Initial commit\"
 #+end_src
 
-** Remove deleted files
-
-Removing multiple files from a Git repo that have already been deleted from
-disk:
+*** Clone an existing repository
 
 #+begin_src conf
-	r = !git ls-files --deleted -z | xargs -0 git rm
+	cl = clone
 #+end_src
 
-** Ignored files
+** Check the status of your files
+
+#+begin_src conf
+	st = status -s -b
+#+end_src
+
+** Ignoring files
 
 XXX Quickly add a file or directory to =.gitignore=:
 
@@ -273,6 +279,15 @@ Show files ignored by Git:
 
 #+begin_src conf
 	ignored = ls-files -o -i --exclude-standard
+#+end_src
+
+** Remove deleted files
+
+Removing multiple files from a Git repo that have already been deleted from
+disk:
+
+#+begin_src conf
+	r = !git ls-files --deleted -z | xargs -0 git rm
 #+end_src
 
 ** Log
