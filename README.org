@@ -375,8 +375,6 @@ Modify the previous commit:
 	amend = commit -a --amend
 #+end_src
 
-XXX Choose one!
-
 The ~-a~ adds any modifications and deletions of existing files to the commit but
 ignores brand new files. The ~--amend~ launches your default commit editor and
 lets you change the commit message of the most recent commit.
