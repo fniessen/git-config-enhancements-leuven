@@ -83,11 +83,11 @@
 
               <li><a href="#sec-12-5">12.5. Log</a></li>
 
-              <li><a href="#sec-12-6">12.6. Unpulled</a></li>
+              <li><a href="#sec-12-6">12.6. Pull</a></li>
 
-              <li><a href="#sec-12-7">12.7. Pull all</a></li>
+              <li><a href="#sec-12-7">12.7. Unpushed</a></li>
 
-              <li><a href="#sec-12-8">12.8. Unpushed</a></li>
+              <li><a href="#sec-12-8">12.8. Stash operations</a></li>
 
               <li><a href="#sec-12-9">12.9. Amend</a></li>
 
@@ -115,13 +115,11 @@
 
               <li><a href="#sec-12-15">12.15. Reset Commands</a></li>
 
-              <li><a href="#sec-12-16">12.16. Stash operations</a></li>
+              <li><a href="#sec-12-16">12.16. Dangling</a></li>
 
-              <li><a href="#sec-12-17">12.17. Dangling</a></li>
+              <li><a href="#sec-12-17">12.17. Save a repo as a tarball</a></li>
 
-              <li><a href="#sec-12-18">12.18. Save a repo as a tarball</a></li>
-
-              <li><a href="#sec-12-19">12.19. SVN</a></li>
+              <li><a href="#sec-12-18">12.18. SVN</a></li>
             </ul>
           </li>
 
@@ -466,6 +464,7 @@
         <span class="org-variable-name">ci</span> = commit
         <span class="org-variable-name">cl</span> = clone
         <span class="org-variable-name">co</span> = checkout
+        <span class="org-variable-name">cob</span> = checkout -b
         <span class="org-variable-name">cp</span> = cherry-pick
         <span class="org-variable-name">ls</span> = ls-files
         <span class="org-variable-name">st</span> = status -s -b
@@ -620,23 +619,29 @@
       </div>
 
       <div id="outline-container-sec-12-6" class="outline-3">
-        <h3 id="sec-12-6"><span class="section-number-3">12.6</span>
-        Unpulled</h3>
+        <h3 id="sec-12-6"><span class="section-number-3">12.6</span> Pull</h3>
 
         <div class="outline-text-3" id="text-12-6">
+          <p>Unpulled:</p>
+
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class="org-variable-name">in</span> = pull --dry-run
 </pre>
           </div>
-        </div>
-      </div>
 
-      <div id="outline-container-sec-12-7" class="outline-3">
-        <h3 id="sec-12-7"><span class="section-number-3">12.7</span> Pull
-        all</h3>
+          <p>Before doing work (in a new branch), ensure that the working
+          directory is up-to-date with the <code>origin</code>:</p>
 
-        <div class="outline-text-3" id="text-12-7">
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class=
+"org-variable-name">up</span> = !git pull --rebase --prune $@ &amp;&amp; git submodule update --init --recursive
+</pre>
+          </div>
+
+          <p>Pull all:</p>
+
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class="org-variable-name">pull-all</span> = !<span class=
@@ -646,11 +651,11 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-12-8" class="outline-3">
-        <h3 id="sec-12-8"><span class="section-number-3">12.8</span>
+      <div id="outline-container-sec-12-7" class="outline-3">
+        <h3 id="sec-12-7"><span class="section-number-3">12.7</span>
         Unpushed</h3>
 
-        <div class="outline-text-3" id="text-12-8">
+        <div class="outline-text-3" id="text-12-7">
           <p>What is left to push to <code>origin</code>:</p>
 
           <div class="org-src-container">
@@ -661,6 +666,63 @@
 "org-variable-name">unpushed</span> = log --branches --not --remotes --color --graph --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> --abbrev-commit
 </pre>
           </div>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-12-8" class="outline-3">
+        <h3 id="sec-12-8"><span class="section-number-3">12.8</span> Stash
+        operations</h3>
+
+        <div class="outline-text-3" id="text-12-8">
+          <p>A <b>stash</b> is nothing but a <b>(temporary) branch</b>.</p>
+
+          <p><code>git stash</code> makes a temporary copy of the index and the
+          working tree, and clears the decks so you can easily work on
+          something else.</p>
+
+          <p><code>git stash</code> simply creates a branch with the contents
+          of the index and the working tree. Then it resets the branch you were
+          on so those contents are no longer there.</p>
+
+          <p>With another three word command, you’re back where you were.</p>
+
+          <p>When you done, you can simply do <code>git stash apply</code>. It
+          applies the top stash by default. But if that doesn’t work, for
+          whatever reason, you can use any of git’s other branch merging tools
+          to put things back they way you want them.</p>
+
+          <p>Get rid of some incomplete changes:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+git stash save --keep-index
+</pre>
+          </div>
+
+          <p>Be aware that, unlike <code>git stash apply</code> (though it has
+          its use), <code>git stash pop</code> <b>deletes the applied stash</b>
+          – <i>only</i> if the stash is cleanly applied. If there are
+          conflicts, Git will not remove it (but it will still apply it)!</p>
+
+          <p>git stash clear</p>
+
+          <p>You can operate on the ‘stash’ ref as if it were any other
+          ref.</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">sl</span> = stash list
+        <span class="org-variable-name">sa</span> = stash apply
+        <span class="org-variable-name">ss</span> = stash save <span class=
+"org-string">"name_stash"</span>
+</pre>
+          </div>
+
+          <p>XXX What about <code>git stash --include-untracked</code> and
+          <code>git stash pop</code>?</p>
+
+          <p>Alternative: do a regular <code>commit</code> and a <code>reset
+          --soft</code> instead.</p>
         </div>
       </div>
 
@@ -678,11 +740,19 @@
 </pre>
           </div>
 
+          <p>Modify the previous commit:</p>
+
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class="org-variable-name">amend</span> = commit --amend --no-edit
+        <span class="org-variable-name">amend</span> = commit -a --amend
 </pre>
           </div>
+
+          <p>The <code>-a</code> adds any modifications and deletions of
+          existing files to the commit but ignores brand new files. The
+          <code>--amend</code> launches your default commit editor and lets you
+          change the commit message of the most recent commit.</p>
         </div>
       </div>
 
@@ -865,7 +935,12 @@ git forkdiff origin/master my_forked_branch --stat
         <div class="outline-text-3" id="text-12-13">
           <p>If you’re the Branch/Integration manager, you can use these
           aliases to <b>merge</b> stuff (to select the entirety of either our
-          or their file in a 3 way merge):</p>
+          or their file in a 3 way merge).</p>
+
+          <p>Often, during a merge, you know you want to take a file from one
+          side wholesale. The following aliases expose the ours and theirs
+          commands which will let you pick a file(s) from the current branch or
+          the merged branch respectively:</p>
 
           <div class="org-src-container">
             <pre class="src src-conf">
@@ -905,7 +980,7 @@ git forkdiff origin/master my_forked_branch --stat
         Commands</h3>
 
         <div class="outline-text-3" id="text-12-15">
-          <p>Remove changes from the index:</p>
+          <p>Remove a file from the index:</p>
 
           <div class="org-src-container">
             <pre class="src src-conf">
@@ -921,45 +996,33 @@ git forkdiff origin/master my_forked_branch --stat
 </pre>
           </div>
 
+          <p>Reset the previous commit, but keeps all the changes from that
+          commit in the working directory:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">undo</span> = reset --mixed HEAD~1
+</pre>
+          </div>
+
           <p>Undo the last commit:</p>
 
           <div class="org-src-container">
             <pre class="src src-conf">
-        <span class="org-variable-name">undo</span> = reset --hard HEAD~1
+        <span class="org-variable-name">wipe</span> = reset --hard HEAD~1
 </pre>
           </div>
 
-          <div class="org-src-container">
-            <pre class="src src-conf">
-        <span class="org-variable-name">undo</span> = checkout --
-</pre>
-          </div>
+          <p>If you reset work that you <i>never committed</i>, it is gone for
+          good. Too bad!</p>
         </div>
       </div>
 
       <div id="outline-container-sec-12-16" class="outline-3">
-        <h3 id="sec-12-16"><span class="section-number-3">12.16</span> Stash
-        operations</h3>
-
-        <div class="outline-text-3" id="text-12-16">
-          <div class="org-src-container">
-            <pre class="src src-conf">
-        <span class="org-variable-name">sl</span> = stash list
-        <span class="org-variable-name">sa</span> = stash apply
-        <span class="org-variable-name">ss</span> = stash save
-</pre>
-          </div>
-
-          <p>XXX What about <code>git stash --include-untracked</code> and
-          <code>git stash pop</code>?</p>
-        </div>
-      </div>
-
-      <div id="outline-container-sec-12-17" class="outline-3">
-        <h3 id="sec-12-17"><span class="section-number-3">12.17</span>
+        <h3 id="sec-12-16"><span class="section-number-3">12.16</span>
         Dangling</h3>
 
-        <div class="outline-text-3" id="text-12-17">
+        <div class="outline-text-3" id="text-12-16">
           <ul class="org-ul">
             <li>Dangling blob = Change(s) that made it to the staging
             area/index but never got committed. One thing that is amazing with
@@ -980,11 +1043,11 @@ git forkdiff origin/master my_forked_branch --stat
         </div>
       </div>
 
-      <div id="outline-container-sec-12-18" class="outline-3">
-        <h3 id="sec-12-18"><span class="section-number-3">12.18</span> Save a
+      <div id="outline-container-sec-12-17" class="outline-3">
+        <h3 id="sec-12-17"><span class="section-number-3">12.17</span> Save a
         repo as a tarball</h3>
 
-        <div class="outline-text-3" id="text-12-18">
+        <div class="outline-text-3" id="text-12-17">
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class=
@@ -994,10 +1057,10 @@ git forkdiff origin/master my_forked_branch --stat
         </div>
       </div>
 
-      <div id="outline-container-sec-12-19" class="outline-3">
-        <h3 id="sec-12-19"><span class="section-number-3">12.19</span> SVN</h3>
+      <div id="outline-container-sec-12-18" class="outline-3">
+        <h3 id="sec-12-18"><span class="section-number-3">12.18</span> SVN</h3>
 
-        <div class="outline-text-3" id="text-12-19">
+        <div class="outline-text-3" id="text-12-18">
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class="org-variable-name">spull</span> = <span class=
@@ -1020,6 +1083,10 @@ git forkdiff origin/master my_forked_branch --stat
 
           <li><a href="https://ochronus.com/git-tips-from-the-trenches/">Git
           tips from the trenches</a></li>
+
+          <li><a href=
+          "file:~/Public/Repositories/emacs/admin/notes/git-workflow">Emacs Git
+          workflow</a></li>
         </ul>
       </div>
     </div>
