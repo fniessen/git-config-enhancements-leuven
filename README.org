@@ -155,6 +155,9 @@ with the /same name/.
 	frag = magenta bold
 	old = red bold
 	new = green bold
+#+end_src
+
+#+begin_src conf
 	whitespace = red reverse
 #+end_src
 
@@ -162,12 +165,18 @@ with the /same name/.
 
 #+begin_src conf
 [color "status"]
-	updated = green
-	added = yellow
+	added = green
 	changed = yellow
-	untracked = bold red
+	untracked = red
+#+end_src
+
+#+begin_src conf
 	branch = green
 	nobranch = red reverse
+#+end_src
+
+#+begin_src conf
+	updated = magenta
 #+end_src
 
 ** Grep
@@ -397,14 +406,14 @@ lets you change the commit message of the most recent commit.
 
 ** Diff
 
-Differences between the *unstaged* files and the *last commit*:
+Differences since the *last commit* (~HEAD~):
 
 #+begin_src conf
 	df = diff
 #+end_src
 
 Just before committing the staged changes, check what your commit changes
-(differences between the *staged* files and the *last commit*):
+(differences between the *staging area* and the *last commit*):
 
 #+begin_src conf
 	dc = diff --cached
@@ -522,7 +531,7 @@ will ~reset~ the index.
 
 ** Reset Commands
 
-Remove a file from the index:
+Remove the specified files from the index (next commit):
 
 #+begin_src conf
 	unstage = reset HEAD --

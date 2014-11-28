@@ -372,6 +372,11 @@
         <span class="org-variable-name">frag</span> = magenta bold
         <span class="org-variable-name">old</span> = red bold
         <span class="org-variable-name">new</span> = green bold
+</pre>
+          </div>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
         <span class="org-variable-name">whitespace</span> = red reverse
 </pre>
           </div>
@@ -386,12 +391,22 @@
           <div class="org-src-container">
             <pre class="src src-conf">
 [color <span class="org-string">"status"</span>]
-        <span class="org-variable-name">updated</span> = green
-        <span class="org-variable-name">added</span> = yellow
+        <span class="org-variable-name">added</span> = green
         <span class="org-variable-name">changed</span> = yellow
-        <span class="org-variable-name">untracked</span> = bold red
+        <span class="org-variable-name">untracked</span> = red
+</pre>
+          </div>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
         <span class="org-variable-name">branch</span> = green
         <span class="org-variable-name">nobranch</span> = red reverse
+</pre>
+          </div>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">updated</span> = magenta
 </pre>
           </div>
         </div>
@@ -761,8 +776,7 @@ git stash save --keep-index
         Diff</h3>
 
         <div class="outline-text-3" id="text-12-10">
-          <p>Differences between the <b>unstaged</b> files and the <b>last
-          commit</b>:</p>
+          <p>Differences since the <b>last commit</b> (<code>HEAD</code>):</p>
 
           <div class="org-src-container">
             <pre class="src src-conf">
@@ -771,7 +785,7 @@ git stash save --keep-index
           </div>
 
           <p>Just before committing the staged changes, check what your commit
-          changes (differences between the <b>staged</b> files and the <b>last
+          changes (differences between the <b>staging area</b> and the <b>last
           commit</b>):</p>
 
           <div class="org-src-container">
@@ -980,7 +994,7 @@ git forkdiff origin/master my_forked_branch --stat
         Commands</h3>
 
         <div class="outline-text-3" id="text-12-15">
-          <p>Remove a file from the index:</p>
+          <p>Remove the specified files from the index (next commit):</p>
 
           <div class="org-src-container">
             <pre class="src src-conf">
