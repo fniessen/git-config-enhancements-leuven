@@ -281,6 +281,43 @@ Show files ignored by Git:
 	ignored = ls-files -o -i --exclude-standard
 #+end_src
 
+** View your changes
+
+Differences since the *last commit* (~HEAD~):
+
+#+begin_src conf
+	df = diff
+#+end_src
+
+Just before committing the staged changes, check what your commit changes
+(differences between the *staging area* and the *last commit*):
+
+#+begin_src conf
+	dc = diff --cached
+#+end_src
+
+Getting the diff of a branch since it forked from another branch, or since the
+last merge.
+
+To see the changes in a branch since it was forked from another branch, or
+since the last merge with the origin branch, you can add this alias:
+
+#+begin_src conf
+	forkdiff = !bash -c 'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" ' -
+#+end_src
+
+It uses ~git merge-base~ to determine the fork-point (the commit that is common
+to both the branches) and does a ~git diff~ between that commit and the second
+branch.
+
+Usage
+
+: git forkdiff <forked from branch> <forked branch> [git-diff-options]
+
+Example
+
+: git forkdiff origin/master my_forked_branch --stat
+
 ** Remove deleted files
 
 Removing multiple files from a Git repo that have already been deleted from
@@ -418,43 +455,6 @@ Modify the previous commit:
 The ~-a~ adds any modifications and deletions of existing files to the commit but
 ignores brand new files. The ~--amend~ launches your default commit editor and
 lets you change the commit message of the most recent commit.
-
-** Diff
-
-Differences since the *last commit* (~HEAD~):
-
-#+begin_src conf
-	df = diff
-#+end_src
-
-Just before committing the staged changes, check what your commit changes
-(differences between the *staging area* and the *last commit*):
-
-#+begin_src conf
-	dc = diff --cached
-#+end_src
-
-Getting the diff of a branch since it forked from another branch, or since the
-last merge.
-
-To see the changes in a branch since it was forked from another branch, or
-since the last merge with the origin branch, you can add this alias:
-
-#+begin_src conf
-	forkdiff = !bash -c 'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" ' -
-#+end_src
-
-It uses ~git merge-base~ to determine the fork-point (the commit that is common
-to both the branches) and does a ~git diff~ between that commit and the second
-branch.
-
-Usage
-
-: git forkdiff <forked from branch> <forked branch> [git-diff-options]
-
-Example
-
-: git forkdiff origin/master my_forked_branch --stat
 
 ** Search
 

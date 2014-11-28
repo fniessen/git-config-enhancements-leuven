@@ -75,19 +75,19 @@
 
               <li><a href="#sec-12-4">12.4. Ignoring files</a></li>
 
-              <li><a href="#sec-12-5">12.5. Remove deleted files</a></li>
+              <li><a href="#sec-12-5">12.5. View your changes</a></li>
 
-              <li><a href="#sec-12-6">12.6. Log</a></li>
+              <li><a href="#sec-12-6">12.6. Remove deleted files</a></li>
 
-              <li><a href="#sec-12-7">12.7. Pull</a></li>
+              <li><a href="#sec-12-7">12.7. Log</a></li>
 
-              <li><a href="#sec-12-8">12.8. Unpushed</a></li>
+              <li><a href="#sec-12-8">12.8. Pull</a></li>
 
-              <li><a href="#sec-12-9">12.9. Stash operations</a></li>
+              <li><a href="#sec-12-9">12.9. Unpushed</a></li>
 
-              <li><a href="#sec-12-10">12.10. Amend</a></li>
+              <li><a href="#sec-12-10">12.10. Stash operations</a></li>
 
-              <li><a href="#sec-12-11">12.11. Diff</a></li>
+              <li><a href="#sec-12-11">12.11. Amend</a></li>
 
               <li>
                 <a href="#sec-12-12">12.12. Search</a>
@@ -347,10 +347,63 @@
       </div>
 
       <div id="outline-container-sec-12-5" class="outline-3">
-        <h3 id="sec-12-5"><span class="section-number-3">12.5</span> Remove
-        deleted files</h3>
+        <h3 id="sec-12-5"><span class="section-number-3">12.5</span> View your
+        changes</h3>
 
         <div class="outline-text-3" id="text-12-5">
+          <p>Differences since the <b>last commit</b> (<code>HEAD</code>):</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">df</span> = diff
+</pre>
+          </div>
+
+          <p>Just before committing the staged changes, check what your commit
+          changes (differences between the <b>staging area</b> and the <b>last
+          commit</b>):</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">dc</span> = diff --cached
+</pre>
+          </div>
+
+          <p>Getting the diff of a branch since it forked from another branch,
+          or since the last merge.</p>
+
+          <p>To see the changes in a branch since it was forked from another
+          branch, or since the last merge with the origin branch, you can add
+          this alias:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+        <span class="org-variable-name">forkdiff</span> = !bash -c <span class=
+"org-string">'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" '</span> -
+</pre>
+          </div>
+
+          <p>It uses <code>git merge-base</code> to determine the fork-point
+          (the commit that is common to both the branches) and does a <code>git
+          diff</code> between that commit and the second branch.</p>
+
+          <p>Usage</p>
+          <pre class="example">
+git forkdiff &lt;forked from branch&gt; &lt;forked branch&gt; [git-diff-options]
+</pre>
+
+          <p>Example</p>
+          <pre class="example">
+git forkdiff origin/master my_forked_branch --stat
+</pre>
+        </div>
+      </div>
+
+      <div id="outline-container-sec-12-6" class="outline-3">
+        <h3 id="sec-12-6"><span class="section-number-3">12.6</span> Remove
+        deleted files</h3>
+
+        <div class="outline-text-3" id="text-12-6">
           <p>Removing multiple files from a Git repo that have already been
           deleted from disk:</p>
 
@@ -363,10 +416,10 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-12-6" class="outline-3">
-        <h3 id="sec-12-6"><span class="section-number-3">12.6</span> Log</h3>
+      <div id="outline-container-sec-12-7" class="outline-3">
+        <h3 id="sec-12-7"><span class="section-number-3">12.7</span> Log</h3>
 
-        <div class="outline-text-3" id="text-12-6">
+        <div class="outline-text-3" id="text-12-7">
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class=
@@ -425,10 +478,10 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-12-7" class="outline-3">
-        <h3 id="sec-12-7"><span class="section-number-3">12.7</span> Pull</h3>
+      <div id="outline-container-sec-12-8" class="outline-3">
+        <h3 id="sec-12-8"><span class="section-number-3">12.8</span> Pull</h3>
 
-        <div class="outline-text-3" id="text-12-7">
+        <div class="outline-text-3" id="text-12-8">
           <p>Unpulled:</p>
 
           <div class="org-src-container">
@@ -458,11 +511,11 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-12-8" class="outline-3">
-        <h3 id="sec-12-8"><span class="section-number-3">12.8</span>
+      <div id="outline-container-sec-12-9" class="outline-3">
+        <h3 id="sec-12-9"><span class="section-number-3">12.9</span>
         Unpushed</h3>
 
-        <div class="outline-text-3" id="text-12-8">
+        <div class="outline-text-3" id="text-12-9">
           <p>What is left to push to <code>origin</code>:</p>
 
           <div class="org-src-container">
@@ -476,11 +529,11 @@
         </div>
       </div>
 
-      <div id="outline-container-sec-12-9" class="outline-3">
-        <h3 id="sec-12-9"><span class="section-number-3">12.9</span> Stash
+      <div id="outline-container-sec-12-10" class="outline-3">
+        <h3 id="sec-12-10"><span class="section-number-3">12.10</span> Stash
         operations</h3>
 
-        <div class="outline-text-3" id="text-12-9">
+        <div class="outline-text-3" id="text-12-10">
           <p>A <b>stash</b> is nothing but a <b>(temporary) branch</b>.</p>
 
           <p><code>git stash</code> makes a temporary copy of the index and the
@@ -533,11 +586,11 @@ git stash save --keep-index
         </div>
       </div>
 
-      <div id="outline-container-sec-12-10" class="outline-3">
-        <h3 id="sec-12-10"><span class="section-number-3">12.10</span>
+      <div id="outline-container-sec-12-11" class="outline-3">
+        <h3 id="sec-12-11"><span class="section-number-3">12.11</span>
         Amend</h3>
 
-        <div class="outline-text-3" id="text-12-10">
+        <div class="outline-text-3" id="text-12-11">
           <p>Amend with the same message (without your editor prompting you for
           the message you’ve already entered).</p>
 
@@ -561,59 +614,6 @@ git stash save --keep-index
           existing files to the commit but ignores brand new files. The
           <code>--amend</code> launches your default commit editor and lets you
           change the commit message of the most recent commit.</p>
-        </div>
-      </div>
-
-      <div id="outline-container-sec-12-11" class="outline-3">
-        <h3 id="sec-12-11"><span class="section-number-3">12.11</span>
-        Diff</h3>
-
-        <div class="outline-text-3" id="text-12-11">
-          <p>Differences since the <b>last commit</b> (<code>HEAD</code>):</p>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
-        <span class="org-variable-name">df</span> = diff
-</pre>
-          </div>
-
-          <p>Just before committing the staged changes, check what your commit
-          changes (differences between the <b>staging area</b> and the <b>last
-          commit</b>):</p>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
-        <span class="org-variable-name">dc</span> = diff --cached
-</pre>
-          </div>
-
-          <p>Getting the diff of a branch since it forked from another branch,
-          or since the last merge.</p>
-
-          <p>To see the changes in a branch since it was forked from another
-          branch, or since the last merge with the origin branch, you can add
-          this alias:</p>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
-        <span class="org-variable-name">forkdiff</span> = !bash -c <span class=
-"org-string">'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" '</span> -
-</pre>
-          </div>
-
-          <p>It uses <code>git merge-base</code> to determine the fork-point
-          (the commit that is common to both the branches) and does a <code>git
-          diff</code> between that commit and the second branch.</p>
-
-          <p>Usage</p>
-          <pre class="example">
-git forkdiff &lt;forked from branch&gt; &lt;forked branch&gt; [git-diff-options]
-</pre>
-
-          <p>Example</p>
-          <pre class="example">
-git forkdiff origin/master my_forked_branch --stat
-</pre>
         </div>
       </div>
 
