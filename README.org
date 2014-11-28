@@ -525,10 +525,9 @@ A *stash* is nothing but a *(temporary) branch*.
 the decks so you can easily work on something else: it resets the branch you
 were on so those contents are no longer there.
 
-When you're done, with ~git stash apply~, you're back where you were.  It applies
-the top stash by default.  But if that doesn't work, for whatever reason, you
-can use any of Git's other branch merging tools to put things back they way you
-want them.
+When you're done, with ~git stash apply~ (top stash by default), you're back where
+you were.  But if that doesn't work, for whatever reason, you can use any of
+Git's other branch merging tools to put things back they way you want them.
 
 Get rid of some incomplete changes:
 
