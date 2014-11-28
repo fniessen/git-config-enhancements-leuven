@@ -638,14 +638,12 @@ git forkdiff origin/master my_forked_branch --stat
           Push</h4>
 
           <div class="outline-text-4" id="text-12-9-2">
-            <p>What is left to push to <code>origin</code>:</p>
+            <p>Unpushed:</p>
 
             <div class="org-src-container">
               <pre class="src src-conf">
         <span class=
-"org-variable-name">out</span> = log --branches --not --remotes
-        <span class=
-"org-variable-name">unpushed</span> = log --branches --not --remotes --color --graph --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> --abbrev-commit
+"org-variable-name">out</span> = log --branches --not --remotes --color --graph --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> --abbrev-commit
 </pre>
             </div>
           </div>

@@ -441,11 +441,10 @@ Pull all:
 
 *** Push
 
-What is left to push to ~origin~:
+Unpushed:
 
 #+begin_src conf
-	out = log --branches --not --remotes
-	unpushed = log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --abbrev-commit
+	out = log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --abbrev-commit
 #+end_src
 
 ** Tag
