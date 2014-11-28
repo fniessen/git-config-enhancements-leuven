@@ -521,18 +521,14 @@ will ~reset~ the index.
 
 A *stash* is nothing but a *(temporary) branch*.
 
-~git stash~ makes a temporary copy of the index and the working tree, and clears
-the decks so you can easily work on something else.
+~git stash~ makes a temporary copy of the *index* and the *working tree*, and clears
+the decks so you can easily work on something else: it resets the branch you
+were on so those contents are no longer there.
 
-~git stash~ simply creates a branch with the contents of the index and the working
-tree. Then it resets the branch you were on so those contents are no longer
-there.
-
-With another three word command, you're back where you were.
-
-When you done, you can simply do ~git stash apply~.  It applies the top stash by
-default.  But if that doesn't work, for whatever reason, you can use any of
-git's other branch merging tools to put things back they way you want them.
+When you're done, with ~git stash apply~, you're back where you were.  It applies
+the top stash by default.  But if that doesn't work, for whatever reason, you
+can use any of Git's other branch merging tools to put things back they way you
+want them.
 
 Get rid of some incomplete changes:
 
@@ -544,7 +540,9 @@ Be aware that, unlike ~git stash apply~ (though it has its use), ~git stash pop~
 *deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
 conflicts, Git will not remove it (but it will still apply it)!
 
+#+begin_src conf :tangle no
 git stash clear
+#+end_src
 
 You can operate on the 'stash' ref as if it were any other ref.
 
