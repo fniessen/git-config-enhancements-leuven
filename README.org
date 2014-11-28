@@ -211,21 +211,11 @@ Print the current list of Git aliases:
 
 Basic shortcuts.
 
-- List all branches (both remote-tracking and local), showing sha1 and commit
-  subject line for each head, along with the name of the upstream branch (if
-  any).
-
-#+begin_src conf
-	br = branch -a -vv
-#+end_src
-
 #+begin_src conf
 	ci = commit
 #+end_src
 
 #+begin_src conf
-	co = checkout
-	cob = checkout -b
 	cp = cherry-pick
 	ls = ls-files
 #+end_src
@@ -454,13 +444,56 @@ Pull all:
 	pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
 #+end_src
 
-*** Unpushed
+*** Push
 
 What is left to push to ~origin~:
 
 #+begin_src conf
 	out = log --branches --not --remotes
 	unpushed = log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --abbrev-commit
+#+end_src
+
+** Tag
+
+List tags using (better) version sorting (if your ~sort~ supports it):
+
+#+begin_src conf
+	tags = !git tag | sort -V
+#+end_src
+
+Show the last tag:
+
+#+begin_src conf
+	lasttag = describe --tags --abbrev=0
+#+end_src
+
+** Branch
+
+#+begin_src conf
+	co = checkout
+	cob = checkout -b
+#+end_src
+
+List all branches (both remote-tracking and local), showing sha1 and commit
+subject line for each head, along with the name of the upstream branch (if any).
+
+#+begin_src conf
+	br = branch -a -vv
+#+end_src
+
+** Merge
+
+If you're the Branch/Integration manager, you can use these aliases to *merge*
+stuff (to select the entirety of either our or their file in a 3 way merge).
+
+Often, during a merge, you know you want to take a file from one side
+wholesale. The following aliases expose the ours and theirs commands which will
+let you pick a file(s) from the current branch or the merged branch
+respectively:
+
+#+begin_src conf
+	ours   = "!f() { git checkout --ours $@ && git add $@; }; f"
+	theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 #+end_src
 
 ** Stash operations
@@ -550,35 +583,6 @@ interface with your repository's Git database; for example, for searching:
 #+end_src
 
 XXX works only on files really in Git (bypassing ignored files)?
-
-** Tags
-
-List tags using (better) version sorting (if your ~sort~ supports it):
-
-#+begin_src conf
-	tags = !git tag | sort -V
-#+end_src
-
-Show the last tag:
-
-#+begin_src conf
-	lasttag = describe --tags --abbrev=0
-#+end_src
-
-** Merge aliases
-
-If you're the Branch/Integration manager, you can use these aliases to *merge*
-stuff (to select the entirety of either our or their file in a 3 way merge).
-
-Often, during a merge, you know you want to take a file from one side
-wholesale. The following aliases expose the ours and theirs commands which will
-let you pick a file(s) from the current branch or the merged branch
-respectively:
-
-#+begin_src conf
-	ours   = "!f() { git checkout --ours $@ && git add $@; }; f"
-	theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
-#+end_src
 
 ** Cherrypick style recording
 
