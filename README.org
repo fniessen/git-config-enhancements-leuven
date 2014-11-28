@@ -496,7 +496,27 @@ respectively:
 	theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 #+end_src
 
-** Stash operations
+** Prepare a release
+
+Save a repo as a tarball:
+
+#+begin_src conf
+	export = archive -o latest.tar.gz -9 --prefix=latest/
+#+end_src
+
+** Cherrypick style recording
+
+Ask interactively which patch hunk to commit, and then do the commit:
+
+#+begin_src conf
+	record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+#+end_src
+
+It will not only do ~git add -p~ (with an optional file list), but it will also
+immediately do the ~commit~. Upon abandonment of either the add or the commit it
+will ~reset~ the index.
+
+** Stash
 
 A *stash* is nothing but a *(temporary) branch*.
 
@@ -545,7 +565,7 @@ alias ggFind='git log -g --pretty=format:%h -S'
 alias gFind='git log --pretty=format:%h -S'
 alias gGFing='git log --pretty=format:%h -G'
 alias gCFind='git log --grep="string in a commit message" --all --pretty=format:%h'
-#+END_SRC
+#+end_src
 
 *** Commit messages
 
@@ -584,18 +604,6 @@ interface with your repository's Git database; for example, for searching:
 
 XXX works only on files really in Git (bypassing ignored files)?
 
-** Cherrypick style recording
-
-Ask interactively which patch hunk to commit, and then do the commit:
-
-#+begin_src conf
-	record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
-#+end_src
-
-It will not only do ~git add -p~ (with an optional file list), but it will also
-immediately do the ~commit~. Upon abandonment of either the add or the commit it
-will ~reset~ the index.
-
 ** Dangling
 
 - Dangling blob = Change(s) that made it to the staging area/index but never got
@@ -610,13 +618,7 @@ will ~reset~ the index.
 	lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 #+end_src
 
-** Save a repo as a tarball
-
-#+begin_src conf
-	export = archive -o latest.tar.gz -9 --prefix=latest/
-#+end_src
-
-** SVN
+** Git and Subversion
 
 #+begin_src conf
 	spull = "svn rebase"
