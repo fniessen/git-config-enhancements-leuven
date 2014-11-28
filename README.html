@@ -807,21 +807,19 @@ git forkdiff origin/master my_forked_branch --stat
 
           <p><code>git stash</code> makes a temporary copy of the <b>index</b>
           and the <b>working tree</b>, and clears the decks so you can easily
-          work on something else: it resets the branch you were on so those
-          contents are no longer there.</p>
+          work on something else; it reverts your local modifications, allowing
+          you to get rid of some incomplete changes:</p>
+
+          <div class="org-src-container">
+            <pre class="src src-conf">
+git stash save <span class="org-string">"describe what you did here"</span>
+</pre>
+          </div>
 
           <p>When you’re done, with <code>git stash apply</code> (top stash by
           default), you’re back where you were. But if that doesn’t work, for
           whatever reason, you can use any of Git’s other branch merging tools
           to put things back they way you want them.</p>
-
-          <p>Get rid of some incomplete changes:</p>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
-git stash save --keep-index
-</pre>
-          </div>
 
           <p>Be aware that, unlike <code>git stash apply</code> (though it has
           its use), <code>git stash pop</code> <b>deletes the applied stash</b>
@@ -839,10 +837,9 @@ git stash clear
 
           <div class="org-src-container">
             <pre class="src src-conf">
+        <span class="org-variable-name">ss</span> = stash save
         <span class="org-variable-name">sl</span> = stash list
         <span class="org-variable-name">sa</span> = stash apply
-        <span class="org-variable-name">ss</span> = stash save <span class=
-"org-string">"name_stash"</span>
 </pre>
           </div>
 
