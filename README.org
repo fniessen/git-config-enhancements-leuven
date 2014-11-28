@@ -327,7 +327,7 @@ disk:
 	r = !git ls-files --deleted -z | xargs -0 git rm
 #+end_src
 
-** Log
+** View the commit history
 
 #+begin_src conf
 	lg = log --decorate --oneline --graph
@@ -356,16 +356,84 @@ The ~--~ signals the end of options, that the rest of the parameters are limiter
 
 #+begin_src conf
 	last = log -n 1
+#+end_src
+
+#+begin_src conf
 	heads = !"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen<%an>%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
+#+end_src
 
-	# prettier and concise whatchanged
+Prettier and concise ~whatchanged~:
+
+#+begin_src conf
 	what = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --stat
+#+end_src
 
-	# prettier whatchanged with full diffs based on text search
+Prettier ~whatchanged~ with full diffs based on text search:
+
+#+begin_src conf
 	whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=iso -p -S
 #+end_src
 
-** Pull
+** Undo things
+
+*** Change your last commit
+
+Amend with the same message (without your editor prompting you for the message
+you've already entered).
+
+#+begin_src conf
+	amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
+#+end_src
+
+Modify the previous commit:
+
+#+begin_src conf
+	amend = commit --amend --no-edit
+	amend = commit -a --amend
+#+end_src
+
+The ~-a~ adds any modifications and deletions of existing files to the commit but
+ignores brand new files. The ~--amend~ launches your default commit editor and
+lets you change the commit message of the most recent commit.
+
+*** Unstage a staged file
+
+Remove the specified files from the index (next commit):
+
+#+begin_src conf
+	unstage = reset HEAD --
+#+end_src
+
+*** Unmodify a modified file
+
+#+begin_src conf
+	undo = checkout --
+#+end_src
+
+Go back before last commit, with files in uncommitted state:
+
+#+begin_src conf
+	uncommit = reset --soft HEAD~1
+#+end_src
+
+Reset the previous commit, but keeps all the changes from that commit in the
+working directory:
+
+#+begin_src conf
+	undo = reset --mixed HEAD~1
+#+end_src
+
+Undo the last commit:
+
+#+begin_src conf
+	wipe = reset --hard HEAD~1
+#+end_src
+
+If you reset work that you /never committed/, it is gone for good. Too bad!
+
+** Work with remotes
+
+*** Pull
 
 Unpulled:
 
@@ -386,7 +454,7 @@ Pull all:
 	pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
 #+end_src
 
-** Unpushed
+*** Unpushed
 
 What is left to push to ~origin~:
 
@@ -435,26 +503,6 @@ You can operate on the 'stash' ref as if it were any other ref.
 XXX What about ~git stash --include-untracked~ and ~git stash pop~?
 
 Alternative: do a regular ~commit~ and a ~reset --soft~ instead.
-
-** Amend
-
-Amend with the same message (without your editor prompting you for the message
-you've already entered).
-
-#+begin_src conf
-	amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
-#+end_src
-
-Modify the previous commit:
-
-#+begin_src conf
-	amend = commit --amend --no-edit
-	amend = commit -a --amend
-#+end_src
-
-The ~-a~ adds any modifications and deletions of existing files to the commit but
-ignores brand new files. The ~--amend~ launches your default commit editor and
-lets you change the commit message of the most recent commit.
 
 ** Search
 
@@ -543,35 +591,6 @@ Ask interactively which patch hunk to commit, and then do the commit:
 It will not only do ~git add -p~ (with an optional file list), but it will also
 immediately do the ~commit~. Upon abandonment of either the add or the commit it
 will ~reset~ the index.
-
-** Reset Commands
-
-Remove the specified files from the index (next commit):
-
-#+begin_src conf
-	unstage = reset HEAD --
-#+end_src
-
-Go back before last commit, with files in uncommitted state:
-
-#+begin_src conf
-	uncommit = reset --soft HEAD~1
-#+end_src
-
-Reset the previous commit, but keeps all the changes from that commit in the
-working directory:
-
-#+begin_src conf
-	undo = reset --mixed HEAD~1
-#+end_src
-
-Undo the last commit:
-
-#+begin_src conf
-	wipe = reset --hard HEAD~1
-#+end_src
-
-If you reset work that you /never committed/, it is gone for good. Too bad!
 
 ** Dangling
 
