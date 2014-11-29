@@ -142,9 +142,10 @@ with the /same name/.
 
 #+begin_src conf
 [color "branch"]
-	current = yellow reverse
-	local = yellow
-	remote = green
+	current = bold cyan
+	local = bold green
+	remote = bold red
+	plain = yellow reverse
 #+end_src
 
 ** Diff
