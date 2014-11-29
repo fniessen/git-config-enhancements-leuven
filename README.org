@@ -577,7 +577,7 @@ git stash save "describe what you did here"
 Take named stash:
 
 #+begin_src conf
-	snapshot = !git stash save "Snapshot: $(date)" && git stash apply "stash@{0}"
+	snapshot = !git stash save "Snapshot: $(date +\"%F %a %R\")" && git stash apply "stash@{0}"
 #+end_src
 
 When you're done, with ~git stash apply~ (top stash by default), you're back where

@@ -881,8 +881,7 @@ git stash save <span class="org-string">"describe what you did here"</span>
             <pre class="src src-conf">
         <span class=
 "org-variable-name">snapshot</span> = !git stash save <span class=
-"org-string">"Snapshot: $(date)"</span> &amp;&amp; git stash apply <span class=
-"org-string">"stash@{0}"</span>
+"org-string">"Snapshot: $(date +\"%F %a %R\")"</span> &amp;&amp; git stash apply <span class="org-string">"stash@{0}"</span>
 </pre>
           </div>
 
