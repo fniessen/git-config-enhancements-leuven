@@ -220,6 +220,10 @@ Basic shortcuts.
 	ls = ls-files
 #+end_src
 
+#+begin_src conf
+	h = help
+#+end_src
+
 ** Getting a Git repository
 
 *** Initialize a repository
@@ -252,10 +256,18 @@ Ignore/unignore file without =.gitignore=:
 
 #+begin_src conf
 	untrack = update-index --assume-unchanged
+	assume   = update-index --assume-unchanged
 #+end_src
 
 #+begin_src conf
 	unignore = update-index --no-assume-unchanged
+	unassume = update-index --no-assume-unchanged
+#+end_src
+
+List ignored files:
+
+#+begin_src conf
+	assumed  = "!git ls-files -v | grep ^h | cut -c 3-"
 #+end_src
 
 Show files ignored by Git:
@@ -265,6 +277,10 @@ Show files ignored by Git:
 #+end_src
 
 ** View your changes
+
+- git diff shows you the differences from index to working tree
+- git diff HEAD shows you the differences from trunk to working tree
+- git diff --cached shows you the differences from trunk to index
 
 Differences since the *last commit* (~HEAD~):
 
@@ -372,6 +388,8 @@ Modify the previous commit:
 
 #+begin_src conf
 	amend = commit --amend --no-edit
+	fixup = commit --amend -C HEAD
+	amend = commit -v --amend
 #+end_src
 
 *** Unstage a staged file
@@ -422,11 +440,13 @@ Unpulled:
 #+end_src
 
 Before doing work (in a new branch), ensure that the working directory is
-up-to-date with the ~origin~:
+up-to-date with the ~origin~ (pull and get latest for all submodules):
 
 #+begin_src conf
 	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
 #+end_src
+
+XXX Pull current branch only?
 
 Pull all:
 
@@ -440,6 +460,12 @@ Unpushed:
 
 #+begin_src conf
 	out = log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --abbrev-commit
+#+end_src
+
+*** Sync
+
+#+begin_src conf
+	sync = !git pull && git push
 #+end_src
 
 ** Tag
@@ -499,6 +525,10 @@ See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
 ** Merge
 
+#+begin_src conf
+	ff = merge --ff-only
+#+end_src
+
 If you're the Branch/Integration manager, you can use these aliases to *merge*
 stuff (to select the entirety of either our or their file in a 3 way merge).
 
@@ -544,6 +574,12 @@ modifications, allowing you to get rid of some incomplete changes:
 git stash save "describe what you did here"
 #+end_src
 
+Take named stash:
+
+#+begin_src conf
+	snapshot = !git stash save "Snapshot: $(date)" && git stash apply "stash@{0}"
+#+end_src
+
 When you're done, with ~git stash apply~ (top stash by default), you're back where
 you were.  But if that doesn't work, for whatever reason, you can use any of
 Git's other branch merging tools to put things back they way you want them.
@@ -562,6 +598,16 @@ You can operate on the 'stash' ref as if it were any other ref.
 	ss = stash save
 	sl = stash list
 	sa = stash apply
+#+end_src
+
+#+begin_src conf
+	stp = stash pop
+	std = stash drop
+#+end_src
+
+#+begin_src conf
+	stashdiff = stash show -p -w stash@{0}
+	stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
 #+end_src
 
 XXX What about ~git stash --include-untracked~ and ~git stash pop~?
@@ -664,6 +710,17 @@ XXX works only on files really in Git (bypassing ignored files)?
 #+begin_src conf
 	spull = "svn rebase"
 	spush = "svn dcommit"
+#+end_src
+
+#+begin_src conf
+	cvs-full-log = log --reverse --pretty=format:'%B\n--------------------------------------------\n'
+	cvsmerge = merge --no-ff --log
+#+end_src
+
+** Tips and tricks
+
+#+begin_src conf
+	graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
 #+end_src
 
 * References
