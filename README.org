@@ -333,6 +333,7 @@ disk:
 ** View the commit history
 
 #+begin_src conf
+	lp = log -p
 	lg = log --decorate --oneline --graph
 	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=relative --graph
 	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --graph
