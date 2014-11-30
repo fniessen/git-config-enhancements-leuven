@@ -129,6 +129,8 @@ with the /same name/.
 
 * Color                                                                :ARCHIVE:
 
+See http://git-scm.com/docs/git-config.
+
 #+begin_src conf
 [color]
 	ui = auto
@@ -145,6 +147,7 @@ with the /same name/.
 	current = bold cyan
 	local = bold green
 	remote = bold red
+	upstream = bold red
 	plain = yellow reverse
 #+end_src
 
@@ -166,18 +169,13 @@ with the /same name/.
 
 #+begin_src conf
 [color "status"]
+	header = normal
 	added = green
-	changed = yellow
+	updated = yellow
+	changed = magenta
 	untracked = red
-#+end_src
-
-#+begin_src conf
-	branch = green
+	branch = bold cyan
 	nobranch = red reverse
-#+end_src
-
-#+begin_src conf
-	updated = magenta
 #+end_src
 
 ** Grep
