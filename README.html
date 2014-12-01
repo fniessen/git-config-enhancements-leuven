@@ -75,7 +75,23 @@
 
               <li><a href="#sec-12-4">12.4. Ignoring files</a></li>
 
-              <li><a href="#sec-12-5">12.5. View your changes</a></li>
+              <li>
+                <a href="#sec-12-5">12.5. View your changes</a>
+
+                <ul>
+                  <li><a href="#sec-12-5-1">12.5.1. Changes between the working
+                  tree and the index</a></li>
+
+                  <li><a href="#sec-12-5-2">12.5.2. Changes between the working
+                  tree and the latest commit (HEAD)</a></li>
+
+                  <li><a href="#sec-12-5-3">12.5.3. Changes between the index
+                  (staged for the next commit) and the latest commit
+                  (HEAD)</a></li>
+
+                  <li><a href="#sec-12-5-4">12.5.4. Yesterday</a></li>
+                </ul>
+              </li>
 
               <li><a href="#sec-12-6">12.6. Remove deleted files</a></li>
 
@@ -370,70 +386,92 @@
         <h3 id="sec-12-5"><span class="section-number-3">12.5</span> View your
         changes</h3>
 
-        <div class="outline-text-3" id="text-12-5">
-          <ul class="org-ul">
-            <li>git diff shows you the differences from index to working
-            tree</li>
+        <div class="outline-text-3" id="text-12-5"></div>
 
-            <li>git diff HEAD shows you the differences from trunk to working
-            tree</li>
+        <div id="outline-container-sec-12-5-1" class="outline-4">
+          <h4 id="sec-12-5-1"><span class="section-number-4">12.5.1</span>
+          Changes between the working tree and the index</h4>
 
-            <li>git diff –cached shows you the differences from trunk to
-            index</li>
-          </ul>
-
-          <p>Differences since the <b>last commit</b> (<code>HEAD</code>):</p>
-
-          <div class="org-src-container">
-            <pre class="src src-conf">
+          <div class="outline-text-4" id="text-12-5-1">
+            <div class="org-src-container">
+              <pre class="src src-conf">
         <span class="org-variable-name">df</span> = diff
 </pre>
+            </div>
           </div>
+        </div>
 
-          <p>Just before committing the staged changes, check what your commit
-          changes (differences between the <b>staging area</b> and the <b>last
-          commit</b>):</p>
+        <div id="outline-container-sec-12-5-2" class="outline-4">
+          <h4 id="sec-12-5-2"><span class="section-number-4">12.5.2</span>
+          Changes between the working tree and the latest commit (HEAD)</h4>
 
-          <div class="org-src-container">
-            <pre class="src src-conf">
+          <div class="outline-text-4" id="text-12-5-2">
+            <div class="org-src-container">
+              <pre class="src src-shell">
+<span class="org-whitespace-indentation">        </span>diff-all = diff HEAD
+</pre>
+            </div>
+          </div>
+        </div>
+
+        <div id="outline-container-sec-12-5-3" class="outline-4">
+          <h4 id="sec-12-5-3"><span class="section-number-4">12.5.3</span>
+          Changes between the index (staged for the next commit) and the latest
+          commit (HEAD)</h4>
+
+          <div class="outline-text-4" id="text-12-5-3">
+            <p>Just before committing the <b>staged</b> changes, check what
+            your commit changes:</p>
+
+            <div class="org-src-container">
+              <pre class="src src-conf">
         <span class="org-variable-name">dc</span> = diff --cached
 </pre>
+            </div>
           </div>
+        </div>
 
-          <div class="org-src-container">
-            <pre class="src src-conf">
+        <div id="outline-container-sec-12-5-4" class="outline-4">
+          <h4 id="sec-12-5-4"><span class="section-number-4">12.5.4</span>
+          Yesterday</h4>
+
+          <div class="outline-text-4" id="text-12-5-4">
+            <div class="org-src-container">
+              <pre class="src src-conf">
         <span class="org-variable-name">y</span> = diff <span class=
 "org-string">"@{yesterday}"</span>
 </pre>
-          </div>
+            </div>
 
-          <p>Getting the diff of a branch since it forked from another branch,
-          or since the last merge.</p>
+            <p>Getting the diff of a branch since it forked from another
+            branch, or since the last merge.</p>
 
-          <p>To see the changes in a branch since it was forked from another
-          branch, or since the last merge with the origin branch, you can add
-          this alias:</p>
+            <p>To see the changes in a branch since it was forked from another
+            branch, or since the last merge with the origin branch, you can add
+            this alias:</p>
 
-          <div class="org-src-container">
-            <pre class="src src-conf">
+            <div class="org-src-container">
+              <pre class="src src-conf">
         <span class="org-variable-name">forkdiff</span> = !bash -c <span class=
 "org-string">'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" '</span> -
 </pre>
-          </div>
+            </div>
 
-          <p>It uses <code>git merge-base</code> to determine the fork-point
-          (the commit that is common to both the branches) and does a <code>git
-          diff</code> between that commit and the second branch.</p>
+            <p>It uses <code>git merge-base</code> to determine the fork-point
+            (the commit that is common to both the branches) and does a
+            <code>git diff</code> between that commit and the second
+            branch.</p>
 
-          <p>Usage</p>
-          <pre class="example">
+            <p>Usage</p>
+            <pre class="example">
 git forkdiff &lt;forked from branch&gt; &lt;forked branch&gt; [git-diff-options]
 </pre>
 
-          <p>Example</p>
-          <pre class="example">
+            <p>Example</p>
+            <pre class="example">
 git forkdiff origin/master my_forked_branch --stat
 </pre>
+          </div>
         </div>
       </div>
 
@@ -470,6 +508,13 @@ git forkdiff origin/master my_forked_branch --stat
         <span class=
 "org-variable-name">lga</span> = log --decorate --pretty=format:<span class=
 "org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ad)%Creset'</span> --date=short --graph
+
+    <span class=
+"org-variable-name">ll</span> = log --pretty=format:<span class="org-string">"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]"</span> --decorate --numstat
+    <span class=
+"org-variable-name">ld</span> = log --pretty=format:<span class="org-string">"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]"</span> --decorate --date=short --graph
+    <span class=
+"org-variable-name">ls</span> = log --pretty=format:<span class="org-string">"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]"</span> --decorate --date=relative
 </pre>
           </div>
 
@@ -797,6 +842,7 @@ git forkdiff origin/master my_forked_branch --stat
           <div class="org-src-container">
             <pre class="src src-conf">
         <span class="org-variable-name">ff</span> = merge --ff-only
+        <span class="org-variable-name">mm</span> = merge --no-ff
 </pre>
           </div>
 

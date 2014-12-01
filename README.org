@@ -278,22 +278,27 @@ Show files ignored by Git:
 
 ** View your changes
 
-- git diff shows you the differences from index to working tree
-- git diff HEAD shows you the differences from trunk to working tree
-- git diff --cached shows you the differences from trunk to index
-
-Differences since the *last commit* (~HEAD~):
+*** Changes between the working tree and the index
 
 #+begin_src conf
 	df = diff
 #+end_src
 
-Just before committing the staged changes, check what your commit changes
-(differences between the *staging area* and the *last commit*):
+*** Changes between the working tree and the latest commit (HEAD)
+
+#+begin_src shell :tangle no
+	diff-all = diff HEAD
+#+end_src
+
+*** Changes between the index (staged for the next commit) and the latest commit (HEAD)
+
+Just before committing the *staged* changes, check what your commit changes:
 
 #+begin_src conf
 	dc = diff --cached
 #+end_src
+
+*** Yesterday
 
 #+begin_src conf
 	y = diff "@{yesterday}"
@@ -337,6 +342,10 @@ disk:
 	lg = log --decorate --oneline --graph
 	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=relative --graph
 	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --graph
+
+    ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+    ld = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --graph
+    ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
 #+end_src
 
 #+begin_src conf
@@ -528,6 +537,7 @@ See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
 #+begin_src conf
 	ff = merge --ff-only
+	mm = merge --no-ff
 #+end_src
 
 If you're the Branch/Integration manager, you can use these aliases to *merge*
