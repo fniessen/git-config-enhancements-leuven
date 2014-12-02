@@ -144,10 +144,10 @@ See http://git-scm.com/docs/git-config for the list of slots.
 
 #+begin_src conf
 [color "branch"]
-	current = bold cyan
-	local = bold green
-	remote = bold red
-	upstream = bold red
+	current = cyan bold
+	local = green bold
+	remote = red bold
+	upstream = red bold
 	plain = yellow reverse
 #+end_src
 
@@ -160,7 +160,7 @@ See http://git-scm.com/docs/git-config for the list of slots.
 	frag = magenta bold
 	old = red bold
 	new = green bold
-	commit = yellow bold
+	commit = yellow
 	whitespace = red reverse
 #+end_src
 
@@ -173,7 +173,7 @@ See http://git-scm.com/docs/git-config for the list of slots.
 	updated = yellow
 	changed = magenta
 	untracked = red
-	branch = bold cyan
+	branch = cyan bold
 	nobranch = red reverse
 #+end_src
 
@@ -181,7 +181,7 @@ See http://git-scm.com/docs/git-config for the list of slots.
 
 #+begin_src conf
 [color "grep"]
-	filename = bold yellow reverse
+	filename = yellow bold
 	linenumber = magenta bold
 	match = green reverse bold
 	separator = red bold
