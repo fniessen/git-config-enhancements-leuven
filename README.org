@@ -160,7 +160,7 @@ See http://git-scm.com/docs/git-config for the list of slots.
 	frag = magenta bold
 	old = red bold
 	new = green bold
-	commit = blue reverse
+	commit = yellow bold
 	whitespace = red reverse
 #+end_src
 
