@@ -129,7 +129,7 @@ with the /same name/.
 
 * Color                                                                :ARCHIVE:
 
-See http://git-scm.com/docs/git-config.
+See http://git-scm.com/docs/git-config for the list of slots.
 
 #+begin_src conf
 [color]
@@ -155,13 +155,12 @@ See http://git-scm.com/docs/git-config.
 
 #+begin_src conf
 [color "diff"]
+	plain = normal
 	meta = yellow bold
 	frag = magenta bold
 	old = red bold
 	new = green bold
-#+end_src
-
-#+begin_src conf
+	commit = blue reverse
 	whitespace = red reverse
 #+end_src
 
