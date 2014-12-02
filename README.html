@@ -89,7 +89,11 @@
                   (staged for the next commit) and the latest commit
                   (HEAD)</a></li>
 
-                  <li><a href="#sec-12-5-4">12.5.4. Yesterday</a></li>
+                  <li><a href="#sec-12-5-4">12.5.4. Today</a></li>
+
+                  <li><a href="#sec-12-5-5">12.5.5. Yesterday</a></li>
+
+                  <li><a href="#sec-12-5-6">12.5.6. Diff of branch</a></li>
                 </ul>
               </li>
 
@@ -433,16 +437,46 @@
 
         <div id="outline-container-sec-12-5-4" class="outline-4">
           <h4 id="sec-12-5-4"><span class="section-number-4">12.5.4</span>
-          Yesterday</h4>
+          Today</h4>
 
           <div class="outline-text-4" id="text-12-5-4">
+            <div class="org-src-container">
+              <pre class="src src-conf">
+        # all commits that aren<span class=
+"org-string">'t merges on all branches</span>
+<span class=
+"org-string">        all = !git log --pretty=oneline --abbrev-commit --all --no-merges</span>
+
+<span class=
+"org-string">        today = "!git all --since='</span>12am<span class=
+"org-string">' --committer=\"`git config user.name`\""</span>
+<span class=
+"org-string">        today-all = "!git all --since='</span>12am<span class=
+"org-string">'"</span>
+</pre>
+            </div>
+          </div>
+        </div>
+
+        <div id="outline-container-sec-12-5-5" class="outline-4">
+          <h4 id="sec-12-5-5"><span class="section-number-4">12.5.5</span>
+          Yesterday</h4>
+
+          <div class="outline-text-4" id="text-12-5-5">
             <div class="org-src-container">
               <pre class="src src-conf">
         <span class="org-variable-name">y</span> = diff <span class=
 "org-string">"@{yesterday}"</span>
 </pre>
             </div>
+          </div>
+        </div>
 
+        <div id="outline-container-sec-12-5-6" class="outline-4">
+          <h4 id="sec-12-5-6"><span class="section-number-4">12.5.6</span> Diff
+          of branch</h4>
+
+          <div class="outline-text-4" id="text-12-5-6">
             <p>Getting the diff of a branch since it forked from another
             branch, or since the last merge.</p>
 
@@ -638,6 +672,14 @@ git forkdiff origin/master my_forked_branch --stat
           XXX</h4>
 
           <div class="outline-text-4" id="text-12-8-4">
+            <p>git commit –amend # correct the previous commit, with the staged
+            changes</p>
+
+            <p>git reset HEAD^ # forget about a commit, load it back into the
+            staging area git reset –soft HEAD^ # remove a commit, keep staged
+            and working changes git reset –hard HEAD^ # remove a commit, delete
+            working copy changes and staged changes</p>
+
             <p>Go back before last commit, with files in uncommitted state:</p>
 
             <div class="org-src-container">
@@ -709,6 +751,17 @@ git forkdiff origin/master my_forked_branch --stat
 "org-string">"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"</span>
 </pre>
             </div>
+
+            <p>Finding new commits:</p>
+
+            <div class="org-src-container">
+              <pre class="src src-conf">
+<span class="org-variable-name">log-local</span>   = <span class=
+"org-string">"log --oneline origin..HEAD"</span>
+<span class="org-variable-name">log-fetched</span> = <span class=
+"org-string">"log --oneline HEAD..origin/master"</span>
+</pre>
+            </div>
           </div>
         </div>
 
@@ -737,6 +790,26 @@ git forkdiff origin/master my_forked_branch --stat
               <pre class="src src-conf">
         <span class=
 "org-variable-name">sync</span> = !git pull &amp;&amp; git push
+</pre>
+            </div>
+
+            <div class="org-src-container">
+              <pre class="src src-conf">
+        <span class=
+"org-variable-name">sync</span> = !git update &amp;&amp; git co master &amp;&amp; git pull &amp;&amp; git co @{-1}
+</pre>
+            </div>
+
+            <p>That’s rather basic - it doesn’t actually rebase my branch that
+            I’m on.</p>
+
+            <p>Let’s do a slightly different command: resync</p>
+
+            <div class="org-src-container">
+              <pre class="src src-conf">
+        # git resync -&gt; sync repository and rebase current branch
+        <span class="org-variable-name">resync</span> = !sh -c <span class=
+"org-string">'BRANCH_NAME=master &amp;&amp; git com &amp;&amp; git fe &amp;&amp; git hr &amp;&amp; git rebase master '</span>
 </pre>
             </div>
           </div>
@@ -789,9 +862,9 @@ git forkdiff origin/master my_forked_branch --stat
 </pre>
           </div>
 
-          <p>List all branches (both remote-tracking and local), showing sha1
-          and commit subject line for each head, along with the name of the
-          upstream branch (if any).</p>
+          <p><b>List all branches</b> (both remote-tracking and local), showing
+          sha1 and commit subject line for each head, along with the name of
+          the upstream branch (if any).</p>
 
           <div class="org-src-container">
             <pre class="src src-conf">
@@ -972,6 +1045,30 @@ git stash clear
 "org-variable-name">stashdiff</span> = stash show -p -w stash@{0}
         <span class=
 "org-variable-name">stash-unapply</span> = !git stash show -p --no-textconv --binary | git apply -R
+</pre>
+          </div>
+
+          <div class="org-src-container">
+            <pre class="src src-shell">
+git stash list               <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">show a list of all stashes</span>
+git stash show               <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">show the last stash</span>
+git stash show stash@{1}      <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">show the previous stash</span>
+
+git stash apply              <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">apply the stash only, don't delete it</span>
+git stash drop               <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">drop the last stash</span>
+git stash drop stash@{1}      <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">drop a previous stash</span>
 </pre>
           </div>
 

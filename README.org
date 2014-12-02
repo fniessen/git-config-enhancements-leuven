@@ -298,11 +298,23 @@ Just before committing the *staged* changes, check what your commit changes:
 	dc = diff --cached
 #+end_src
 
+*** Today
+
+#+begin_src conf
+	# all commits that aren't merges on all branches
+	all = !git log --pretty=oneline --abbrev-commit --all --no-merges
+
+	today = "!git all --since='12am' --committer=\"`git config user.name`\""
+	today-all = "!git all --since='12am'"
+#+end_src
+
 *** Yesterday
 
 #+begin_src conf
 	y = diff "@{yesterday}"
 #+end_src
+
+*** Diff of branch
 
 Getting the diff of a branch since it forked from another branch, or since the
 last merge.
@@ -418,6 +430,12 @@ Remove the specified files from the index (next commit):
 
 *** XXX
 
+git commit --amend            # correct the previous commit, with the staged changes
+
+git reset HEAD^               # forget about a commit, load it back into the staging area
+git reset --soft HEAD^        # remove a commit, keep staged and working changes
+git reset --hard HEAD^        # remove a commit, delete working copy changes and staged changes
+
 Go back before last commit, with files in uncommitted state:
 
 #+begin_src conf
@@ -464,6 +482,13 @@ Pull all:
 	pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
 #+end_src
 
+Finding new commits:
+
+#+begin_src conf
+log-local   = "log --oneline origin..HEAD"
+log-fetched = "log --oneline HEAD..origin/master"
+#+end_src
+
 *** Push
 
 Unpushed:
@@ -476,6 +501,19 @@ Unpushed:
 
 #+begin_src conf
 	sync = !git pull && git push
+#+end_src
+
+#+begin_src conf
+	sync = !git update && git co master && git pull && git co @{-1}
+#+end_src
+
+That's rather basic - it doesn't actually rebase my branch that I'm on.
+
+Let's do a slightly different command: resync
+
+#+begin_src conf
+	# git resync -> sync repository and rebase current branch
+	resync = !sh -c 'BRANCH_NAME=master && git com && git fe && git hr && git rebase master '
 #+end_src
 
 ** Tag
@@ -506,7 +544,7 @@ Checkout common branches (useful if you have feature branches):
 	develop = checkout develop
 #+end_src
 
-List all branches (both remote-tracking and local), showing sha1 and commit
+*List all branches* (both remote-tracking and local), showing sha1 and commit
 subject line for each head, along with the name of the upstream branch (if any).
 
 #+begin_src conf
@@ -619,6 +657,16 @@ You can operate on the 'stash' ref as if it were any other ref.
 #+begin_src conf
 	stashdiff = stash show -p -w stash@{0}
 	stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
+#+end_src
+
+#+begin_src shell :tangle no
+git stash list               # show a list of all stashes
+git stash show               # show the last stash
+git stash show stash@{1}      # show the previous stash
+
+git stash apply              # apply the stash only, don't delete it
+git stash drop               # drop the last stash
+git stash drop stash@{1}      # drop a previous stash
 #+end_src
 
 XXX What about ~git stash --include-untracked~ and ~git stash pop~?
