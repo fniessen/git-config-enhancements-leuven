@@ -464,8 +464,30 @@ If you reset work that you /never committed/, it is gone for good. Too bad!
 Unpulled:
 
 #+begin_src conf
-	in = pull --dry-run
+	in2 = pull --dry-run
 	in = log --pretty=format:'%h %ad %s' --date=short HEAD..origin
+#+end_src
+
+Finding new commits:
+
+#+begin_src conf
+	log-local = log --oneline origin..HEAD
+#+end_src
+
+Show the changes between the last local commit and the *remote* branch (after
+a ~git fetch~):
+
+#+begin_src conf
+	log-fetched = log --oneline HEAD..origin
+#+end_src
+
+Show a single diff of all changes with ~git diff HEAD...origin~ (with 3 dots).
+
+The Incoming command will return a nicely formated list of incoming commits, the
+next time you do a pull.
+
+#+begin_src conf
+	incoming = !(git fetch --quiet && git log --pretty=format:'%C(yellow)%h %C(white)- %C(red)%an %C(white)- %C(cyan)%d%Creset %s %C(white)- %ar%Creset' ..$(git rev-parse --abbrev-ref --symbolic-full-name @{u}))
 #+end_src
 
 Before doing work (in a new branch), ensure that the working directory is
@@ -483,19 +505,33 @@ Pull all:
 	pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
 #+end_src
 
-Finding new commits:
-
-#+begin_src conf
-log-local   = "log --oneline origin..HEAD"
-log-fetched = "log --oneline HEAD..origin/master"
-#+end_src
-
 *** Push
+
+The Outgoing command will return a nicely formated list of outgoing commits, the
+next time you do a push.
 
 Unpushed:
 
 #+begin_src conf
-	out = log --branches --not --remotes --color --graph --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --abbrev-commit
+	out = log --branches --not --remotes --color --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --abbrev-commit
+#+end_src
+
+If you just want to see the outgoing commits for the *current branch*, you can use
+the following:
+
+#+begin_src conf
+	unpushed = log @{u}.. --pretty=format:'%h %an %s'
+#+end_src
+
+This causes git log to show all commits reachable from ~HEAD~ excluding those
+reachable from the upstream branch. The ~@{u}..~ argument is equivalent to
+~@{u}..HEAD~, and ~@{u}~ is shorthand for the current branch's upstream commit
+(e.g., ~origin/foo~ if the checked out branch is ~foo~).
+
+If you want to see all unpushed commits from *all branches*, do this:
+
+#+begin_src conf
+	unpushed2 = log --all --not --remotes --tags --pretty=format:'%h %an %s'
 #+end_src
 
 *** Sync
