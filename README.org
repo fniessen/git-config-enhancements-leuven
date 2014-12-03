@@ -80,39 +80,16 @@ You should "override" the above with your personal details:
 	algorithm = patience
 #+end_src
 
-* Merge                                                                :ARCHIVE:
-
-#+begin_src conf
-[merge]
-	stat = true
-#+end_src
-
-* Grep                                                                 :ARCHIVE:
-
-#+begin_src conf
-[grep]
-	fullname = true
-	linenumber = true
-#+end_src
-
 * Pull                                                                 :ARCHIVE:
 
 Configure Git to do the ~--rebase~ part automatically.
 
 #+begin_src conf
 [pull]
-	rebase = true
+	rebase = preserve
 #+end_src
 
-* Rebase                                                               :ARCHIVE:
-
-Also set ~rebase.stat = true~, so the ~diffstat~ output is still shown when they
-pull.
-
-#+begin_src conf
-[rebase]
-	stat = true
-#+end_src
+(The merge commit doesn't get deleted!)
 
 * Push                                                                 :ARCHIVE:
 
@@ -126,6 +103,31 @@ with the /same name/.
 #+end_src
 
 (~simple~ is the default in Git 2.x)
+
+* Merge                                                                :ARCHIVE:
+
+#+begin_src conf
+[merge]
+	stat = true
+#+end_src
+
+* Rebase                                                               :ARCHIVE:
+
+Also set ~rebase.stat = true~, so the ~diffstat~ output is still shown when they
+pull.
+
+#+begin_src conf
+[rebase]
+	stat = true
+#+end_src
+
+* Grep                                                                 :ARCHIVE:
+
+#+begin_src conf
+[grep]
+	fullname = true
+	linenumber = true
+#+end_src
 
 * Color                                                                :ARCHIVE:
 
@@ -463,6 +465,7 @@ Unpulled:
 
 #+begin_src conf
 	in = pull --dry-run
+	in = log --pretty=format:'%h %ad %s' --date=short HEAD..origin
 #+end_src
 
 Before doing work (in a new branch), ensure that the working directory is
