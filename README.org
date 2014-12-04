@@ -461,11 +461,18 @@ If you reset work that you /never committed/, it is gone for good. Too bad!
 
 *** Pull
 
+The ~in~ command returns a list of *incoming* commits for the *current branch*, the
+next time you do a pull.
+
+#+begin_src conf
+	in-with-fetch = !(git fetch --quiet && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..$(git rev-parse --abbrev-ref --symbolic-full-name @{u}))
+	in = !(git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..$(git rev-parse --abbrev-ref --symbolic-full-name @{u}))
+#+end_src
+
 Unpulled:
 
 #+begin_src conf
-	in2 = pull --dry-run
-	in = log --pretty=format:'%h %ad %s' --date=short HEAD..origin
+	in-almost-all = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --date=short HEAD..origin
 #+end_src
 
 Finding new commits:
@@ -481,14 +488,9 @@ a ~git fetch~):
 	log-fetched = log --oneline HEAD..origin
 #+end_src
 
-Show a single diff of all changes with ~git diff HEAD...origin~ (with 3 dots).
-
-The Incoming command will return a nicely formated list of incoming commits, the
-next time you do a pull.
-
-#+begin_src conf
-	incoming = !(git fetch --quiet && git log --pretty=format:'%C(yellow)%h %C(white)- %C(red)%an %C(white)- %C(cyan)%d%Creset %s %C(white)- %ar%Creset' ..$(git rev-parse --abbrev-ref --symbolic-full-name @{u}))
-#+end_src
+#+begin_note
+Show a *single diff of all changes* with ~git diff HEAD...origin~ (with 3 dots).
+#+end_note
 
 Before doing work (in a new branch), ensure that the working directory is
 up-to-date with the ~origin~ (pull and get latest for all submodules):
