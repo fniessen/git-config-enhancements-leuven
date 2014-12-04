@@ -16,7 +16,7 @@ in the =.gitconfig= file located in the user home directory.
 
 #+begin_warning
 Note that tangling this file will override whichever =~/.gitconfig= file you
-might have. So *be extremely careful*!
+might have. So *BE EXTREMELY CAREFUL*!
 #+end_warning
 
 * Tasks
@@ -338,6 +338,14 @@ Example
 
 : git forkdiff origin/master my_forked_branch --stat
 
+*** Finding new commits
+
+Diverging from ~origin/master~, whatever the branch?
+
+#+begin_src conf
+	log-local = log --oneline origin..HEAD
+#+end_src
+
 ** Remove deleted files
 
 Removing multiple files from a Git repo that have already been deleted from
@@ -355,9 +363,9 @@ disk:
 	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=relative --graph
 	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --graph
 
-    ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
-    ld = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --graph
-    ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+	ld = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --graph
+	ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
 #+end_src
 
 #+begin_src conf
@@ -461,32 +469,20 @@ If you reset work that you /never committed/, it is gone for good. Too bad!
 
 *** Pull
 
-The ~in~ command returns a list of *incoming* commits for the *current branch*, the
-next time you do a pull.
+The ~in~ command returns a list of *incoming* commits for the *current branch* --
+after a ~git fetch~ --, the next time you do a pull.
 
 #+begin_src conf
-	in-with-fetch = !(git fetch --quiet && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..$(git rev-parse --abbrev-ref --symbolic-full-name @{u}))
-	in = !(git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..$(git rev-parse --abbrev-ref --symbolic-full-name @{u}))
+	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..$(git rev-parse --abbrev-ref --symbolic-full-name @{u}))
 #+end_src
 
-Unpulled:
+Show the changes between the last local commit and the *remote* branch:
 
 #+begin_src conf
-	in-almost-all = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --date=short HEAD..origin
+	in-fetched = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --date=short HEAD..origin
 #+end_src
 
-Finding new commits:
-
-#+begin_src conf
-	log-local = log --oneline origin..HEAD
-#+end_src
-
-Show the changes between the last local commit and the *remote* branch (after
-a ~git fetch~):
-
-#+begin_src conf
-	log-fetched = log --oneline HEAD..origin
-#+end_src
+(XXX more than the current branch, though not all!?)
 
 #+begin_note
 Show a *single diff of all changes* with ~git diff HEAD...origin~ (with 3 dots).
