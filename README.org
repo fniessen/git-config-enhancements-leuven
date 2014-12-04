@@ -507,20 +507,11 @@ Pull all:
 
 *** Push
 
-The Outgoing command will return a nicely formated list of outgoing commits, the
+The ~out~ command returns a list of *unpushed* commits for the *current branch*, the
 next time you do a push.
 
-Unpushed:
-
 #+begin_src conf
-	out = log --branches --not --remotes --color --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --abbrev-commit
-#+end_src
-
-If you just want to see the outgoing commits for the *current branch*, you can use
-the following:
-
-#+begin_src conf
-	unpushed = log @{u}.. --pretty=format:'%h %an %s'
+	out = log @{u}.. --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset'
 #+end_src
 
 This causes git log to show all commits reachable from ~HEAD~ excluding those
@@ -528,10 +519,15 @@ reachable from the upstream branch. The ~@{u}..~ argument is equivalent to
 ~@{u}..HEAD~, and ~@{u}~ is shorthand for the current branch's upstream commit
 (e.g., ~origin/foo~ if the checked out branch is ~foo~).
 
-If you want to see all unpushed commits from *all branches*, do this:
+#+begin_note
+Use ~git push -u origin new/branch~ to set up branch ~new/branch~ to track remote
+branch ~new/branch~ from ~origin~.
+#+end_note
+
+If you want to see all *unpushed* commits from *all branches*, do this:
 
 #+begin_src conf
-	unpushed2 = log --all --not --remotes --tags --pretty=format:'%h %an %s'
+	out-all = log --branches --not --remotes --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset'
 #+end_src
 
 *** Sync
@@ -581,7 +577,7 @@ Checkout common branches (useful if you have feature branches):
 	develop = checkout develop
 #+end_src
 
-*List all branches* (both remote-tracking and local), showing sha1 and commit
+*List all branches* (both remote-tracking and local), showing SHA1 and commit
 subject line for each head, along with the name of the upstream branch (if any).
 
 #+begin_src conf
