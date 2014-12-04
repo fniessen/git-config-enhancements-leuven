@@ -5,6 +5,7 @@
 #+KEYWORDS:
 #+LANGUAGE:  en
 
+#+SETUPFILE: ./bigblow-pirilampo.setup
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  tangle ~/.gitconfig
 #+PROPERTY:  eval no
