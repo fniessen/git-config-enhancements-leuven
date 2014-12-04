@@ -308,12 +308,6 @@ Just before committing the *staged* changes, check what your commit changes:
 	today-all = "!git all --since='12am'"
 #+end_src
 
-*** Yesterday
-
-#+begin_src conf
-	y = diff "@{yesterday}"
-#+end_src
-
 *** Diff of branch
 
 Getting the diff of a branch since it forked from another branch, or since the
