@@ -433,11 +433,13 @@ Remove the specified files from the index (next commit):
 
 *** XXX
 
+#+begin_src shell :tangle no
 git commit --amend            # correct the previous commit, with the staged changes
 
 git reset HEAD^               # forget about a commit, load it back into the staging area
 git reset --soft HEAD^        # remove a commit, keep staged and working changes
 git reset --hard HEAD^        # remove a commit, delete working copy changes and staged changes
+#+end_src
 
 Go back before last commit, with files in uncommitted state:
 
@@ -468,7 +470,7 @@ The ~in~ command returns a list of *incoming* commits for the *current branch* -
 after a ~git fetch~ --, the next time you do a pull.
 
 #+begin_src conf
-	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..$(git rev-parse --abbrev-ref --symbolic-full-name @{u}))
+	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
 #+end_src
 
 Show the changes between the last local commit and the *remote* branch:
@@ -504,7 +506,7 @@ The ~out~ command returns a list of *unpushed* commits for the *current branch*,
 next time you do a push.
 
 #+begin_src conf
-	out = log @{u}.. --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset'
+	out = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' @{u}..
 #+end_src
 
 This causes git log to show all commits reachable from ~HEAD~ excluding those

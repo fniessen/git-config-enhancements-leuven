@@ -706,13 +706,23 @@ git forkdiff origin/master my_forked_branch --stat
           XXX</h4>
 
           <div class="outline-text-4" id="text-12-8-4">
-            <p>git commit –amend # correct the previous commit, with the staged
-            changes</p>
+            <div class="org-src-container">
+              <pre class="src src-shell">
+git commit --amend            <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">correct the previous commit, with the staged changes</span>
 
-            <p>git reset HEAD^ # forget about a commit, load it back into the
-            staging area git reset –soft HEAD^ # remove a commit, keep staged
-            and working changes git reset –hard HEAD^ # remove a commit, delete
-            working copy changes and staged changes</p>
+git reset HEAD^               <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">forget about a commit, load it back into the staging area</span>
+git reset --soft HEAD^        <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">remove a commit, keep staged and working changes</span>
+git reset --hard HEAD^        <span class=
+"org-comment-delimiter"># </span><span class=
+"org-comment">remove a commit, delete working copy changes and staged changes</span>
+</pre>
+            </div>
 
             <p>Go back before last commit, with files in uncommitted state:</p>
 
@@ -763,7 +773,7 @@ git forkdiff origin/master my_forked_branch --stat
             <div class="org-src-container">
               <pre class="src src-conf">
         <span class="org-variable-name">in</span> = !(echo <span class=
-"org-string">"Please fetch origin before."</span> &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..$(git rev-parse --abbrev-ref --symbolic-full-name @{u}))
+"org-string">"Please fetch origin before."</span> &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..@{u})
 </pre>
             </div>
 
@@ -821,8 +831,8 @@ git forkdiff origin/master my_forked_branch --stat
             <div class="org-src-container">
               <pre class="src src-conf">
         <span class=
-"org-variable-name">out</span> = log @{u}.. --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span>
+"org-variable-name">out</span> = log --pretty=format:<span class=
+"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> @{u}..
 </pre>
             </div>
 
