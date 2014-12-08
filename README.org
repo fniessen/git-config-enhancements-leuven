@@ -464,10 +464,14 @@ If you reset work that you /never committed/, it is gone for good. Too bad!
 
 ** Work with remotes
 
+Starting with Git 1.7.0, ~@{u}~ is shorthand for the *current* branch's *upstream*
+branch (e.g., ~origin/foo~ if the checked out branch is ~foo~).
+
 *** Pull
 
 The ~in~ command returns a list of *incoming* commits for the *current branch* --
-after a ~git fetch~ --, the next time you do a pull.
+after a ~git fetch~, to fetch down *all the data* it has that you do not --, the
+next time you do a pull.
 
 #+begin_src conf
 	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
@@ -479,11 +483,15 @@ Show the changes between the last local commit and the *remote* branch:
 	in-fetched = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --date=short HEAD..origin
 #+end_src
 
-(XXX more than the current branch, though not all!?)
+(XXX more than the current branch, though not *all*!?)
 
 #+begin_note
 Show a *single diff of all changes* with ~git diff HEAD...origin~ (with 3 dots).
 #+end_note
+
+#+begin_src conf
+	in-what = diff --stat ..@{u}
+#+end_src
 
 Before doing work (in a new branch), ensure that the working directory is
 up-to-date with the ~origin~ (pull and get latest for all submodules):
@@ -502,8 +510,8 @@ Pull all:
 
 *** Push
 
-The ~out~ command returns a list of *unpushed* commits for the *current branch*, the
-next time you do a push.
+The ~out~ command returns a list of *unpushed* (outgoing) commits for the *current
+branch*, the next time you do a push.
 
 #+begin_src conf
 	out = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' @{u}..
@@ -511,8 +519,7 @@ next time you do a push.
 
 This causes git log to show all commits reachable from ~HEAD~ excluding those
 reachable from the upstream branch. The ~@{u}..~ argument is equivalent to
-~@{u}..HEAD~, and ~@{u}~ is shorthand for the current branch's upstream commit
-(e.g., ~origin/foo~ if the checked out branch is ~foo~).
+~@{u}..HEAD~.
 
 #+begin_note
 Use ~git push -u origin new/branch~ to set up branch ~new/branch~ to track remote
@@ -811,6 +818,10 @@ XXX works only on files really in Git (bypassing ignored files)?
 #+end_src
 
 * References
+
+- https://github.com/tj/git-extras
+- https://hub.github.com/hub.1.html
+- http://stackoverflow.com/questions/2423777/is-it-possible-to-create-a-remote-repo-on-github-from-the-cli-without-ssh
 
 - [[https://git.wiki.kernel.org/index.php/Aliases][Git SCM Wiki - Aliases]]
 - [[https://ochronus.com/git-tips-from-the-trenches/][Git tips from the trenches]]

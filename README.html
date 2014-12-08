@@ -759,7 +759,12 @@ git reset --hard HEAD^        <span class=
         <h3 id="sec-12-9"><span class="section-number-3">12.9</span> Work with
         remotes</h3>
 
-        <div class="outline-text-3" id="text-12-9"></div>
+        <div class="outline-text-3" id="text-12-9">
+          <p>Starting with Git 1.7.0, <code>@{u}</code> is shorthand for the
+          <b>current</b> branch’s <b>upstream</b> branch (e.g.,
+          <code>origin/foo</code> if the checked out branch is
+          <code>foo</code>).</p>
+        </div>
 
         <div id="outline-container-sec-12-9-1" class="outline-4">
           <h4 id="sec-12-9-1"><span class="section-number-4">12.9.1</span>
@@ -768,7 +773,8 @@ git reset --hard HEAD^        <span class=
           <div class="outline-text-4" id="text-12-9-1">
             <p>The <code>in</code> command returns a list of <b>incoming</b>
             commits for the <b>current branch</b> – after a <code>git
-            fetch</code> –, the next time you do a pull.</p>
+            fetch</code>, to fetch down <b>all the data</b> it has that you do
+            not –, the next time you do a pull.</p>
 
             <div class="org-src-container">
               <pre class="src src-conf">
@@ -788,11 +794,17 @@ git reset --hard HEAD^        <span class=
 </pre>
             </div>
 
-            <p>(XXX more than the current branch, though not all!?)</p>
+            <p>(XXX more than the current branch, though not <b>all</b>!?)</p>
 
             <div class="note">
               <p>Show a <b>single diff of all changes</b> with <code>git diff
               HEAD...origin</code> (with 3 dots).</p>
+            </div>
+
+            <div class="org-src-container">
+              <pre class="src src-conf">
+        <span class="org-variable-name">in-what</span> = diff --stat ..@{u}
+</pre>
             </div>
 
             <p>Before doing work (in a new branch), ensure that the working
@@ -825,8 +837,8 @@ git reset --hard HEAD^        <span class=
 
           <div class="outline-text-4" id="text-12-9-2">
             <p>The <code>out</code> command returns a list of <b>unpushed</b>
-            commits for the <b>current branch</b>, the next time you do a
-            push.</p>
+            (outgoing) commits for the <b>current branch</b>, the next time you
+            do a push.</p>
 
             <div class="org-src-container">
               <pre class="src src-conf">
@@ -839,9 +851,7 @@ git reset --hard HEAD^        <span class=
             <p>This causes git log to show all commits reachable from
             <code>HEAD</code> excluding those reachable from the upstream
             branch. The <code>@{u}..</code> argument is equivalent to
-            <code>@{u}..HEAD</code>, and <code>@{u}</code> is shorthand for the
-            current branch’s upstream commit (e.g., <code>origin/foo</code> if
-            the checked out branch is <code>foo</code>).</p>
+            <code>@{u}..HEAD</code>.</p>
 
             <div class="note">
               <p>Use <code>git push -u origin new/branch</code> to set up
@@ -1376,6 +1386,16 @@ git commit -a --amend
 
       <div class="outline-text-2" id="text-13">
         <ul class="org-ul">
+          <li><a href=
+          "https://github.com/tj/git-extras">https://github.com/tj/git-extras</a></li>
+
+          <li><a href=
+          "https://hub.github.com/hub.1.html">https://hub.github.com/hub.1.html</a></li>
+
+          <li><a href=
+          "http://stackoverflow.com/questions/2423777/is-it-possible-to-create-a-remote-repo-on-github-from-the-cli-without-ssh">
+          http://stackoverflow.com/questions/2423777/is-it-possible-to-create-a-remote-repo-on-github-from-the-cli-without-ssh</a></li>
+
           <li><a href="https://git.wiki.kernel.org/index.php/Aliases">Git SCM
           Wiki - Aliases</a></li>
 
