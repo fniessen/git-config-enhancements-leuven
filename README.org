@@ -462,6 +462,9 @@ Undo the last commit:
 
 If you reset work that you /never committed/, it is gone for good. Too bad!
 
+Use ~git reset --hard @{u}~ to make sure the integration branch is up to date
+before merging.
+
 ** Work with remotes
 
 Starting with Git 1.7.0, ~@{u}~ is shorthand for the *current* branch's *upstream*
@@ -470,28 +473,27 @@ branch (e.g., ~origin/foo~ if the checked out branch is ~foo~).
 *** Pull
 
 The ~in~ command returns a list of *incoming* commits for the *current branch* --
-after a ~git fetch~, to fetch down *all the data* it has that you do not --, the
-next time you do a pull.
+after a ~git fetch~, to fetch down *all the data* it has for the *current branch* that
+you do not --, the next time you do a pull.
 
 #+begin_src conf
 	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
+	inf = !(git remote update -p && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
 #+end_src
 
 Show the changes between the last local commit and the *remote* branch:
 
-#+begin_src conf
-	in-fetched = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' --date=short HEAD..origin
-#+end_src
-
-(XXX more than the current branch, though not *all*!?)
-
-#+begin_note
-Show a *single diff of all changes* with ~git diff HEAD...origin~ (with 3 dots).
-#+end_note
+Show a *single diffstat* (number of added and deleted lines for *all changed
+files*):
 
 #+begin_src conf
-	in-what = diff --stat ..@{u}
+	in-what = diff --stat ...@{u}
 #+end_src
+
+#+begin_warning
+The upstream diff ~in-what~ will show the negative of unpushed (rebased) commits,
+if any, with the ".." notation -- not with the "..." notation!
+#+end_warning
 
 Before doing work (in a new branch), ensure that the working directory is
 up-to-date with the ~origin~ (pull and get latest for all submodules):

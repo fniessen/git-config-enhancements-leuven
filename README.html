@@ -751,6 +751,9 @@ git reset --hard HEAD^        <span class=
 
             <p>If you reset work that you <i>never committed</i>, it is gone
             for good. Too bad!</p>
+
+            <p>Use <code>git reset --hard @{u}</code> to make sure the
+            integration branch is up to date before merging.</p>
           </div>
         </div>
       </div>
@@ -773,38 +776,35 @@ git reset --hard HEAD^        <span class=
           <div class="outline-text-4" id="text-12-9-1">
             <p>The <code>in</code> command returns a list of <b>incoming</b>
             commits for the <b>current branch</b> – after a <code>git
-            fetch</code>, to fetch down <b>all the data</b> it has that you do
-            not –, the next time you do a pull.</p>
+            fetch</code>, to fetch down <b>all the data</b> it has for the
+            <b>current branch</b> that you do not –, the next time you do a
+            pull.</p>
 
             <div class="org-src-container">
               <pre class="src src-conf">
         <span class="org-variable-name">in</span> = !(echo <span class=
 "org-string">"Please fetch origin before."</span> &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..@{u})
+        <span class=
+"org-variable-name">inf</span> = !(git remote update -p &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..@{u})
 </pre>
             </div>
 
             <p>Show the changes between the last local commit and the
             <b>remote</b> branch:</p>
 
-            <div class="org-src-container">
-              <pre class="src src-conf">
-        <span class=
-"org-variable-name">in-fetched</span> = log --pretty=format:<span class=
-"org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> --date=short HEAD..origin
-</pre>
-            </div>
-
-            <p>(XXX more than the current branch, though not <b>all</b>!?)</p>
-
-            <div class="note">
-              <p>Show a <b>single diff of all changes</b> with <code>git diff
-              HEAD...origin</code> (with 3 dots).</p>
-            </div>
+            <p>Show a <b>single diffstat</b> (number of added and deleted lines
+            for <b>all changed files</b>):</p>
 
             <div class="org-src-container">
               <pre class="src src-conf">
-        <span class="org-variable-name">in-what</span> = diff --stat ..@{u}
+        <span class="org-variable-name">in-what</span> = diff --stat ...@{u}
 </pre>
+            </div>
+
+            <div class="warning">
+              <p>The upstream diff <code>in-what</code> will show the negative
+              of unpushed (rebased) commits, if any, with the “..” notation –
+              not with the “…” notation!</p>
             </div>
 
             <p>Before doing work (in a new branch), ensure that the working
