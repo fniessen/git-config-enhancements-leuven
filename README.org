@@ -479,6 +479,7 @@ you do not --, the next time you do a pull.
 #+begin_src conf
 	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
 	inf = !(git remote update -p && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
+	incoming = log ..@{u} --stat
 #+end_src
 
 Show the changes between the last local commit and the *remote* branch:
@@ -517,6 +518,7 @@ branch*, the next time you do a push.
 
 #+begin_src conf
 	out = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' @{u}..
+	outgoing = log @{u}.. --stat
 #+end_src
 
 This causes git log to show all commits reachable from ~HEAD~ excluding those

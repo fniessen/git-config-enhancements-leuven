@@ -786,6 +786,7 @@ git reset --hard HEAD^        <span class=
 "org-string">"Please fetch origin before."</span> &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..@{u})
         <span class=
 "org-variable-name">inf</span> = !(git remote update -p &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..@{u})
+        <span class="org-variable-name">incoming</span> = log ..@{u} --stat
 </pre>
             </div>
 
@@ -845,6 +846,7 @@ git reset --hard HEAD^        <span class=
         <span class=
 "org-variable-name">out</span> = log --pretty=format:<span class=
 "org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> @{u}..
+        <span class="org-variable-name">outgoing</span> = log @{u}.. --stat
 </pre>
             </div>
 
