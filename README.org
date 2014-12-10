@@ -470,6 +470,10 @@ before merging.
 Starting with Git 1.7.0, ~@{u}~ is shorthand for the *current* branch's *upstream*
 branch (e.g., ~origin/foo~ if the checked out branch is ~foo~).
 
+#+begin_src conf
+	r = "remote -v"
+#+end_src
+
 *** Pull
 
 The ~in~ command returns a list of *incoming* commits for the *current branch* --
@@ -479,6 +483,9 @@ you do not --, the next time you do a pull.
 #+begin_src conf
 	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
 	inf = !(git remote update -p && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
+#+end_src
+
+#+begin_src conf
 	incoming = log ..@{u} --stat
 #+end_src
 
@@ -518,6 +525,9 @@ branch*, the next time you do a push.
 
 #+begin_src conf
 	out = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' @{u}..
+#+end_src
+
+#+begin_src conf
 	outgoing = log @{u}.. --stat
 #+end_src
 
@@ -526,8 +536,8 @@ reachable from the upstream branch. The ~@{u}..~ argument is equivalent to
 ~@{u}..HEAD~.
 
 #+begin_note
-Use ~git push -u origin new/branch~ to set up branch ~new/branch~ to track remote
-branch ~new/branch~ from ~origin~.
+Use ~git push -u origin new/branch~ to push the ~new/branch~ branch to the ~origin~
+remote and to set up tracking.
 #+end_note
 
 If you want to see all *unpushed* commits from *all branches*, do this:
@@ -552,7 +562,7 @@ Let's do a slightly different command: resync
 
 #+begin_src conf
 	# git resync -> sync repository and rebase current branch
-	resync = !sh -c 'BRANCH_NAME=master && git com && git fe && git hr && git rebase master '
+	resync = !sh -c 'BRANCH_NAME=master && git co master && git fe && git reset --hard origin/master && git rebase master'
 #+end_src
 
 ** Tag
@@ -610,10 +620,19 @@ local machine, I use git bdone:
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
+#+begin_src conf
+	# current branch
+	cb = "name-rev --name-only HEAD"
+
+	lc = "!git log origin/$(git name-rev --name-only HEAD).."
+	rc = "!git log ..origin/$(git name-rev --name-only HEAD)"
+#+end_src
+
 ** Merge
 
 #+begin_src conf
 	ff = merge --ff-only
+	ff = merge --ff-only @{u}
 	mm = merge --no-ff
 #+end_src
 
@@ -761,6 +780,16 @@ If you want to find all commits where /commit message/ contains given word, use
 	git log --grep
 #+end_src
 
+Show the last commit which message matches a regex:
+
+#+begin_src shell :tangle no
+git show :/fix
+# shows the last commit which has the word "fix" in its message
+
+git show :/^Merge
+# shows the last merge commit
+#+end_src
+
 *** Commit contents (Diff)
 
 If you want to find all commits where a *string* was added or removed in the /file
@@ -768,7 +797,8 @@ contents/ (to be more exact: where its *number of occurrences changed*),
 i.e. search the /commit contents/, use ~-S~.
 
 By default, ~-S~ accepts a string, but can be modified to accept a regexp with
-~--pickaxe-regex~.
+~--pickaxe-regex~.  You can dig up commits that have, for example, removed calls
+to a specific function, or added a certain CSS classname.
 
 ~-G~ looks for *differences* whose added or removed *line* matches the given *regexp*.
 
@@ -820,6 +850,60 @@ XXX works only on files really in Git (bypassing ignored files)?
 #+begin_src conf
 	graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
 #+end_src
+
+** Find out if a change is part of a release
+
+#+begin_src conf
+	sha1-tag = '!f() { git name-rev --name-only "$@"; }; f'
+#+end_src
+
+The ~name-rev~ command indicates the *position of a commit relative to tags* in the
+project. For example, ~v2.3~5~ means that this commit is located 5 commits *before*
+the v2.3 tag -- we can be certain that this change is part of v2.3, then.
+
+** Find out which branch contains a change
+
+Filter the list of branches to only those which have the given commit among
+their ancestors.
+
+#+begin_src conf
+	sha1-branch = '!f() { git branch -a --contains "$@"; }; f'
+	where = "branch -a --contains"
+#+end_src
+
+This also includes *remote* tracking branches in the list.
+
+** See which changes from a branch are already present upstream
+
+While on "feature" branch:
+
+#+begin_src shell :tangle no
+git cherry -v master
+#+end_src
+
++ 497034f2 Listener.new now accepts a hash of options
+- 2d0333ff cache the absolute images path for growl messages
++ e4406858 rename Listener#run to #start
+
+The cherry command is useful to see which commits have been cherry-picked from
+a development branch to the stable branch, for instance. This command compares
+changes on the current (~feature~) branch to upstream (~master~) and indicates which
+are present on both with the ~-~ sign. Changes still missing from upstream are
+marked with ~+~.
+
+** Show blame information about original authors of lines changed or removed
+
+Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
+original authors of lines changed or removed in a given branch:
+
+#+begin_src shell :tangle no
+git overwritten feature origin/master
+#+end_src
+
+This is useful when opening pull requests per GitHub Flow; you'll want your pull
+request reviewed by colleagues but you might not be sure who to ping. With
+git-overwritten you'll get the names of people who wrote the lines you just
+changed, so you'll know who to @-mention when opening a pull request.
 
 * References
 
