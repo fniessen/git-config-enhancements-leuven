@@ -73,12 +73,24 @@ You should "override" the above with your personal details:
 	safecrlf = true
 #+end_src
 
+#+begin_src conf
+[gc]
+	auto = 1
+#+end_src
+
 * Diff                                                                 :ARCHIVE:
 
 #+begin_src conf
 [diff]
 	renames = copies
 	algorithm = patience
+#+end_src
+
+Git diff will use (i)ndex, (w)ork tree, (c)ommit and (o)bject instead of a/b/c/d
+as prefixes for patches:
+
+#+begin_src conf
+	mnemonicprefix = true
 #+end_src
 
 * Pull                                                                 :ARCHIVE:
@@ -110,6 +122,7 @@ with the /same name/.
 #+begin_src conf
 [merge]
 	stat = true
+	summary = true
 #+end_src
 
 * Rebase                                                               :ARCHIVE:
@@ -193,6 +206,14 @@ See http://git-scm.com/docs/git-config for the list of slots.
 	function = red
 #+end_src
 
+* Format
+
+#+begin_src conf
+[format]
+	pretty = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset
+	# pretty = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset
+#+end_src
+
 * Aliases
 
 If you forget your aliases and don't want to open =.gitconfig= just to check, type
@@ -217,7 +238,7 @@ Basic shortcuts.
 #+end_src
 
 #+begin_src conf
-	cp = cherry-pick
+	cp = cherry-pick -x
 	ls = ls-files
 #+end_src
 
@@ -355,8 +376,8 @@ disk:
 #+begin_src conf
 	lp = log -p
 	lg = log --decorate --oneline --graph
-	lgr = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=relative --graph
-	lga = log --decorate --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --graph
+	lgr = log --decorate --date=relative --graph
+	lga = log --decorate --date=short --graph
 
 	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
 	ld = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --graph
@@ -409,21 +430,22 @@ you've already entered).
 	amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
 #+end_src
 
-Modify the previous commit:
+Modify the last commit:
 
 #+begin_src conf
-	amend = commit --amend --no-edit
-	fixup = commit --amend -C HEAD
-	amend = commit -v --amend
+	amend = commit -a -v --amend
+	fixup = commit --amend
 #+end_src
 
-*** Unstage a staged file
+Note that the ~-a~ switch which tells Git to automatically *stage all your changes*,
+as if you ran ~git add .~ right before the commit.
 
-Remove the specified files from the index (next commit):
-
-#+begin_src conf
-	unstage = reset HEAD --
+#+begin_src shell :tangle no
+git commit --amend            # correct the previous commit, with the staged changes
 #+end_src
+
+*WARNING:* never do this to a commit that you've already pushed to a remote
+repository.
 
 *** Unmodify a modified file
 
@@ -431,20 +453,48 @@ Remove the specified files from the index (next commit):
 	undo = checkout --
 #+end_src
 
-*** XXX
+When you grab a file from a previous time, it sits *in your index*, modified.
+
+*** Unstage a staged file
+
+Remove the specified files from the index (next commit):
+
+#+begin_src conf
+	unstage = reset HEAD --
+# OK
+#+end_src
+
+~unstage~ is the opposite of ~git add~. It lets you remove items from the staging
+area.  This makes it a very useful tool when you're deciding which files to
+stage for a commit.  If you've accidentally added something to the staging area,
+just use ~unstage~ to remove it.
+
+*** Throw away commits
+
+http://www.vogella.com/tutorials/Git/article.html#resetcommits
+
+**** Do not touch the index file or the working tree at all
 
 #+begin_src shell :tangle no
-git commit --amend            # correct the previous commit, with the staged changes
-
-git reset HEAD^               # forget about a commit, load it back into the staging area
 git reset --soft HEAD^        # remove a commit, keep staged and working changes
-git reset --hard HEAD^        # remove a commit, delete working copy changes and staged changes
 #+end_src
 
 Go back before last commit, with files in uncommitted state:
 
 #+begin_src conf
 	uncommit = reset --soft HEAD~1
+# OK
+#+end_src
+
+~uncommit~ *removes the last commit* from your repository, and *puts the changes
+into your index*. It's like going back in time to the moment right before you
+committed. This is a useful technique in resuming work on an unfinished
+changeset.
+
+**** Reset the index but not the working tree
+
+#+begin_src shell :tangle no
+git reset HEAD^               # forget about a commit, load it back into the staging area
 #+end_src
 
 Reset the previous commit, but keeps all the changes from that commit in the
@@ -454,16 +504,46 @@ working directory:
 	undo = reset --mixed HEAD~1
 #+end_src
 
+**** Reset the index and working tree
+
+#+begin_src shell :tangle no
+git reset --hard HEAD^        # remove a commit, delete working copy changes and staged changes
+#+end_src
+
 Undo the last commit:
 
 #+begin_src conf
 	wipe = reset --hard HEAD~1
 #+end_src
 
-If you reset work that you /never committed/, it is gone for good. Too bad!
+If you reset work that you /never committed/, it is gone for good. Too bad!  This
+is quite a dangerous command, and must be used with care.
 
 Use ~git reset --hard @{u}~ to make sure the integration branch is up to date
 before merging.
+
+*** Revert a changeset
+
+Once you've pushed changes to a remote repository, it is considered dangerous to
+modify the history because someone else may have already pulled it.
+
+However, Git offers you an easy way to undo a patch by committing a change that
+effectively reverses the patch in question. The simplest usage is to revert an
+entire changeset:
+
+#+begin_src shell :tangle no
+git revert [hash]
+#+end_src
+
+This creates a patch that is the opposite of changeset ~[hash]~ and commits it to
+your repo.
+
+If you want to revert that changeset without committing it (putting the
+reversion into your index), use:
+
+#+begin_src shell :tangle no
+git revert -n [hash]
+#+end_src
 
 ** Work with remotes
 
@@ -773,11 +853,11 @@ alias gCFind='git log --grep="string in a commit message" --all --pretty=format:
 
 *** Commit messages
 
-If you want to find all commits where /commit message/ contains given word, use
+If you want to find all commits where *commit message* contains given word, use
 ~--grep~.
 
-#+begin_src conf :tangle no
-	git log --grep
+#+begin_src shell :tangle no
+git log --grep="Ticket #382"
 #+end_src
 
 Show the last commit which message matches a regex:
@@ -799,6 +879,10 @@ i.e. search the /commit contents/, use ~-S~.
 By default, ~-S~ accepts a string, but can be modified to accept a regexp with
 ~--pickaxe-regex~.  You can dig up commits that have, for example, removed calls
 to a specific function, or added a certain CSS classname.
+
+#+begin_src shell :tangle no
+git log -p -S"foo" --since="1 week ago"
+#+end_src
 
 ~-G~ looks for *differences* whose added or removed *line* matches the given *regexp*.
 
@@ -836,8 +920,9 @@ XXX works only on files really in Git (bypassing ignored files)?
 ** Git and Subversion
 
 #+begin_src conf
-	spull = "svn rebase"
-	spush = "svn dcommit"
+	spull = svn rebase
+	spush = svn dcommit
+	slog = svn log --oneline --show-commit
 #+end_src
 
 #+begin_src conf
@@ -904,6 +989,14 @@ This is useful when opening pull requests per GitHub Flow; you'll want your pull
 request reviewed by colleagues but you might not be sure who to ping. With
 git-overwritten you'll get the names of people who wrote the lines you just
 changed, so you'll know who to @-mention when opening a pull request.
+
+> So, given a patch (or a branch) together with a "base revision", you'd get
+> a list of code chunks modified by that patch, then run "annotate" on the
+> base revision, and look for those code chunks, collecting the names of
+> corresponding authors.
+
+Sounds like git-guilt (which I've just read about today), might be
+relevant: https://bitbucket.org/tpettersen/git-guilt
 
 * References
 
