@@ -449,15 +449,24 @@ repository.
 
 *** Unmodify a modified file
 
+Roll a file back to the last committed version *in the working directory*.
+
 #+begin_src conf
 	undo = checkout --
+	scrap = checkout --
 #+end_src
+
+#+begin_note
+The two dashes there (canonically called the "bare double dashes") ensure that
+the checkout command know that we are trying to roll back a file and not /change
+branches/ (the typical usage of the checkout command).
+#+end_note
 
 When you grab a file from a previous time, it sits *in your index*, modified.
 
 *** Unstage a staged file
 
-Remove the specified files from the index (next commit):
+Remove the specified files from the index (proposed next commit):
 
 #+begin_src conf
 	unstage = reset HEAD --
@@ -472,6 +481,7 @@ just use ~unstage~ to remove it.
 *** Throw away commits
 
 http://www.vogella.com/tutorials/Git/article.html#resetcommits
+http://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified
 
 **** Do not touch the index file or the working tree at all
 
@@ -491,7 +501,7 @@ into your index*. It's like going back in time to the moment right before you
 committed. This is a useful technique in resuming work on an unfinished
 changeset.
 
-**** Reset the index but not the working tree
+**** Reset the index (but not the working tree)
 
 #+begin_src shell :tangle no
 git reset HEAD^               # forget about a commit, load it back into the staging area
@@ -522,24 +532,24 @@ is quite a dangerous command, and must be used with care.
 Use ~git reset --hard @{u}~ to make sure the integration branch is up to date
 before merging.
 
-*** Revert a changeset
+*** Revert a commit
 
 Once you've pushed changes to a remote repository, it is considered dangerous to
 modify the history because someone else may have already pulled it.
 
 However, Git offers you an easy way to undo a patch by committing a change that
 effectively reverses the patch in question. The simplest usage is to revert an
-entire changeset:
+entire commit:
 
 #+begin_src shell :tangle no
 git revert [hash]
 #+end_src
 
-This creates a patch that is the opposite of changeset ~[hash]~ and commits it to
+This creates a patch that is the opposite of commit ~[hash]~ and commits it to
 your repo.
 
-If you want to revert that changeset without committing it (putting the
-reversion into your index), use:
+If you want to revert that commit without committing it (putting the reversion
+into your index), use:
 
 #+begin_src shell :tangle no
 git revert -n [hash]
@@ -557,7 +567,7 @@ branch (e.g., ~origin/foo~ if the checked out branch is ~foo~).
 *** Pull
 
 The ~in~ command returns a list of *incoming* commits for the *current branch* --
-after a ~git fetch~, to fetch down *all the data* it has for the *current branch* that
+after a ~git fetch~, to fetch down *all the data* it has for the *current remote* that
 you do not --, the next time you do a pull.
 
 #+begin_src conf
