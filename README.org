@@ -1,8 +1,8 @@
 #+TITLE:     Git configuration file
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
-#+DESCRIPTION:
-#+KEYWORDS:
+#+DESCRIPTION: Pretty format for `git log' and different helpful command aliases
+#+KEYWORDS:  git, log, pretty format, alias
 #+LANGUAGE:  en
 
 #+SETUPFILE: ./bigblow-pirilampo.setup
@@ -229,6 +229,13 @@ Print the current list of Git aliases:
 	alias = "!git config -l | grep alias | cut -c 7- | sort"
 #+end_src
 
+#+begin_src conf
+	type = cat-file -t
+	dump = cat-file -p
+#+end_src
+
+(see http://gitimmersion.com/lab_11.html)
+
 ** Abbreviations
 
 Basic shortcuts.
@@ -322,12 +329,14 @@ Just before committing the *staged* changes, check what your commit changes:
 
 *** Today
 
-#+begin_src conf
-	# all commits that aren't merges on all branches
-	all = !git log --pretty=oneline --abbrev-commit --all --no-merges
+Quickly see what you've done today (commits that aren't merges on all branches):
 
-	today = "!git all --since='12am' --committer=\"`git config user.name`\""
-	today-all = "!git all --since='12am'"
+#+begin_src conf
+	today = !git log --since=midnight --author=\"`git config user.name`\" --no-merges --all
+#+end_src
+
+#+begin_src conf
+	today-all = !git log --since=midnight --no-merges --all
 #+end_src
 
 *** Diff of branch
@@ -449,7 +458,8 @@ repository.
 
 *** Unmodify a modified file
 
-Roll a file back to the last committed version *in the working directory*.
+Undo the local changes *in the working directory*: roll a file back to its last
+committed version.
 
 #+begin_src conf
 	undo = checkout --
@@ -510,9 +520,13 @@ git reset HEAD^               # forget about a commit, load it back into the sta
 Reset the previous commit, but keeps all the changes from that commit in the
 working directory:
 
-#+begin_src conf
+#+begin_src conf :tangle no
 	undo = reset --mixed HEAD~1
 #+end_src
+
+#+begin_warning
+--mixed with paths is deprecated; use 'git reset -- <paths>' instead.
+#+end_warning
 
 **** Reset the index and working tree
 
@@ -967,6 +981,10 @@ their ancestors.
 #+end_src
 
 This also includes *remote* tracking branches in the list.
+
+#+begin_src shell :tangle no
+git tag --contains a2c71a6
+#+end_src
 
 ** See which changes from a branch are already present upstream
 
