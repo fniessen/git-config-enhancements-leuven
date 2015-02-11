@@ -1026,6 +1026,13 @@ changed, so you'll know who to @-mention when opening a pull request.
 Sounds like git-guilt (which I've just read about today), might be
 relevant: https://bitbucket.org/tpettersen/git-guilt
 
+* What if
+
+... I'm working on master adding a simple feature. After a few minutes I realize
+it was not so simple and it should have been better to work into a new branch.
+
+http://stackoverflow.com/questions/2569459/git-create-a-branch-from-unstaged-uncommited-changes-on-master
+
 * References
 
 - https://github.com/tj/git-extras
