@@ -147,7 +147,8 @@
                   <li><a href="#sec-13-8-3">13.8.3. Unstage a staged
                   file</a></li>
 
-                  <li><a href="#sec-13-8-4">13.8.4. Throw away commits</a></li>
+                  <li><a href="#sec-13-8-4">13.8.4. Throw away a
+                  commit</a></li>
 
                   <li><a href="#sec-13-8-5">13.8.5. Revert a commit</a></li>
                 </ul>
@@ -738,8 +739,8 @@ git commit --amend            <span class=
           Unmodify a modified file</h4>
 
           <div class="outline-text-4" id="text-13-8-2">
-            <p>Undo the local changes <b>in the working directory</b>: roll a
-            file back to its last committed version.</p>
+            <p><b>Undo</b> the local changes <b>in the working directory</b>:
+            roll a file back to its last committed version.</p>
 
             <div class="org-src-container">
               <pre class="src src-conf">
@@ -765,8 +766,8 @@ git commit --amend            <span class=
           Unstage a staged file</h4>
 
           <div class="outline-text-4" id="text-13-8-3">
-            <p>Remove the specified files from the index (proposed next
-            commit):</p>
+            <p><b>Remove</b> the specified files <b>from the index</b>
+            (proposed next commit):</p>
 
             <div class="org-src-container">
               <pre class="src src-conf">
@@ -785,7 +786,7 @@ git commit --amend            <span class=
 
         <div id="outline-container-sec-13-8-4" class="outline-4">
           <h4 id="sec-13-8-4"><span class="section-number-4">13.8.4</span>
-          Throw away commits</h4>
+          Throw away a commit</h4>
 
           <div class="outline-text-4" id="text-13-8-4">
             <p><a href=
@@ -882,6 +883,21 @@ git reset --hard HEAD^        <span class=
 
                 <p>Use <code>git reset --hard @{u}</code> to make sure the
                 integration branch is up to date before merging.</p>
+
+                <div class="note">
+                  <p><code>git reset --hard</code> will not <b>remove untracked
+                  files</b>, where as <code>git clean</code> will remove any
+                  files from the tracked root directory that are not under Git
+                  tracking.</p>
+
+                  <p>WARNING – BE CAREFUL WITH THIS! It is helpful to run a
+                  dry-run with <code>git clean</code> first, to see what it
+                  will delete.</p>
+
+                  <p>Use <code>git clean -f</code> (to remove the untracked
+                  files) and <code>-fd</code> (to also <b>remove untracked
+                  directories</b>).</p>
+                </div>
               </div>
             </li>
           </ol>

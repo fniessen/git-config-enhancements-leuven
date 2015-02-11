@@ -458,7 +458,7 @@ repository.
 
 *** Unmodify a modified file
 
-Undo the local changes *in the working directory*: roll a file back to its last
+*Undo* the local changes *in the working directory*: roll a file back to its last
 committed version.
 
 #+begin_src conf
@@ -476,7 +476,7 @@ When you grab a file from a previous time, it sits *in your index*, modified.
 
 *** Unstage a staged file
 
-Remove the specified files from the index (proposed next commit):
+*Remove* the specified files *from the index* (proposed next commit):
 
 #+begin_src conf
 	unstage = reset HEAD --
@@ -488,7 +488,7 @@ area.  This makes it a very useful tool when you're deciding which files to
 stage for a commit.  If you've accidentally added something to the staging area,
 just use ~unstage~ to remove it.
 
-*** Throw away commits
+*** Throw away a commit
 
 http://www.vogella.com/tutorials/Git/article.html#resetcommits
 http://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified
@@ -545,6 +545,17 @@ is quite a dangerous command, and must be used with care.
 
 Use ~git reset --hard @{u}~ to make sure the integration branch is up to date
 before merging.
+
+#+begin_note
+~git reset --hard~ will not *remove untracked files*, where as ~git clean~ will remove
+any files from the tracked root directory that are not under Git tracking.
+
+WARNING -- BE CAREFUL WITH THIS!  It is helpful to run a dry-run with ~git clean~
+first, to see what it will delete.
+
+Use ~git clean -f~ (to remove the untracked files) and ~-fd~ (to also *remove
+untracked directories*).
+#+end_note
 
 *** Revert a commit
 
