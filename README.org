@@ -4,8 +4,14 @@
 #+DESCRIPTION: Pretty format for `git log' and different helpful command aliases
 #+KEYWORDS:  git, log, pretty format, alias
 #+LANGUAGE:  en
+#+OPTIONS:   H:4 num:3 toc:2
 
 #+SETUPFILE: ./bigblow-pirilampo.setup
+
+# #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="d:/Users/fni/src/org-html-themes/styles/readtheorg/rtd.css"/>
+# #+HTML_HEAD: <script type="text/javascript" src="http://www.pirilampo.org/styles/bigblow/js/jquery-1.11.0.min.js"></script>
+# #+HTML_HEAD: <script type="text/javascript" src="d:/Users/fni/src/org-html-themes/styles/readtheorg/rtd.js"></script>
+
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  tangle ~/.gitconfig
 #+PROPERTY:  eval no
@@ -355,11 +361,11 @@ It uses ~git merge-base~ to determine the fork-point (the commit that is common
 to both the branches) and does a ~git diff~ between that commit and the second
 branch.
 
-Usage
+Usage:
 
 : git forkdiff <forked from branch> <forked branch> [git-diff-options]
 
-Example
+Example:
 
 : git forkdiff origin/master my_forked_branch --stat
 
@@ -525,7 +531,7 @@ working directory:
 #+end_src
 
 #+begin_warning
---mixed with paths is deprecated; use 'git reset -- <paths>' instead.
+~--mixed~ with paths is deprecated; use ~git reset -- <paths>~ instead.
 #+end_warning
 
 **** Reset the index and working tree
@@ -550,7 +556,7 @@ before merging.
 ~git reset --hard~ will not *remove untracked files*, where as ~git clean~ will remove
 any files from the tracked root directory that are not under Git tracking.
 
-WARNING -- BE CAREFUL WITH THIS!  It is helpful to run a dry-run with ~git clean~
+*WARNING -- BE CAREFUL WITH THIS!*  It is helpful to run a dry-run with ~git clean~
 first, to see what it will delete.
 
 Use ~git clean -f~ (to remove the untracked files) and ~-fd~ (to also *remove
@@ -615,7 +621,7 @@ files*):
 
 #+begin_warning
 The upstream diff ~in-what~ will show the negative of unpushed (rebased) commits,
-if any, with the ".." notation -- not with the "..." notation!
+if any, with the ~..~ notation --- not with the ~...~ notation!
 #+end_warning
 
 Before doing work (in a new branch), ensure that the working directory is
