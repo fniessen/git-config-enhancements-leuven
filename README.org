@@ -517,6 +517,11 @@ into your index*. It's like going back in time to the moment right before you
 committed. This is a useful technique in resuming work on an unfinished
 changeset.
 
+#+begin_note
+~uncommit~ here means to do just the reverse of commit, i.e. just like commit it
+shouldn't touch the files's contents, only the metadata.
+#+end_note
+
 **** Reset the index (but not the working tree)
 
 #+begin_src shell :tangle no
@@ -638,6 +643,16 @@ Pull all:
 #+begin_src conf
 	pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
 #+end_src
+
+
+XXX
+
+#+begin_src conf
+	up = !git pull --ff-only
+#+end_src
+
+is pretty safe.  It will abort the merge if it can't be done using fast-forward.
+(In other words, if the local branch has diverged from the remote.)
 
 *** Push
 
