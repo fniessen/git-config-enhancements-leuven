@@ -619,19 +619,18 @@ be called ~origin~) if the checked out branch is ~foo~.
 #+begin_note
 ~git pull~ is simply ~git fetch && git merge remote~.  Its ~--rebase~ option uses
 ~rebase~ instead of ~merge~.
+
+That's exactly why some decide to avoid ~rebase~ (but to ~pull~ instead), because it
+has bad effects if one merges from another branch and then wants to push.
 #+end_note
 
 The ~in~ command returns a list of *incoming* commits for the *current branch* --
 after a ~git fetch~, to fetch down *all the data* it has for the *current remote* that
-you do not --, the next time you do a pull.
+you do not --, the next time you do a merge.
 
 #+begin_src conf
 	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
 	inf = !(git remote update -p && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
-#+end_src
-
-#+begin_src conf
-	rc = "!git log ..origin/$(git name-rev --name-only HEAD)"
 #+end_src
 
 #+begin_src conf
@@ -687,10 +686,6 @@ branch*, the next time you do a push.
 
 #+begin_src conf
 	out = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' @{u}..
-#+end_src
-
-#+begin_src conf
-	lc = "!git log origin/$(git name-rev --name-only HEAD).."
 #+end_src
 
 #+begin_src conf

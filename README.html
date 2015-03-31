@@ -516,16 +516,13 @@ git revert -n [hash]
 <div class="outline-text-4" id="text-13-9-1">
 <div class="note">
 <p><code>git pull</code> is simply <code>git fetch &amp;&amp; git merge remote</code>. Its <code>--rebase</code> option uses <code>rebase</code> instead of <code>merge</code>.</p>
+<p>That's exactly why some decide to avoid <code>rebase</code> (but to <code>pull</code> instead), because it has bad effects if one merges from another branch and then wants to push.</p>
 </div>
-<p>The <code>in</code> command returns a list of <b>incoming</b> commits for the <b>current branch</b> - after a <code>git fetch</code>, to fetch down <b>all the data</b> it has for the <b>current remote</b> that you do not -, the next time you do a pull.</p>
+<p>The <code>in</code> command returns a list of <b>incoming</b> commits for the <b>current branch</b> - after a <code>git fetch</code>, to fetch down <b>all the data</b> it has for the <b>current remote</b> that you do not -, the next time you do a merge.</p>
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">in</span> = !(echo <span class="org-string">"Please fetch origin before."</span> &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..@{u})
         <span class="org-variable-name">inf</span> = !(git remote update -p &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..@{u})
-</pre></div>
-<div class="org-src-container">
-<pre class="src src-conf">
-        <span class="org-variable-name">rc</span> = <span class="org-string">"!git log ..origin/$(git name-rev --name-only HEAD)"</span>
 </pre></div>
 <div class="org-src-container">
 <pre class="src src-conf">
@@ -567,10 +564,6 @@ git revert -n [hash]
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">out</span> = log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> @{u}..
-</pre></div>
-<div class="org-src-container">
-<pre class="src src-conf">
-        <span class="org-variable-name">lc</span> = <span class="org-string">"!git log origin/$(git name-rev --name-only HEAD).."</span>
 </pre></div>
 <div class="org-src-container">
 <pre class="src src-conf">
