@@ -70,16 +70,20 @@
 <li><a href="#sec-13-15">13.15. Stash</a></li>
 <li><a href="#sec-13-16">13.16. Search</a></li>
 <li><a href="#sec-13-17">13.17. Dangling</a></li>
-<li><a href="#sec-13-18">13.18. Git and Subversion</a></li>
-<li><a href="#sec-13-19">13.19. Tips and tricks</a></li>
-<li><a href="#sec-13-20">13.20. Find out if a change is part of a release</a></li>
-<li><a href="#sec-13-21">13.21. Find out which branch contains a change</a></li>
-<li><a href="#sec-13-22">13.22. See which changes from a branch are already present upstream</a></li>
-<li><a href="#sec-13-23">13.23. Show blame information about original authors of lines changed or removed</a></li>
+<li><a href="#sec-13-18">13.18. Tips and tricks</a></li>
+<li><a href="#sec-13-19">13.19. Find out if a change is part of a release</a></li>
+<li><a href="#sec-13-20">13.20. Find out which branch contains a change</a></li>
+<li><a href="#sec-13-21">13.21. See which changes from a branch are already present upstream</a></li>
+<li><a href="#sec-13-22">13.22. Show blame information about original authors of lines changed or removed</a></li>
 </ul>
 </li>
 <li><a href="#sec-14">14. What if</a></li>
-<li><a href="#sec-15">15. References</a></li>
+<li><a href="#sec-15">15. Recover from problems</a>
+<ul>
+<li><a href="#sec-15-1">15.1. Alternative</a></li>
+</ul>
+</li>
+<li><a href="#sec-16">16. References</a></li>
 </ul>
 </div>
 </div>
@@ -194,10 +198,27 @@
 </div>
 <div id="outline-container-sec-13-3" class="outline-3">
 <h3 id="sec-13-3"><span class="section-number-3">13.3</span> Check the status of your files</h3>
-<div class="outline-text-3 org-src-container" id="text-13-3">
+<div class="outline-text-3" id="text-13-3">
+<p>Give the status in the <b>short-format</b> (preceded by a line showing the <i>branch name</i> and <i>tracking info</i>).</p>
+<div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">st</span> = status -s -b
 </pre></div>
+<p>In this example:</p>
+<pre class="example">
+M  README
+ M lisp/mail/rmail.el
+MM ChangeLog
+</pre>
+<ul class="org-ul">
+<li><code>README</code> is changed and <b>staged for commit</b> (it's <b>in the index</b>),</li>
+<li><code>lisp/mail/rmail.el</code> is changed but <b>not staged for commit</b>, and</li>
+<li><code>Changelog</code> is changed and staged for commit, then <b>changed again</b> and the new change is <b>not staged for commit</b>.</li>
+</ul>
+<div class="note">
+<p>Staging for commit is typically done by <code>git add</code>.</p>
+</div>
+</div>
 </div>
 <div id="outline-container-sec-13-4" class="outline-3">
 <h3 id="sec-13-4"><span class="section-number-3">13.4</span> Ignoring files</h3>
@@ -501,11 +522,18 @@ git revert -n [hash]
 <div id="outline-container-sec-13-9-1" class="outline-4">
 <h4 id="sec-13-9-1"><span class="section-number-4">13.9.1</span> Pull</h4>
 <div class="outline-text-4" id="text-13-9-1">
+<div class="note">
+<p><code>git pull</code> is simply <code>git fetch &amp;&amp; git merge remote</code>. Its <code>--rebase</code> option uses <code>rebase</code> instead of <code>merge</code>.</p>
+</div>
 <p>The <code>in</code> command returns a list of <b>incoming</b> commits for the <b>current branch</b> - after a <code>git fetch</code>, to fetch down <b>all the data</b> it has for the <b>current remote</b> that you do not -, the next time you do a pull.</p>
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">in</span> = !(echo <span class="org-string">"Please fetch origin before."</span> &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..@{u})
         <span class="org-variable-name">inf</span> = !(git remote update -p &amp;&amp; git log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> ..@{u})
+</pre></div>
+<div class="org-src-container">
+<pre class="src src-conf">
+        <span class="org-variable-name">rc</span> = <span class="org-string">"!git log ..origin/$(git name-rev --name-only HEAD)"</span>
 </pre></div>
 <div class="org-src-container">
 <pre class="src src-conf">
@@ -542,10 +570,15 @@ git revert -n [hash]
 <div id="outline-container-sec-13-9-2" class="outline-4">
 <h4 id="sec-13-9-2"><span class="section-number-4">13.9.2</span> Push</h4>
 <div class="outline-text-4" id="text-13-9-2">
+<p>It is useful to know if you have any local commits that are not in the remote branch.</p>
 <p>The <code>out</code> command returns a list of <b>unpushed</b> (outgoing) commits for the <b>current branch</b>, the next time you do a push.</p>
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">out</span> = log --pretty=format:<span class="org-string">'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset'</span> @{u}..
+</pre></div>
+<div class="org-src-container">
+<pre class="src src-conf">
+        <span class="org-variable-name">lc</span> = <span class="org-string">"!git log origin/$(git name-rev --name-only HEAD).."</span>
 </pre></div>
 <div class="org-src-container">
 <pre class="src src-conf">
@@ -637,9 +670,6 @@ git revert -n [hash]
 <pre class="src src-conf">
         # current branch
         <span class="org-variable-name">cb</span> = <span class="org-string">"name-rev --name-only HEAD"</span>
-
-        <span class="org-variable-name">lc</span> = <span class="org-string">"!git log origin/$(git name-rev --name-only HEAD).."</span>
-        <span class="org-variable-name">rc</span> = <span class="org-string">"!git log ..origin/$(git name-rev --name-only HEAD)"</span>
 </pre></div>
 </div>
 </div>
@@ -833,31 +863,15 @@ git log -p -S<span class="org-string">"foo"</span> --since=<span class="org-stri
 </div>
 </div>
 <div id="outline-container-sec-13-18" class="outline-3">
-<h3 id="sec-13-18"><span class="section-number-3">13.18</span> Git and Subversion</h3>
-<div class="outline-text-3" id="text-13-18">
-<div class="org-src-container">
-<pre class="src src-conf">
-        <span class="org-variable-name">spull</span> = svn rebase
-        <span class="org-variable-name">spush</span> = svn dcommit
-        <span class="org-variable-name">slog</span> = svn log --oneline --show-commit
-</pre></div>
-<div class="org-src-container">
-<pre class="src src-conf">
-        <span class="org-variable-name">cvs-full-log</span> = log --reverse --pretty=format:<span class="org-string">'%B\n--------------------------------------------\n'</span>
-        <span class="org-variable-name">cvsmerge</span> = merge --no-ff --log
-</pre></div>
-</div>
-</div>
-<div id="outline-container-sec-13-19" class="outline-3">
-<h3 id="sec-13-19"><span class="section-number-3">13.19</span> Tips and tricks</h3>
-<div class="outline-text-3 org-src-container" id="text-13-19">
+<h3 id="sec-13-18"><span class="section-number-3">13.18</span> Tips and tricks</h3>
+<div class="outline-text-3 org-src-container" id="text-13-18">
 <pre class="src src-conf">
         <span class="org-variable-name">graphviz</span> = <span class="org-string">"!f() { echo 'digraph git {' ; git log --pretty='format:  %h -&gt; { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&amp;\"/g' ; echo '}'; }; f"</span>
 </pre></div>
 </div>
-<div id="outline-container-sec-13-20" class="outline-3">
-<h3 id="sec-13-20"><span class="section-number-3">13.20</span> Find out if a change is part of a release</h3>
-<div class="outline-text-3" id="text-13-20">
+<div id="outline-container-sec-13-19" class="outline-3">
+<h3 id="sec-13-19"><span class="section-number-3">13.19</span> Find out if a change is part of a release</h3>
+<div class="outline-text-3" id="text-13-19">
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">sha1-tag</span> = <span class="org-string">'!f() { git name-rev --name-only "$@"; }; f'</span>
@@ -865,9 +879,9 @@ git log -p -S<span class="org-string">"foo"</span> --since=<span class="org-stri
 <p>The <code>name-rev</code> command indicates the <b>position of a commit relative to tags</b> in the project. For example, <code>v2.3~5</code> means that this commit is located 5 commits <b>before</b> the v2.3 tag - we can be certain that this change is part of v2.3, then.</p>
 </div>
 </div>
-<div id="outline-container-sec-13-21" class="outline-3">
-<h3 id="sec-13-21"><span class="section-number-3">13.21</span> Find out which branch contains a change</h3>
-<div class="outline-text-3" id="text-13-21">
+<div id="outline-container-sec-13-20" class="outline-3">
+<h3 id="sec-13-20"><span class="section-number-3">13.20</span> Find out which branch contains a change</h3>
+<div class="outline-text-3" id="text-13-20">
 <p>Filter the list of branches to only those which have the given commit among their ancestors.</p>
 <div class="org-src-container">
 <pre class="src src-conf">
@@ -881,25 +895,25 @@ git tag --contains a2c71a6
 </pre></div>
 </div>
 </div>
-<div id="outline-container-sec-13-22" class="outline-3">
-<h3 id="sec-13-22"><span class="section-number-3">13.22</span> See which changes from a branch are already present upstream</h3>
-<div class="outline-text-3" id="text-13-22">
+<div id="outline-container-sec-13-21" class="outline-3">
+<h3 id="sec-13-21"><span class="section-number-3">13.21</span> See which changes from a branch are already present upstream</h3>
+<div class="outline-text-3" id="text-13-21">
 <p>While on "feature" branch:</p>
 <div class="org-src-container">
 <pre class="src src-shell">
 git cherry -v master
 </pre></div>
-<ul class="org-ul">
-<li>497034f2 Listener.new now accepts a hash of options</li>
-<li>2d0333ff cache the absolute images path for growl messages</li>
-<li>e4406858 rename Listener#run to #start</li>
-</ul>
-<p>The cherry command is useful to see which commits have been cherry-picked from a development branch to the stable branch, for instance. This command compares changes on the current (<code>feature</code>) branch to upstream (<code>master</code>) and indicates which are present on both with the <code>-</code> sign. Changes still missing from upstream are marked with <code>+</code>.</p>
+<pre class="example">
++ 497034f2 Listener.new now accepts a hash of options
+- 2d0333ff cache the absolute images path for growl messages
++ e4406858 rename Listener#run to #start
+</pre>
+<p>The <code>cherry</code> command is useful to see which commits have been cherry-picked from a development branch to the stable branch, for instance. This command compares changes on the current (<code>feature</code>) branch to upstream (<code>master</code>) and indicates which are present on both with the <code>-</code> sign. Changes still missing from upstream are marked with <code>+</code>.</p>
 </div>
 </div>
-<div id="outline-container-sec-13-23" class="outline-3">
-<h3 id="sec-13-23"><span class="section-number-3">13.23</span> Show blame information about original authors of lines changed or removed</h3>
-<div class="outline-text-3" id="text-13-23">
+<div id="outline-container-sec-13-22" class="outline-3">
+<h3 id="sec-13-22"><span class="section-number-3">13.22</span> Show blame information about original authors of lines changed or removed</h3>
+<div class="outline-text-3" id="text-13-22">
 <p>Extra script (called <a href="https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten">git-overwritten</a>) which shows blame information about original authors of lines changed or removed in a given branch:</p>
 <div class="org-src-container">
 <pre class="src src-shell">
@@ -919,8 +933,52 @@ git overwritten feature origin/master
 </div>
 </div>
 <div id="outline-container-sec-15" class="outline-2">
-<h2 id="sec-15"><span class="section-number-2">15</span> References</h2>
+<h2 id="sec-15"><span class="section-number-2">15</span> Recover from problems</h2>
 <div class="outline-text-2" id="text-15">
+<p>It is POSSIBLE that a safe way to recover from your problems is as follows:</p>
+<div class="org-src-container">
+<pre class="src src-shell">
+git stash
+git reset --hard HEAD
+git pull --ff-only
+git stash apply
+</pre></div>
+<p>Of course, if any of the commands but the last fails, stop and ask for advice again. If the last one reports merge conflicts, fix them by hand and run "git add" on each file after you fixed it. DO NOT use C-x v v after fixing a merge conflict, since that runs both git add and git commit, and you are not ready for the latter until all merge conflicts are dealt with.</p>
+<p>In any case, do run git status before finally doing git commit. If all succeeds, you can clean up with:</p>
+<div class="org-src-container">
+<pre class="src src-shell">
+git stash drop
+</pre></div>
+</div>
+<div id="outline-container-sec-15-1" class="outline-3">
+<h3 id="sec-15-1"><span class="section-number-3">15.1</span> Alternative</h3>
+<div class="outline-text-3" id="text-15-1">
+<p>If your master branch is busted, rename it to something else so that it's out of the way:</p>
+<div class="org-src-container">
+<pre class="src src-shell">
+git branch -m master master-busted
+</pre></div>
+<p>Create a new branch <code>master</code> that tracks the origin:</p>
+<div class="org-src-container">
+<pre class="src src-shell">
+git branch --track master origin/master
+</pre></div>
+<p>Check it out (be careful, this will discard all your local changes):</p>
+<div class="org-src-container">
+<pre class="src src-shell">
+git checkout -f master
+</pre></div>
+<p>Make sure the <code>master</code> is up-to-date:</p>
+<div class="org-src-container">
+<pre class="src src-shell">
+git pull
+</pre></div>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-16" class="outline-2">
+<h2 id="sec-16"><span class="section-number-2">16</span> References</h2>
+<div class="outline-text-2" id="text-16">
 <ul class="org-ul">
 <li><a href="https://github.com/tj/git-extras">https://github.com/tj/git-extras</a></li>
 <li><a href="https://hub.github.com/hub.1.html">https://hub.github.com/hub.1.html</a></li>

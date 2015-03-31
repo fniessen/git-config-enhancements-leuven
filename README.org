@@ -275,9 +275,29 @@ Basic shortcuts.
 
 ** Check the status of your files
 
+Give the status in the *short-format* (preceded by a line showing the /branch name/
+and /tracking info/).
+
 #+begin_src conf
 	st = status -s -b
 #+end_src
+
+In this example:
+
+#+begin_example
+M  README
+ M lisp/mail/rmail.el
+MM ChangeLog
+#+end_example
+
+- =README= is changed and *staged for commit* (it's *in the index*),
+- =lisp/mail/rmail.el= is changed but *not staged for commit*, and
+- =Changelog= is changed and staged for commit, then *changed again* and the new
+  change is *not staged for commit*.
+
+#+begin_note
+Staging for commit is typically done by ~git add~.
+#+end_note
 
 ** Ignoring files
 
@@ -602,6 +622,11 @@ branch (e.g., ~origin/foo~ if the checked out branch is ~foo~).
 
 *** Pull
 
+#+begin_note
+~git pull~ is simply ~git fetch && git merge remote~.  Its ~--rebase~ option uses
+~rebase~ instead of ~merge~.
+#+end_note
+
 The ~in~ command returns a list of *incoming* commits for the *current branch* --
 after a ~git fetch~, to fetch down *all the data* it has for the *current remote* that
 you do not --, the next time you do a pull.
@@ -609,6 +634,10 @@ you do not --, the next time you do a pull.
 #+begin_src conf
 	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
 	inf = !(git remote update -p && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
+#+end_src
+
+#+begin_src conf
+	rc = "!git log ..origin/$(git name-rev --name-only HEAD)"
 #+end_src
 
 #+begin_src conf
@@ -656,11 +685,18 @@ is pretty safe.  It will abort the merge if it can't be done using fast-forward.
 
 *** Push
 
+It is useful to know if you have any local commits that are not in the remote
+branch.
+
 The ~out~ command returns a list of *unpushed* (outgoing) commits for the *current
 branch*, the next time you do a push.
 
 #+begin_src conf
 	out = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' @{u}..
+#+end_src
+
+#+begin_src conf
+	lc = "!git log origin/$(git name-rev --name-only HEAD).."
 #+end_src
 
 #+begin_src conf
@@ -759,9 +795,6 @@ See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 #+begin_src conf
 	# current branch
 	cb = "name-rev --name-only HEAD"
-
-	lc = "!git log origin/$(git name-rev --name-only HEAD).."
-	rc = "!git log ..origin/$(git name-rev --name-only HEAD)"
 #+end_src
 
 ** Merge
@@ -973,7 +1006,7 @@ XXX works only on files really in Git (bypassing ignored files)?
 	lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 #+end_src
 
-** Git and Subversion
+** COMMENT Git and Subversion
 
 #+begin_src conf
 	spull = svn rebase
@@ -1026,11 +1059,13 @@ While on "feature" branch:
 git cherry -v master
 #+end_src
 
+#+begin_example
 + 497034f2 Listener.new now accepts a hash of options
 - 2d0333ff cache the absolute images path for growl messages
 + e4406858 rename Listener#run to #start
+#+end_example
 
-The cherry command is useful to see which commits have been cherry-picked from
+The ~cherry~ command is useful to see which commits have been cherry-picked from
 a development branch to the stable branch, for instance. This command compares
 changes on the current (~feature~) branch to upstream (~master~) and indicates which
 are present on both with the ~-~ sign. Changes still missing from upstream are
@@ -1064,6 +1099,60 @@ relevant: https://bitbucket.org/tpettersen/git-guilt
 it was not so simple and it should have been better to work into a new branch.
 
 http://stackoverflow.com/questions/2569459/git-create-a-branch-from-unstaged-uncommited-changes-on-master
+
+* Recover from problems
+  :PROPERTIES:
+  :tangle:   no
+  :END:
+
+It is POSSIBLE that a safe way to recover from your problems is as follows:
+
+#+begin_src shell
+git stash
+git reset --hard HEAD
+git pull --ff-only
+git stash apply
+#+end_src
+
+Of course, if any of the commands but the last fails, stop and ask for advice
+again. If the last one reports merge conflicts, fix them by hand and run “git
+add” on each file after you fixed it. DO NOT use C-x v v after fixing a merge
+conflict, since that runs both git add and git commit, and you are not ready for
+the latter until all merge conflicts are dealt with.
+
+In any case, do run git status before finally doing git commit. If all succeeds,
+you can clean up with:
+
+#+begin_src shell
+git stash drop
+#+end_src
+
+** Alternative
+
+If your master branch is busted, rename it to something else so that it's out of
+the way:
+
+#+begin_src shell
+git branch -m master master-busted
+#+end_src
+
+Create a new branch ~master~ that tracks the origin:
+
+#+begin_src shell
+git branch --track master origin/master
+#+end_src
+
+Check it out (be careful, this will discard all your local changes):
+
+#+begin_src shell
+git checkout -f master
+#+end_src
+
+Make sure the ~master~ is up-to-date:
+
+#+begin_src shell
+git pull
+#+end_src
 
 * References
 
