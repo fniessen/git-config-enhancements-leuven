@@ -493,7 +493,7 @@ git commit --amend            <span class="org-comment-delimiter"># </span><span
 <pre class="src src-shell">
 git revert [hash]
 </pre></div>
-<p>This creates a patch that is the opposite of commit <code>[hash]</code> and commits it to your repo.</p>
+<p>This creates a patch that is the opposite of commit <code>[hash]</code> and commits it to your repository.</p>
 <p>If you want to revert that commit without committing it (putting the reversion into your index), use:</p>
 <div class="org-src-container">
 <pre class="src src-shell">
@@ -505,7 +505,7 @@ git revert -n [hash]
 <div id="outline-container-sec-13-9" class="outline-3">
 <h3 id="sec-13-9"><span class="section-number-3">13.9</span> Work with remotes</h3>
 <div class="outline-text-3" id="text-13-9">
-<p>Starting with Git 1.7.0, <code>@{u}</code> is shorthand for the <b>current</b> branch's <b>upstream</b> branch (e.g., <code>origin/foo</code> if the checked out branch is <code>foo</code>).</p>
+<p>Starting with Git 1.7.0, <code>@{u}</code> is shorthand for the <b>current</b> branch's <b>upstream</b> branch; e.g., <code>origin/foo</code> (or <code>github/foo</code>, etc., since the remote doesn't have to be called <code>origin</code>) if the checked out branch is <code>foo</code>.</p>
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">r</span> = <span class="org-string">"remote -v"</span>
@@ -562,7 +562,7 @@ git revert -n [hash]
 <div id="outline-container-sec-13-9-2" class="outline-4">
 <h4 id="sec-13-9-2"><span class="section-number-4">13.9.2</span> Push</h4>
 <div class="outline-text-4" id="text-13-9-2">
-<p>It is useful to know if you have any local commits that are not in the remote branch.</p>
+<p>It is useful to know if you have any <b>local commits</b> that are not in the remote branch.</p>
 <p>The <code>out</code> command returns a list of <b>unpushed</b> (outgoing) commits for the <b>current branch</b>, the next time you do a push.</p>
 <div class="org-src-container">
 <pre class="src src-conf">

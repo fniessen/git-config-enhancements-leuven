@@ -595,7 +595,7 @@ git revert [hash]
 #+end_src
 
 This creates a patch that is the opposite of commit ~[hash]~ and commits it to
-your repo.
+your repository.
 
 If you want to revert that commit without committing it (putting the reversion
 into your index), use:
@@ -607,7 +607,8 @@ git revert -n [hash]
 ** Work with remotes
 
 Starting with Git 1.7.0, ~@{u}~ is shorthand for the *current* branch's *upstream*
-branch (e.g., ~origin/foo~ if the checked out branch is ~foo~).
+branch; e.g., ~origin/foo~ (or ~github/foo~, etc., since the remote doesn't have to
+be called ~origin~) if the checked out branch is ~foo~.
 
 #+begin_src conf
 	r = "remote -v"
@@ -678,7 +679,7 @@ is pretty safe.  It will abort the merge if it can't be done using fast-forward.
 
 *** Push
 
-It is useful to know if you have any local commits that are not in the remote
+It is useful to know if you have any *local commits* that are not in the remote
 branch.
 
 The ~out~ command returns a list of *unpushed* (outgoing) commits for the *current
