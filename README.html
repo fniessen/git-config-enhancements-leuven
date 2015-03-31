@@ -437,35 +437,28 @@ git commit --amend            <span class="org-comment-delimiter"># </span><span
 <div id="outline-container-unnumbered-1" class="outline-5">
 <h5 id="unnumbered-1">Do not touch the index file or the working tree at all</h5>
 <div class="outline-text-5" id="text-unnumbered-1">
-<div class="org-src-container">
-<pre class="src src-shell">
-git reset --soft HEAD^        <span class="org-comment-delimiter"># </span><span class="org-comment">remove a commit, keep staged and working changes</span>
-</pre></div>
 <p>Go back before last commit, with files in uncommitted state:</p>
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">uncommit</span> = reset --soft HEAD~1
 # OK
 </pre></div>
-<p><code>uncommit</code> <b>removes the last commit</b> from your repository, and <b>puts the changes into your index</b>. It's like going back in time to the moment right before you committed. This is a useful technique in resuming work on an unfinished changeset.</p>
+<p><code>uncommit</code> <b>removes the last commit</b> from your repository, and <b>puts the changes into your index</b>, keeping changes in the working tree. It's like going back in time to the moment right before you committed.</p>
 <div class="note">
 <p><code>uncommit</code> here means to do just the reverse of commit, i.e. just like commit it shouldn't touch the files's contents, only the metadata.</p>
 </div>
+<p>This is a useful technique in resuming work on an unfinished changeset.</p>
 </div>
 </div>
 <div id="outline-container-unnumbered-2" class="outline-5">
 <h5 id="unnumbered-2">Reset the index (but not the working tree)</h5>
 <div class="outline-text-5" id="text-unnumbered-2">
-<div class="org-src-container">
-<pre class="src src-shell">
-git reset HEAD^               <span class="org-comment-delimiter"># </span><span class="org-comment">forget about a commit, load it back into the staging area</span>
-</pre></div>
-<p>Reset the previous commit, but keeps all the changes from that commit in the working directory:</p>
+<p>Reset the previous commit, but <b>puts</b> all <b>the changes</b> from that commit <b>in the working directory</b>:</p>
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">undo</span> = reset --mixed HEAD~1
 </pre></div>
-<div class="warning">
+<div class="note">
 <p><code>--mixed</code> with paths is deprecated; use <code>git reset -- &lt;paths&gt;</code> instead.</p>
 </div>
 </div>
@@ -473,17 +466,16 @@ git reset HEAD^               <span class="org-comment-delimiter"># </span><span
 <div id="outline-container-unnumbered-3" class="outline-5">
 <h5 id="unnumbered-3">Reset the index and working tree</h5>
 <div class="outline-text-5" id="text-unnumbered-3">
-<div class="org-src-container">
-<pre class="src src-shell">
-git reset --hard HEAD^        <span class="org-comment-delimiter"># </span><span class="org-comment">remove a commit, delete working copy changes and staged changes</span>
-</pre></div>
-<p>Undo the last commit:</p>
+<p>Remove the last commit, delete staged changes and working copy changes:</p>
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">wipe</span> = reset --hard HEAD~1
 </pre></div>
 <p>If you reset work that you <i>never committed</i>, it is gone for good. Too bad! This is quite a dangerous command, and must be used with care.</p>
-<p>Use <code>git reset --hard @{u}</code> to make sure the integration branch is up to date before merging.</p>
+<div class="warning">
+<p>This command will also <b>overwrite changed files</b> in the working tree!</p>
+</div>
+<p>Use <code>git reset --hard @{u}</code> to make sure the integration branch is up-to-date before merging.</p>
 <div class="note">
 <p><code>git reset --hard</code> will not <b>remove untracked files</b>, where as <code>git clean</code> will remove any files from the tracked root directory that are not under Git tracking.</p>
 <p><b>WARNING - BE CAREFUL WITH THIS!</b> It is helpful to run a dry-run with <code>git clean</code> first, to see what it will delete.</p>
@@ -607,7 +599,7 @@ git revert -n [hash]
         <span class="org-variable-name">sync</span> = !git update &amp;&amp; git co master &amp;&amp; git pull &amp;&amp; git co @{-1}
 </pre></div>
 <p>That's rather basic - it doesn't actually rebase my branch that I'm on.</p>
-<p>Let's do a slightly different command: resync</p>
+<p>Let's do a slightly different command: <code>resync</code></p>
 <div class="org-src-container">
 <pre class="src src-conf">
         # git resync -&gt; sync repository and rebase current branch

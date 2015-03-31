@@ -521,10 +521,6 @@ http://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified
 
 **** Do not touch the index file or the working tree at all
 
-#+begin_src shell :tangle no
-git reset --soft HEAD^        # remove a commit, keep staged and working changes
-#+end_src
-
 Go back before last commit, with files in uncommitted state:
 
 #+begin_src conf
@@ -532,40 +528,33 @@ Go back before last commit, with files in uncommitted state:
 # OK
 #+end_src
 
-~uncommit~ *removes the last commit* from your repository, and *puts the changes
-into your index*. It's like going back in time to the moment right before you
-committed. This is a useful technique in resuming work on an unfinished
-changeset.
+~uncommit~ *removes the last commit* from your repository, and *puts the changes into
+your index*, keeping changes in the working tree. It's like going back in time to
+the moment right before you committed.
 
 #+begin_note
 ~uncommit~ here means to do just the reverse of commit, i.e. just like commit it
 shouldn't touch the files's contents, only the metadata.
 #+end_note
 
+This is a useful technique in resuming work on an unfinished changeset.
+
 **** Reset the index (but not the working tree)
 
-#+begin_src shell :tangle no
-git reset HEAD^               # forget about a commit, load it back into the staging area
-#+end_src
-
-Reset the previous commit, but keeps all the changes from that commit in the
-working directory:
+Reset the previous commit, but *puts* all *the changes* from that commit *in the
+working directory*:
 
 #+begin_src conf :tangle no
 	undo = reset --mixed HEAD~1
 #+end_src
 
-#+begin_warning
+#+begin_note
 ~--mixed~ with paths is deprecated; use ~git reset -- <paths>~ instead.
-#+end_warning
+#+end_note
 
 **** Reset the index and working tree
 
-#+begin_src shell :tangle no
-git reset --hard HEAD^        # remove a commit, delete working copy changes and staged changes
-#+end_src
-
-Undo the last commit:
+Remove the last commit, delete staged changes and working copy changes:
 
 #+begin_src conf
 	wipe = reset --hard HEAD~1
@@ -574,7 +563,11 @@ Undo the last commit:
 If you reset work that you /never committed/, it is gone for good. Too bad!  This
 is quite a dangerous command, and must be used with care.
 
-Use ~git reset --hard @{u}~ to make sure the integration branch is up to date
+#+begin_warning
+This command will also *overwrite changed files* in the working tree!
+#+end_warning
+
+Use ~git reset --hard @{u}~ to make sure the integration branch is up-to-date
 before merging.
 
 #+begin_note
@@ -730,7 +723,7 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 
 That's rather basic - it doesn't actually rebase my branch that I'm on.
 
-Let's do a slightly different command: resync
+Let's do a slightly different command: ~resync~
 
 #+begin_src conf
 	# git resync -> sync repository and rebase current branch
