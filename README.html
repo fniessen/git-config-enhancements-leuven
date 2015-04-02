@@ -384,6 +384,8 @@ git forkdiff origin/master my_forked_branch --stat
 <div id="outline-container-sec-12-8-1" class="outline-4">
 <h4 id="sec-12-8-1"><span class="section-number-4">12.8.1</span> Change your last commit</h4>
 <div class="outline-text-4" id="text-12-8-1">
+<p>&gt; The reason I don't commit a change immediately after I write it is &gt; that I want to test it in real (and varied) use. Sometimes I find &gt; bugs and have to change it. After some period in which it works well, &gt; I decide it is ready to install.</p>
+<p>That is a good reason. However, for your information there is the variant "git commit -amend", which as the option suggests amends the current commit. Just "git add" the files you changed and run "git commit -amend". It also lets you edit the commit message. After discovering this option, I find I am less fearful of making premature commits, since they are easily fixed. (But not after pushing, of course. That way lies madness.)</p>
 <p>Amend with the same message (without your editor prompting you for the message you've already entered).</p>
 <div class="org-src-container">
 <pre class="src src-conf">
@@ -464,6 +466,7 @@ git commit --amend            <span class="org-comment-delimiter"># </span><span
 <div class="note">
 <p><code>--mixed</code> with paths is deprecated; use <code>git reset -- &lt;paths&gt;</code> instead.</p>
 </div>
+<p>This is a useful technique if your pull fails to merge the new stuff from upstream: <code>git reset HEAD~1</code>, pull again, fix the conflicts, then commit your changes again.</p>
 </div>
 </div>
 <div id="outline-container-unnumbered-3" class="outline-5">
@@ -559,6 +562,9 @@ git revert -n [hash]
         <span class="org-variable-name">up</span> = !git pull --ff-only
 </pre></div>
 <p>is pretty safe. It will abort the merge if it can't be done using fast-forward. (In other words, if the local branch has diverged from the remote.)</p>
+<div class="note">
+<p><code>git pull</code> with uncommitted changes can succeed if the newly pulled changes don't touch the locally changed files, but will fail otherwise. Which makes a lot of sense.</p>
+</div>
 </div>
 </div>
 <div id="outline-container-sec-12-9-2" class="outline-4">

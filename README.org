@@ -472,6 +472,18 @@ The ~--~ signals the end of options, that the rest of the parameters are limiter
 
 *** Change your last commit
 
+> The reason I don't commit a change immediately after I write it is
+> that I want to test it in real (and varied) use.  Sometimes I find
+> bugs and have to change it.  After some period in which it works well,
+> I decide it is ready to install.
+
+That is a good reason. However, for your information there is the variant “git
+commit --amend”, which as the option suggests amends the current commit. Just
+“git add“ the files you changed and run “git commit --amend”. It also lets you
+edit the commit message. After discovering this option, I find I am less fearful
+of making premature commits, since they are easily fixed. (But not after
+pushing, of course. That way lies madness.)
+
 Amend with the same message (without your editor prompting you for the message
 you've already entered).
 
@@ -547,9 +559,9 @@ Go back before last commit, with files in uncommitted state:
 # OK
 #+end_src
 
-~uncommit~ *removes the last commit* from your repository, and *puts the changes into
-your index*, keeping changes in the working tree. It's like going back in time to
-the moment right before you committed.
+~uncommit~ *removes the last commit* from your repository, and *puts the changes
+into your index*, keeping changes in the working tree. It's like going back in
+time to the moment right before you committed.
 
 #+begin_note
 ~uncommit~ here means to do just the reverse of commit, i.e. just like commit it
@@ -570,6 +582,10 @@ working directory*:
 #+begin_note
 ~--mixed~ with paths is deprecated; use ~git reset -- <paths>~ instead.
 #+end_note
+
+This is a useful technique if your pull fails to merge the new stuff from
+upstream: ~git reset HEAD~1~, pull again, fix the conflicts, then commit your
+changes again.
 
 **** Reset both the index and working tree
 
@@ -697,6 +713,12 @@ XXX
 
 is pretty safe.  It will abort the merge if it can't be done using fast-forward.
 (In other words, if the local branch has diverged from the remote.)
+
+#+begin_note
+~git pull~ with uncommitted changes can succeed if the newly pulled changes don't
+touch the locally changed files, but will fail otherwise.  Which makes a lot of
+sense.
+#+end_note
 
 *** Push
 
