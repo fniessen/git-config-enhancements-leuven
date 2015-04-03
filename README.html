@@ -216,7 +216,7 @@ MM ChangeLog
 <p><a href="http://stackoverflow.com/questions/23097368/git-ignore-vs-exclude-vs-assume-unchanged">http://stackoverflow.com/questions/23097368/git-ignore-vs-exclude-vs-assume-unchanged</a></p>
 </div>
 <div id="outline-container-sec-12-4-1" class="outline-4">
-<h4 id="sec-12-4-1"><span class="section-number-4">12.4.1</span> git ignore</h4>
+<h4 id="sec-12-4-1"><span class="section-number-4">12.4.1</span> <code>git ignore</code></h4>
 <div class="outline-text-4" id="text-12-4-1">
 <p>XXX Quickly add a file or directory to <code>.gitignore</code>:</p>
 <div class="org-src-container">
@@ -226,23 +226,18 @@ MM ChangeLog
 </div>
 </div>
 <div id="outline-container-sec-12-4-2" class="outline-4">
-<h4 id="sec-12-4-2"><span class="section-number-4">12.4.2</span> assume-unchanged</h4>
+<h4 id="sec-12-4-2"><span class="section-number-4">12.4.2</span> <code>assume-unchanged</code></h4>
 <div class="outline-text-4" id="text-12-4-2">
 <p>Ignore/unignore file without <code>.gitignore</code>:</p>
 <div class="org-src-container">
 <pre class="src src-conf">
-        <span class="org-variable-name">untrack</span> = update-index --assume-unchanged
         <span class="org-variable-name">assume</span> = update-index --assume-unchanged
-</pre></div>
-<div class="org-src-container">
-<pre class="src src-conf">
-        <span class="org-variable-name">unignore</span> = update-index --no-assume-unchanged
         <span class="org-variable-name">unassume</span> = update-index --no-assume-unchanged
 </pre></div>
-<p>List ignored files:</p>
+<p>List ignored files (<b>marked unchanged</b>):</p>
 <div class="org-src-container">
 <pre class="src src-conf">
-        <span class="org-variable-name">assumed</span> = <span class="org-string">"!git ls-files -v | grep ^h | cut -c 3-"</span>
+        <span class="org-variable-name">assumed</span> = <span class="org-string">"!git ls-files -v | grep '^h' | cut -c 3-"</span>
 </pre></div>
 <p>Show files ignored by Git:</p>
 <div class="org-src-container">
@@ -676,6 +671,7 @@ git revert -n [hash]
 <div id="outline-container-sec-12-12" class="outline-3">
 <h3 id="sec-12-12"><span class="section-number-3">12.12</span> Merge</h3>
 <div class="outline-text-3" id="text-12-12">
+<p>Merging means to <b>bring the contents of another branch</b> (possibly from an external repository) <b>into the current branch</b>. […] Merging is performed by an automatic process that identifies changes made since the branches diverged, and then applies all those changes together.</p>
 <div class="org-src-container">
 <pre class="src src-conf">
         <span class="org-variable-name">ff</span> = merge --ff-only
@@ -709,7 +705,7 @@ git revert -n [hash]
 <pre class="src src-conf">
         <span class="org-variable-name">record</span> = !sh -c <span class="org-string">'(git add -p -- $@ &amp;&amp; git commit) || git reset'</span> --
 </pre></div>
-<p>It will not only do <code>git add -p</code> (with an optional file list), but it will also immediately do the <code>commit</code>. Upon abandonment of either the add or the commit it will <code>reset</code> the index.</p>
+<p>It will not only do <code>git add -p</code> (with an optional file list), but it will also immediately do the <code>commit</code>. Upon abandonment of either the add or the commit, it will <code>reset</code> the index.</p>
 </div>
 </div>
 <div id="outline-container-sec-12-15" class="outline-3">

@@ -31,6 +31,87 @@ might have. So *BE EXTREMELY CAREFUL*!
 
 * COMMENT Tasks
 
+** TODO Add doc about push failure
+
+If a push fails, that does not necessarily indicate a "bad state"---it
+simply represents that your history is different than what the remote
+server has, and that the tip of the branch you are pushing to cannot
+simply be "fast-forwarded" to your commit.
+
+After a failed push, you are in no different state than you were before
+the push (aside from a possibly puzzled mental state).
+
+In your case, since you just want to commit and push in one operation,
+you likely want to run `git pull --rebase`, which would get those
+changes and then automatically re-commit your work on top of them, as if
+you had those changes all along.  You could then push.  So, something
+like:
+
+  # commit all changes and attempt to push, pulling in changes if
+  # necessary and re-pushing; on failure, restore to previous state with
+  # changes uncomitted
+  git commit -am Foo \
+    && {
+      git push \
+        |   | { |
+          { git pull --rebase || handle-pull-conflicts; } \
+            && git push;
+        }
+    } \
+    |   | { |
+      git reset --soft HEAD^
+      echo 'Commit failed.'
+    }
+
+But what if rebasing fails?  Then you are left resolving a conflict
+before you can attempt the push operation again.  I do not know how you
+would want to handle this.  `handle-pull-conflicts` might simply perform
+a `git rebase --abort` and exit with a non-zero status, or it may open a
+UI/shell to help resolve changes.  If you are pushing after every
+change, this amounts to correcting a single commit, so it might be worth
+having VC maintain the state here, allow you to correct your commit, and
+then the vc-next-action would be to run `git rebase --continue` after
+adding the files that conflicted.
+
+This will be how the majority of Git users will resolve rejected pushes.
+
+Does that make sense?
+
+  [Aside: `git pull` without `--rebase` performs a `git fetch && git
+  merge whatever-branch-you-are-tracking`, which has the unfortunate
+  side-effect of creating a merge commit if histories are different;
+  this muddies up history.  `git pull --rebase` performs `git fetch &&
+  git rebase whatever-branch-you-are-tracking`.  The difference in the
+  two styles of conflicts here is that, with rebasing, since you are
+  re-committing each and every changeset, you may get multiple
+  conflicts on any number of commits, whereas a merge will give you a
+  single conflict that must be resolved at once.  The benefit of
+  rebasing is that it gives you a clean history and does not produce an
+  unnecessary merge conflict which you would then push to origin, akin
+  to leaving a bag of poop on origin's doorstep.]
+
+For other users, it may represent a wholly different problem.  For
+example, if I were to push to GNU ease.js' repo and get that message,
+that would be a problem, since that means that someone has committed to
+my repository without my permission.  An automatic pull and re-push
+would be bad in this case, since that makes it look like I'm okay with
+that.
+
+A failed push could also mean that you are tracking the wrong
+branch, or pushing to the wrong repository.  Git allows you to set a
+"tracking branch", which can be anything---a local branch, a remote
+branch, or a branch in an entirely different repository, local or
+remote.  Further, you can override the tracking branch by specifying
+which remote to push to as part of the `push` command.
+
+In your case, you'd always want to respect the tracking branch and
+assume that there are no problems pushing, since you use only one
+remote, and the tracking branch is always a branch of the same name on
+origin.
+
+A failed push could also mean that someone rudely rewrote history on the
+remote branch (using `git push --force`) and someone needs a talkin' to.
+
 ** TODO Outsource and include private entries in .gitconfig
 
 Git (1.7.10+) now supports this syntax in .gitconfig:
@@ -311,7 +392,7 @@ Staging for commit is typically done by ~git add~.
 
 http://stackoverflow.com/questions/23097368/git-ignore-vs-exclude-vs-assume-unchanged
 
-*** git ignore
+*** ~git ignore~
 
 XXX Quickly add a file or directory to =.gitignore=:
 
@@ -319,24 +400,19 @@ XXX Quickly add a file or directory to =.gitignore=:
 	ignore = !([ ! -e .gitignore ] && touch .gitignore) | echo $1 >> .gitignore
 #+end_src
 
-*** assume-unchanged
+*** ~assume-unchanged~
 
 Ignore/unignore file without =.gitignore=:
 
 #+begin_src conf
-	untrack = update-index --assume-unchanged
 	assume = update-index --assume-unchanged
-#+end_src
-
-#+begin_src conf
-	unignore = update-index --no-assume-unchanged
 	unassume = update-index --no-assume-unchanged
 #+end_src
 
-List ignored files:
+List ignored files (*marked unchanged*):
 
 #+begin_src conf
-	assumed = "!git ls-files -v | grep ^h | cut -c 3-"
+	assumed = "!git ls-files -v | grep '^h' | cut -c 3-"
 #+end_src
 
 Show files ignored by Git:
@@ -837,6 +913,11 @@ See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
 ** Merge
 
+Merging means to *bring the contents of another branch* (possibly from an external
+repository) *into the current branch*. [...]  Merging is performed by an automatic
+process that identifies changes made since the branches diverged, and then
+applies all those changes together.
+
 #+begin_src conf
 	ff = merge --ff-only
 	ff = merge --ff-only @{u}
@@ -873,7 +954,7 @@ Ask interactively which patch hunk to commit, and then do the commit:
 #+end_src
 
 It will not only do ~git add -p~ (with an optional file list), but it will also
-immediately do the ~commit~. Upon abandonment of either the add or the commit it
+immediately do the ~commit~. Upon abandonment of either the add or the commit, it
 will ~reset~ the index.
 
 ** Stash
