@@ -119,8 +119,8 @@ Git (1.7.10+) now supports this syntax in .gitconfig:
 #+end_src
 
 So you can split your gitconfig configurations across multiple files, e.g. you
-can have a .gitconfig file for your nonsensitive information and a git ignored
-.githubconfig file containing your private github token.
+can have a =.gitconfig= file for your nonsensitive information and a git ignored
+=.githubconfig= file containing your private github token.
 
 See http://travisjeffery.com/b/2012/03/using-gits-include-for-private-information-like-github-tokens/
 
@@ -162,6 +162,8 @@ Or create a Git command to set email addresses for you:
 #+end_src
 
 * Core                                                                 :ARCHIVE:
+
+# pager = "less -r"
 
 #+begin_src conf
 [core]
@@ -247,7 +249,7 @@ pull.
 
 * Color                                                                :ARCHIVE:
 
-See http://git-scm.com/docs/git-config for the list of slots.
+Instead of hardcoding colors, I suggest:
 
 #+begin_src conf
 [color]
@@ -257,6 +259,8 @@ See http://git-scm.com/docs/git-config for the list of slots.
 	status = auto
 	interactive = auto
 #+end_src
+
+See http://git-scm.com/docs/git-config for the ~slot~ list.
 
 ** Branch
 
@@ -401,17 +405,16 @@ Staging for commit is typically done by ~git add~.
 
 *** ~git ignore~ command
 
-XXX Quickly add a file or directory to =.gitignore=:
+Quickly add a file or directory to =.gitignore=:
 
 #+begin_src conf
-	ignore = !([ ! -e .gitignore ] && touch .gitignore) | echo $1 >> .gitignore
+	ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
 #+end_src
 
-XXX Bug: names are duplicated in =.gitignore=!!
+List untracked files ignored by a =.gitignore= statement somewhere.
 
 #+begin_src conf
-# list untracked files ignored by a .gitignore statement somewhere
-	ignored = ls-files --others --ignored --exclude-standard
+        ignored = ls-files --others --ignored --exclude-standard
 #+end_src
 
 *** ~assume-unchanged~ command
@@ -530,7 +533,10 @@ disk:
 	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
 	ld = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --graph
 	ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
-	ls           = "!git status -suno"
+	ls = "!git status -suno"
+
+	lg50 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-50s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{49}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
+	lg80 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-80s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{79}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
 #+end_src
 
 #+begin_src conf
@@ -1401,6 +1407,46 @@ Make sure the ~master~ is up-to-date:
 
 #+begin_src shell
 git pull
+#+end_src
+
+* GitHub tasks
+  :PROPERTIES:
+  :tangle:   no
+  :END:
+
+# https://github.com/abo-abo/oremacs/blob/github/etc/org/wiki/git.org
+
+** force push
+
+#+begin_src shell
+git push --force origin master
+#+end_src
+
+** push tags
+
+#+begin_src shell
+git push --tags
+#+end_src
+
+** get user pubkeys
+
+#+begin_src shell
+curl https://github.com/abo-abo.keys
+#+end_src
+
+** routine
+
+#+begin_src shell
+git fetch --all
+#+end_src
+
+This results in all pull requests available in the local repo in the local pull/
+namespace.
+
+To check out e.g. PR #42:
+
+#+begin_src shell
+git checkout -b foo refs/pull/upstream/42
 #+end_src
 
 * References
