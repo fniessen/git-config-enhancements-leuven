@@ -166,7 +166,24 @@ Or create a Git command to set email addresses for you:
 #+begin_src conf
 [core]
 	editor = emacsclient
+#+end_src
+
+*Text viewer* for use by Git commands.
+
+#+begin_note
+When the ~LESS~ environment variable is unset, Git sets it to ~FRSX~.  If the ~LESS~
+environment variable is set, Git does not change it at all.
+
+We use ~-R~ in the command itself to be sure to *interpret the color codes* when Git
+is run from /Windows/ Emacs (~C-x v l~), with /no/ value for the ~LESS~ /environment
+variable/.
+#+end_note
+
+#+begin_src conf
 	pager = "less -R"
+#+end_src
+
+#+begin_src conf
 	whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
 #+end_src
 
