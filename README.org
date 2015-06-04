@@ -163,12 +163,10 @@ Or create a Git command to set email addresses for you:
 
 * Core                                                                 :ARCHIVE:
 
-# pager = "less -r"
-
 #+begin_src conf
 [core]
 	editor = emacsclient
-	pager = less
+	pager = "less -R"
 	whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
 #+end_src
 
