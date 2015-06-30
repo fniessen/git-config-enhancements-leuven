@@ -136,6 +136,44 @@ http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 
 http://www.emacswiki.org/emacs/GitQuickStartForEmacsDevs
 
+** TODO Work in progress which I can't commit (from Stephen J. Turnbull)
+   [2015-03-31 Tue 16:35]
+
+#+begin_verse
+ > > With git pull, if there are changes in the working directory, the
+ > > merge (i.e. merge from remote/master into master) part of the
+ > > operation is aborted before it starts, giving a message describing its
+ > > refusal.  It does this even when there are no conflicts to deal with.
+ >
+ > What are we supposed to do in that case, if we're not yet ready to
+ > commit our files?
+
+If you have work-in-progress and feel unable to commit, but at the
+same time feel the need to pull into that workspace, I suggest you get
+up and walk around, fight off the pull urge, then finish the commit
+after your head cools off.
+
+If that isn't satisfactory, then
+
+ > or putting our work into a new branch, like:
+ >
+ > --8<---------------cut here---------------start------------->8---
+ > git checkout -b new-branch-name
+ > git commit -a -m "Edited"
+ > git checkout master
+ > git pull
+ > ...
+ > --8<---------------cut here---------------end--------------->8---
+
+is one way to go.  Another possibility is creating a new workspace,
+with cp -a or similar.
+
+If you need the pulled code for your work, then a quick stash is the
+better idea.
+#+end_verse
+
+From [[gnus:INBOX#87vbhhi69x.fsf@uwakimon.sk.tsukuba.ac.jp][Email from Stephen J. Turnbull: Re: VC mode and git]]
+
 * User                                                                 :ARCHIVE:
 
 Setting your user name and e-mail address is important because Git stores the
@@ -621,6 +659,30 @@ edit the commit message. After discovering this option, I find I am less fearful
 of making premature commits, since they are easily fixed. (But not after
 pushing, of course. That way lies madness.)
 
+#+begin_verse
+The key to understanding that is that Git does not rewrite history, it creates
+new history and calls that reality.  The commits in this history have different
+IDs (because the ID is the content plus the ID of its parent, changing just one
+commit means everything after it must change).  If you push this new history
+(with --force) everyone else will have the old divergent history.  All their
+work will be on top of this divergent history.  They have to do the surgery to
+put their work on your new history.
+
+When users do a "git pull", git doesn't store that you did a rebase (it would be
+nice if it did) so it assumes something has gone wrong and refuses to pull.  Git
+gets a human to look at the divergence and decide what to do with it.
+Unfortunately, most people don't know what to do with a divergent repository.
+
+And yes, this applies to amended commits.
+
+This is a common question answered on Stack Overflow.
+https://stackoverflow.com/questions/8939977/git-push-rejected-after-feature-branch-rebase
+
+This answer isn't specifically about rebase, but it illustrates how Git creates
+new history.
+https://stackoverflow.com/questions/27692954/change-mail-address-in-each-commit/27709938#27709938
+#+end_verse
+
 Amend with the same message (without your editor prompting you for the message
 you've already entered).
 
@@ -982,7 +1044,7 @@ resolved, ie. like so
 with SSL/TLS...)
 #+end_note
 
-Checkout common branches (useful if you have feature branches):
+Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][common branches]] (useful if you have feature branches):
 
 #+begin_src conf
 	master = checkout master
@@ -1357,6 +1419,8 @@ it was not so simple and it should have been better to work into a new branch.
 http://stackoverflow.com/questions/2569459/git-create-a-branch-from-unstaged-uncommited-changes-on-master
 
 * If you made a mistake
+
+# Absolutely read https://github.com/blog/2019-how-to-undo-almost-anything-with-git!
 
 This will help when we need to change the most recent commit.
 

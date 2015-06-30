@@ -3,14 +3,14 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>Git configuration file</title>
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>Git configuration file</title>
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="Fabrice Niessen" />
 <meta  name="description" content="Pretty format for `git log' and different helpful command aliases"
  />
 <meta  name="keywords" content="git, log, pretty format, alias" />
-<meta  name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" type="text/css" href="d:/Users/fni/src/org-html-themes/styles/readtheorg/css/htmlize.css"/>
 <link rel="stylesheet" type="text/css" href="d:/Users/fni/src/org-html-themes/styles/readtheorg/css/readtheorg.css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -383,7 +383,7 @@ Show files ignored by Git:
 <div class="outline-text-4" id="text-orgheadline22">
 <div class="org-src-container">
 
-<pre class="src src-shell"><span class="org-whitespace-indentation">        </span>diff-all = diff HEAD
+<pre class="src src-shell"><span class="org-whitespace-indentation">        </span>diff-all = diff HEAD
 </pre>
 </div>
 </div>
@@ -621,6 +621,30 @@ of making premature commits, since they are easily fixed. (But not after
 pushing, of course. That way lies madness.)
 </p>
 
+<p class="verse">
+The key to understanding that is that Git does not rewrite history, it creates<br  />
+new history and calls that reality.  The commits in this history have different<br  />
+IDs (because the ID is the content plus the ID of its parent, changing just one<br  />
+commit means everything after it must change).  If you push this new history<br  />
+(with &#x2013;force) everyone else will have the old divergent history.  All their<br  />
+work will be on top of this divergent history.  They have to do the surgery to<br  />
+put their work on your new history.<br  />
+<br  />
+When users do a &ldquo;git pull&rdquo;, git doesn&rsquo;t store that you did a rebase (it would be<br  />
+nice if it did) so it assumes something has gone wrong and refuses to pull.  Git<br  />
+gets a human to look at the divergence and decide what to do with it.<br  />
+Unfortunately, most people don&rsquo;t know what to do with a divergent repository.<br  />
+<br  />
+And yes, this applies to amended commits.<br  />
+<br  />
+This is a common question answered on Stack Overflow.<br  />
+<a href="https://stackoverflow.com/questions/8939977/git-push-rejected-after-feature-branch-rebase">https://stackoverflow.com/questions/8939977/git-push-rejected-after-feature-branch-rebase</a><br  />
+<br  />
+This answer isn&rsquo;t specifically about rebase, but it illustrates how Git creates<br  />
+new history.<br  />
+<a href="https://stackoverflow.com/questions/27692954/change-mail-address-in-each-commit/27709938#27709938">https://stackoverflow.com/questions/27692954/change-mail-address-in-each-commit/27709938#27709938</a><br  />
+</p>
+
 <p>
 Amend with the same message (without your editor prompting you for the message
 you&rsquo;ve already entered).
@@ -657,7 +681,7 @@ as if you ran <code>git add .</code> right before the commit.
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git commit --amend            <span class="org-comment-delimiter"># </span><span class="org-comment">correct the previous commit, with the staged changes</span>
+<pre class="src src-shell">git commit --amend            <span class="org-comment-delimiter"># </span><span class="org-comment">correct the previous commit, with the staged changes</span>
 </pre>
 </div>
 
@@ -875,7 +899,7 @@ entire commit:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git revert [hash]
+<pre class="src src-shell">git revert [hash]
 </pre>
 </div>
 
@@ -891,7 +915,7 @@ into your index), use:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git revert -n [hash]
+<pre class="src src-shell">git revert -n [hash]
 </pre>
 </div>
 </div>
@@ -1212,7 +1236,7 @@ with SSL/TLS&#x2026;)
 </div>
 
 <p>
-Checkout common branches (useful if you have feature branches):
+Checkout <a href="http://nvie.com/posts/a-successful-git-branching-model/">common branches</a> (useful if you have feature branches):
 </p>
 
 <div class="org-src-container">
@@ -1454,13 +1478,13 @@ You can operate on the &ldquo;stash&rdquo; ref as if it were any other ref.
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git stash list                          <span class="org-comment-delimiter"># </span><span class="org-comment">show a list of all stashes</span>
-git stash show                          <span class="org-comment-delimiter"># </span><span class="org-comment">show the last stash</span>
-git stash show stash@{1}                <span class="org-comment-delimiter"># </span><span class="org-comment">show the previous stash</span>
-
-git stash apply                         <span class="org-comment-delimiter"># </span><span class="org-comment">apply the stash only, don't delete it</span>
-git stash drop                          <span class="org-comment-delimiter"># </span><span class="org-comment">drop the last stash</span>
-git stash drop stash@{1}                <span class="org-comment-delimiter"># </span><span class="org-comment">drop a previous stash</span>
+<pre class="src src-shell">git stash list                          <span class="org-comment-delimiter"># </span><span class="org-comment">show a list of all stashes</span>
+git stash show                          <span class="org-comment-delimiter"># </span><span class="org-comment">show the last stash</span>
+git stash show stash@{1}                <span class="org-comment-delimiter"># </span><span class="org-comment">show the previous stash</span>
+
+git stash apply                         <span class="org-comment-delimiter"># </span><span class="org-comment">apply the stash only, don't delete it</span>
+git stash drop                          <span class="org-comment-delimiter"># </span><span class="org-comment">drop the last stash</span>
+git stash drop stash@{1}                <span class="org-comment-delimiter"># </span><span class="org-comment">drop a previous stash</span>
 </pre>
 </div>
 
@@ -1484,7 +1508,7 @@ Do a regular <code>commit</code>:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git add -A &amp;&amp; git commit -m <span class="org-string">'WIP'</span>       <span class="org-comment-delimiter"># </span><span class="org-comment">Add all changes (including untracked files).</span>
+<pre class="src src-shell">git add -A &amp;&amp; git commit -m <span class="org-string">'WIP'</span>       <span class="org-comment-delimiter"># </span><span class="org-comment">Add all changes (including untracked files).</span>
 </pre>
 </div></li>
 
@@ -1496,11 +1520,11 @@ Return to previous work:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git reset --mixed                       <span class="org-comment-delimiter"># </span><span class="org-comment">Reset the previous commit (but</span>
-                                        <span class="org-comment-delimiter"># </span><span class="org-comment">keeps all the changes from that</span>
-                                        <span class="org-comment-delimiter"># </span><span class="org-comment">commit in the working directory).</span>
-
-git reset --soft                        <span class="org-comment-delimiter"># </span><span class="org-comment">or this one???</span>
+<pre class="src src-shell">git reset --mixed                       <span class="org-comment-delimiter"># </span><span class="org-comment">Reset the previous commit (but</span>
+                                        <span class="org-comment-delimiter"># </span><span class="org-comment">keeps all the changes from that</span>
+                                        <span class="org-comment-delimiter"># </span><span class="org-comment">commit in the working directory).</span>
+
+git reset --soft                        <span class="org-comment-delimiter"># </span><span class="org-comment">or this one???</span>
 </pre>
 </div>
 
@@ -1510,7 +1534,7 @@ Or, if I merely need to modify the previous commit:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git commit -a --amend
+<pre class="src src-shell">git commit -a --amend
 </pre>
 </div>
 
@@ -1532,11 +1556,11 @@ commit message of the most recent commit.
 <div class="outline-text-3" id="text-orgheadline49">
 <div class="org-src-container">
 
-<pre class="src src-shell"><span class="org-comment-delimiter"># </span><span class="org-comment">Git Search</span>
-<span class="org-builtin">alias</span> <span class="org-variable-name">ggFind</span>=<span class="org-string">'git log -g --pretty=format:%h -S'</span>
-<span class="org-builtin">alias</span> <span class="org-variable-name">gFind</span>=<span class="org-string">'git log --pretty=format:%h -S'</span>
-<span class="org-builtin">alias</span> <span class="org-variable-name">gGFing</span>=<span class="org-string">'git log --pretty=format:%h -G'</span>
-<span class="org-builtin">alias</span> <span class="org-variable-name">gCFind</span>=<span class="org-string">'git log --grep="string in a commit message" --all --pretty=format:%h'</span>
+<pre class="src src-shell"><span class="org-comment-delimiter"># </span><span class="org-comment">Git Search</span>
+<span class="org-builtin">alias</span> <span class="org-variable-name">ggFind</span>=<span class="org-string">'git log -g --pretty=format:%h -S'</span>
+<span class="org-builtin">alias</span> <span class="org-variable-name">gFind</span>=<span class="org-string">'git log --pretty=format:%h -S'</span>
+<span class="org-builtin">alias</span> <span class="org-variable-name">gGFing</span>=<span class="org-string">'git log --pretty=format:%h -G'</span>
+<span class="org-builtin">alias</span> <span class="org-variable-name">gCFind</span>=<span class="org-string">'git log --grep="string in a commit message" --all --pretty=format:%h'</span>
 </pre>
 </div>
 </div>
@@ -1551,7 +1575,7 @@ If you want to find all commits where <b>commit message</b> contains given word,
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git log --grep=<span class="org-string">"Ticket #382"</span>
+<pre class="src src-shell">git log --grep=<span class="org-string">"Ticket #382"</span>
 </pre>
 </div>
 
@@ -1561,11 +1585,11 @@ Show the last commit which message matches a regex:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git show :/fix
-<span class="org-comment-delimiter"># </span><span class="org-comment">Show the last commit which has the word "fix" in its message.</span>
-
-git show :/^Merge
-<span class="org-comment-delimiter"># </span><span class="org-comment">Show the last merge commit.</span>
+<pre class="src src-shell">git show :/fix
+<span class="org-comment-delimiter"># </span><span class="org-comment">Show the last commit which has the word "fix" in its message.</span>
+
+git show :/^Merge
+<span class="org-comment-delimiter"># </span><span class="org-comment">Show the last merge commit.</span>
 </pre>
 </div>
 </div>
@@ -1588,7 +1612,7 @@ to a specific function, or added a certain CSS classname.
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git log -p -S<span class="org-string">"foo"</span> --since=<span class="org-string">"1 week ago"</span>
+<pre class="src src-shell">git log -p -S<span class="org-string">"foo"</span> --since=<span class="org-string">"1 week ago"</span>
 </pre>
 </div>
 
@@ -1703,7 +1727,7 @@ This also includes <b>remote</b> tracking branches in the list.
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git tag --contains a2c71a6
+<pre class="src src-shell">git tag --contains a2c71a6
 </pre>
 </div>
 </div>
@@ -1718,7 +1742,7 @@ While on &ldquo;feature&rdquo; branch:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git cherry -v master
+<pre class="src src-shell">git cherry -v master
 </pre>
 </div>
 
@@ -1748,7 +1772,7 @@ original authors of lines changed or removed in a given branch:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git overwritten feature origin/master
+<pre class="src src-shell">git overwritten feature origin/master
 </pre>
 </div>
 
@@ -1822,10 +1846,10 @@ It is POSSIBLE that a safe way to recover from your problems is as follows:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git stash
-git reset --hard HEAD
-git pull --ff-only
-git stash apply
+<pre class="src src-shell">git stash
+git reset --hard HEAD
+git pull --ff-only
+git stash apply
 </pre>
 </div>
 
@@ -1844,7 +1868,7 @@ you can clean up with:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git stash drop
+<pre class="src src-shell">git stash drop
 </pre>
 </div>
 </div>
@@ -1859,7 +1883,7 @@ the way:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git branch -m master master-busted
+<pre class="src src-shell">git branch -m master master-busted
 </pre>
 </div>
 
@@ -1869,7 +1893,7 @@ Create a new branch <code>master</code> that tracks the origin:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git branch --track master origin/master
+<pre class="src src-shell">git branch --track master origin/master
 </pre>
 </div>
 
@@ -1879,7 +1903,7 @@ Check it out (be careful, this will discard all your local changes):
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git checkout -f master
+<pre class="src src-shell">git checkout -f master
 </pre>
 </div>
 
@@ -1889,7 +1913,7 @@ Make sure the <code>master</code> is up-to-date:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git pull
+<pre class="src src-shell">git pull
 </pre>
 </div>
 </div>
@@ -1907,7 +1931,7 @@ Make sure the <code>master</code> is up-to-date:
 <div class="outline-text-3" id="text-orgheadline64">
 <div class="org-src-container">
 
-<pre class="src src-shell">git push --force origin master
+<pre class="src src-shell">git push --force origin master
 </pre>
 </div>
 </div>
@@ -1918,7 +1942,7 @@ Make sure the <code>master</code> is up-to-date:
 <div class="outline-text-3" id="text-orgheadline65">
 <div class="org-src-container">
 
-<pre class="src src-shell">git push --tags
+<pre class="src src-shell">git push --tags
 </pre>
 </div>
 </div>
@@ -1929,7 +1953,7 @@ Make sure the <code>master</code> is up-to-date:
 <div class="outline-text-3" id="text-orgheadline66">
 <div class="org-src-container">
 
-<pre class="src src-shell">curl https://github.com/abo-abo.keys
+<pre class="src src-shell">curl https://github.com/abo-abo.keys
 </pre>
 </div>
 </div>
@@ -1940,7 +1964,7 @@ Make sure the <code>master</code> is up-to-date:
 <div class="outline-text-3" id="text-orgheadline67">
 <div class="org-src-container">
 
-<pre class="src src-shell">git fetch --all
+<pre class="src src-shell">git fetch --all
 </pre>
 </div>
 
@@ -1955,7 +1979,7 @@ To check out e.g. PR #42:
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git checkout -b foo refs/pull/upstream/42
+<pre class="src src-shell">git checkout -b foo refs/pull/upstream/42
 </pre>
 </div>
 </div>
