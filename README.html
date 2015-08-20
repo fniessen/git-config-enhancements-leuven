@@ -11,6 +11,91 @@
 <meta  name="description" content="Pretty format for `git log' and different helpful command aliases"
  />
 <meta  name="keywords" content="git, log, pretty format, alias" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
 <link rel="stylesheet" type="text/css" href="d:/Users/fni/src/org-html-themes/styles/readtheorg/css/htmlize.css"/>
 <link rel="stylesheet" type="text/css" href="d:/Users/fni/src/org-html-themes/styles/readtheorg/css/readtheorg.css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -53,7 +138,7 @@
 <li><a href="#orgheadline46">Prepare a release</a></li>
 <li><a href="#orgheadline47">Cherrypick style recording</a></li>
 <li><a href="#orgheadline48">Stash</a></li>
-<li><a href="#orgheadline49">Search</a></li>
+<li><a href="#orgheadline49">Search commits</a></li>
 <li><a href="#orgheadline53">Dangling</a></li>
 <li><a href="#orgheadline54">Tips and tricks</a></li>
 <li><a href="#orgheadline55">Find out if a change is part of a release</a></li>
@@ -147,7 +232,7 @@ might have. So <b>BE EXTREMELY CAREFUL</b>!
 
 <pre class="src src-conf">[<span class="org-type">format</span>]
         <span class="org-variable-name">pretty</span> = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ad)%Creset
-        <span class="org-comment-delimiter"># </span><span class="org-comment">pretty = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset</span>
+        <span class="org-variable-name"># pretty</span> = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen&lt;%an&gt;%Creset %C(bold blue)(%ar)%Creset
 </pre>
 </div>
 </div>
@@ -227,7 +312,7 @@ Basic shortcuts.
 
 <pre class="src src-conf">        <span class="org-variable-name">this</span> = !git init &amp;&amp; git add . &amp;&amp; git commit -m \"Initial commit\"
         <span class="org-variable-name">this</span> = !git init &amp;&amp; ( [[ -n $(ls) ]] || touch .gitignore ) &amp;&amp; git add . &amp;&amp; git commit -m \"Initial commit\"
-<span class="org-comment-delimiter"># </span><span class="org-comment">plant?</span>
+# plant?
 </pre>
 </div>
 </div>
@@ -535,7 +620,7 @@ disk:
 
 <div class="org-src-container">
 
-<pre class="src src-conf"><span class="org-comment-delimiter"># </span><span class="org-comment">list all untracked files</span>
+<pre class="src src-conf"># list all untracked files
         <span class="org-variable-name">untracked</span> = ls-files --others
 </pre>
 </div>
@@ -664,12 +749,12 @@ Modify the last commit:
 
 <pre class="src src-conf">        <span class="org-variable-name">amend</span> = commit -a -v --amend
         <span class="org-variable-name">fixup</span> = commit --amend
-<span class="org-comment-delimiter"># </span><span class="org-comment">fixlastcommit?</span>
+# fixlastcommit?
 
-<span class="org-comment-delimiter"># </span><span class="org-comment">Commit changes to current head as amended commit</span>
+# Commit changes to current head as amended commit
         <span class="org-variable-name">plus</span> = commit --amend -a -C HEAD
 
-<span class="org-comment-delimiter"># </span><span class="org-comment">append additional changes to the previous commit</span>
+# append additional changes to the previous commit
         <span class="org-variable-name">fixup</span> = commit --amend --reuse-message HEAD
 </pre>
 </div>
@@ -734,7 +819,7 @@ When you grab a file from a previous time, it sits <b>in your index</b>, modifie
 <div class="org-src-container">
 
 <pre class="src src-conf">        <span class="org-variable-name">unstage</span> = reset HEAD --
-<span class="org-comment-delimiter"># </span><span class="org-comment">OK</span>
+# OK
 </pre>
 </div>
 
@@ -772,7 +857,7 @@ Go back before last commit, with files in uncommitted state:
 <div class="org-src-container">
 
 <pre class="src src-conf">        <span class="org-variable-name">uncommit</span> = reset --soft HEAD~1
-<span class="org-comment-delimiter"># </span><span class="org-comment">OK</span>
+# OK
 </pre>
 </div>
 
@@ -807,7 +892,7 @@ working directory</b>:
 <div class="org-src-container">
 
 <pre class="src src-conf">        <span class="org-variable-name">undo</span> = reset --mixed HEAD~1
-<span class="org-comment-delimiter"># </span><span class="org-comment">popcommit?</span>
+# popcommit?
 </pre>
 </div>
 
@@ -836,7 +921,7 @@ Remove the last commit, delete staged changes and working copy changes:
 <div class="org-src-container">
 
 <pre class="src src-conf">        <span class="org-variable-name">wipe</span> = reset --hard HEAD~1
-<span class="org-comment-delimiter"># </span><span class="org-comment">rollback?</span>
+# rollback?
 </pre>
 </div>
 
@@ -1147,7 +1232,7 @@ Let&rsquo;s do a slightly different command: <code>resync</code>
 
 <div class="org-src-container">
 
-<pre class="src src-conf">        <span class="org-comment-delimiter"># </span><span class="org-comment">git resync -&gt; sync repository and rebase current branch</span>
+<pre class="src src-conf">        # git resync -&gt; sync repository and rebase current branch
         <span class="org-variable-name">resync</span> = !sh -c <span class="org-string">'BRANCH_NAME=master &amp;&amp; git co master &amp;&amp; git fe &amp;&amp; git reset --hard origin/master &amp;&amp; git rebase master'</span>
 </pre>
 </div>
@@ -1192,7 +1277,7 @@ Show the last tag:
 <div class="org-src-container">
 
 <pre class="src src-conf">        <span class="org-variable-name">cob</span> = checkout -b
-<span class="org-comment-delimiter"># </span><span class="org-comment">grow?</span>
+# grow?
 </pre>
 </div>
 
@@ -1292,7 +1377,7 @@ See <a href="http://haacked.com/archive/2014/07/28/github-flow-aliases/">http://
 
 <div class="org-src-container">
 
-<pre class="src src-conf">        <span class="org-comment-delimiter"># </span><span class="org-comment">current branch</span>
+<pre class="src src-conf">        # current branch
         <span class="org-variable-name">cb</span> = <span class="org-string">"name-rev --name-only HEAD"</span>
 </pre>
 </div>
@@ -1389,7 +1474,7 @@ modifications, allowing you to get rid of some incomplete changes:
 
 <div class="org-src-container">
 
-<pre class="src src-conf">git stash save <span class="org-string">"Describe what you did here"</span>
+<pre class="src src-conf">git stash save <span class="org-string">"DESCRIBE WHAT YOU DID HERE"</span>
 </pre>
 </div>
 
@@ -1437,7 +1522,7 @@ You can operate on the &ldquo;stash&rdquo; ref as if it were any other ref.
 
 <pre class="src src-conf">        <span class="org-variable-name">hide</span> = stash
         <span class="org-variable-name">unhide</span> = stash apply
-<span class="org-comment-delimiter"># </span><span class="org-comment">bad aliases, used by some instead to mean assume and unassume...</span>
+# bad aliases, used by some instead to mean assume and unassume...
 </pre>
 </div>
 
@@ -1458,9 +1543,9 @@ You can operate on the &ldquo;stash&rdquo; ref as if it were any other ref.
 <div class="org-src-container">
 
 <pre class="src src-conf">        <span class="org-variable-name">plop</span> = <span class="org-string">"!git stash &amp;&amp; git pull &amp;&amp; git stash pop"</span>
-<span class="org-comment-delimiter"># </span><span class="org-comment">cleanpull</span>
-<span class="org-comment-delimiter"># </span><span class="org-comment">update (like svn? if we add a git reset in front?)</span>
-<span class="org-comment-delimiter"># </span><span class="org-comment">sync</span>
+# cleanpull
+# update (like svn? if we add a git reset in front?)
+# sync
 </pre>
 </div>
 
@@ -1552,7 +1637,7 @@ commit message of the most recent commit.
 </div>
 
 <div id="outline-container-orgheadline49" class="outline-3">
-<h3 id="orgheadline49">Search</h3>
+<h3 id="orgheadline49">Search commits</h3>
 <div class="outline-text-3" id="text-orgheadline49">
 <div class="org-src-container">
 
@@ -1566,16 +1651,27 @@ commit message of the most recent commit.
 </div>
 
 <div id="outline-container-orgheadline50" class="outline-4">
-<h4 id="orgheadline50">Commit log messages</h4>
+<h4 id="orgheadline50">Log messages</h4>
 <div class="outline-text-4" id="text-orgheadline50">
 <p>
-If you want to find all commits where <b>commit message</b> contains given word, use
-<code>--grep</code>.
+If you want to find all commits (across all branches, showing names and status
+of changed files) where <b>log message</b> matches a specified pattern (regular
+expression), use <code>find</code>.
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-shell">git log --grep=<span class="org-string">"Ticket #382"</span>
+<pre class="src src-conf">        <span class="org-variable-name">find</span> = <span class="org-string">"log --all --name-status --grep"</span>
+</pre>
+</div>
+
+<p>
+For example, to find all commits referencing bug #382:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-shell">git find <span class="org-string">"Bug #382"</span>
 </pre>
 </div>
 
@@ -1996,7 +2092,6 @@ To check out e.g. PR #42:
 
 <li><a href="https://git.wiki.kernel.org/index.php/Aliases">Git SCM Wiki - Aliases</a></li>
 <li><a href="https://ochronus.com/git-tips-from-the-trenches/">Git tips from the trenches</a></li>
-<li><a href="file:///cygdrive/d/Users/fni/Public/Repositories/emacs/admin/notes/git-workflow">Emacs Git workflow</a></li>
 </ul>
 </div>
 </div>

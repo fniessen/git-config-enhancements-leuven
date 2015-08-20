@@ -10,8 +10,7 @@
 #+SETUPFILE: ~/src/org-html-themes/setup/theme-readtheorg-local-abs.setup
 
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+PROPERTY:  tangle ~/.gitconfig
-#+PROPERTY:  eval no
+#+PROPERTY:  header-args :tangle ~/.gitconfig :eval no
 
 *Commit early, commit often*: it is a bad idea to do a lot of work without
 committing.
@@ -44,6 +43,7 @@ changes and then automatically re-commit your work on top of them, as if
 you had those changes all along.  You could then push.  So, something
 like:
 
+#+begin_src shell :tangle no
   # commit all changes and attempt to push, pulling in changes if
   # necessary and re-pushing; on failure, restore to previous state with
   # changes uncomitted
@@ -59,6 +59,7 @@ like:
       git reset --soft HEAD^
       echo 'Commit failed.'
     }
+#+end_src
 
 But what if rebasing fails?  Then you are left resolving a conflict
 before you can attempt the push operation again.  I do not know how you
@@ -1139,7 +1140,7 @@ the decks so you can easily work on something else; it reverts your local
 modifications, allowing you to get rid of some incomplete changes:
 
 #+begin_src conf :tangle no
-git stash save "Describe what you did here"
+git stash save "DESCRIBE WHAT YOU DID HERE"
 #+end_src
 
 Take named stash:
@@ -1246,7 +1247,7 @@ Alternative to ~stash~ (writing a commit with a default message):
    The ~--amend~ launches your default commit editor and lets you change the
    commit message of the most recent commit.
 
-** Search
+** Search commits
 
 #+begin_src shell :tangle no
 # Git Search
@@ -1256,13 +1257,20 @@ alias gGFing='git log --pretty=format:%h -G'
 alias gCFind='git log --grep="string in a commit message" --all --pretty=format:%h'
 #+end_src
 
-*** Commit log messages
+*** Log messages
 
-If you want to find all commits where *commit message* contains given word, use
-~--grep~.
+If you want to find all commits (across all branches, showing names and status
+of changed files) where *log message* matches a specified pattern (regular
+expression), use ~find~.
+
+#+begin_src conf
+	find = "log --all --name-status --grep"
+#+end_src
+
+For example, to find all commits referencing bug #382:
 
 #+begin_src shell :tangle no
-git log --grep="Ticket #382"
+git find "Bug #382"
 #+end_src
 
 Show the last commit which message matches a regex:
@@ -1436,7 +1444,7 @@ I don't really know how to proof the instructions against that.
 
 * Recover from problems
   :PROPERTIES:
-  :tangle:   no
+  :header-args+: :tangle no
   :END:
 
 It is POSSIBLE that a safe way to recover from your problems is as follows:
@@ -1490,7 +1498,7 @@ git pull
 
 * GitHub tasks
   :PROPERTIES:
-  :tangle:   no
+  :header-args+: :tangle no
   :END:
 
 # https://github.com/abo-abo/oremacs/blob/github/etc/org/wiki/git.org
@@ -1536,4 +1544,4 @@ git checkout -b foo refs/pull/upstream/42
 
 - [[https://git.wiki.kernel.org/index.php/Aliases][Git SCM Wiki - Aliases]]
 - [[https://ochronus.com/git-tips-from-the-trenches/][Git tips from the trenches]]
-- [[file:~/Public/Repositories/emacs/admin/notes/git-workflow][Emacs Git workflow]]
+# - [[file:~/Public/Repositories/emacs/admin/notes/git-workflow][Emacs Git workflow]]
