@@ -1249,23 +1249,17 @@ Alternative to ~stash~ (writing a commit with a default message):
 
 ** Search commits
 
-#+begin_src shell :tangle no
-# Git Search
-alias ggFind='git log -g --pretty=format:%h -S'
-alias gFind='git log --pretty=format:%h -S'
-alias gGFing='git log --pretty=format:%h -G'
-alias gCFind='git log --grep="string in a commit message" --all --pretty=format:%h'
-#+end_src
-
-*** Log messages
+*** String in Log messages
 
 If you want to find all commits (across all branches, showing names and status
 of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-	find = "log --all --name-status --grep"
+        find = "log --all --grep"
 #+end_src
+
+Add ~--name-status~ to show only names and status of *changed files*.
 
 For example, to find all commits referencing bug #382:
 
@@ -1273,19 +1267,19 @@ For example, to find all commits referencing bug #382:
 git find "Bug #382"
 #+end_src
 
-Show the last commit which message matches a regex:
+Show the *last commit* which *message matches a regex*:
 
 #+begin_src shell :tangle no
-git show :/fix
 # Show the last commit which has the word "fix" in its message.
+git show :/fix
 
-git show :/^Merge
 # Show the last merge commit.
+git show :/^Merge
 #+end_src
 
-*** Commit contents (Diff)
+*** String added/removed in Commit contents (Diff)
 
-If you want to find all commits where a *string* was added or removed in the /file
+If you want to find all commits where a *string* was *added or removed* in the /file
 contents/ (to be more exact: where its *number of occurrences changed*),
 i.e. search the /commit contents/, use ~-S~.
 
@@ -1294,14 +1288,16 @@ By default, ~-S~ accepts a string, but can be modified to accept a regexp with
 to a specific function, or added a certain CSS classname.
 
 #+begin_src shell :tangle no
-git log -p -S"foo" --since="1 week ago"
+git log -S "foo" --since="1 week ago"
 #+end_src
+
+*** String contained in added/removed lines from Commit contents (Diff)
 
 ~-G~ looks for *differences* whose added or removed *line* matches the given *regexp*.
 
 I think you'd want this with ~--all~ as well (whether using ~-S~ or ~-G~).
 
-*** Code base
+*** String in (current?) Code base
 
 The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
 your project files (i.e. no files in =.git=), but also that is allows you to
@@ -1535,6 +1531,18 @@ To check out e.g. PR #42:
 #+begin_src shell
 git checkout -b foo refs/pull/upstream/42
 #+end_src
+
+* Git workflows
+
+It may be helpful to do a some background reading on workflows with Git.  Here
+is the gitworkflows man page:
+https://www.kernel.org/pub/software/scm/git/docs/gitworkflows.html
+
+Other doc on branch models:
+
+http://nvie.com/posts/a-successful-git-branching-model/
+http://www.draconianoverlord.com/2013/09/07/no-cherry-picking.html
+http://williamdurand.fr/2012/01/17/my-git-branching-model/
 
 * References
 
