@@ -116,7 +116,7 @@ Git (1.7.10+) now supports this syntax in .gitconfig:
 
 #+begin_src conf :tangle no
 [include]
-	path = /path/to/file
+    path = /path/to/file
 #+end_src
 
 So you can split your gitconfig configurations across multiple files, e.g. you
@@ -182,29 +182,29 @@ committer and author of a change in every commit.
 
 #+begin_src conf
 [user]
-	name = John Doe
-	email = johndoe@example.com
+    name = John Doe
+    email = johndoe@example.com
 #+end_src
 
 You should "override" the above with your personal details:
 
 #+begin_src conf
 [include]
-	path = .gitconfig.user
+    path = ~/.gitconfig_local
 #+end_src
 
 Or create a Git command to set email addresses for you:
 
 #+begin_src conf
 [alias]
-	workprofile = config user.email \"john@work.com\"
+    workprofile = config user.email \"john@work.com\"
 #+end_src
 
 * Core                                                                 :ARCHIVE:
 
 #+begin_src conf
 [core]
-	editor = emacsclient
+    editor = emacsclient
 #+end_src
 
 *Text viewer* for use by Git commands.
@@ -219,36 +219,36 @@ variable/.
 #+end_note
 
 #+begin_src conf
-	pager = "less -R"
+    pager = "less -R"
 #+end_src
 
 #+begin_src conf
-	whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
 #+end_src
 
 #+begin_src conf :tangle no
-	autocrlf = input
-	safecrlf = true
+    autocrlf = input
+    safecrlf = true
 #+end_src
 
 #+begin_src conf
 [gc]
-	auto = 1
+    auto = 1
 #+end_src
 
 * Diff                                                                 :ARCHIVE:
 
 #+begin_src conf
 [diff]
-	renames = copies
-	algorithm = patience
+    renames = copies
+    algorithm = patience
 #+end_src
 
 Git diff will use (i)ndex, (w)ork tree, (c)ommit and (o)bject instead of a/b/c/d
 as prefixes for patches:
 
 #+begin_src conf
-	mnemonicprefix = true
+    mnemonicprefix = true
 #+end_src
 
 * Pull                                                                 :ARCHIVE:
@@ -257,7 +257,7 @@ Configure Git to do the ~--rebase~ part automatically.
 
 #+begin_src conf
 [pull]
-	rebase = preserve
+    rebase = preserve
 #+end_src
 
 (The merge commit doesn't get deleted!)
@@ -270,7 +270,7 @@ with the /same name/.
 
 #+begin_src conf
 [push]
-	default = simple
+    default = simple
 #+end_src
 
 (~simple~ is the default in Git 2.x)
@@ -279,8 +279,8 @@ with the /same name/.
 
 #+begin_src conf
 [merge]
-	stat = true
-	summary = true
+    stat = true
+    summary = true
 #+end_src
 
 * Rebase                                                               :ARCHIVE:
@@ -290,15 +290,15 @@ pull.
 
 #+begin_src conf
 [rebase]
-	stat = true
+    stat = true
 #+end_src
 
 * Grep                                                                 :ARCHIVE:
 
 #+begin_src conf
 [grep]
-	fullname = true
-	linenumber = true
+    fullname = true
+    linenumber = true
 #+end_src
 
 * Color                                                                :ARCHIVE:
@@ -307,11 +307,11 @@ Instead of hardcoding colors, I suggest:
 
 #+begin_src conf
 [color]
-	ui = auto
-	branch = auto
-	diff = auto
-	status = auto
-	interactive = auto
+    ui = auto
+    branch = auto
+    diff = auto
+    status = auto
+    interactive = auto
 #+end_src
 
 See http://git-scm.com/docs/git-config for the ~slot~ list.
@@ -320,58 +320,58 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 
 #+begin_src conf
 [color "branch"]
-	current = cyan bold
-	local = green bold
-	remote = red bold
-	upstream = red bold
-	plain = yellow reverse
+    current = cyan bold
+    local = green bold
+    remote = red bold
+    upstream = red bold
+    plain = yellow reverse
 #+end_src
 
 ** Diff
 
 #+begin_src conf
 [color "diff"]
-	plain = normal
-	meta = yellow bold
-	frag = magenta bold
-	old = red bold
-	new = green bold
-	commit = yellow
-	whitespace = red reverse
+    plain = normal
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+    commit = yellow
+    whitespace = red reverse
 #+end_src
 
 ** Status
 
 #+begin_src conf
 [color "status"]
-	header = normal
-	added = green
-	updated = yellow
-	changed = magenta
-	untracked = red
-	branch = cyan bold
-	nobranch = red reverse
+    header = normal
+    added = green
+    updated = yellow
+    changed = magenta
+    untracked = red
+    branch = cyan bold
+    nobranch = red reverse
 #+end_src
 
 ** Grep
 
 #+begin_src conf
 [color "grep"]
-	filename = yellow bold
-	linenumber = magenta bold
-	match = green reverse bold
-	separator = red bold
-	selected = white bold
-	context = black
-	function = red
+    filename = yellow bold
+    linenumber = magenta bold
+    match = green reverse bold
+    separator = red bold
+    selected = white bold
+    context = black
+    function = red
 #+end_src
 
 * Format
 
 #+begin_src conf
 [format]
-	pretty = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset
-	# pretty = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset
+    pretty = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset
+    # pretty = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset
 #+end_src
 
 * Aliases
@@ -386,12 +386,12 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 Print the current list of Git aliases:
 
 #+begin_src conf
-	alias = "!git config -l | grep alias | cut -c 7- | sort"
+    alias = "!git config -l | grep alias | cut -c 7- | sort"
 #+end_src
 
 #+begin_src conf
-	type = cat-file -t
-	dump = cat-file -p
+    type = cat-file -t
+    dump = cat-file -p
 #+end_src
 
 (see http://gitimmersion.com/lab_11.html)
@@ -401,16 +401,16 @@ Print the current list of Git aliases:
 Basic shortcuts.
 
 #+begin_src conf
-	ci = commit
+    ci = commit
 #+end_src
 
 #+begin_src conf
-	cp = cherry-pick -x
-	ls = ls-files
+    cp = cherry-pick -x
+    ls = ls-files
 #+end_src
 
 #+begin_src conf
-	h = help
+    h = help
 #+end_src
 
 ** Getting a Git repository
@@ -418,15 +418,15 @@ Basic shortcuts.
 *** Initialize a repository
 
 #+begin_src conf
-	this = !git init && git add . && git commit -m \"Initial commit\"
-	this = !git init && ( [[ -n $(ls) ]] || touch .gitignore ) && git add . && git commit -m \"Initial commit\"
+    this = !git init && git add . && git commit -m \"Initial commit\"
+    this = !git init && ( [[ -n $(ls) ]] || touch .gitignore ) && git add . && git commit -m \"Initial commit\"
 # plant?
 #+end_src
 
 *** Clone an existing repository
 
 #+begin_src conf
-	cl = clone
+    cl = clone
 #+end_src
 
 ** Check the status of your files
@@ -435,7 +435,7 @@ Give the status in the *short-format* (preceded by a line showing the /branch na
 and /tracking info/).
 
 #+begin_src conf
-	st = status -s -b
+    st = status -s -b
 #+end_src
 
 In the following example:
@@ -462,13 +462,13 @@ Staging for commit is typically done by ~git add~.
 Quickly add a file or directory to =.gitignore=:
 
 #+begin_src conf
-	ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
+    ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
 #+end_src
 
 List untracked files ignored by a =.gitignore= statement somewhere.
 
 #+begin_src conf
-        ignored = ls-files --others --ignored --exclude-standard
+    ignored = ls-files --others --ignored --exclude-standard
 #+end_src
 
 *** ~assume-unchanged~ command
@@ -476,8 +476,8 @@ List untracked files ignored by a =.gitignore= statement somewhere.
 Ignore/unignore changes to *tracked file(s)* without =.gitignore=:
 
 #+begin_src conf
-	assume = update-index --assume-unchanged
-	unassume = update-index --no-assume-unchanged
+    assume = update-index --assume-unchanged
+    unassume = update-index --no-assume-unchanged
 #+end_src
 
 It has to be configured for each project member individually.
@@ -492,13 +492,13 @@ that.
 List ignored files (*marked unchanged*):
 
 #+begin_src conf
-	assumed = "!git ls-files -v | grep '^h' | cut -c 3-"
+    assumed = "!git ls-files -v | grep '^h' | cut -c 3-"
 #+end_src
 
 Show files ignored by Git:
 
 #+begin_src conf
-	ignored = ls-files -o -i --exclude-standard
+    ignored = ls-files -o -i --exclude-standard
 #+end_src
 
 ** View your changes
@@ -506,13 +506,13 @@ Show files ignored by Git:
 *** Changes between the working tree and the index
 
 #+begin_src conf
-	df = diff
+    df = diff
 #+end_src
 
 *** Changes between the working tree and the latest commit (HEAD)
 
 #+begin_src shell :tangle no
-	diff-all = diff HEAD
+    diff-all = diff HEAD
 #+end_src
 
 *** Changes between the index (staged for the next commit) and the latest commit (HEAD)
@@ -520,7 +520,7 @@ Show files ignored by Git:
 Just before committing the *staged* changes, check what your commit changes:
 
 #+begin_src conf
-	dc = diff --cached
+    dc = diff --cached
 #+end_src
 
 *** Today
@@ -528,11 +528,11 @@ Just before committing the *staged* changes, check what your commit changes:
 Quickly see what you've done today (commits that aren't merges on all branches):
 
 #+begin_src conf
-	today = !git log --since=midnight --author=\"`git config user.name`\" --no-merges --all
+    today = !git log --since=midnight --author=\"`git config user.name`\" --no-merges --all
 #+end_src
 
 #+begin_src conf
-	today-all = !git log --since=midnight --no-merges --all
+    today-all = !git log --since=midnight --no-merges --all
 #+end_src
 
 *** Diff of branch
@@ -544,7 +544,7 @@ To see the changes in a branch since it was forked from another branch, or
 since the last merge with the origin branch, you can add this alias:
 
 #+begin_src conf
-	forkdiff = !bash -c 'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" ' -
+    forkdiff = !bash -c 'git diff $(git merge-base "$1" "$2") "$2" "${@: 3}" ' -
 #+end_src
 
 It uses ~git merge-base~ to determine the fork-point (the commit that is common
@@ -564,7 +564,7 @@ Example:
 Diverging from ~origin/master~, whatever the branch?
 
 #+begin_src conf
-	log-local = log --oneline origin..HEAD
+    log-local = log --oneline origin..HEAD
 #+end_src
 
 ** Remove deleted files
@@ -573,44 +573,44 @@ Removing multiple files from a Git repo that have already been deleted from
 disk:
 
 #+begin_src conf
-	r = !git ls-files --deleted -z | xargs -0 git rm
+    r = !git ls-files --deleted -z | xargs -0 git rm
 #+end_src
 
 ** View the commit history
 
 #+begin_src conf
-	lp = log -p
-	lg = log --decorate --oneline --graph
-	lgr = log --decorate --date=relative --graph
-	lga = log --decorate --date=short --graph
+    lp = log -p
+    lg = log --decorate --oneline --graph
+    lgr = log --decorate --date=relative --graph
+    lga = log --decorate --date=short --graph
 
-	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
-	ld = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --graph
-	ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
-	ls = "!git status -suno"
+    ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+    ld = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --graph
+    ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+    ls = "!git status -suno"
 
-	lg50 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-50s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{49}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
-	lg80 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-80s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{79}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
+    lg50 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-50s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{49}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
+    lg80 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-80s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{79}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
 #+end_src
 
 #+begin_src conf
-	ls-modified  = "!git status --porcelain -uno | awk 'match($1, /M/) {print $2}'"
-	ls-added     = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
-	ls-deleted   = "!git status --porcelain -uno | awk 'match($1, /D/) {print $2}'"
-	ls-renamed   = "!git status --porcelain -uno | awk 'match($1, /R/) {print $2}'"
-	ls-copied    = "!git status --porcelain -uno | awk 'match($1, /C/) {print $2}'"
-	ls-updated   = "!git status --porcelain -uno | awk 'match($1, /U/) {print $2}'"
-	ls-staged    = "!git status --porcelain -uno | grep -P '^[MA]' | awk '{ print $2 }'"
-	ls-untracked = "!git status --porcelain -uall | awk '$1 == \"??\" {print $2}'"
+    ls-modified  = "!git status --porcelain -uno | awk 'match($1, /M/) {print $2}'"
+    ls-added     = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
+    ls-deleted   = "!git status --porcelain -uno | awk 'match($1, /D/) {print $2}'"
+    ls-renamed   = "!git status --porcelain -uno | awk 'match($1, /R/) {print $2}'"
+    ls-copied    = "!git status --porcelain -uno | awk 'match($1, /C/) {print $2}'"
+    ls-updated   = "!git status --porcelain -uno | awk 'match($1, /U/) {print $2}'"
+    ls-staged    = "!git status --porcelain -uno | grep -P '^[MA]' | awk '{ print $2 }'"
+    ls-untracked = "!git status --porcelain -uall | awk '$1 == \"??\" {print $2}'"
 #+end_src
 
 #+begin_src conf
 # list all untracked files
-	untracked = ls-files --others
+    untracked = ls-files --others
 #+end_src
 
 #+begin_src conf
-	heads = !"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen<%an>%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
+    heads = !"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen<%an>%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
 #+end_src
 
 #+begin_note
@@ -619,25 +619,25 @@ date".
 #+end_note
 
 #+begin_src conf
-	last = log -n 1
+    last = log -n 1
 #+end_src
 
 Prettier and concise ~whatchanged~:
 
 #+begin_src conf
-	what = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --stat
+    what = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --stat
 #+end_src
 
 Prettier ~whatchanged~ with full diffs based on text search:
 
 #+begin_src conf
-	whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=iso -p -S
+    whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=iso -p -S
 #+end_src
 
 Show a "top contributors" list:
 
 #+begin_src conf
-	who = shortlog -n -s --
+    who = shortlog -n -s --
 #+end_src
 
 #+begin_note
@@ -688,21 +688,21 @@ Amend with the same message (without your editor prompting you for the message
 you've already entered).
 
 #+begin_src conf
-	amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
+    amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
 #+end_src
 
 Modify the last commit:
 
 #+begin_src conf
-	amend = commit -a -v --amend
-	fixup = commit --amend
+    amend = commit -a -v --amend
+    fixup = commit --amend
 # fixlastcommit?
 
 # Commit changes to current head as amended commit
-	plus = commit --amend -a -C HEAD
+    plus = commit --amend -a -C HEAD
 
 # append additional changes to the previous commit
-	fixup = commit --amend --reuse-message HEAD
+    fixup = commit --amend --reuse-message HEAD
 #+end_src
 
 Note that the ~-a~ switch which tells Git to automatically *stage all your changes*,
@@ -722,8 +722,8 @@ Never do this to a commit that you've already pushed to a remote repository.
 committed version.
 
 #+begin_src conf
-	undo = checkout --
-	scrap = checkout --
+    undo = checkout --
+    scrap = checkout --
 #+end_src
 
 #+begin_note
@@ -739,7 +739,7 @@ When you grab a file from a previous time, it sits *in your index*, modified.
 *Remove* the specified files *from the index* (proposed next commit):
 
 #+begin_src conf
-	unstage = reset HEAD --
+    unstage = reset HEAD --
 # OK
 #+end_src
 
@@ -762,7 +762,7 @@ else.
 Go back before last commit, with files in uncommitted state:
 
 #+begin_src conf
-	uncommit = reset --soft HEAD~1
+    uncommit = reset --soft HEAD~1
 # OK
 #+end_src
 
@@ -783,7 +783,7 @@ Reset the previous commit, but *puts* all *the changes* from that commit *in the
 working directory*:
 
 #+begin_src conf :tangle no
-	undo = reset --mixed HEAD~1
+    undo = reset --mixed HEAD~1
 # popcommit?
 #+end_src
 
@@ -800,7 +800,7 @@ changes again.
 Remove the last commit, delete staged changes and working copy changes:
 
 #+begin_src conf
-	wipe = reset --hard HEAD~1
+    wipe = reset --hard HEAD~1
 # rollback?
 #+end_src
 
@@ -858,7 +858,7 @@ branch; e.g., ~origin/foo~ (or ~github/foo~, etc., since the remote doesn't have
 be called ~origin~) if the checked out branch is ~foo~.
 
 #+begin_src conf
-	r = "remote -v"
+    r = "remote -v"
 #+end_src
 
 *** Pull
@@ -876,12 +876,12 @@ after a ~git fetch~, to fetch down *all the data* it has for the *current remote
 you do not --, the next time you do a merge.
 
 #+begin_src conf
-	in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
-	inf = !(git remote update -p && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
+    in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
+    inf = !(git remote update -p && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
 #+end_src
 
 #+begin_src conf
-	incoming = log ..@{u} --stat
+    incoming = log ..@{u} --stat
 #+end_src
 
 Show the changes between the last local commit and the *remote* branch:
@@ -890,7 +890,7 @@ Show a *single diffstat* (number of added and deleted lines for *all changed
 files*):
 
 #+begin_src conf
-	in-what = diff --stat ...@{u}
+    in-what = diff --stat ...@{u}
 #+end_src
 
 #+begin_warning
@@ -902,7 +902,7 @@ Before doing work (in a new branch), ensure that the working directory is
 up-to-date with the ~origin~ (pull and get latest for all submodules):
 
 #+begin_src conf
-	up = !git pull --rebase --prune $@ && git submodule update --init --recursive
+    up = !git pull --rebase --prune $@ && git submodule update --init --recursive
 #+end_src
 
 XXX Pull current branch only?
@@ -910,13 +910,13 @@ XXX Pull current branch only?
 Pull all:
 
 #+begin_src conf
-	pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
+    pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
 #+end_src
 
 XXX
 
 #+begin_src conf
-	up = !git pull --ff-only
+    up = !git pull --ff-only
 #+end_src
 
 is pretty safe.  It will abort the merge if it can't be done using fast-forward.
@@ -953,11 +953,11 @@ The ~out~ command returns a list of *unpushed* (outgoing) commits for the *curre
 branch*, the next time you do a push.
 
 #+begin_src conf
-	out = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' @{u}..
+    out = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' @{u}..
 #+end_src
 
 #+begin_src conf
-	outgoing = log @{u}.. --stat
+    outgoing = log @{u}.. --stat
 #+end_src
 
 This causes git log to show all commits reachable from ~HEAD~ excluding those
@@ -973,17 +973,17 @@ remote and to set up tracking.
 If you want to see all *unpushed* commits from *all branches*, do this:
 
 #+begin_src conf
-	out-all = log --branches --not --remotes --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset'
+    out-all = log --branches --not --remotes --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset'
 #+end_src
 
 *** Sync
 
 #+begin_src conf
-	sync = !git pull && git push
+    sync = !git pull && git push
 #+end_src
 
 #+begin_src conf
-	sync = !git update && git co master && git pull && git co @{-1}
+    sync = !git update && git co master && git pull && git co @{-1}
 #+end_src
 
 That's rather basic - it doesn't actually rebase my branch that I'm on.
@@ -991,8 +991,8 @@ That's rather basic - it doesn't actually rebase my branch that I'm on.
 Let's do a slightly different command: ~resync~
 
 #+begin_src conf
-	# git resync -> sync repository and rebase current branch
-	resync = !sh -c 'BRANCH_NAME=master && git co master && git fe && git reset --hard origin/master && git rebase master'
+    # git resync -> sync repository and rebase current branch
+    resync = !sh -c 'BRANCH_NAME=master && git co master && git fe && git reset --hard origin/master && git rebase master'
 #+end_src
 
 ** Tag
@@ -1000,23 +1000,23 @@ Let's do a slightly different command: ~resync~
 List tags using (better) version sorting (if your ~sort~ supports it):
 
 #+begin_src conf
-	tags = !git tag | sort -V
+    tags = !git tag | sort -V
 #+end_src
 
 Show the last tag:
 
 #+begin_src conf
-	lasttag = describe --tags --abbrev=0
+    lasttag = describe --tags --abbrev=0
 #+end_src
 
 ** Branch
 
 #+begin_src conf
-	co = checkout
+    co = checkout
 #+end_src
 
 #+begin_src conf
-	cob = checkout -b
+    cob = checkout -b
 # grow?
 #+end_src
 
@@ -1048,8 +1048,8 @@ with SSL/TLS...)
 Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][common branches]] (useful if you have feature branches):
 
 #+begin_src conf
-	master = checkout master
-	develop = checkout develop
+    master = checkout master
+    develop = checkout develop
 #+end_src
 
 *List all branches* (both remote-tracking and local branches), showing SHA1 and
@@ -1057,14 +1057,14 @@ commit subject line for each head, along with the name of the upstream branch
 (if any).
 
 #+begin_src conf
-	br = branch -a -vv
+    br = branch -a -vv
 #+end_src
 
 ~git bclean~ is meant to be run from your master (or default) branch and does the
 cleanup of merged branches.
 
 #+begin_src conf
-	bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; f"
+    bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; f"
 #+end_src
 
 When I'm done with this topic branch and I want to clean everything up on my
@@ -1075,14 +1075,14 @@ local machine, I use git bdone:
 3. Delete all branches already merged into master using another alias, git bclean
 
 #+begin_src conf
-	bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+    bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
 #+end_src
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
 #+begin_src conf
-	# current branch
-	cb = "name-rev --name-only HEAD"
+    # current branch
+    cb = "name-rev --name-only HEAD"
 #+end_src
 
 ** Merge
@@ -1093,9 +1093,9 @@ process that identifies changes made since the branches diverged, and then
 applies all those changes together.
 
 #+begin_src conf
-	ff = merge --ff-only
-	ff = merge --ff-only @{u}
-	mm = merge --no-ff
+    ff = merge --ff-only
+    ff = merge --ff-only @{u}
+    mm = merge --no-ff
 #+end_src
 
 If you're the Branch/Integration manager, you can use these aliases to *merge*
@@ -1107,8 +1107,8 @@ let you pick a file(s) from the current branch or the merged branch
 respectively:
 
 #+begin_src conf
-	ours = "!f() { git checkout --ours $@ && git add $@; }; f"
-	theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+    ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+    theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 #+end_src
 
 ** Prepare a release
@@ -1116,7 +1116,7 @@ respectively:
 Save a repo as a tarball:
 
 #+begin_src conf
-	export = archive -o latest.tar.gz -9 --prefix=latest/
+    export = archive -o latest.tar.gz -9 --prefix=latest/
 #+end_src
 
 ** Cherrypick style recording
@@ -1124,7 +1124,7 @@ Save a repo as a tarball:
 Ask interactively which patch hunk to commit, and then do the commit:
 
 #+begin_src conf
-	record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+    record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 #+end_src
 
 It will not only do ~git add -p~ (with an optional file list), but it will also
@@ -1146,7 +1146,7 @@ git stash save "DESCRIBE WHAT YOU DID HERE"
 Take named stash:
 
 #+begin_src conf
-	snapshot = !git stash save "Snapshot: $(date +\"%F %a %R\")" && git stash apply "stash@{0}"
+    snapshot = !git stash save "Snapshot: $(date +\"%F %a %R\")" && git stash apply "stash@{0}"
 #+end_src
 
 When you're done, with ~git stash apply~ (top stash by default), you're back where
@@ -1164,29 +1164,29 @@ git stash clear
 You can operate on the "stash" ref as if it were any other ref.
 
 #+begin_src conf
-	ss = stash save
-	sl = stash list
-	sa = stash apply
+    ss = stash save
+    sl = stash list
+    sa = stash apply
 #+end_src
 
 #+begin_src conf
-	hide = stash
-	unhide = stash apply
+    hide = stash
+    unhide = stash apply
 # bad aliases, used by some instead to mean assume and unassume...
 #+end_src
 
 #+begin_src conf
-	stp = stash pop
-	std = stash drop
+    stp = stash pop
+    std = stash drop
 #+end_src
 
 #+begin_src conf
-	stashdiff = stash show -p -w stash@{0}
-	stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
+    stashdiff = stash show -p -w stash@{0}
+    stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
 #+end_src
 
 #+begin_src conf
-	plop = "!git stash && git pull && git stash pop"
+    plop = "!git stash && git pull && git stash pop"
 # cleanpull
 # update (like svn? if we add a git reset in front?)
 # sync
@@ -1196,8 +1196,8 @@ You can operate on the "stash" ref as if it were any other ref.
 https://news.ycombinator.com/item?id=2301765.
 
 #+begin_src conf
-	sp = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash && git pull && git stash pop
-	spp = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash && git pull && git push && git stash pop
+    sp = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash && git pull && git stash pop
+    spp = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash && git pull && git push && git stash pop
 #+end_src
 
 #+begin_src shell :tangle no
@@ -1256,7 +1256,7 @@ of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-        find = "log --all --grep"
+    find = "log --all --grep"
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -1307,7 +1307,7 @@ interface with your repository's Git database; for example, for searching:
 - files registered in the index, rather than the working tree.
 
 #+begin_src conf
-	gr = "grep --break --heading"
+    gr = "grep --break --heading"
 #+end_src
 
 XXX works only on files really in Git (bypassing ignored files)?
@@ -1323,20 +1323,20 @@ XXX works only on files really in Git (bypassing ignored files)?
   directly or by any of its ancestors. You can get these back too!
 
 #+begin_src conf
-	lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+    lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 #+end_src
 
 ** COMMENT Git and Subversion
 
 #+begin_src conf
-	spull = svn rebase
-	spush = svn dcommit
-	slog = svn log --oneline --show-commit
+    spull = svn rebase
+    spush = svn dcommit
+    slog = svn log --oneline --show-commit
 #+end_src
 
 #+begin_src conf
-	cvs-full-log = log --reverse --pretty=format:'%B\n--------------------------------------------\n'
-	cvsmerge = merge --no-ff --log
+    cvs-full-log = log --reverse --pretty=format:'%B\n--------------------------------------------\n'
+    cvsmerge = merge --no-ff --log
 #+end_src
 
 ** Tips and tricks
@@ -1344,13 +1344,13 @@ XXX works only on files really in Git (bypassing ignored files)?
 Directed Acyclic Graph:
 
 #+begin_src conf
-	graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
+    graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
 #+end_src
 
 ** Find out if a change is part of a release
 
 #+begin_src conf
-	sha1-tag = '!f() { git name-rev --name-only "$@"; }; f'
+    sha1-tag = '!f() { git name-rev --name-only "$@"; }; f'
 #+end_src
 
 The ~name-rev~ command indicates the *position of a commit relative to tags* in the
@@ -1363,8 +1363,8 @@ Filter the list of branches to only those which have the given commit among
 their ancestors.
 
 #+begin_src conf
-	sha1-branch = '!f() { git branch -a --contains "$@"; }; f'
-	where = "branch -a --contains"
+    sha1-branch = '!f() { git branch -a --contains "$@"; }; f'
+    where = "branch -a --contains"
 #+end_src
 
 This also includes *remote* tracking branches in the list.
