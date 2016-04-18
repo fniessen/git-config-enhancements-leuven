@@ -44,21 +44,20 @@ you had those changes all along.  You could then push.  So, something
 like:
 
 #+begin_src shell :tangle no
-  # commit all changes and attempt to push, pulling in changes if
-  # necessary and re-pushing; on failure, restore to previous state with
-  # changes uncomitted
-  git commit -am Foo \
-    && {
-      git push \
-        |   | { |
-          { git pull --rebase || handle-pull-conflicts; } \
-            && git push;
-        }
-    } \
-    |   | { |
-      git reset --soft HEAD^
-      echo 'Commit failed.'
-    }
+# Commit all changes and attempt to push, pulling in changes if necessary and
+# re-pushing; on failure, restore to previous state with changes uncomitted.
+git commit -am Foo \
+  && {
+    git push \
+      |   | { |
+        { git pull --rebase || handle-pull-conflicts; } \
+          && git push;
+      }
+  } \
+  |   | { |
+    git reset --soft HEAD^
+    echo 'Commit failed.'
+  }
 #+end_src
 
 But what if rebasing fails?  Then you are left resolving a conflict
@@ -184,6 +183,9 @@ committer and author of a change in every commit.
 [user]
     name = John Doe
     email = johndoe@example.com
+
+[github]
+    user = jdoe
 #+end_src
 
 You should "override" the above with your personal details:
@@ -605,7 +607,7 @@ disk:
 #+end_src
 
 #+begin_src conf
-# list all untracked files
+    # List all untracked files.
     untracked = ls-files --others
 #+end_src
 
@@ -698,10 +700,10 @@ Modify the last commit:
     fixup = commit --amend
 # fixlastcommit?
 
-# Commit changes to current head as amended commit
+# Commit changes to current head as amended commit.
     plus = commit --amend -a -C HEAD
 
-# append additional changes to the previous commit
+# Append additional changes to the previous commit.
     fixup = commit --amend --reuse-message HEAD
 #+end_src
 
@@ -709,7 +711,7 @@ Note that the ~-a~ switch which tells Git to automatically *stage all your chang
 as if you ran ~git add .~ right before the commit.
 
 #+begin_src shell :tangle no
-git commit --amend            # correct the previous commit, with the staged changes
+git commit --amend                      # Correct the previous commit, with the staged changes.
 #+end_src
 
 #+begin_warning
@@ -991,7 +993,7 @@ That's rather basic - it doesn't actually rebase my branch that I'm on.
 Let's do a slightly different command: ~resync~
 
 #+begin_src conf
-    # git resync -> sync repository and rebase current branch
+    # git resync -> sync repository and rebase current branch.
     resync = !sh -c 'BRANCH_NAME=master && git co master && git fe && git reset --hard origin/master && git rebase master'
 #+end_src
 
@@ -1081,7 +1083,7 @@ local machine, I use git bdone:
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
 #+begin_src conf
-    # current branch
+    # Current branch.
     cb = "name-rev --name-only HEAD"
 #+end_src
 
@@ -1232,7 +1234,7 @@ Alternative to ~stash~ (writing a commit with a default message):
                                            # keeps all the changes from that
                                            # commit in the working directory).
 
-   git reset --soft                        # or this one???
+   git reset --soft                        # Or this one???
    #+end_src
 
    Or, if I merely need to modify the previous commit:
