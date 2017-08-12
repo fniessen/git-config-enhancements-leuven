@@ -6,11 +6,10 @@
 #+LANGUAGE:  en
 #+OPTIONS:   H:4 num:nil toc:2
 
-# #+SETUPFILE: ./bigblow-pirilampo.setup
-#+SETUPFILE: ~/src/org-html-themes/setup/theme-readtheorg-local-abs.setup
+#+SETUPFILE: ~/.dotfiles/org/theme-readtheorg.setup
 
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+PROPERTY:  header-args :tangle ~/.gitconfig :eval no
+#+PROPERTY:  header-args :tangle ~/.dotfiles/home/.gitconfig :eval no
 
 *Commit early, commit often*: it is a bad idea to do a lot of work without
 committing.
@@ -26,6 +25,17 @@ might have. So *BE EXTREMELY CAREFUL*!
 #+end_warning
 
 * COMMENT Tasks
+
+See https://blog.liip.ch/archive/2015/12/11/git-tips-tricks.html!!! XXX
+
+** TODO Look at Git Power Routines [course]
+
+https://www.youtube.com/playlist?list=PLDshL1Z581YYxLsjYwM25HkIYrymXb7H_
+
+** TODO Read about Git
+
+http://marlacorinne.4parkers.com/2012/07/20/git-pull-vs-git-fetch-then-merge/
+https://adamcod.es/2014/12/10/git-pull-correct-workflow.html
 
 ** TODO Add doc about push failure
 
@@ -111,7 +121,7 @@ remote branch (using `git push --force`) and someone needs a talkin' to.
 
 ** TODO Outsource and include private entries in .gitconfig
 
-Git (1.7.10+) now supports this syntax in .gitconfig:
+Git 1.7.10+ supports this syntax in =.gitconfig=:
 
 #+begin_src conf :tangle no
 [include]
@@ -174,6 +184,16 @@ better idea.
 
 From [[gnus:INBOX#87vbhhi69x.fsf@uwakimon.sk.tsukuba.ac.jp][Email from Stephen J. Turnbull: Re: VC mode and git]]
 
+** Git the simple guide
+
+http://rogerdudler.github.io/git-guide/
+
+** Git rebase branch
+
+#+begin_src shell :tangle no
+git pull --rebase -r origin master
+#+end_src
+
 * User                                                                 :ARCHIVE:
 
 Setting your user name and e-mail address is important because Git stores the
@@ -225,7 +245,7 @@ variable/.
 #+end_src
 
 #+begin_src conf
-    whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+#    whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
 #+end_src
 
 #+begin_src conf :tangle no
@@ -243,6 +263,7 @@ variable/.
 #+begin_src conf
 [diff]
     renames = copies
+    renameLimit = 12000
     algorithm = patience
 #+end_src
 
@@ -251,6 +272,18 @@ as prefixes for patches:
 
 #+begin_src conf
     mnemonicprefix = true
+#+end_src
+
+#+begin_src conf
+    tool = meld
+#+end_src
+
+* Apply                                                                :ARCHIVE:
+
+#+begin_src conf
+[apply]
+    # Detect whitespace errors when applying a patch.
+    whitespace = fix
 #+end_src
 
 * Pull                                                                 :ARCHIVE:
@@ -283,6 +316,98 @@ with the /same name/.
 [merge]
     stat = true
     summary = true
+
+    # Include summaries of merged commits in newly created merge commit messages.
+    log = true
+#+end_src
+
+#+begin_src conf
+    conflictstyle = diff3
+#+end_src
+
+- For small changes, ~git diff~ and ~vc-diff~ are perfect.
+- For medium changes, ~magit~ is perfect.
+- For large changes, [[https://www.deltawalker.com/][DeltaWalker]] (39.95 USD) is perfect.
+
+** Emacs as a Git mergetool
+
+Ediff or Emerge?  Or Magit???
+
+#+begin_src conf :tangle no
+[merge]
+    tool = ediff
+
+[mergetool "ediff"]
+    cmd = emacsclient -c -a \"\"  --eval \"(ediff-merge-files-with-ancestor \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\" nil \\\"$MERGED\\\")\"
+#+end_src
+
+** Meld as Git mergetool
+
+*How do I set up and use Meld as my git mergetool?*
+See https://stackoverflow.com/questions/34119866/setting-up-and-using-meld-as-your-git-difftool-and-mergetool.
+
+See ~auto-merge~ in
+https://stackoverflow.com/questions/11133290/git-merging-using-meld (first and
+second solution).
+
+#+begin_src conf
+    tool = meld
+#+end_src
+
+Firstly here is what the parameters mean:
+
+- ~$LOCAL~ is the file in the *current branch* (e.g. ~master~).
+
+- ~$REMOTE~ is the file in the *branch being merged* (e.g. ~branch_name~).
+
+- ~$MERGED~ is the *partially merged file* with the merge conflict information in
+  it.
+
+- ~$BASE~ is the *common ancestor* of ~$LOCAL~ and ~$REMOTE~, this is to say the file as
+  it was (before both changes) when the branch containing ~$REMOTE~ was originally
+  created.
+
+I suggest you use either:
+
+#+begin_src conf :tangle no
+[mergetool "meld"]
+    cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
+#+end_src
+
+or:
+
+#+begin_src conf :tangle no
+[mergetool "meld"]
+    cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
+#+end_src
+
+The choice is whether to use ~$MERGED~ or ~$BASE~ in between ~$LOCAL~ and ~$REMOTE~.
+
+Either way, Meld will display 3 panes with:
+
+- ~$LOCAL~ in the left pane,
+- ~$REMOTE~ in the right pane and
+- either ~$MERGED~ or ~$BASE~ in the middle pane.
+
+In BOTH cases, *the middle pane is the file that you should edit to resolve the
+merge conflicts*.  The difference is just in which starting edit position you'd
+prefer:
+
+- ~$MERGED~ for the file which contains the partially merged file with the merge
+  conflict information or
+
+- ~$BASE~ for the shared commit ancestor of ~$LOCAL~ and ~$REMOTE~.
+
+#+begin_note
+Since both cmd lines can be useful, I keep them both in my =.gitconfig= file. Most
+of the time I use the ~$MERGED~ line and the ~$BASE~ line is commented out, but the
+commenting out can be swapped over if I want to use the ~$BASE~ line instead.
+#+end_note
+
+#+begin_src conf
+[mergetool "meld"]
+    cmd = meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
+    # cmd = meld --diff "$LOCAL" "$BASE" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
 #+end_src
 
 * Rebase                                                               :ARCHIVE:
@@ -297,10 +422,16 @@ pull.
 
 * Grep                                                                 :ARCHIVE:
 
+https://git-scm.com/docs/git-grep
+
 #+begin_src conf
 [grep]
-    fullname = true
-    linenumber = true
+    lineNumber = true
+
+    # # Allow extended regular expressions
+    # extendedRegexp = true
+
+    fullName = true
 #+end_src
 
 * Color                                                                :ARCHIVE:
@@ -378,14 +509,12 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 
 * Aliases
 
-If you forget your aliases and don't want to open =.gitconfig= just to check, type
-~git alias~:
-
 #+begin_src conf
 [alias]
 #+end_src
 
-Print the current list of Git aliases:
+If you forget your aliases and don't want to open =.gitconfig= just to check, type
+~git alias~ to *print the current list of Git aliases*:
 
 #+begin_src conf
     alias = "!git config -l | grep alias | cut -c 7- | sort"
@@ -398,6 +527,52 @@ Print the current list of Git aliases:
 
 (see http://gitimmersion.com/lab_11.html)
 
+#+begin_src conf
+    exec = '!exec '
+#+end_src
+
+#+begin_src conf
+    # Show the diff between the latest commit and the current state
+    d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
+
+    # `git di $number` shows the diff between the state `$number` revisions ago and the current state
+    di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
+
+    # Pull in remote changes for the current repository and all its submodules
+    p = !"git pull; git submodule foreach git pull origin master"
+
+    # Commit all changes
+    ca = !git add -A && git commit -av
+
+    # Credit an author on the LATEST commit
+    credit = "!f() { git commit --amend --author \"$1 <$2>\" -C HEAD; }; f"
+
+    # Interactive rebase with the given number of latest commits
+    reb = "!r() { git rebase -i HEAD~$1; }; r"
+#+end_src
+
+#+begin_src conf
+    # Find branches containing commit
+    fb = "!f() { git branch -a --contains $1; }; f"
+
+    # Find tags containing commit
+    ft = "!f() { git describe --always --contains $1; }; f"
+
+    # Find commits by source code
+    fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+
+    # Find commits by commit message
+    fm = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+#+end_src
+
+#+begin_src conf
+    # Remove branches that have already been merged with master
+    dm = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
+#+end_src
+
+So, I can do things like ~git exec make~. This works because shell aliases are
+always executed in the top-level directory.
+
 ** Abbreviations
 
 Basic shortcuts.
@@ -408,11 +583,26 @@ Basic shortcuts.
 
 #+begin_src conf
     cp = cherry-pick -x
+    pick = cherry-pick -s
+#+end_src
+
+#+begin_src conf
     ls = ls-files
 #+end_src
 
 #+begin_src conf
     h = help
+#+end_src
+
+** TODO To sort out
+
+#+begin_src conf
+    grep4d = !sh -c 'git log -p -S'$1' $2' -
+
+    # 2009-05-26  (merged-bed-bug) 6fe85ff regenerate rules Brad Bowman
+    logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
+    brdate = !"sh -c 'for b in `git branch --no-merged` ; \
+               do git logdate -1 -r $b --; done'" 
 #+end_src
 
 ** Getting a Git repository
@@ -428,7 +618,8 @@ Basic shortcuts.
 *** Clone an existing repository
 
 #+begin_src conf
-    cl = clone
+    # Clone a repository including all submodules.
+    cl = clone --recursive
 #+end_src
 
 ** Check the status of your files
@@ -467,7 +658,7 @@ Quickly add a file or directory to =.gitignore=:
     ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
 #+end_src
 
-List untracked files ignored by a =.gitignore= statement somewhere.
+List untracked *files ignored* by a =.gitignore= statement somewhere.
 
 #+begin_src conf
     ignored = ls-files --others --ignored --exclude-standard
@@ -497,18 +688,13 @@ List ignored files (*marked unchanged*):
     assumed = "!git ls-files -v | grep '^h' | cut -c 3-"
 #+end_src
 
-Show files ignored by Git:
-
-#+begin_src conf
-    ignored = ls-files -o -i --exclude-standard
-#+end_src
-
 ** View your changes
 
-*** Changes between the working tree and the index
+*** Changes between the working tree and the index (staged for the next commit)
 
 #+begin_src conf
     df = diff
+    dw = diff --word-diff
 #+end_src
 
 *** Changes between the working tree and the latest commit (HEAD)
@@ -523,6 +709,15 @@ Just before committing the *staged* changes, check what your commit changes:
 
 #+begin_src conf
     dc = diff --cached
+#+end_src
+
+*** Precommit
+
+This is a key part of my workflow. I run this before every commit to make sure
+I don't need to use the undo commands.
+
+#+begin_src conf
+    precommit = diff --cached --diff-algorithm=minimal -w
 #+end_src
 
 *** Today
@@ -575,7 +770,7 @@ Removing multiple files from a Git repo that have already been deleted from
 disk:
 
 #+begin_src conf
-    r = !git ls-files --deleted -z | xargs -0 git rm
+    rma = !git ls-files --deleted -z | xargs -0 git rm
 #+end_src
 
 ** View the commit history
@@ -593,6 +788,12 @@ disk:
 
     lg50 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-50s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{49}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
     lg80 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-80s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{79}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
+#+end_src
+
+To see real *timeline* of who is working on what and when:
+
+#+begin_src conf
+    graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %Creset %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
 #+end_src
 
 #+begin_src conf
@@ -621,8 +822,10 @@ date".
 #+end_note
 
 #+begin_src conf
-    last = log -n 1
+    last = log -1 --stat
 #+end_src
+
+*** What changed
 
 Prettier and concise ~whatchanged~:
 
@@ -636,10 +839,51 @@ Prettier ~whatchanged~ with full diffs based on text search:
     whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=iso -p -S
 #+end_src
 
+*** List all the changed files in a commit
+
+*List all the ~changed~ files in a commit*:
+
+#+begin_src conf
+    changed = show --pretty="format:" --name-only
+    #+end_src
+
+List all the changed files *between 2 commits*:
+
+    #+begin_src conf
+    diffn = diff --name-only
+#+end_src
+
+(See ~git what~ as well!)
+(Use Tig?  Use git blame?)
+
+XXX They don't show the same files (test with ~git changed HEAD~1~ and ~git diffn HEAD~1~) XXX
+
+#+begin_src shell :tangle no
+git changed                             # List files modified in last commit.
+git changed bAda55                      # List files modified in this commit.
+git changed bAda55..ff0021              # List files modified between those commits.
+#+end_src
+
+*** List all commits that changed a specific file
+
+*List all commits* that changed a *specific file* (it accounts for renames!):
+
+#+begin_src conf
+    lf = "log --follow"
+    logfile = log --follow -C
+#+end_src
+
+#+begin_warning
+Put a end of options character (--) after lf and before the path!!
+#+end_warning
+
+*** Show a "top contributors" list
+
 Show a "top contributors" list:
 
 #+begin_src conf
     who = shortlog -n -s --
+    # who = shortlog -n -s -e --
 #+end_src
 
 #+begin_note
@@ -656,7 +900,7 @@ The ~--~ signals the end of options, that the rest of the parameters are limiter
 > I decide it is ready to install.
 
 That is a good reason. However, for your information there is the variant “git
-commit --amend”, which as the option suggests amends the current commit. Just
+commit --amend”, which as the option suggests amends the *current* commit. Just
 “git add“ the files you changed and run “git commit --amend”. It also lets you
 edit the commit message. After discovering this option, I find I am less fearful
 of making premature commits, since they are easily fixed. (But not after
@@ -693,11 +937,11 @@ you've already entered).
     amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
 #+end_src
 
-Modify the last commit:
+Modify the *last* commit:
 
 #+begin_src conf
     amend = commit -a -v --amend
-    fixup = commit --amend
+    amend = commit --amend
 # fixlastcommit?
 
 # Commit changes to current head as amended commit.
@@ -711,21 +955,30 @@ Note that the ~-a~ switch which tells Git to automatically *stage all your chang
 as if you ran ~git add .~ right before the commit.
 
 #+begin_src shell :tangle no
-git commit --amend                      # Correct the previous commit, with the staged changes.
+git commit --amend                      # Correct the PREVIOUS commit, with the staged changes.
 #+end_src
 
 #+begin_warning
 Never do this to a commit that you've already pushed to a remote repository.
 #+end_warning
 
-*** Unmodify a modified file
+Solution for *amending older commits*:
+https://stackoverflow.com/questions/3042437/change-commit-author-at-one-specific-commit
+(see 1st and 2nd answers!)
+
+*** Unmodify a modified file / Undelete a deleted file
 
 *Undo* the local changes *in the working directory*: roll a file back to its last
 committed version.
 
+#+begin_tip
+It can also recover *deleted files* -- if the deletion has not been committed.
+#+end_tip
+
 #+begin_src conf
-    undo = checkout --
-    scrap = checkout --
+    # undo = checkout --
+    unmodify = checkout --
+    undelete = checkout --
 #+end_src
 
 #+begin_note
@@ -759,13 +1012,15 @@ http://git-scm.com/2011/07/11/reset.html
 ~git reset~ is a simple way to undo changes that haven't been shared with anyone
 else.
 
+See « Undo 'git add' before commit ».
+
 **** Do not touch the index file or the working tree at all
 
 Go back before last commit, with files in uncommitted state:
 
 #+begin_src conf
     uncommit = reset --soft HEAD~1
-# OK
+# OK (or undolast)
 #+end_src
 
 ~uncommit~ *removes the last commit* from your repository, and *puts the changes
@@ -823,9 +1078,23 @@ any files from the tracked root directory that are not under Git tracking.
 *WARNING -- BE CAREFUL WITH THIS!*  It is helpful to run a dry-run with ~git clean~
 first, to see what it will delete.
 
-Use ~git clean -f~ (to remove the untracked files) and ~-fd~ (to also *remove
-untracked directories*).
+Use:
+- ~git clean -n~ to see what ~git clean -f~ will do, so you can be sure it's what
+  you want.
+- ~git clean -f~ (to *remove* the *untracked files*) and
+- ~git clean -fd~ (to also *remove untracked directories*).
 #+end_note
+
+Nuclear version:
+
+#+begin_src conf
+    nevermind = !git reset --hard HEAD && git clean -d -f
+#+end_src
+
+which:
+- unstages changes in the index,
+- discards changes in the working directory, and
+- removes any new files.
 
 XXX What is the difference with ~git checkout .~?  See
 https://wiki.mozilla.org/Cjku/git#git-reset_and_git-checkout.
@@ -861,6 +1130,7 @@ be called ~origin~) if the checked out branch is ~foo~.
 
 #+begin_src conf
     r = "remote -v"
+    remotes = remote -v
 #+end_src
 
 *** Pull
@@ -900,12 +1170,16 @@ The upstream diff ~in-what~ will show the negative of unpushed (rebased) commits
 if any, with the ~..~ notation --- not with the ~...~ notation!
 #+end_warning
 
-Before doing work (in a new branch), ensure that the working directory is
-up-to-date with the ~origin~ (pull and get latest for all submodules):
+Before doing work (in a new branch), *ensure that the working directory is*
+*up-to-date* with the ~origin~ (pull and get latest for all submodules):
 
 #+begin_src conf
     up = !git pull --rebase --prune $@ && git submodule update --init --recursive
+# `up' used many times
+    update = !git pull && git submodule update --init --recursive
 #+end_src
+
+[[https://gist.github.com/gitaarik/8735255][Git Submodules basic explanation]]
 
 XXX Pull current branch only?
 
@@ -919,7 +1193,8 @@ XXX
 
 #+begin_src conf
     up = !git pull --ff-only
-#+end_src
+# `up' used many times
+    #+end_src
 
 is pretty safe.  It will abort the merge if it can't be done using fast-forward.
 (In other words, if the local branch has diverged from the remote.)
@@ -929,6 +1204,63 @@ is pretty safe.  It will abort the merge if it can't be done using fast-forward.
 touch the locally changed files, but will fail otherwise.  Which makes a lot of
 sense.
 #+end_note
+
+with *all versions* of Git, I recommend using ~git up~ instead of ~git pull~.
+
+    #+begin_src conf
+    up = !git remote update -p; git merge --ff-only @{u}
+# `up' used many times
+#+end_src
+
+See https://stackoverflow.com/questions/15316601/in-what-cases-could-git-pull-be-harmful
+
+*** Update all local branches
+
+See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
+(+ interesting comments about *rebase vs merge during a pull*!)
+
+#+begin_src shell :tangle ~/.dotfiles/bin/git-up-all
+#!/bin/bash
+
+REMOTES="$@";
+if [ -z "$REMOTES" ]; then
+    REMOTES=$(git remote);
+fi
+REMOTES=$(echo "$REMOTES" | xargs -n1 echo)
+
+CLB=$(git branch -l | awk '/^\*/{print $2}');
+
+echo "$REMOTES" | while read REMOTE; do
+    git remote update $REMOTE
+    git remote show $REMOTE -n \
+        | awk '/merges with remote/ {print $5" "$1}' \
+        | while read line; do
+              RB=$(echo "$line" | cut -f1 -d" ");
+              ARB="refs/remotes/$REMOTE/$RB";
+              LB=$(echo "$line" | cut -f2 -d" ");
+              ALB="refs/heads/$LB";
+              NBEHIND=$(( $(git rev-list --count $ALB..$ARB 2> /dev/null) + 0));
+              NAHEAD=$(( $(git rev-list --count $ARB..$ALB 2> /dev/null) + 0));
+              if [ "$NBEHIND" -gt 0 ]; then
+                  if [ "$NAHEAD" -gt 0 ]; then
+                      echo -e "$LB \tis $NBEHIND commit(s) behind and $NAHEAD commit(s) ahead of $REMOTE/$RB.  Could not be fast-forwarded";
+                  elif [ "$LB" = "$CLB" ]; then
+                      echo -e "$LB \twas $NBEHIND commit(s) behind of $REMOTE/$RB.  Fast-forwarding merge...";
+                      echo git merge -q $ARB;
+                  else
+                      echo -e "$LB \twas $NBEHIND commit(s) behind of $REMOTE/$RB.  Resetting local branch to remote...";
+                      echo git branch -l -f $LB -t $ARB > /dev/null;
+                  fi
+              fi
+    done
+done
+#+end_src
+
+*** Get timestamp of last pull
+
+#+begin_src conf
+    when = !stat -c %y .git/FETCH_HEAD
+#+end_src
 
 *** Push
 
@@ -1002,7 +1334,15 @@ Let's do a slightly different command: ~resync~
 List tags using (better) version sorting (if your ~sort~ supports it):
 
 #+begin_src conf
+    # Show verbose output about tags.
+    tags = tag -l
     tags = !git tag | sort -V
+#+end_src
+
+You can do a lot better with:
+
+#+begin_src conf
+    releases = log --decorate --oneline --simplify-by-decoration --all
 #+end_src
 
 Show the last tag:
@@ -1013,11 +1353,23 @@ Show the last tag:
 
 ** Branch
 
+See http://nuclearsquid.com/writings/git-tricks-tips-workflows/ for more
+interesting stuff, such as:
+
+- When branching off a remote branch, automatically let the local branch track
+  the remote branch:
+
+- When pushing without giving a refspec, push the current branch to its upstream
+  branch. See the git config man page for more possible options.
+
 #+begin_src conf
     co = checkout
 #+end_src
 
 #+begin_src conf
+    # Switch to a branch, creating it if necessary.
+    go = checkout -B
+
     cob = checkout -b
 # grow?
 #+end_src
@@ -1074,7 +1426,8 @@ local machine, I use git bdone:
 
 1. Switch to master (though you can specify a different default branch)
 2. Run git up to bring master up to speed with the origin
-3. Delete all branches already merged into master using another alias, git bclean
+3. Delete all branches already merged into master using another alias,
+   ~git bclean~
 
 #+begin_src conf
     bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
@@ -1086,6 +1439,19 @@ See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
     # Current branch.
     cb = "name-rev --name-only HEAD"
 #+end_src
+
+*** How to git diff all changes since branching from master?
+
+Show all commits in a git branch since original branching point from master:
+
+#+begin_src conf
+    sincemaster = diff master...
+#+end_src
+
+When you use three dots, ~git diff~ finds the1 merge-base between the left and
+right side commit SHA-1s (as obtained from the names, or defaulting to ~HEAD~) and
+substitutes that in for the left-side SHA-1. The right-side SHA-1 (as resolved
+from the name) remains intact.
 
 ** Merge
 
@@ -1113,6 +1479,28 @@ respectively:
     theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 #+end_src
 
+Best (and safest) way to merge a Git local branch into ~master~:
+
+#+begin_src shell :tangle no
+git checkout master
+git pull origin master                  # Get the latest changes from the remote.
+git merge test
+git push origin master
+
+git branch -d branch_name               # Delete local branch.
+#+end_src
+
+Best answer I have seen on ~git merge~ *strategies*:
+https://stackoverflow.com/questions/366860/when-would-you-use-the-different-git-merge-strategies
+
+*** List conflicted files
+
+Unmerged files after a merge failure:
+
+#+begin_src conf
+    conflicts = "!git ls-files -u | cut -f 2 | sort -u"
+#+end_src
+
 ** Prepare a release
 
 Save a repo as a tarball:
@@ -1137,13 +1525,21 @@ will ~reset~ the index.
 
 A *stash* is nothing but a *(temporary) branch*.
 
-~git stash~ makes a temporary copy of the *index* and the *working tree*, and clears
-the decks so you can easily work on something else; it reverts your local
-modifications, allowing you to get rid of some incomplete changes:
+~git stash~ makes a temporary copy of the changes in your *index* (staging area) and
+*working tree*, and clears the decks so you can easily work on something else; it
+reverts your local modifications, allowing you to get rid of some incomplete
+changes:
 
 #+begin_src conf :tangle no
 git stash save "DESCRIBE WHAT YOU DID HERE"
 #+end_src
+
+This command is useful in saving all changes not ready to be committed and the
+user wants to have an updated repository.
+
+#+begin_tip
+Use ~git stash~ if Git refused to merge because it foresees conflicts.
+#+end_tip
 
 Take named stash:
 
@@ -1159,7 +1555,7 @@ Be aware that, unlike ~git stash apply~ (though it has its use), ~git stash pop~
 *deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
 conflicts, Git will not remove it (but it will still apply it)!
 
-#+begin_src conf :tangle no
+#+begin_src shell :tangle no
 git stash clear
 #+end_src
 
@@ -1170,6 +1566,21 @@ You can operate on the "stash" ref as if it were any other ref.
     sl = stash list
     sa = stash apply
 #+end_src
+
+#+begin_src conf
+    stashes = stash list
+#+end_src
+
+#+begin_src conf
+    save = stash save
+    savepatch = stash save --patch
+    savescratch = stash save --keep-index
+    pop = stash pop
+#+end_src
+
+~git stash pop~ removes the most recent stash or any stash specified and applies
+changes as a merge. If merge fails the stash is not removed from the list and
+must be removed manually.
 
 #+begin_src conf
     hide = stash
@@ -1189,6 +1600,9 @@ You can operate on the "stash" ref as if it were any other ref.
 
 #+begin_src conf
     plop = "!git stash && git pull && git stash pop"
+    up = !git stash && git pull origin master && git stash apply
+# `up' used many times
+
 # cleanpull
 # update (like svn? if we add a git reset in front?)
 # sync
@@ -1237,7 +1651,7 @@ Alternative to ~stash~ (writing a commit with a default message):
    git reset --soft                        # Or this one???
    #+end_src
 
-   Or, if I merely need to modify the previous commit:
+   Or, if I merely need to modify the *previous* commit:
 
    #+begin_src shell :tangle no
    git commit -a --amend
@@ -1247,18 +1661,77 @@ Alternative to ~stash~ (writing a commit with a default message):
    but ignores brand new files.
 
    The ~--amend~ launches your default commit editor and lets you change the
-   commit message of the most recent commit.
+   commit message of the *most recent* commit.
 
-** Search commits
+*** From git help stash
 
-*** String in Log messages
+       Pulling into a dirty tree
+           When you are in the middle of something, you learn that there are upstream changes that are possibly relevant to what you are doing. When your local changes do not conflict with the changes in the upstream, a simple git pull will let
+           you move forward.
 
-If you want to find all commits (across all branches, showing names and status
+           However, there are cases in which your local changes do conflict with the upstream changes, and git pull refuses to overwrite your changes. In such a case, you can stash your changes away, perform a pull, and then unstash, like this:
+
+               $ git pull
+                ...
+               file foobar not up to date, cannot merge.
+               $ git stash
+               $ git pull
+               $ git stash pop
+
+       Interrupted workflow
+           When you are in the middle of something, your boss comes in and demands that you fix something immediately. Traditionally, you would make a commit to a temporary branch to store your changes away, and return to your original branch to
+           make the emergency fix, like this:
+
+               # ... hack hack hack ...
+               $ git checkout -b my_wip
+               $ git commit -a -m "WIP"
+               $ git checkout master
+               $ edit emergency fix
+               $ git commit -a -m "Fix in a hurry"
+               $ git checkout my_wip
+               $ git reset --soft HEAD^
+               # ... continue hacking ...
+
+           You can use git stash to simplify the above, like this:
+
+               # ... hack hack hack ...
+               $ git stash
+               $ edit emergency fix
+               $ git commit -a -m "Fix in a hurry"
+               $ git stash pop
+               # ... continue hacking ...
+
+       Testing partial commits
+           You can use git stash save --keep-index when you want to make two or more commits out of the changes in the work tree, and you want to test each change before committing:
+
+               # ... hack hack hack ...
+               $ git add --patch foo            # add just first part to the index
+               $ git stash save --keep-index    # save all other changes to the stash
+               $ edit/build/test first part
+               $ git commit -m 'First part'     # commit fully tested change
+               $ git stash pop                  # prepare to work on all other changes
+               # ... repeat above five steps until one commit remains ...
+               $ edit/build/test remaining parts
+               $ git commit foo -m 'Remaining parts'
+
+       Recovering stashes that were cleared/dropped erroneously
+           If you mistakenly drop or clear stashes, they cannot be recovered through the normal safety mechanisms. However, you can try the following incantation to get a list of stashes that are still in your repository, but not reachable any
+           more:
+
+               git fsck --unreachable |
+               grep commit | cut -d\  -f3 |
+               xargs git log --merges --no-walk --grep=WIP
+
+** Search for commits
+
+*** Whose commit message mention your regexp
+
+If you want to find all commits (*across all branches*, showing names and status
 of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-    find = "log --all --grep"
+    find = "log --all -i --grep"
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -1267,6 +1740,20 @@ For example, to find all commits referencing bug #382:
 
 #+begin_src shell :tangle no
 git find "Bug #382"
+#+end_src
+
+To find commits that match *either* of patterns (implicit *OR* semantic), you can
+use:
+
+#+begin_src shell :tangle no
+git log --grep=<foo> --grep=<bar>
+#+end_src
+
+To find /commit/ that has *both* line matching first and line matching second
+somewhere, use the *AND* semantic:
+
+#+begin_src shell :tangle no
+git log --all-match --grep=<foo> --grep=<bar>
 #+end_src
 
 Show the *last commit* which *message matches a regex*:
@@ -1285,34 +1772,69 @@ If you want to find all commits where a *string* was *added or removed* in the /
 contents/ (to be more exact: where its *number of occurrences changed*),
 i.e. search the /commit contents/, use ~-S~.
 
-By default, ~-S~ accepts a string, but can be modified to accept a regexp with
-~--pickaxe-regex~.  You can dig up commits that have, for example, removed calls
-to a specific function, or added a certain CSS classname.
+You can dig up commits that have, for example,
+- removed calls to a specific function, or
+- added a certain CSS classname.
+
+#+begin_note
+If the number of times "foo" appears in the file is the same before and after
+a commit, it will not match using ~-S "foo"~.
+#+end_note
 
 #+begin_src shell :tangle no
-git log -S "foo" --since="1 week ago"
+git log --all -S "foo" --since="1 week ago"
 #+end_src
 
-*** String contained in added/removed lines from Commit contents (Diff)
+By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
+~--pickaxe-regex~.
 
-~-G~ looks for *differences* whose added or removed *line* matches the given *regexp*.
+*** Whose changes include your regexp
 
-I think you'd want this with ~--all~ as well (whether using ~-S~ or ~-G~).
+String contained in added/removed lines from Commit contents (Diff)
 
-*** String in (current?) Code base
+With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
+any *line* that was added, removed, or changed.
+
+#+begin_src shell :tangle no
+git log --all -G "foo" --since="1 week ago"
+#+end_src
+
+** Grep (Print lines matching a pattern)
+
+*** Pattern in working directory (and its subdirectories)
 
 The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
 your project files (i.e. no files in =.git=), but also that is allows you to
 interface with your repository's Git database; for example, for searching:
 
-- for your regexp in some files from another branch,
-- files registered in the index, rather than the working tree.
+- files registered in the index, rather than the working tree,
+- for your regexp in some files from another branch (XXX does not work? XXX).
+
+#+begin_note
+It doesn't search files that are not revisioned (untracked, excluded/ignored,
+etc.).
+#+end_note
+
+More readable output, with *grouping* (like Ripgrep, ~rg~):
 
 #+begin_src conf
-    gr = "grep --break --heading"
+    rg = "grep --break --heading"
 #+end_src
 
-XXX works only on files really in Git (bypassing ignored files)?
+Broader search (*case-insensitive*), output without grouping:
+
+#+begin_src conf
+    gr = "grep -i -I"
+#+end_src
+
+*** Find files that contain some terms, not necessarily on the same line
+
+Match any of these patterns, but print matches only from files that have /all/ of
+them (files must have lines that match each of them):
+
+#+begin_src shell :tangle no
+git grep --all-match -e <regexp> -e <regexp>
+#+end_src
 
 ** Dangling
 
@@ -1330,13 +1852,13 @@ XXX works only on files really in Git (bypassing ignored files)?
 
 ** COMMENT Git and Subversion
 
-#+begin_src conf
+#+begin_src conf :tangle no
     spull = svn rebase
     spush = svn dcommit
     slog = svn log --oneline --show-commit
 #+end_src
 
-#+begin_src conf
+#+begin_src conf :tangle no
     cvs-full-log = log --reverse --pretty=format:'%B\n--------------------------------------------\n'
     cvsmerge = merge --no-ff --log
 #+end_src
@@ -1359,17 +1881,35 @@ The ~name-rev~ command indicates the *position of a commit relative to tags* in 
 project. For example, ~v2.3~5~ means that this commit is located 5 commits *before*
 the v2.3 tag -- we can be certain that this change is part of v2.3, then.
 
-** Find out which branch contains a change
+** Rename branch
 
-Filter the list of branches to only those which have the given commit among
+Sometimes we name a branch poorly or maybe we thought the name was "good" but
+not meaningful to the work we are doing.
+
+To rename the branch locally:
+
+#+begin_src conf
+    rename = branch -m
+#+end_src
+
+One thing to keep in mind is that this command works in two different ways:
+
+- if we are on the branch we want to rename, we can just ~git rename new-name~.
+- If we are not on the branch, we have to use ~git rename target-branch new-name~.
+
+** List branches that contain a given commit ID (SHA1)
+
+Filter the list of *branches* to only those which have the given *commit ID* among
 their ancestors.
 
 #+begin_src conf
-    sha1-branch = '!f() { git branch -a --contains "$@"; }; f'
     where = "branch -a --contains"
 #+end_src
 
-This also includes *remote* tracking branches in the list.
+This also includes *remote tracking branches* in the list, that is "local
+branches that have a direct relationship to a remote branch".
+
+List all *tags* that contain a commit ID:
 
 #+begin_src shell :tangle no
 git tag --contains a2c71a6
@@ -1396,6 +1936,12 @@ are present on both with the ~-~ sign. Changes still missing from upstream are
 marked with ~+~.
 
 ** Show blame information about original authors of lines changed or removed
+
+#+begin_src conf
+    praise = blame -w
+    archeology = blame -w -C -n
+    whodoikill = blame -w -C -n
+#+end_src
 
 Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
 original authors of lines changed or removed in a given branch:
@@ -1467,6 +2013,15 @@ you can clean up with:
 git stash drop
 #+end_src
 
+** Review which file have conflicts
+
+This command tells you which files have conflicts after merging.
+
+#+begin_src conf :tangle ~/.dotfiles/home/.gitconfig
+    conflicts = diff --name-only --diff-filter=U
+    unmerged = diff --name-only --diff-filter=U
+#+end_src
+
 ** Alternative
 
 If your master branch is busted, rename it to something else so that it's out of
@@ -1494,6 +2049,11 @@ Make sure the ~master~ is up-to-date:
 git pull
 #+end_src
 
+** A GitHub test repository to experiment with conflicts
+
+You can experiment with resolving a Git conflict with this repository:
+https://github.com/brianleetest/testGit/blob/master/README.md
+
 * GitHub tasks
   :PROPERTIES:
   :header-args+: :tangle no
@@ -1501,25 +2061,25 @@ git pull
 
 # https://github.com/abo-abo/oremacs/blob/github/etc/org/wiki/git.org
 
-** force push
+** Force push
 
 #+begin_src shell
 git push --force origin master
 #+end_src
 
-** push tags
+** Push tags
 
 #+begin_src shell
 git push --tags
 #+end_src
 
-** get user pubkeys
+** Get user pubkeys
 
 #+begin_src shell
 curl https://github.com/abo-abo.keys
 #+end_src
 
-** routine
+** Routine
 
 #+begin_src shell
 git fetch --all
@@ -1555,3 +2115,8 @@ http://williamdurand.fr/2012/01/17/my-git-branching-model/
 - [[https://git.wiki.kernel.org/index.php/Aliases][Git SCM Wiki - Aliases]]
 - [[https://ochronus.com/git-tips-from-the-trenches/][Git tips from the trenches]]
 # - [[file:~/Public/Repositories/emacs/admin/notes/git-workflow][Emacs Git workflow]]
+
+* Free private repositories
+
+I use the *free private repos* from https://bitbucket.org/.
+
