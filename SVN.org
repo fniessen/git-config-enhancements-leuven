@@ -1,0 +1,167 @@
+#+TITLE:     SVN aliases
+#+AUTHOR:    Fabrice Niessen
+#+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
+#+DESCRIPTION: Pretty format for `git log' and different helpful command aliases
+#+KEYWORDS:  git, log, pretty format, alias
+#+LANGUAGE:  en
+#+OPTIONS:   H:4 num:nil toc:2
+
+#+SETUPFILE: ~/.dotfiles/org/theme-readtheorg.setup
+
+#+EXPORT_EXCLUDE_TAGS: noexport
+
+* svn diff zip revision to deploy
+
+Make release package (get list of changed files via svn diff log and zip them):
+
+svn-rev-patch:
+
+#+begin_src shell
+# For one release only.
+svn diff -c 124 --summarize | cut -c 9- | xargs zip -9 patch.zip
+
+# For a range of releases.
+svn diff -r 123:124 --summarize | cut -c 9- | xargs zip -9 patch.zip
+#+end_src
+
+This will create a ZIP file with the changed file(s) -- in an intact directory
+structure -- from revision ~123:HEAD~.
+
+#+begin_note
+~-c ARG~ = change made by revision ~ARG~ (like ~-r ARG-1:ARG~)
+#+end_note
+
+* Others
+
+We also supply four bash shell aliases that make status checks of your working
+copy easier, add them to your ~.bashrc~:
+
+#+BEGIN_SRC shell
+alias svnl="svn log -r 1:HEAD -v"    # Show log messages
+alias svnm="svn status -u -q"        # Show locally/repository changed items
+alias svnn="svn status -q"           # Show locally changed items
+alias svns="svn status -u -q -v"     # Show status of all items
+#+END_SRC
+
+To *compare all modified files* in your working copy with the HEAD revision in the
+repository, use the following command:
+
+#+BEGIN_SRC shell
+alias svndiffall="echo svn status | grep '^M' | awk '{print $2}' | xargs svn diff -rHEAD"
+#+END_SRC
+
+* Incoming
+
+http://stackoverflow.com/questions/182945/how-to-see-what-will-be-updated-from-repository-before-issuing-svn-update-comm
+
+Depending on what you want to know between your working copy and the latest svn
+server repository, without updating your local working copy, here is what you
+can do:
+
+If you want to know what has been changed in svn server repository, run command:
+
+#+begin_src shell
+svn st -u
+#+end_src
+
+If you want to know if the same file has been modified both in your local
+working copy and in svn server repository, run command:
+
+#+begin_src shell
+svn st -u | grep -i "^M \{7\}\*"
+#+end_src
+
+If you want to get list of files changed between a particular revision and HEAD,
+run command:
+
+#+begin_src shell
+svn diff -r revisionNumber:HEAD --summarize
+#+end_src
+
+If you want to get a list of files changed between paticular revisions, run
+command:
+
+#+begin_src shell
+svn diff -r revisionNumber:anotherRevisionNumber --summarize
+#+end_src
+
+If you want to know what content of a particular file has been changed in svn
+server repository compared with your working copy, run command:
+
+#+begin_src shell
+svn diff -r BASE:HEAD ./pathToYour/file
+#+end_src
+
+If you want to know what contents of all the files have been changed in svn
+server repository compared with your working copy, run command:
+
+#+begin_src shell
+svn diff -r BASE:HEAD .
+#+end_src
+
+* Overview
+
+The following aliases are interesting for using SVN a bit like Git.
+
+* Log
+
+** One-line log format
+
+#+begin_src shell
+alias svnlog="svn log | perl -l40pe 's/^-+/\n/'"
+#+end_src
+
+** Show a single revision
+
+#+begin_src shell
+svn diff -c <revision>
+#+end_src
+
+** Show what changed
+
+Output filenames of files changed in each commit:
+
+#+begin_src shell
+svn log -v
+#+end_src
+
+* Incoming changes
+
+** Check for modifications
+
+Show which files are modified in the repository (with an ~*~):
+
+#+begin_src shell
+alias svn-incoming='svn status -u | grep \*'
+#+end_src
+
+#+begin_src shell
+svn log -r BASE:HEAD                    # Equivalent of `git log'
+svn log --diff -r BASE:HEAD             # Equivalent of `git log -p'
+#+end_src
+
+** Preview incoming changes
+
+See what has been changed (how it's different from my working copy):
+
+#+begin_src shell
+svn diff -r BASE:HEAD
+#+end_src
+
+* SVN conflict
+
+Quand problème avec psvn, s'en sortir en faisant :
+
+#+begin_src shell
+svn status (-q)
+svn resolved (FILE)
+svn status (-q)
+#+end_src
+
+* Checkout a specific older version of the source code
+
+Update the revision (say we want to get r4732):
+
+#+begin_src shell
+svn update -r4732
+#+end_src
