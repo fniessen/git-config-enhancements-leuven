@@ -10,6 +10,30 @@
 
 #+EXPORT_EXCLUDE_TAGS: noexport
 
+* Use colordiff
+
+Use ~colordiff~ for my ~svn diff~ command (set in =~/.subversion/config=):
+
+#+begin_src diff
+diff-cmd = colordiff
+#+end_src
+
+* Subversion equivalent to 'git show' command
+
+#+begin_src shell
+svn diff -c4795                         # Or svn diff -r4795:4792.
+#+end_src
+
+* View history of file
+
+To view all historical changes to a file in SVN:
+
+#+begin_src shell
+svn log -q path_to_file | grep ^r | awk '{print $1}' # List of revisions.
+
+svn log --diff path_to_file
+#+end_src
+
 * svn diff zip revision to deploy
 
 Make release package (get list of changed files via svn diff log and zip them):
@@ -36,19 +60,25 @@ structure -- from revision ~123:HEAD~.
 We also supply four bash shell aliases that make status checks of your working
 copy easier, add them to your ~.bashrc~:
 
-#+BEGIN_SRC shell
-alias svnl="svn log -r 1:HEAD -v"    # Show log messages
-alias svnm="svn status -u -q"        # Show locally/repository changed items
-alias svnn="svn status -q"           # Show locally changed items
-alias svns="svn status -u -q -v"     # Show status of all items
-#+END_SRC
+#+begin_src shell
+alias svnl="svn log -r 1:HEAD -v"       # Show log messages.
+alias svnm="svn status -u -q"           # Show locally/repository changed items.
+alias svnn="svn status -q"              # Show locally changed items.
+alias svns="svn status -u -q -v"        # Show status of all items.
+#+end_src
 
-To *compare all modified files* in your working copy with the HEAD revision in the
+To *compare all modified files* in your working copy with the ~HEAD~ revision in the
 repository, use the following command:
 
-#+BEGIN_SRC shell
+#+begin_src shell
 alias svndiffall="echo svn status | grep '^M' | awk '{print $2}' | xargs svn diff -rHEAD"
-#+END_SRC
+#+end_src
+
+Colored ~svn diff~ command like ~git diff~.
+
+#+begin_src shell
+alias svndiff='svn diff --diff-cmd=colordiff --extensions=" -u --strip-trailing-cr --ignore-space-change " | less --quit-if-one-screen'
+#+end_src
 
 * Incoming
 
@@ -71,29 +101,29 @@ working copy and in svn server repository, run command:
 svn st -u | grep -i "^M \{7\}\*"
 #+end_src
 
-If you want to get list of files changed between a particular revision and HEAD,
-run command:
+If you want to get list of files changed between a particular revision and ~HEAD~,
+run the command:
 
 #+begin_src shell
 svn diff -r revisionNumber:HEAD --summarize
 #+end_src
 
-If you want to get a list of files changed between paticular revisions, run
+If you want to get a list of files changed between particular revisions, run the
 command:
 
 #+begin_src shell
 svn diff -r revisionNumber:anotherRevisionNumber --summarize
 #+end_src
 
-If you want to know what content of a particular file has been changed in svn
-server repository compared with your working copy, run command:
+If you want to know what content of a particular file has been changed in SVN
+server repository compared with your working copy, run the command:
 
 #+begin_src shell
 svn diff -r BASE:HEAD ./pathToYour/file
 #+end_src
 
-If you want to know what contents of all the files have been changed in svn
-server repository compared with your working copy, run command:
+If you want to know what contents of all the files have been changed in SVN
+server repository compared with your working copy, run the command:
 
 #+begin_src shell
 svn diff -r BASE:HEAD .
