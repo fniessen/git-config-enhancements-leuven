@@ -14,6 +14,11 @@
 *Commit early, commit often*: it is a bad idea to do a lot of work without
 committing.
 
+* TODO See more Git configs (and aliases)
+
+- https://github.com/alikins/gitconfig/blob/master/gitconfig
+- https://github.com/GitAlias/gitalias
+
 * Overview
 
 The following configures interesting global settings for Git. These are stored
@@ -53,7 +58,7 @@ changes and then automatically re-commit your work on top of them, as if
 you had those changes all along.  You could then push.  So, something
 like:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 # Commit all changes and attempt to push, pulling in changes if necessary and
 # re-pushing; on failure, restore to previous state with changes uncomitted.
 git commit -am Foo \
@@ -147,7 +152,7 @@ http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 http://www.emacswiki.org/emacs/GitQuickStartForEmacsDevs
 
 ** TODO Work in progress which I can't commit (from Stephen J. Turnbull)
-   [2015-03-31 Tue 16:35]
+[2015-03-31 Tue 16:35]
 
 #+begin_verse
  > > With git pull, if there are changes in the working directory, the
@@ -190,7 +195,7 @@ http://rogerdudler.github.io/git-guide/
 
 ** Git rebase branch
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git pull --rebase -r origin master
 #+end_src
 
@@ -699,7 +704,7 @@ List ignored files (*marked unchanged*):
 
 *** Changes between the working tree and the latest commit (HEAD)
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
     diff-all = diff HEAD
 #+end_src
 
@@ -858,7 +863,7 @@ List all the changed files *between 2 commits*:
 
 XXX They don't show the same files (test with ~git changed HEAD~1~ and ~git diffn HEAD~1~) XXX
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git changed                             # List files modified in last commit.
 git changed bAda55                      # List files modified in this commit.
 git changed bAda55..ff0021              # List files modified between those commits.
@@ -954,7 +959,7 @@ Modify the *last* commit:
 Note that the ~-a~ switch which tells Git to automatically *stage all your changes*,
 as if you ran ~git add .~ right before the commit.
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git commit --amend                      # Correct the PREVIOUS commit, with the staged changes.
 #+end_src
 
@@ -1054,19 +1059,27 @@ changes again.
 
 **** Reset both the index and working tree
 
-Remove the last commit, delete staged changes and working copy changes:
+Remove the last commit, *delete changes in your staging area and in your working
+directory*:
 
 #+begin_src conf
     wipe = reset --hard HEAD~1
 # rollback?
 #+end_src
 
-If you reset work that you /never committed/, it is gone for good. Too bad!  This
-is quite a dangerous command, and must be used with care.
+If you reset work that you /never committed/, it is gone for good.  Too bad!  This
+is quite a dangerous command (~git reset --hard~ is one of the few Git commands
+which deletes information with no backout), and must be used with *extreme
+caution*.
 
 #+begin_warning
 This command will also *overwrite changed files* in the working tree!
 #+end_warning
+
+#+begin_tip
+If you have changes in your working directory or staging area, you'll probably
+want to stash them before doing the above.
+#+end_tip
 
 Use ~git reset --hard @{u}~ to make sure the integration branch is up-to-date
 before merging.
@@ -1108,7 +1121,7 @@ However, Git offers you an easy way to undo a patch by committing a change that
 effectively reverses the patch in question. The simplest usage is to revert an
 entire commit:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git revert [hash]
 #+end_src
 
@@ -1118,7 +1131,7 @@ your repository.
 If you want to revert that commit without committing it (putting the reversion
 into your index), use:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git revert -n [hash]
 #+end_src
 
@@ -1194,7 +1207,7 @@ XXX
 #+begin_src conf
     up = !git pull --ff-only
 # `up' used many times
-    #+end_src
+#+end_src
 
 is pretty safe.  It will abort the merge if it can't be done using fast-forward.
 (In other words, if the local branch has diverged from the remote.)
@@ -1219,7 +1232,7 @@ See https://stackoverflow.com/questions/15316601/in-what-cases-could-git-pull-be
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
 (+ interesting comments about *rebase vs merge during a pull*!)
 
-#+begin_src shell :tangle ~/.dotfiles/bin/git-up-all
+#+begin_src sh :tangle ~/.dotfiles/bin/git-up-all
 #!/bin/bash
 
 REMOTES="$@";
@@ -1448,7 +1461,7 @@ Show all commits in a git branch since original branching point from master:
     sincemaster = diff master...
 #+end_src
 
-When you use three dots, ~git diff~ finds the1 merge-base between the left and
+When you use three dots, ~git diff~ finds the merge-base between the left and
 right side commit SHA-1s (as obtained from the names, or defaulting to ~HEAD~) and
 substitutes that in for the left-side SHA-1. The right-side SHA-1 (as resolved
 from the name) remains intact.
@@ -1461,13 +1474,71 @@ process that identifies changes made since the branches diverged, and then
 applies all those changes together.
 
 #+begin_src conf
+    # Will only try to "merge" if your current HEAD commit is in the branch
+    # you're merging in.  This will allow you to merge some commits whilst being
+    # sure you won't get conflicts.
     ff = merge --ff-only
     ff = merge --ff-only @{u}
+
+    # Avoid a fast-forward commit.
     mm = merge --no-ff
 #+end_src
 
+*** Undo the merge
+
+If you tried a merge which resulted in complex conflicts and want to start over,
+you can recover with ~git merge --abort~.  It will allow you to *undo the merge*,
+even if it is a fast-forward merge.
+
+*** Dry run (do not make changes)
+
+Naive (but slow) way:
+
+#+begin_src sh :tangle no
+rm -Rf /tmp/repository
+cp -r repository /tmp/
+cd /tmp/repository
+git merge ...
+# ... If successful, do the real merge.
+#+end_src
+
+#+begin_warning
+It won't work just cloning to =/tmp=; you need a *copy* in order *to be sure that
+uncommitted changes will not conflict*.
+#+end_warning
+
+Performing a Git merge with *no commit* and *no fast-forward* will merge the two
+code bases together -- it will *modify your working copy*.  This will allow you to
+examine, test, and undo the merge if required.
+
+#+begin_src sh :tangle no
+git merge --no-commit --no-ff $BRANCH
+#+end_src
+
+#+begin_warning
+If your repository is a live Web server, then you could be serving files with
+conflicts in.  That's why you should *never* be *handling merges on a live Web
+server*!  Fix up the ~prod~ branch (on your development box) and then push it to
+the real webserver with ~git pull --ff-only~.
+#+end_warning
+
+See if the merge is applicable to the current working tree and/or the index file
+and *detects conflicts*:
+
+#+begin_src conf
+    mergetest = "!f() { git merge --no-commit --no-ff $1; git merge --abort; echo 'Merge aborted'; }; f"
+
+    # Check how the merge of `dev' into master will go: git mergedryrun dev.
+    mergedryrun = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflict detected' || echo 'Merged cleanly'; }; f"
+
+    # Extract the "changed in both" lines as well as the conflicting parts.
+    mergedryrunconflicts = "!f() { git merge-tree $(git merge-base $1 $2) $1 $2 | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' | cdiff; }; f"
+#+end_src
+
+*** Branch/Integration manager
+
 If you're the Branch/Integration manager, you can use these aliases to *merge*
-stuff (to select the entirety of either our or their file in a 3 way merge).
+stuff (to select the entirety of either our or their file in a 3-way merge).
 
 Often, during a merge, you know you want to take a file from one side
 wholesale. The following aliases expose the ~ours~ and ~theirs~ commands which will
@@ -1481,7 +1552,7 @@ respectively:
 
 Best (and safest) way to merge a Git local branch into ~master~:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git checkout master
 git pull origin master                  # Get the latest changes from the remote.
 git merge test
@@ -1555,7 +1626,7 @@ Be aware that, unlike ~git stash apply~ (though it has its use), ~git stash pop~
 *deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
 conflicts, Git will not remove it (but it will still apply it)!
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git stash clear
 #+end_src
 
@@ -1616,14 +1687,14 @@ https://news.ycombinator.com/item?id=2301765.
     spp = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash && git pull && git push && git stash pop
 #+end_src
 
-#+begin_src shell :tangle no
-git stash list                          # show a list of all stashes
-git stash show                          # show the last stash
-git stash show stash@{1}                # show the previous stash
+#+begin_src sh :tangle no
+git stash list                          # Show a list of all stashes.
+git stash show                          # Show the last stash.
+git stash show stash@{1}                # Show the previous stash.
 
-git stash apply                         # apply the stash only, don't delete it
-git stash drop                          # drop the last stash
-git stash drop stash@{1}                # drop a previous stash
+git stash apply                         # Apply the stash only, don't delete it.
+git stash drop                          # Drop the last stash.
+git stash drop stash@{1}                # Drop a previous stash.
 #+end_src
 
 XXX What about ~git stash --include-untracked~ and ~git stash pop~?
@@ -1635,7 +1706,7 @@ Alternative to ~stash~ (writing a commit with a default message):
 
 1. Do a regular ~commit~:
 
-   #+begin_src shell :tangle no
+   #+begin_src sh :tangle no
    git add -A && git commit -m 'WIP'       # Add all changes (including untracked files).
    #+end_src
 
@@ -1643,7 +1714,7 @@ Alternative to ~stash~ (writing a commit with a default message):
 
 3. Return to previous work:
 
-   #+begin_src shell :tangle no
+   #+begin_src sh :tangle no
    git reset --mixed                       # Reset the previous commit (but
                                            # keeps all the changes from that
                                            # commit in the working directory).
@@ -1653,7 +1724,7 @@ Alternative to ~stash~ (writing a commit with a default message):
 
    Or, if I merely need to modify the *previous* commit:
 
-   #+begin_src shell :tangle no
+   #+begin_src sh :tangle no
    git commit -a --amend
    #+end_src
 
@@ -1738,27 +1809,27 @@ Add ~--name-status~ to show only names and status of *changed files*.
 
 For example, to find all commits referencing bug #382:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git find "Bug #382"
 #+end_src
 
 To find commits that match *either* of patterns (implicit *OR* semantic), you can
 use:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git log --grep=<foo> --grep=<bar>
 #+end_src
 
 To find /commit/ that has *both* line matching first and line matching second
 somewhere, use the *AND* semantic:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git log --all-match --grep=<foo> --grep=<bar>
 #+end_src
 
 Show the *last commit* which *message matches a regex*:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 # Show the last commit which has the word "fix" in its message.
 git show :/fix
 
@@ -1781,7 +1852,7 @@ If the number of times "foo" appears in the file is the same before and after
 a commit, it will not match using ~-S "foo"~.
 #+end_note
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git log --all -S "foo" --since="1 week ago"
 #+end_src
 
@@ -1795,7 +1866,7 @@ String contained in added/removed lines from Commit contents (Diff)
 With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
 any *line* that was added, removed, or changed.
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git log --all -G "foo" --since="1 week ago"
 #+end_src
 
@@ -1832,7 +1903,7 @@ Broader search (*case-insensitive*), output without grouping:
 Match any of these patterns, but print matches only from files that have /all/ of
 them (files must have lines that match each of them):
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git grep --all-match -e <regexp> -e <regexp>
 #+end_src
 
@@ -1911,7 +1982,7 @@ branches that have a direct relationship to a remote branch".
 
 List all *tags* that contain a commit ID:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git tag --contains a2c71a6
 #+end_src
 
@@ -1919,7 +1990,7 @@ git tag --contains a2c71a6
 
 While on "feature" branch:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git cherry -v master
 #+end_src
 
@@ -1946,7 +2017,7 @@ marked with ~+~.
 Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
 original authors of lines changed or removed in a given branch:
 
-#+begin_src shell :tangle no
+#+begin_src sh :tangle no
 git overwritten feature origin/master
 #+end_src
 
@@ -1987,13 +2058,13 @@ push), and we'll have two similar commits in the history.
 I don't really know how to proof the instructions against that.
 
 * Recover from problems
-  :PROPERTIES:
-  :header-args+: :tangle no
-  :END:
+:PROPERTIES:
+:header-args+: :tangle no
+:END:
 
 It is POSSIBLE that a safe way to recover from your problems is as follows:
 
-#+begin_src shell
+#+begin_src sh
 git stash
 git reset --hard HEAD
 git pull --ff-only
@@ -2009,7 +2080,7 @@ the latter until all merge conflicts are dealt with.
 In any case, do run git status before finally doing git commit. If all succeeds,
 you can clean up with:
 
-#+begin_src shell
+#+begin_src sh
 git stash drop
 #+end_src
 
@@ -2027,25 +2098,25 @@ This command tells you which files have conflicts after merging.
 If your master branch is busted, rename it to something else so that it's out of
 the way:
 
-#+begin_src shell
+#+begin_src sh
 git branch -m master master-busted
 #+end_src
 
 Create a new branch ~master~ that tracks the origin:
 
-#+begin_src shell
+#+begin_src sh
 git branch --track master origin/master
 #+end_src
 
 Check it out (be careful, this will discard all your local changes):
 
-#+begin_src shell
+#+begin_src sh
 git checkout -f master
 #+end_src
 
 Make sure the ~master~ is up-to-date:
 
-#+begin_src shell
+#+begin_src sh
 git pull
 #+end_src
 
@@ -2055,33 +2126,33 @@ You can experiment with resolving a Git conflict with this repository:
 https://github.com/brianleetest/testGit/blob/master/README.md
 
 * GitHub tasks
-  :PROPERTIES:
-  :header-args+: :tangle no
-  :END:
+:PROPERTIES:
+:header-args+: :tangle no
+:END:
 
 # https://github.com/abo-abo/oremacs/blob/github/etc/org/wiki/git.org
 
 ** Force push
 
-#+begin_src shell
+#+begin_src sh
 git push --force origin master
 #+end_src
 
 ** Push tags
 
-#+begin_src shell
+#+begin_src sh
 git push --tags
 #+end_src
 
 ** Get user pubkeys
 
-#+begin_src shell
+#+begin_src sh
 curl https://github.com/abo-abo.keys
 #+end_src
 
 ** Routine
 
-#+begin_src shell
+#+begin_src sh
 git fetch --all
 #+end_src
 
@@ -2090,7 +2161,7 @@ namespace.
 
 To check out e.g. PR #42:
 
-#+begin_src shell
+#+begin_src sh
 git checkout -b foo refs/pull/upstream/42
 #+end_src
 
