@@ -36,7 +36,7 @@ svn log --diff path_to_file
 
 * svn diff zip revision to deploy
 
-Make release package (get list of changed files via svn diff log and zip them):
+Make release package (get list of changed files via ~svn diff~ log and zip them):
 
 svn-rev-patch:
 
@@ -84,24 +84,24 @@ alias svndiff='svn diff --diff-cmd=colordiff --extensions=" -u --strip-trailing-
 
 http://stackoverflow.com/questions/182945/how-to-see-what-will-be-updated-from-repository-before-issuing-svn-update-comm
 
-Depending on what you want to know between your working copy and the latest svn
+Depending on what you want to know between your working copy and the latest SVN
 server repository, without updating your local working copy, here is what you
 can do:
 
-If you want to know what has been changed in svn server repository, run command:
+If you want to know what has been changed in SVN server repository, run command:
 
 #+begin_src shell
 svn st -u
 #+end_src
 
 If you want to know if the same file has been modified both in your local
-working copy and in svn server repository, run command:
+working copy and in SVN server repository, run command:
 
 #+begin_src shell
 svn st -u | grep -i "^M \{7\}\*"
 #+end_src
 
-If you want to get list of files changed between a particular revision and ~HEAD~,
+If you want to get *list of files changed* between a particular revision and ~HEAD~,
 run the command:
 
 #+begin_src shell
