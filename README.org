@@ -578,6 +578,20 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 So, I can do things like ~git exec make~. This works because shell aliases are
 always executed in the top-level directory.
 
+** Debugging
+
+Sometimes it's nice to see what is going on under the hood. Try this alias:
+
+#+begin_src conf
+    debug  = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
+#+end_src
+
+Just insert ~debug~ between ~git~ and whatever would usually follow; for example:
+
+#+begin_src sh :tangle no
+git debug unwip
+#+end_src
+
 ** Abbreviations
 
 Basic shortcuts.
@@ -1267,6 +1281,22 @@ echo "$REMOTES" | while read REMOTE; do
               fi
     done
 done
+#+end_src
+
+*** Delete all old local branches
+
+Remove local branches no longer on remote (by deleting the local ones that show
+they are "gone" in ~git branch -vv~):
+
+#+begin_src conf
+    # Git config alias escaping...  This DOES NOT work.
+    # prunelocal = !sh -c 'git fetch -p && git branch -vv | grep \": gone]\" | awk \"{print $1}\" | xargs git branch -d'
+
+    # Here is a correct solution (using bash as a command-line).
+    prunelocal = "!f() { git fetch -p && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d ; }; f"
+
+    # Here is a correct solution (which does not need access to the remote Git repo).
+    prunelocal = "!f() { git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d ; }; f"
 #+end_src
 
 *** Get timestamp of last pull
