@@ -129,6 +129,14 @@ server repository compared with your working copy, run the command:
 svn diff -r BASE:HEAD .
 #+end_src
 
+If you want to get a *list of all files that were changed on the branch* (created,
+say, at revision 22334) compared to what's on the trunk (without seeing files
+that were changed on the trunk between when the branch was created and "now"):
+
+#+begin_src shell
+svn diff -r 22334:HEAD --summarize <url of the branch>
+#+end_src
+
 * Overview
 
 The following aliases are interesting for using SVN a bit like Git.
