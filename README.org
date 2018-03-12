@@ -551,9 +551,16 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 
     # Credit an author on the LATEST commit
     credit = "!f() { git commit --amend --author \"$1 <$2>\" -C HEAD; }; f"
+#+end_src
 
+Clean up your commits before publishing.  Before you push your commits to the
+repository, it's good to revise them.  You can run the git interactive rebase to
+squash your commits or modify commit messages.  The goal is to publish only
+clean and relevant commits, no experiments or fixing typos.
+
+#+begin_src conf
     # Interactive rebase with the given number of latest commits
-    reb = "!r() { git rebase -i HEAD~$1; }; r"
+    ireb = "!r() { git rebase -i HEAD~$1; }; r"
 #+end_src
 
 #+begin_src conf
@@ -995,7 +1002,6 @@ It can also recover *deleted files* -- if the deletion has not been committed.
 #+end_tip
 
 #+begin_src conf
-    # undo = checkout --
     unmodify = checkout --
     undelete = checkout --
 #+end_src
@@ -1197,34 +1203,7 @@ The upstream diff ~in-what~ will show the negative of unpushed (rebased) commits
 if any, with the ~..~ notation --- not with the ~...~ notation!
 #+end_warning
 
-Before doing work (in a new branch), *ensure that the working directory is*
-*up-to-date* with the ~origin~ (pull and get latest for all submodules):
-
-#+begin_src conf
-    up = !git pull --rebase --prune $@ && git submodule update --init --recursive
-# `up' used many times
-    update = !git pull && git submodule update --init --recursive
-#+end_src
-
-[[https://gist.github.com/gitaarik/8735255][Git Submodules basic explanation]]
-
-XXX Pull current branch only?
-
-Pull all:
-
-#+begin_src conf
-    pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
-#+end_src
-
-XXX
-
-#+begin_src conf
-    up = !git pull --ff-only
-# `up' used many times
-#+end_src
-
-is pretty safe.  It will abort the merge if it can't be done using fast-forward.
-(In other words, if the local branch has diverged from the remote.)
+*** Update with local modifications
 
 #+begin_note
 ~git pull~ with uncommitted changes can succeed if the newly pulled changes don't
@@ -1232,16 +1211,52 @@ touch the locally changed files, but will fail otherwise.  Which makes a lot of
 sense.
 #+end_note
 
-with *all versions* of Git, I recommend using ~git up~ instead of ~git pull~.
+Before doing work (in a new branch), *ensure that the working directory is*
+*up-to-date* with the ~origin~ (pull and get latest for all submodules):
 
-    #+begin_src conf
-    up = !git remote update -p; git merge --ff-only @{u}
+#+begin_src conf
+    update = !git pull --rebase --prune $@ && git submodule update --init --recursive
+    update = !git pull && git submodule update --init --recursive
+#+end_src
+
+[[https://gist.github.com/gitaarik/8735255][Git Submodules basic explanation]]
+
+#+begin_src conf
+    up = pull --rebase --autostash
 # `up' used many times
 #+end_src
 
+See [[http://aanandprasad.com/git-up/][git-up]] (no longer maintained).
+
+#+begin_warning
+Use with care: the final stash application after a successful rebase might
+result in non-trivial conflicts.
+#+end_warning
+
+With *all versions* of Git, I recommend using ~git up~ instead of ~git pull~.
+
+#+begin_src conf
+    up = "!f() { git remote update -p; git merge --ff-only @{u} ; }; f"
+# `up' used many times
+#+end_src
+
+is pretty safe.  It will abort the merge if it can't be done using fast-forward.
+(In other words, if the local branch has diverged from the remote.)
+
 See https://stackoverflow.com/questions/15316601/in-what-cases-could-git-pull-be-harmful
 
+#+begin_src conf
+    # Rebasing non-linear changes (when the fast-forward merge is not possible).
+    upr = "!f() { git remote update -p; git rebase -p @{u} ; }; f"
+#+end_src
+
 *** Update all local branches
+
+Pull all:
+
+#+begin_src conf
+    pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
+#+end_src
 
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
 (+ interesting comments about *rebase vs merge during a pull*!)
@@ -1680,7 +1695,7 @@ You can operate on the "stash" ref as if it were any other ref.
 #+end_src
 
 ~git stash pop~ removes the most recent stash or any stash specified and applies
-changes as a merge. If merge fails the stash is not removed from the list and
+changes as a merge.  If merge fails, the stash is not removed from the list and
 must be removed manually.
 
 #+begin_src conf
@@ -1700,10 +1715,17 @@ must be removed manually.
 #+end_src
 
 #+begin_src conf
-    plop = "!git stash && git pull && git stash pop"
-    up = !git stash && git pull origin master && git stash apply
+    # plop = "!git stash && git pull && git stash pop"
+    # up = !git stash && git pull origin master && git stash apply
 # `up' used many times
+#+end_src
 
+#+begin_warning
+The above approach is *unsafe*: if there's nothing to stash, the first command
+will do nothing, and then ~stash pop~ will unstash some random stuff from before.
+#+end_warning
+
+#+begin_src conf
 # cleanpull
 # update (like svn? if we add a git reset in front?)
 # sync

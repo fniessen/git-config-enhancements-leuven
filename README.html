@@ -311,9 +311,20 @@ If you forget your aliases and don&rsquo;t want to open <code>.gitconfig</code> 
 
     <span class="org-comment-delimiter"># </span><span class="org-comment">Credit an author on the LATEST commit</span>
     <span class="org-variable-name">credit</span> = <span class="org-string">"!f() { git commit --amend --author \"$1 &lt;$2&gt;\" -C HEAD; }; f"</span>
+</pre>
+</div>
 
-    <span class="org-comment-delimiter"># </span><span class="org-comment">Interactive rebase with the given number of latest commits</span>
-    <span class="org-variable-name">reb</span> = <span class="org-string">"!r() { git rebase -i HEAD~$1; }; r"</span>
+<p>
+Clean up your commits before publishing.  Before you push your commits to the
+repository, it&rsquo;s good to revise them.  You can run the git interactive rebase to
+squash your commits or modify commit messages.  The goal is to publish only
+clean and relevant commits, no experiments or fixing typos.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Interactive rebase with the given number of latest commits</span>
+    <span class="org-variable-name">ireb</span> = <span class="org-string">"!r() { git rebase -i HEAD~$1; }; r"</span>
 </pre>
 </div>
 
@@ -1018,8 +1029,7 @@ It can also recover <b>deleted files</b> &#x2013; if the deletion has not been c
 
 <div class="org-src-container">
 
-<pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">undo = checkout --</span>
-    <span class="org-variable-name">unmodify</span> = checkout --
+<pre class="src src-conf">    <span class="org-variable-name">unmodify</span> = checkout --
     <span class="org-variable-name">undelete</span> = checkout --
 </pre>
 </div>
@@ -1356,54 +1366,12 @@ if any, with the <code>..</code> notation &#x2014; not with the <code>...</code>
 </p>
 
 </div>
-
-<p>
-Before doing work (in a new branch), <b>ensure that the working directory is</b>
-<b>up-to-date</b> with the <code>origin</code> (pull and get latest for all submodules):
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-conf">    <span class="org-variable-name">up</span> = !git pull --rebase --prune $@ &amp;&amp; git submodule update --init --recursive
-<span class="org-comment-delimiter"># </span><span class="org-comment">`up' used many times</span>
-    <span class="org-variable-name">update</span> = !git pull &amp;&amp; git submodule update --init --recursive
-</pre>
+</div>
 </div>
 
-<p>
-<a href="https://gist.github.com/gitaarik/8735255">Git Submodules basic explanation</a>
-</p>
-
-<p>
-XXX Pull current branch only?
-</p>
-
-<p>
-Pull all:
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-conf">    <span class="org-variable-name">pull-all</span> = !<span class="org-string">"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"</span>
-</pre>
-</div>
-
-<p>
-XXX
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-conf">    <span class="org-variable-name">up</span> = !git pull --ff-only
-<span class="org-comment-delimiter"># </span><span class="org-comment">`up' used many times</span>
-</pre>
-</div>
-
-<p>
-is pretty safe.  It will abort the merge if it can&rsquo;t be done using fast-forward.
-(In other words, if the local branch has diverged from the remote.)
-</p>
-
+<div id="outline-container-sec-14-11-2" class="outline-4">
+<h4 id="sec-14-11-2">Update with local modifications</h4>
+<div class="outline-text-4" id="text-14-11-2">
 <div class="note">
 <p>
 <code>git pull</code> with uncommitted changes can succeed if the newly pulled changes don&rsquo;t
@@ -1414,25 +1382,82 @@ sense.
 </div>
 
 <p>
-with <b>all versions</b> of Git, I recommend using <code>git up</code> instead of <code>git pull</code>.
+Before doing work (in a new branch), <b>ensure that the working directory is</b>
+<b>up-to-date</b> with the <code>origin</code> (pull and get latest for all submodules):
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-conf">    <span class="org-variable-name">up</span> = !git remote update -p; git merge --ff-only @{u}
+<pre class="src src-conf">    <span class="org-variable-name">update</span> = !git pull --rebase --prune $@ &amp;&amp; git submodule update --init --recursive
+    <span class="org-variable-name">update</span> = !git pull &amp;&amp; git submodule update --init --recursive
+</pre>
+</div>
+
+<p>
+<a href="https://gist.github.com/gitaarik/8735255">Git Submodules basic explanation</a>
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf">    <span class="org-variable-name">up</span> = pull --rebase --autostash
 <span class="org-comment-delimiter"># </span><span class="org-comment">`up' used many times</span>
 </pre>
 </div>
 
 <p>
+See <a href="http://aanandprasad.com/git-up/">git-up</a> (no longer maintained).
+</p>
+
+<div class="warning">
+<p>
+Use with care: the final stash application after a successful rebase might
+result in non-trivial conflicts.
+</p>
+
+</div>
+
+<p>
+With <b>all versions</b> of Git, I recommend using <code>git up</code> instead of <code>git pull</code>.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf">    <span class="org-variable-name">up</span> = <span class="org-string">"!f() { git remote update -p; git merge --ff-only @{u} ; }; f"</span>
+<span class="org-comment-delimiter"># </span><span class="org-comment">`up' used many times</span>
+</pre>
+</div>
+
+<p>
+is pretty safe.  It will abort the merge if it can&rsquo;t be done using fast-forward.
+(In other words, if the local branch has diverged from the remote.)
+</p>
+
+<p>
 See <a href="https://stackoverflow.com/questions/15316601/in-what-cases-could-git-pull-be-harmful">https://stackoverflow.com/questions/15316601/in-what-cases-could-git-pull-be-harmful</a>
 </p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Rebasing non-linear changes (when the fast-forward merge is not possible).</span>
+    <span class="org-variable-name">upr</span> = <span class="org-string">"!f() { git remote update -p; git rebase -p @{u} ; }; f"</span>
+</pre>
+</div>
 </div>
 </div>
 
-<div id="outline-container-sec-14-11-2" class="outline-4">
-<h4 id="sec-14-11-2">Update all local branches</h4>
-<div class="outline-text-4" id="text-14-11-2">
+<div id="outline-container-sec-14-11-3" class="outline-4">
+<h4 id="sec-14-11-3">Update all local branches</h4>
+<div class="outline-text-4" id="text-14-11-3">
+<p>
+Pull all:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf">    <span class="org-variable-name">pull-all</span> = !<span class="org-string">"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"</span>
+</pre>
+</div>
+
 <p>
 See <a href="http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches">http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches</a>
 (+ interesting comments about <b>rebase vs merge during a pull</b>!)
@@ -1479,9 +1504,9 @@ See <a href="http://stackoverflow.com/questions/4318161/can-git-pull-all-update-
 </div>
 </div>
 
-<div id="outline-container-sec-14-11-3" class="outline-4">
-<h4 id="sec-14-11-3">Delete all old local branches</h4>
-<div class="outline-text-4" id="text-14-11-3">
+<div id="outline-container-sec-14-11-4" class="outline-4">
+<h4 id="sec-14-11-4">Delete all old local branches</h4>
+<div class="outline-text-4" id="text-14-11-4">
 <p>
 Remove local branches no longer on remote (by deleting the local ones that show
 they are &ldquo;gone&rdquo; in <code>git branch -vv</code>):
@@ -1502,9 +1527,9 @@ they are &ldquo;gone&rdquo; in <code>git branch -vv</code>):
 </div>
 </div>
 
-<div id="outline-container-sec-14-11-4" class="outline-4">
-<h4 id="sec-14-11-4">Get timestamp of last pull</h4>
-<div class="outline-text-4" id="text-14-11-4">
+<div id="outline-container-sec-14-11-5" class="outline-4">
+<h4 id="sec-14-11-5">Get timestamp of last pull</h4>
+<div class="outline-text-4" id="text-14-11-5">
 <div class="org-src-container">
 
 <pre class="src src-conf">    <span class="org-variable-name">when</span> = !stat -c %y .git/FETCH_HEAD
@@ -1513,9 +1538,9 @@ they are &ldquo;gone&rdquo; in <code>git branch -vv</code>):
 </div>
 </div>
 
-<div id="outline-container-sec-14-11-5" class="outline-4">
-<h4 id="sec-14-11-5">Push</h4>
-<div class="outline-text-4" id="text-14-11-5">
+<div id="outline-container-sec-14-11-6" class="outline-4">
+<h4 id="sec-14-11-6">Push</h4>
+<div class="outline-text-4" id="text-14-11-6">
 <p>
 It is useful to know if you have any <b>local commits</b> that are not in the remote
 branch.
@@ -1588,9 +1613,9 @@ If you want to see all <b>unpushed</b> commits from <b>all branches</b>, do this
 </div>
 </div>
 
-<div id="outline-container-sec-14-11-6" class="outline-4">
-<h4 id="sec-14-11-6">Sync</h4>
-<div class="outline-text-4" id="text-14-11-6">
+<div id="outline-container-sec-14-11-7" class="outline-4">
+<h4 id="sec-14-11-7">Sync</h4>
+<div class="outline-text-4" id="text-14-11-7">
 <div class="org-src-container">
 
 <pre class="src src-conf">    <span class="org-variable-name">sync</span> = !git pull &amp;&amp; git push
@@ -2107,7 +2132,7 @@ You can operate on the &ldquo;stash&rdquo; ref as if it were any other ref.
 
 <p>
 <code>git stash pop</code> removes the most recent stash or any stash specified and applies
-changes as a merge. If merge fails the stash is not removed from the list and
+changes as a merge.  If merge fails, the stash is not removed from the list and
 must be removed manually.
 </p>
 
@@ -2135,11 +2160,23 @@ must be removed manually.
 
 <div class="org-src-container">
 
-<pre class="src src-conf">    <span class="org-variable-name">plop</span> = <span class="org-string">"!git stash &amp;&amp; git pull &amp;&amp; git stash pop"</span>
-    <span class="org-variable-name">up</span> = !git stash &amp;&amp; git pull origin master &amp;&amp; git stash apply
+<pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">plop = "!git stash &amp;&amp; git pull &amp;&amp; git stash pop"</span>
+    <span class="org-comment-delimiter"># </span><span class="org-comment">up = !git stash &amp;&amp; git pull origin master &amp;&amp; git stash apply</span>
 <span class="org-comment-delimiter"># </span><span class="org-comment">`up' used many times</span>
+</pre>
+</div>
 
-<span class="org-comment-delimiter"># </span><span class="org-comment">cleanpull</span>
+<div class="warning">
+<p>
+The above approach is <b>unsafe</b>: if there&rsquo;s nothing to stash, the first command
+will do nothing, and then <code>stash pop</code> will unstash some random stuff from before.
+</p>
+
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-conf"><span class="org-comment-delimiter"># </span><span class="org-comment">cleanpull</span>
 <span class="org-comment-delimiter"># </span><span class="org-comment">update (like svn? if we add a git reset in front?)</span>
 <span class="org-comment-delimiter"># </span><span class="org-comment">sync</span>
 </pre>
