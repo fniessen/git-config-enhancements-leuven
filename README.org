@@ -1182,7 +1182,7 @@ you do not --, the next time you do a merge.
 
 #+begin_src conf
     in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
-    inf = !(git remote update -p && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
+    inf = !(git remote update -p              && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
 #+end_src
 
 #+begin_src conf
@@ -1216,7 +1216,7 @@ Before doing work (in a new branch), *ensure that the working directory is*
 
 #+begin_src conf
     update = !git pull --rebase --prune $@ && git submodule update --init --recursive
-    update = !git pull && git submodule update --init --recursive
+    update = !git pull                     && git submodule update --init --recursive
 #+end_src
 
 [[https://gist.github.com/gitaarik/8735255][Git Submodules basic explanation]]
@@ -1240,10 +1240,14 @@ With *all versions* of Git, I recommend using ~git up~ instead of ~git pull~.
 # `up' used many times
 #+end_src
 
-is pretty safe.  It will abort the merge if it can't be done using fast-forward.
-(In other words, if the local branch has diverged from the remote.)
+It is pretty safe: it will abort the merge if it can't be done using
+fast-forward.  (In other words, if the local branch has diverged from the
+remote.)
 
 See https://stackoverflow.com/questions/15316601/in-what-cases-could-git-pull-be-harmful
+
+~remote update -p~ *fetches* all refs from all remotes, instead of just the needed
+one; ~merge~ then merges the appropriate *single branch*.
 
 #+begin_src conf
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
