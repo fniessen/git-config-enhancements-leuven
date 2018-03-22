@@ -334,6 +334,8 @@ with the /same name/.
 - For medium changes, ~magit~ is perfect.
 - For large changes, [[https://www.deltawalker.com/][DeltaWalker]] (39.95 USD) is perfect.
 
+How to resolve merge conflicts in Git?  Try: ~git mergetool~.
+
 ** Emacs as a Git mergetool
 
 Ediff or Emerge?  Or Magit???
@@ -344,6 +346,7 @@ Ediff or Emerge?  Or Magit???
 
 [mergetool "ediff"]
     cmd = emacsclient -c -a \"\"  --eval \"(ediff-merge-files-with-ancestor \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\" nil \\\"$MERGED\\\")\"
+    keepBackup = false
 #+end_src
 
 ** Meld as Git mergetool
@@ -377,6 +380,7 @@ I suggest you use either:
 #+begin_src conf :tangle no
 [mergetool "meld"]
     cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
+    keepBackup = false
 #+end_src
 
 or:
@@ -384,6 +388,7 @@ or:
 #+begin_src conf :tangle no
 [mergetool "meld"]
     cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
+    keepBackup = false
 #+end_src
 
 The choice is whether to use ~$MERGED~ or ~$BASE~ in between ~$LOCAL~ and ~$REMOTE~.
@@ -413,6 +418,7 @@ commenting out can be swapped over if I want to use the ~$BASE~ line instead.
 [mergetool "meld"]
     cmd = meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
     # cmd = meld --diff "$LOCAL" "$BASE" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
+    keepBackup = false
 #+end_src
 
 * Rebase                                                               :ARCHIVE:
@@ -532,9 +538,14 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 
 (see http://gitimmersion.com/lab_11.html)
 
+Define:
+
 #+begin_src conf
     exec = '!exec '
 #+end_src
+
+so that you can do things like ~git exec make~.  This works because Shell aliases
+are always executed in the top-level directory.
 
 #+begin_src conf
     # Show the diff between the latest commit and the current state
@@ -638,7 +649,6 @@ Basic shortcuts.
 #+begin_src conf
     this = !git init && git add . && git commit -m \"Initial commit\"
     this = !git init && ( [[ -n $(ls) ]] || touch .gitignore ) && git add . && git commit -m \"Initial commit\"
-# plant?
 #+end_src
 
 *** Clone an existing repository
@@ -647,6 +657,21 @@ Basic shortcuts.
     # Clone a repository including all submodules.
     cl = clone --recursive
 #+end_src
+
+** Get the Git root directory
+
+#+begin_src conf
+    root = rev-parse --show-toplevel
+#+end_src
+
+#+begin_src conf
+    # Get the path cleaned up.
+    root = !pwd -P
+#+end_src
+
+#+begin_note
+This works because Shell aliases are always executed in the top-level directory.
+#+end_note
 
 ** Check the status of your files
 
