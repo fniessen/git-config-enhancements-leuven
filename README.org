@@ -1137,10 +1137,11 @@ any files from the tracked root directory that are not under Git tracking.
 first, to see what it will delete.
 
 Use:
-- ~git clean -n~ to see what ~git clean -f~ will do, so you can be sure it's what
-  you want.
+- ~git clean -n~ (dry run) to see what ~git clean -f~ will do, so you can be sure
+  it's what you want.
 - ~git clean -f~ (to *remove* the *untracked files*) and
-- ~git clean -fd~ (to also *remove untracked directories*).
+- ~git clean -fd~ (to also *remove untracked directories* in addition to untracked
+  files).
 #+end_note
 
 Nuclear version:
@@ -1491,6 +1492,15 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][common branc
 #+begin_src conf
     master = checkout master
     develop = checkout develop
+#+end_src
+
+In case of error "The following untracked working tree files would be
+overwritten by checkout", *move the untracked files*, instead of *deleting them*.
+For example:
+
+#+begin_src sh :tangle no
+cd "`git rev-parse --show-toplevel`"
+git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f".bak; done
 #+end_src
 
 *List all branches* (both remote-tracking and local branches), showing SHA1 and

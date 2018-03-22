@@ -1246,12 +1246,13 @@ first, to see what it will delete.
 Use:
 </p>
 <ul class="org-ul">
-<li><code>git clean -n</code> to see what <code>git clean -f</code> will do, so you can be sure it&rsquo;s what
-you want.
+<li><code>git clean -n</code> (dry run) to see what <code>git clean -f</code> will do, so you can be sure
+it&rsquo;s what you want.
 </li>
 <li><code>git clean -f</code> (to <b>remove</b> the <b>untracked files</b>) and
 </li>
-<li><code>git clean -fd</code> (to also <b>remove untracked directories</b>).
+<li><code>git clean -fd</code> (to also <b>remove untracked directories</b> in addition to untracked
+files).
 </li>
 </ul>
 
@@ -1804,6 +1805,19 @@ Checkout <a href="http://nvie.com/posts/a-successful-git-branching-model/">commo
 
 <pre class="src src-conf">    <span class="org-variable-name">master</span> = checkout master
     <span class="org-variable-name">develop</span> = checkout develop
+</pre>
+</div>
+
+<p>
+In case of error &ldquo;The following untracked working tree files would be
+overwritten by checkout&rdquo;, <b>move the untracked files</b>, instead of <b>deleting them</b>.
+For example:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh"><span class="org-builtin">cd</span> <span class="org-string">"`git rev-parse --show-toplevel`"</span>
+git checkout BRANCH 2&gt;&amp;1 | <span class="org-keyword">while </span><span class="org-builtin">read</span> f; <span class="org-keyword">do</span> [ <span class="org-negation-char">!</span> -e <span class="org-string">"$f"</span> ] || mv <span class="org-string">"$f"</span> <span class="org-string">"$f"</span>.bak; <span class="org-keyword">done</span>
 </pre>
 </div>
 
