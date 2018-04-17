@@ -542,21 +542,28 @@ Staging for commit is typically done by <code>git add</code>.
 <h3 id="sec-14-7">Ignoring files</h3>
 <div class="outline-text-3" id="text-14-7">
 </div><div id="outline-container-sec-14-7-1" class="outline-4">
-<h4 id="sec-14-7-1"><code>git ignore</code> command</h4>
+<h4 id="sec-14-7-1">List untracked files</h4>
 <div class="outline-text-4" id="text-14-7-1">
 <p>
-Quickly add a file or directory to <code>.gitignore</code>:
+Tell if a file is being tracked:
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-conf">    <span class="org-variable-name">ignore</span> = <span class="org-string">"!f() { echo $1 &gt;&gt; \"${GIT_PREFIX}.gitignore\"; }; f"</span>
+<pre class="src src-conf">    <span class="org-variable-name">check-file</span> = <span class="org-string">"!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi;  };  f"</span>
 </pre>
 </div>
 
 <p>
 List untracked <b>files ignored</b> by a <code>.gitignore</code> statement somewhere.
 </p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">List all untracked files.</span>
+    <span class="org-variable-name">ls-untracked</span> = ls-files --others
+</pre>
+</div>
 
 <div class="org-src-container">
 
@@ -567,8 +574,23 @@ List untracked <b>files ignored</b> by a <code>.gitignore</code> statement somew
 </div>
 
 <div id="outline-container-sec-14-7-2" class="outline-4">
-<h4 id="sec-14-7-2"><code>assume-unchanged</code> command</h4>
+<h4 id="sec-14-7-2"><code>git ignore</code> command</h4>
 <div class="outline-text-4" id="text-14-7-2">
+<p>
+Quickly add a file or directory to <code>.gitignore</code>:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-conf">    <span class="org-variable-name">ignore</span> = <span class="org-string">"!f() { echo $1 &gt;&gt; \"${GIT_PREFIX}.gitignore\"; }; f"</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-14-7-3" class="outline-4">
+<h4 id="sec-14-7-3"><code>assume-unchanged</code> command</h4>
+<div class="outline-text-4" id="text-14-7-3">
 <p>
 Ignore/unignore changes to <b>tracked file(s)</b> without <code>.gitignore</code>:
 </p>
@@ -799,14 +821,6 @@ To see real <b>timeline</b> of who is working on what and when:
     <span class="org-variable-name">ls-copied</span>    = <span class="org-string">"!git status --porcelain -uno | awk 'match($1, /C/) {print $2}'"</span>
     <span class="org-variable-name">ls-updated</span>   = <span class="org-string">"!git status --porcelain -uno | awk 'match($1, /U/) {print $2}'"</span>
     <span class="org-variable-name">ls-staged</span>    = <span class="org-string">"!git status --porcelain -uno | grep -P '^[MA]' | awk '{ print $2 }'"</span>
-    <span class="org-variable-name">ls-untracked</span> = <span class="org-string">"!git status --porcelain -uall | awk '$1 == \"??\" {print $2}'"</span>
-</pre>
-</div>
-
-<div class="org-src-container">
-
-<pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">List all untracked files.</span>
-    <span class="org-variable-name">untracked</span> = ls-files --others
 </pre>
 </div>
 

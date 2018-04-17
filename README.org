@@ -701,18 +701,31 @@ Staging for commit is typically done by ~git add~.
 
 ** Ignoring files
 
+*** List untracked files
+
+Tell if a file is being tracked:
+
+#+begin_src conf
+    check-file = "!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi;  };  f"
+#+end_src
+
+List untracked *files ignored* by a =.gitignore= statement somewhere.
+
+#+begin_src conf
+    # List all untracked files.
+    ls-untracked = ls-files --others
+#+end_src
+
+#+begin_src conf
+    ignored = ls-files --others --ignored --exclude-standard
+#+end_src
+
 *** ~git ignore~ command
 
 Quickly add a file or directory to =.gitignore=:
 
 #+begin_src conf
     ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
-#+end_src
-
-List untracked *files ignored* by a =.gitignore= statement somewhere.
-
-#+begin_src conf
-    ignored = ls-files --others --ignored --exclude-standard
 #+end_src
 
 *** ~assume-unchanged~ command
@@ -855,12 +868,6 @@ To see real *timeline* of who is working on what and when:
     ls-copied    = "!git status --porcelain -uno | awk 'match($1, /C/) {print $2}'"
     ls-updated   = "!git status --porcelain -uno | awk 'match($1, /U/) {print $2}'"
     ls-staged    = "!git status --porcelain -uno | grep -P '^[MA]' | awk '{ print $2 }'"
-    ls-untracked = "!git status --porcelain -uall | awk '$1 == \"??\" {print $2}'"
-#+end_src
-
-#+begin_src conf
-    # List all untracked files.
-    untracked = ls-files --others
 #+end_src
 
 #+begin_src conf
