@@ -706,7 +706,7 @@ Staging for commit is typically done by ~git add~.
 Tell if a file is being tracked:
 
 #+begin_src conf
-    check-file = "!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi;  };  f"
+    tracked = "!f() { if [ ! -f ${1} ]; then echo 'No such file!'; else tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; fi; }; f"
 #+end_src
 
 List untracked *files ignored* by a =.gitignore= statement somewhere.

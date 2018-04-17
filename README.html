@@ -550,7 +550,7 @@ Tell if a file is being tracked:
 
 <div class="org-src-container">
 
-<pre class="src src-conf">    <span class="org-variable-name">check-file</span> = <span class="org-string">"!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi;  };  f"</span>
+<pre class="src src-conf">    <span class="org-variable-name">tracked</span> = <span class="org-string">"!f() { if [ ! -f ${1} ]; then echo 'No such file!'; else tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; fi; }; f"</span>
 </pre>
 </div>
 
