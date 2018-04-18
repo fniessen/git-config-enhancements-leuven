@@ -18,20 +18,43 @@ Use ~colordiff~ for my ~svn diff~ command (set in =~/.subversion/config=):
 diff-cmd = colordiff
 #+end_src
 
-* Subversion equivalent to 'git show' command
+* Subversion equivalent to Git commands
+
+The following aliases are interesting for using SVN a bit like Git.
+
+** One-line log format
 
 #+begin_src shell
+alias svnlog="svn log | perl -l40pe 's/^-+/\n/'"
+#+end_src
+
+** Show a single revision ('git show')
+
+#+begin_src shell
+svn diff -c <revision>
 svn diff -c4795                         # Or svn diff -r4795:4792.
 #+end_src
+
+See ~svnshow~ and ~svnmeld~ in my Shell configuration.
+
+** Show what changed
+
+Output filenames of files changed in each commit:
+
+#+begin_src shell
+svn log -v
+#+end_src
+
+See ~svnwhatchanged~ in my Shell configuration.
 
 * View history of file
 
 To view all historical changes to a file in SVN:
 
 #+begin_src shell
-svn log -q path_to_file | grep ^r | awk '{print $1}' # List of revisions.
+svn log -q path/to/file | grep ^r | awk '{print $1}' # List of revisions.
 
-svn log --diff path_to_file
+svn log --diff path/to/file
 #+end_src
 
 * svn diff zip revision to deploy
@@ -119,7 +142,7 @@ If you want to know what content of a particular file has been changed in SVN
 server repository compared with your working copy, run the command:
 
 #+begin_src shell
-svn diff -r BASE:HEAD ./pathToYour/file
+svn diff -r BASE:HEAD ./path/to/file
 #+end_src
 
 If you want to know what contents of all the files have been changed in SVN
@@ -135,32 +158,6 @@ that were changed on the trunk between when the branch was created and "now"):
 
 #+begin_src shell
 svn diff -r 22334:HEAD --summarize <url of the branch>
-#+end_src
-
-* Overview
-
-The following aliases are interesting for using SVN a bit like Git.
-
-* Log
-
-** One-line log format
-
-#+begin_src shell
-alias svnlog="svn log | perl -l40pe 's/^-+/\n/'"
-#+end_src
-
-** Show a single revision
-
-#+begin_src shell
-svn diff -c <revision>
-#+end_src
-
-** Show what changed
-
-Output filenames of files changed in each commit:
-
-#+begin_src shell
-svn log -v
 #+end_src
 
 * Incoming changes
