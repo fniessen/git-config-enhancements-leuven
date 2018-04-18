@@ -22,11 +22,9 @@ diff-cmd = colordiff
 
 The following aliases are interesting for using SVN a bit like Git.
 
-** One-line log format
+** One-line log format ('git log')
 
-#+begin_src shell
-alias svnlog="svn log | perl -l40pe 's/^-+/\n/'"
-#+end_src
+See ~svnlog~ in my Shell configuration.
 
 ** Show a single revision ('git show')
 
