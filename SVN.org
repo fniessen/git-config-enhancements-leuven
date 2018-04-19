@@ -24,16 +24,15 @@ The following aliases are interesting for using SVN a bit like Git.
 
 ** One-line log format ('git log')
 
-See ~svnlog~ in my Shell configuration.
+See ~svn-log~ in my Shell configuration.
 
 ** Show a single revision ('git show')
 
 #+begin_src shell
-svn diff -c <revision>
-svn diff -c4795                         # Or svn diff -r4795:4792.
+svn diff -c 4795                        # Or svn diff -r 4795:4792.
 #+end_src
 
-See ~svnshow~ and ~svnmeld~ in my Shell configuration.
+See ~svn-show~ and ~svn-showtool~ in my Shell configuration.
 
 ** Show what changed
 
@@ -43,7 +42,7 @@ Output filenames of files changed in each commit:
 svn log -v
 #+end_src
 
-See ~svnwhatchanged~ in my Shell configuration.
+See ~svn-whatchanged~ in my Shell configuration.
 
 * View history of file
 
@@ -73,7 +72,7 @@ This will create a ZIP file with the changed file(s) -- in an intact directory
 structure -- from revision ~123:HEAD~.
 
 #+begin_note
-~-c ARG~ = change made by revision ~ARG~ (like ~-r ARG-1:ARG~)
+The ~-c REV~ option is equivalent to ~-r REV-1:REV~.
 #+end_note
 
 * Others
@@ -92,13 +91,13 @@ To *compare all modified files* in your working copy with the ~HEAD~ revision in
 repository, use the following command:
 
 #+begin_src shell
-alias svndiffall="echo svn status | grep '^M' | awk '{print $2}' | xargs svn diff -rHEAD"
+alias svn-diffall="echo svn status | grep '^M' | awk '{print $2}' | xargs svn diff -r HEAD"
 #+end_src
 
 Colored ~svn diff~ command like ~git diff~.
 
 #+begin_src shell
-alias svndiff='svn diff --diff-cmd=colordiff --extensions=" -u --strip-trailing-cr --ignore-space-change " | less --quit-if-one-screen'
+alias svn-diff='svn diff --diff-cmd=colordiff --extensions=" -u --strip-trailing-cr --ignore-space-change " | less --quit-if-one-screen'
 #+end_src
 
 * Incoming
@@ -196,5 +195,5 @@ svn status (-q)
 Update the revision (say we want to get r4732):
 
 #+begin_src shell
-svn update -r4732
+svn update -r 4732
 #+end_src
