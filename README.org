@@ -279,7 +279,7 @@ as prefixes for patches:
     mnemonicprefix = true
 #+end_src
 
-Use Meld as Git ~difftool~:
+** Use Meld as Git ~difftool~
 
 #+begin_src conf
     tool = meld
@@ -305,11 +305,14 @@ This allows doing nice things like:
 git showtool :/some nasty bug
 #+end_src
 
+** Performing directory diffs (Comparing folders)
+
 The following command makes it similar to the =git-meld.pl= script here:
 https://github.com/wmanley/git-meld:
 
 #+begin_src conf
-    meld = "!git difftool -t meld --dir-diff"
+[alias]
+    diffall = "!git difftool -t meld --dir-diff"
 #+end_src
 
 * Apply                                                                :ARCHIVE:
