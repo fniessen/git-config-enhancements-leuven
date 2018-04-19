@@ -279,8 +279,37 @@ as prefixes for patches:
     mnemonicprefix = true
 #+end_src
 
+Use Meld as Git ~difftool~:
+
 #+begin_src conf
     tool = meld
+
+[difftool]
+    prompt = false
+
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
+#+end_src
+
+Use a generic rev syntax (rev-parse) to transparently allow complex rev
+expressions.
+
+#+begin_src conf
+[alias]
+    showtool = "!f () { rev=$(git rev-parse \"${*:-HEAD}\"); git difftool $rev~1 $rev; }; f"
+#+end_src
+
+This allows doing nice things like:
+
+#+begin_src shell :tangle no
+git showtool :/some nasty bug
+#+end_src
+
+The following command makes it similar to the =git-meld.pl= script here:
+https://github.com/wmanley/git-meld:
+
+#+begin_src conf
+    meld = "!git difftool -t meld --dir-diff"
 #+end_src
 
 * Apply                                                                :ARCHIVE:
@@ -706,8 +735,25 @@ Staging for commit is typically done by ~git add~.
 Tell if a file is being tracked:
 
 #+begin_src conf
-    tracked = "!f() { if [ ! -f ${1} ]; then echo 'No such file!'; else tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; fi; }; f"
+    tracked1 = "!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
+
+    tracked2 = "!f() { echo -n ${1}': '; if [[ -f ${1} ]]; then tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
+# does not work!?
 #+end_src
+
+#+begin_note
+[[ has fewer surprises and is generally safer to use. But it is not portable -
+POSIX doesn't specify what it does and only some shells support it (beside bash,
+I heard ksh supports it too). For example, you can do
+
+: [[ -e $b ]]
+
+to test whether a file exists. But with [, you have to quote $b, because it
+splits the argument and expands things like "a*" (where [[ takes it
+literally). That has also to do with how [ can be an external program and
+receives its argument just normally like every other program (although it can
+also be a builtin, but then it still has not this special handling).
+#+end_note
 
 List untracked *files ignored* by a =.gitignore= statement somewhere.
 
