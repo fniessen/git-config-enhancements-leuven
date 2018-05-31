@@ -49,10 +49,16 @@ See ~svn-whatchanged~ in my Shell configuration.
 To view all historical changes to a file in SVN:
 
 #+begin_src shell
-svn log -q path/to/file | grep ^r | awk '{print $1}' # List of revisions.
+svn log -q path/to/file | grep "^r" | awk '{print $1}' # List of revisions.
+#+end_src
 
+See ~svn-logfile~ in my Shell configuration.
+
+#+begin_src shell
 svn log --diff path/to/file
 #+end_src
+
+See ~svn-logfile-p~ in my Shell configuration.
 
 * svn diff zip revision to deploy
 
