@@ -256,6 +256,9 @@ variable/.
 #+begin_src conf :tangle no
     autocrlf = input
     safecrlf = true
+
+    autocrlf = false
+    safecrlf = false
 #+end_src
 
 #+begin_src conf
@@ -899,8 +902,7 @@ disk:
     ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
     ls = "!git status -suno"
 
-    lg50 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-50s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{49}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
-    lg80 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[31m%s\\033[0m %-80s \\033[32m%14s\\033[0m \\033[30;1m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{79}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
+    lg80 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[33m%s\\033[0m %-80s \\033[34m%14s\\033[0m \\033[32m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{79}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
 #+end_src
 
 To see real *timeline* of who is working on what and when:
@@ -978,6 +980,10 @@ git changed bAda55..ff0021              # List files modified between those comm
 #+begin_src conf
     lf = "log --follow"
     logfile = log --follow -C
+#+end_src
+
+#+begin_src conf
+    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 #+end_src
 
 #+begin_warning
@@ -1403,7 +1409,7 @@ they are "gone" in ~git branch -vv~):
 *** Get timestamp of last pull
 
 #+begin_src conf
-    when = !stat -c %y .git/FETCH_HEAD
+    when = !stat -c %y .git/FETCH_HEAD | cut -d'.' -f1
 #+end_src
 
 *** Push
@@ -1756,6 +1762,13 @@ Take named stash:
 
 #+begin_src conf
     snapshot = !git stash save "Snapshot: $(date +\"%F %a %R\")" && git stash apply "stash@{0}"
+#+end_src
+
+https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
+
+#+begin_src conf
+    sshow = "!f() { git stash show stash^{/$*} -p; }; f"
+    sapply = "!f() { git stash apply stash^{/$*}; }; f"
 #+end_src
 
 When you're done, with ~git stash apply~ (top stash by default), you're back where
