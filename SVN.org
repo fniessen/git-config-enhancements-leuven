@@ -198,7 +198,8 @@ svn status (-q)
 
 * Checkout a specific older version of the source code
 
-Update the revision (say we want to get r4732):
+Assuming that the source has already been checked out (that is you have an
+already existing folder...), update the revision (say we want to get r4732):
 
 #+begin_src shell
 svn update -r 4732
