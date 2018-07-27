@@ -634,51 +634,9 @@ clean and relevant commits, no experiments or fixing typos.
 So, I can do things like ~git exec make~. This works because shell aliases are
 always executed in the top-level directory.
 
-** Debugging
+** CREATE - Getting a Git repository
 
-Sometimes it's nice to see what is going on under the hood. Try this alias:
-
-#+begin_src conf
-    debug  = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
-#+end_src
-
-Just insert ~debug~ between ~git~ and whatever would usually follow; for example:
-
-#+begin_src shell :tangle no
-git debug unwip
-#+end_src
-
-** Abbreviations
-
-Basic shortcuts.
-
-#+begin_src conf
-    ci = commit
-#+end_src
-
-#+begin_src conf
-    cp = cherry-pick -x
-    pick = cherry-pick -s
-#+end_src
-
-#+begin_src conf
-    h = help
-#+end_src
-
-** TODO To sort out
-
-#+begin_src conf
-    grep4d = !sh -c 'git log -p -S'$1' $2' -
-
-    # 2009-05-26  (merged-bed-bug) 6fe85ff regenerate rules Brad Bowman
-    logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
-    brdate = !"sh -c 'for b in `git branch --no-merged` ; \
-               do git logdate -1 -r $b --; done'"
-#+end_src
-
-** Getting a Git repository
-
-*** Initialize a repository
+*** Create a repository
 
 #+begin_src conf
     this = !git init && ( [[ -n $(ls) ]] || touch .gitignore ) && git add . && git commit -m \"Initial commit\"
@@ -691,22 +649,7 @@ Basic shortcuts.
     cl = clone --recursive
 #+end_src
 
-** Get the Git root directory
-
-#+begin_src conf
-    root = rev-parse --show-toplevel
-#+end_src
-
-#+begin_src conf
-    # Get the path cleaned up.
-    root = !pwd -P
-#+end_src
-
-#+begin_note
-This works because Shell aliases are always executed in the top-level directory.
-#+end_note
-
-** Check the status of your files
+** SHOW - Check the status of your files
 
 Give the status in the *short-format* (preceded by a line showing the /branch name/
 and /tracking info/).
@@ -732,89 +675,7 @@ MM ChangeLog
 Staging for commit is typically done by ~git add~.
 #+end_note
 
-** Ignoring files
-
-*** List untracked files
-
-Tell if a file is being tracked:
-
-#+begin_src conf
-    tracked1 = "!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
-
-    tracked2 = "!f() { echo -n ${1}': '; if [[ -f ${1} ]]; then tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
-# does not work!?
-#+end_src
-
-#+begin_note
-[[ has fewer surprises and is generally safer to use. But it is not portable -
-POSIX doesn't specify what it does and only some shells support it (beside bash,
-I heard ksh supports it too). For example, you can do
-
-: [[ -e $b ]]
-
-to test whether a file exists. But with [, you have to quote $b, because it
-splits the argument and expands things like "a*" (where [[ takes it
-literally). That has also to do with how [ can be an external program and
-receives its argument just normally like every other program (although it can
-also be a builtin, but then it still has not this special handling).
-#+end_note
-
-List untracked *files ignored* by a =.gitignore= statement somewhere.
-
-#+begin_src conf
-    # List all untracked files.
-    ls-untracked = ls-files --others
-#+end_src
-
-#+begin_src conf
-    ignored = ls-files --others --ignored --exclude-standard
-#+end_src
-
-*** ~git ignore~ command
-
-Quickly add a file or directory to =.gitignore=:
-
-#+begin_src conf
-    ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
-#+end_src
-
-*** ~assume-unchanged~ command
-
-Ignore/unignore changes to *tracked file(s)* without =.gitignore=:
-
-#+begin_src conf
-    assume = update-index --assume-unchanged
-    unassume = update-index --no-assume-unchanged
-#+end_src
-
-It has to be configured for each project member individually.
-
-#+begin_warning
-As stated in [[http://stackoverflow.com/questions/23097368/git-ignore-vs-exclude-vs-assume-unchanged][git ignore vs. exclude vs. assume-unchanged]],
-~git-update-index --assume-unchanged~ was never meant to ignore changes to tracked
-files (*only to spare some stats*).  So do not suggest it as a means to achieve
-that.
-#+end_warning
-
-List ignored files (*marked unchanged*):
-
-#+begin_src conf
-    assumed = "!git ls-files -v | grep '^h' | cut -c 3-"
-#+end_src
-
-Unassume all the assumed files:
-
-#+begin_src conf
-    unassumeall = "!git assumed | xargs git update-index --no-assume-unchanged"
-#+end_src
-
-Assume all:
-
-#+begin_src conf
-    assumeall = "!git status -s | awk {'print $2'} | xargs git assume"
-#+end_src
-
-** View your changes
+** SHOW - View your changes
 
 *** Changes between the working tree and the index (staged for the next commit)
 
@@ -891,16 +752,7 @@ Diverging from ~origin/master~, whatever the branch?
     log-local = log --oneline origin..HEAD
 #+end_src
 
-** Remove deleted files
-
-Removing multiple files from a Git repo that have already been deleted from
-disk:
-
-#+begin_src conf
-    rma = !git ls-files --deleted -z | xargs -0 git rm
-#+end_src
-
-** View the commit history
+** SHOW - View the commit history
 
 #+begin_note
 The ~git log~ command shows, by default, the "author date" -- not the "committer
@@ -1015,7 +867,234 @@ Show a "top contributors" list:
 The ~--~ signals the end of options, that the rest of the parameters are limiters.
 #+end_note
 
-** Undo things
+** SHOW - Show blame information about original authors of lines changed or removed
+
+#+begin_src conf
+    praise = blame -w
+    archeology = blame -w -C -n
+    whodoikill = blame -w -C -n
+#+end_src
+
+Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
+original authors of lines changed or removed in a given branch:
+
+#+begin_src shell :tangle no
+git overwritten feature origin/master
+#+end_src
+
+This is useful when opening pull requests per GitHub Flow; you'll want your pull
+request reviewed by colleagues but you might not be sure who to ping. With
+git-overwritten you'll get the names of people who wrote the lines you just
+changed, so you'll know who to @-mention when opening a pull request.
+
+> So, given a patch (or a branch) together with a "base revision", you'd get
+> a list of code chunks modified by that patch, then run "annotate" on the
+> base revision, and look for those code chunks, collecting the names of
+> corresponding authors.
+
+Sounds like git-guilt (which I've just read about today), might be
+relevant: https://bitbucket.org/tpettersen/git-guilt
+
+** SHOW - Search for commits
+
+*** Whose commit message mention your regexp
+
+If you want to find all commits (*across all branches*, showing names and status
+of changed files) where *log message* matches a specified pattern (regular
+expression), use ~find~.
+
+#+begin_src conf
+    find = "log --all -i --grep"
+#+end_src
+
+Add ~--name-status~ to show only names and status of *changed files*.
+
+For example, to find all commits referencing bug #382:
+
+#+begin_src shell :tangle no
+git find "Bug #382"
+#+end_src
+
+To find commits that match *either* of patterns (implicit *OR* semantic), you can
+use:
+
+#+begin_src shell :tangle no
+git log --grep=<foo> --grep=<bar>
+#+end_src
+
+To find /commit/ that has *both* line matching first and line matching second
+somewhere, use the *AND* semantic:
+
+#+begin_src shell :tangle no
+git log --all-match --grep=<foo> --grep=<bar>
+#+end_src
+
+Show the *last commit* which *message matches a regex*:
+
+#+begin_src shell :tangle no
+# Show the last commit which has the word "fix" in its message.
+git show :/fix
+
+# Show the last merge commit.
+git show :/^Merge
+#+end_src
+
+*** String added/removed in Commit contents (Diff)
+
+If you want to find all commits where a *string* was *added or removed* in the /file
+contents/ (to be more exact: where its *number of occurrences changed*),
+i.e. search the /commit contents/, use ~-S~.
+
+You can dig up commits that have, for example,
+- removed calls to a specific function, or
+- added a certain CSS classname.
+
+#+begin_note
+If the number of times "foo" appears in the file is the same before and after
+a commit, it will not match using ~-S "foo"~.
+#+end_note
+
+#+begin_src shell :tangle no
+git log --all -S "foo" --since="1 week ago"
+#+end_src
+
+By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
+~--pickaxe-regex~.
+
+*** Whose changes include your regexp
+
+String contained in added/removed lines from Commit contents (Diff)
+
+With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
+any *line* that was added, removed, or changed.
+
+#+begin_src shell :tangle no
+git log --all -G "foo" --since="1 week ago"
+#+end_src
+
+** Grep (Print lines matching a pattern)
+
+*** Pattern in working directory (and its subdirectories)
+
+The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
+your project files (i.e. no files in =.git=), but also that is allows you to
+interface with your repository's Git database; for example, for searching:
+
+- files registered in the index, rather than the working tree,
+- for your regexp in some files from another branch (XXX does not work? XXX).
+
+#+begin_note
+It doesn't search files that are not revisioned (untracked, excluded/ignored,
+etc.).
+#+end_note
+
+More readable output, with *grouping* (like Ripgrep, ~rg~):
+
+#+begin_src conf
+    rg = "grep --break --heading"
+#+end_src
+
+Broader search (*case-sensitive*), output without grouping:
+
+#+begin_src conf
+    g = "grep -I"
+    gno = "grep -I --name-only"
+#+end_src
+
+(Don't match the pattern in binary files.)
+
+*** Find files that contain some terms, not necessarily on the same line
+
+Match any of these patterns, but print matches only from files that have /all/ of
+them (files must have lines that match each of them):
+
+#+begin_src shell :tangle no
+git grep --all-match -e <regexp> -e <regexp>
+#+end_src
+
+** Ignoring files
+
+*** List untracked files
+
+Tell if a file is being tracked:
+
+#+begin_src conf
+    tracked1 = "!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
+
+    tracked2 = "!f() { echo -n ${1}': '; if [[ -f ${1} ]]; then tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
+# does not work!?
+#+end_src
+
+#+begin_note
+[[ has fewer surprises and is generally safer to use. But it is not portable -
+POSIX doesn't specify what it does and only some shells support it (beside bash,
+I heard ksh supports it too). For example, you can do
+
+: [[ -e $b ]]
+
+to test whether a file exists. But with [, you have to quote $b, because it
+splits the argument and expands things like "a*" (where [[ takes it
+literally). That has also to do with how [ can be an external program and
+receives its argument just normally like every other program (although it can
+also be a builtin, but then it still has not this special handling).
+#+end_note
+
+List untracked *files ignored* by a =.gitignore= statement somewhere.
+
+#+begin_src conf
+    # List all untracked files.
+    ls-untracked = ls-files --others
+#+end_src
+
+#+begin_src conf
+    ignored = ls-files --others --ignored --exclude-standard
+#+end_src
+
+*** ~git ignore~ command
+
+Quickly add a file or directory to =.gitignore=:
+
+#+begin_src conf
+    ignore = "!f() { echo $1 >> \"${GIT_PREFIX}.gitignore\"; }; f"
+#+end_src
+
+*** ~assume-unchanged~ command
+
+Ignore/unignore changes to *tracked file(s)* without =.gitignore=:
+
+#+begin_src conf
+    assume = update-index --assume-unchanged
+    unassume = update-index --no-assume-unchanged
+#+end_src
+
+It has to be configured for each project member individually.
+
+#+begin_warning
+As stated in [[http://stackoverflow.com/questions/23097368/git-ignore-vs-exclude-vs-assume-unchanged][git ignore vs. exclude vs. assume-unchanged]],
+~git-update-index --assume-unchanged~ was never meant to ignore changes to tracked
+files (*only to spare some stats*).  So do not suggest it as a means to achieve
+that.
+#+end_warning
+
+List ignored files (*marked unchanged*):
+
+#+begin_src conf
+    assumed = "!git ls-files -v | grep '^h' | cut -c 3-"
+#+end_src
+
+Unassume all the assumed files:
+
+#+begin_src conf
+    unassumeall = "!git assumed | xargs git update-index --no-assume-unchanged"
+#+end_src
+
+Assume all:
+
+#+begin_src conf
+    assumeall = "!git status -s | awk {'print $2'} | xargs git assume"
+#+end_src
+
+** REVERT - Undo things
 
 *** Change your last commit
 
@@ -1260,7 +1339,7 @@ into your index), use:
 git revert -n [hash]
 #+end_src
 
-** Work with remotes
+** UPDATE - Pull
 
 Starting with Git 1.7.0, ~@{u}~ is shorthand for the *current* branch's *upstream*
 branch; e.g., ~origin/foo~ (or ~github/foo~, etc., since the remote doesn't have to
@@ -1270,8 +1349,6 @@ be called ~origin~) if the checked out branch is ~foo~.
     r = "remote -v"
     remotes = remote -v
 #+end_src
-
-*** Pull
 
 #+begin_note
 ~git pull~ is simply ~git fetch && git merge remote~.  Its ~--rebase~ option uses
@@ -1433,104 +1510,113 @@ they are "gone" in ~git branch -vv~):
     when = !stat -c %y .git/FETCH_HEAD | cut -d'.' -f1
 #+end_src
 
-*** Push
+** UPDATE - Merge
 
-It is useful to know if you have any *local commits* that are not in the remote
-branch.
-
-#+begin_note
-It is a good idea to examine what you are about to push, before actually doing
-so, because fixing mistakes before pushing is much easier (see the next
-section). To do that, use the command "git diff origin/master". If you want to
-show your unpushed commits with their commit log messages, use "git show
-origin/master.." instead. If you only have one local commit you want to push,
-just "git show" is enough.
-
-> It is not clear to me how these two differ.  Does "git show origin/master.."
-> output everything that "git diff origin/master" outputs, plus log messages?
-
-Yes, that's the only real difference between them, when you have no
-uncommitted changes.  (When you do have uncommitted changes, "git
-diff" will include them, while "git show" will not.)
-#+end_note
-
-The ~out~ command returns a list of *unpushed* (outgoing) commits for the *current
-branch*, the next time you do a push.
+Merging means to *bring the contents of another branch* (possibly from an external
+repository) *into the current branch*. [...]  Merging is performed by an automatic
+process that identifies changes made since the branches diverged, and then
+applies all those changes together.
 
 #+begin_src conf
-    out = log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)' @{u}..
+    # Will only try to "merge" if your current HEAD commit is in the branch
+    # you're merging in.  This will allow you to merge some commits whilst being
+    # sure you won't get conflicts.
+    ff = merge --ff-only
+    ff = merge --ff-only @{u}
+
+    # Avoid a fast-forward commit.
+    mm = merge --no-ff
 #+end_src
+
+*** Undo the merge
+
+If you tried a merge which resulted in complex conflicts and want to start over,
+you can recover with ~git merge --abort~.  It will allow you to *undo the merge*,
+even if it is a fast-forward merge.
+
+*** Dry run (do not make changes)
+
+Naive (but slow) way:
+
+#+begin_src shell :tangle no
+rm -Rf /tmp/repository
+cp -r repository /tmp/
+cd /tmp/repository
+git merge ...
+# ... If successful, do the real merge.
+#+end_src
+
+#+begin_warning
+It won't work just cloning to =/tmp=; you need a *copy* in order *to be sure that
+uncommitted changes will not conflict*.
+#+end_warning
+
+Performing a Git merge with *no commit* and *no fast-forward* will merge the two
+code bases together -- it will *modify your working copy*.  This will allow you to
+examine, test, and undo the merge if required.
+
+#+begin_src shell :tangle no
+git merge --no-commit --no-ff $BRANCH
+#+end_src
+
+#+begin_warning
+If your repository is a live Web server, then you could be serving files with
+conflicts in.  That's why you should *never* be *handling merges on a live Web
+server*!  Fix up the ~prod~ branch (on your development box) and then push it to
+the real webserver with ~git pull --ff-only~.
+#+end_warning
+
+See if the merge is applicable to the current working tree and/or the index file
+and *detects conflicts*:
 
 #+begin_src conf
-    outgoing = log @{u}.. --stat
+    mergetest = "!f() { git merge --no-commit --no-ff $1; git merge --abort; echo 'Merge aborted'; }; f"
+
+    # Check how the merge of `dev' into master will go: git mergedryrun dev.
+    mergedryrun = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflict detected' || echo 'Merged cleanly'; }; f"
+
+    # Extract the "changed in both" lines as well as the conflicting parts.
+    mergedryrunconflicts = "!f() { git merge-tree $(git merge-base $1 $2) $1 $2 | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' | cdiff; }; f"
 #+end_src
 
-This causes git log to show all commits reachable from ~HEAD~ excluding those
-reachable from the upstream branch. The ~@{u}..~ argument is equivalent to
-~@{u}..HEAD~, where ~HEAD~ stands for the last commit in your local branch, but ~HEAD~
-can be omitted for shorthand purposes.
+*** Branch/Integration manager
 
-#+begin_note
-Use ~git push -u origin new/branch~ to push the ~new/branch~ branch to the ~origin~
-remote and to set up tracking.
-#+end_note
+If you're the Branch/Integration manager, you can use these aliases to *merge*
+stuff (to select the entirety of either our or their file in a 3-way merge).
 
-If you want to see all *unpushed* commits from *all branches*, do this:
+Often, during a merge, you know you want to take a file from one side
+wholesale. The following aliases expose the ~ours~ and ~theirs~ commands which will
+let you pick a file(s) from the current branch or the merged branch
+respectively:
 
 #+begin_src conf
-    out-all = log --branches --not --remotes --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)'
+    ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+    theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 #+end_src
+
+Best (and safest) way to merge a Git local branch into ~master~:
+
+#+begin_src shell :tangle no
+git checkout master
+git pull origin master                  # Get the latest changes from the remote.
+git merge test
+git push origin master
+
+git branch -d branch_name               # Delete local branch.
+#+end_src
+
+Best answer I have seen on ~git merge~ *strategies*:
+https://stackoverflow.com/questions/366860/when-would-you-use-the-different-git-merge-strategies
+
+*** List conflicted files
+
+Unmerged files after a merge failure:
 
 #+begin_src conf
-    pof = !git push origin -f $(git branch | grep \\* | cut -d ' ' -f2)
+    conflicts = "!git ls-files -u | cut -f 2 | sort -u"
 #+end_src
 
-is a shortcut for manually typing the branch name:
-
-: git push origin -f <current-branch>
-
-*** Sync
-
-#+begin_src conf
-    sync = !git pull && git push
-#+end_src
-
-#+begin_src conf
-    sync = !git update && git co master && git pull && git co @{-1}
-#+end_src
-
-That's rather basic - it doesn't actually rebase my branch that I'm on.
-
-Let's do a slightly different command: ~resync~
-
-#+begin_src conf
-    # git resync -> sync repository and rebase current branch.
-    resync = !sh -c 'BRANCH_NAME=master && git co master && git fe && git reset --hard origin/master && git rebase master'
-#+end_src
-
-** Tag
-
-Show the last tag:
-
-#+begin_src conf
-    lasttag = describe --tags --abbrev=0
-#+end_src
-
-List tags using (better) version sorting (if your ~sort~ supports it):
-
-#+begin_src conf
-    # Show verbose output about tags.
-    tags = tag -l
-    tags = !git tag | sort -V
-#+end_src
-
-You can do a lot better with:
-
-#+begin_src conf
-    releases = log --decorate --oneline --simplify-by-decoration --all
-#+end_src
-
-** Branch
+** BRANCH - Branch
 
 See http://nuclearsquid.com/writings/git-tricks-tips-workflows/ for more
 interesting stuff, such as:
@@ -1641,131 +1727,59 @@ right side commit SHA-1s (as obtained from the names, or defaulting to ~HEAD~) a
 substitutes that in for the left-side SHA-1. The right-side SHA-1 (as resolved
 from the name) remains intact.
 
-** Merge
+*** Rename branch
 
-Merging means to *bring the contents of another branch* (possibly from an external
-repository) *into the current branch*. [...]  Merging is performed by an automatic
-process that identifies changes made since the branches diverged, and then
-applies all those changes together.
+Sometimes we name a branch poorly or maybe we thought the name was "good" but
+not meaningful to the work we are doing.
+
+To rename the branch locally:
 
 #+begin_src conf
-    # Will only try to "merge" if your current HEAD commit is in the branch
-    # you're merging in.  This will allow you to merge some commits whilst being
-    # sure you won't get conflicts.
-    ff = merge --ff-only
-    ff = merge --ff-only @{u}
-
-    # Avoid a fast-forward commit.
-    mm = merge --no-ff
+    rename = branch -m
 #+end_src
 
-*** Undo the merge
+One thing to keep in mind is that this command works in two different ways:
 
-If you tried a merge which resulted in complex conflicts and want to start over,
-you can recover with ~git merge --abort~.  It will allow you to *undo the merge*,
-even if it is a fast-forward merge.
+- if we are on the branch we want to rename, we can just ~git rename new-name~.
+- If we are not on the branch, we have to use ~git rename target-branch new-name~.
 
-*** Dry run (do not make changes)
+*** List branches that contain a given commit ID (SHA1)
 
-Naive (but slow) way:
+Filter the list of *branches* to only those which have the given *commit ID* among
+their ancestors.
+
+#+begin_src conf
+    where = "branch -a --contains"
+#+end_src
+
+This also includes *remote tracking branches* in the list, that is "local
+branches that have a direct relationship to a remote branch".
+
+List all *tags* that contain a commit ID:
 
 #+begin_src shell :tangle no
-rm -Rf /tmp/repository
-cp -r repository /tmp/
-cd /tmp/repository
-git merge ...
-# ... If successful, do the real merge.
+git tag --contains a2c71a6
 #+end_src
 
-#+begin_warning
-It won't work just cloning to =/tmp=; you need a *copy* in order *to be sure that
-uncommitted changes will not conflict*.
-#+end_warning
+*** See which changes from a branch are already present upstream
 
-Performing a Git merge with *no commit* and *no fast-forward* will merge the two
-code bases together -- it will *modify your working copy*.  This will allow you to
-examine, test, and undo the merge if required.
+While on "feature" branch:
 
 #+begin_src shell :tangle no
-git merge --no-commit --no-ff $BRANCH
+git cherry -v master
 #+end_src
 
-#+begin_warning
-If your repository is a live Web server, then you could be serving files with
-conflicts in.  That's why you should *never* be *handling merges on a live Web
-server*!  Fix up the ~prod~ branch (on your development box) and then push it to
-the real webserver with ~git pull --ff-only~.
-#+end_warning
+#+begin_example
++ 497034f2 Listener.new now accepts a hash of options
+- 2d0333ff cache the absolute images path for growl messages
++ e4406858 rename Listener#run to #start
+#+end_example
 
-See if the merge is applicable to the current working tree and/or the index file
-and *detects conflicts*:
-
-#+begin_src conf
-    mergetest = "!f() { git merge --no-commit --no-ff $1; git merge --abort; echo 'Merge aborted'; }; f"
-
-    # Check how the merge of `dev' into master will go: git mergedryrun dev.
-    mergedryrun = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflict detected' || echo 'Merged cleanly'; }; f"
-
-    # Extract the "changed in both" lines as well as the conflicting parts.
-    mergedryrunconflicts = "!f() { git merge-tree $(git merge-base $1 $2) $1 $2 | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' | cdiff; }; f"
-#+end_src
-
-*** Branch/Integration manager
-
-If you're the Branch/Integration manager, you can use these aliases to *merge*
-stuff (to select the entirety of either our or their file in a 3-way merge).
-
-Often, during a merge, you know you want to take a file from one side
-wholesale. The following aliases expose the ~ours~ and ~theirs~ commands which will
-let you pick a file(s) from the current branch or the merged branch
-respectively:
-
-#+begin_src conf
-    ours = "!f() { git checkout --ours $@ && git add $@; }; f"
-    theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
-#+end_src
-
-Best (and safest) way to merge a Git local branch into ~master~:
-
-#+begin_src shell :tangle no
-git checkout master
-git pull origin master                  # Get the latest changes from the remote.
-git merge test
-git push origin master
-
-git branch -d branch_name               # Delete local branch.
-#+end_src
-
-Best answer I have seen on ~git merge~ *strategies*:
-https://stackoverflow.com/questions/366860/when-would-you-use-the-different-git-merge-strategies
-
-*** List conflicted files
-
-Unmerged files after a merge failure:
-
-#+begin_src conf
-    conflicts = "!git ls-files -u | cut -f 2 | sort -u"
-#+end_src
-
-** Prepare a release
-
-Save a repo as a tarball:
-
-#+begin_src conf
-    export = archive -o latest.tar.gz -9 --prefix=latest/
-#+end_src
-
-** Cherrypick style recording
-
-Ask interactively which patch hunk to commit, and then do the commit:
-
-#+begin_src conf
-    record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
-#+end_src
-
-It will not only do ~git add -p~ (with an optional file list), but it will also
-immediately do the ~commit~. Upon abandonment of either the add or the commit, it
-will ~reset~ the index.
+The ~cherry~ command is useful to see which commits have been cherry-picked from
+a development branch to the stable branch, for instance. This command compares
+changes on the current (~feature~) branch to upstream (~master~) and indicates which
+are present on both with the ~-~ sign. Changes still missing from upstream are
+marked with ~+~.
 
 ** Stash
 
@@ -2027,122 +2041,187 @@ XXX See doc of git help stash for workflows...
                grep commit | cut -d\  -f3 |
                xargs git log --merges --no-walk --grep=WIP
 
-** Search for commits
+** PUBLISH - Push
 
-*** Whose commit message mention your regexp
-
-If you want to find all commits (*across all branches*, showing names and status
-of changed files) where *log message* matches a specified pattern (regular
-expression), use ~find~.
-
-#+begin_src conf
-    find = "log --all -i --grep"
-#+end_src
-
-Add ~--name-status~ to show only names and status of *changed files*.
-
-For example, to find all commits referencing bug #382:
-
-#+begin_src shell :tangle no
-git find "Bug #382"
-#+end_src
-
-To find commits that match *either* of patterns (implicit *OR* semantic), you can
-use:
-
-#+begin_src shell :tangle no
-git log --grep=<foo> --grep=<bar>
-#+end_src
-
-To find /commit/ that has *both* line matching first and line matching second
-somewhere, use the *AND* semantic:
-
-#+begin_src shell :tangle no
-git log --all-match --grep=<foo> --grep=<bar>
-#+end_src
-
-Show the *last commit* which *message matches a regex*:
-
-#+begin_src shell :tangle no
-# Show the last commit which has the word "fix" in its message.
-git show :/fix
-
-# Show the last merge commit.
-git show :/^Merge
-#+end_src
-
-*** String added/removed in Commit contents (Diff)
-
-If you want to find all commits where a *string* was *added or removed* in the /file
-contents/ (to be more exact: where its *number of occurrences changed*),
-i.e. search the /commit contents/, use ~-S~.
-
-You can dig up commits that have, for example,
-- removed calls to a specific function, or
-- added a certain CSS classname.
+It is useful to know if you have any *local commits* that are not in the remote
+branch.
 
 #+begin_note
-If the number of times "foo" appears in the file is the same before and after
-a commit, it will not match using ~-S "foo"~.
+It is a good idea to examine what you are about to push, before actually doing
+so, because fixing mistakes before pushing is much easier (see the next
+section). To do that, use the command "git diff origin/master". If you want to
+show your unpushed commits with their commit log messages, use "git show
+origin/master.." instead. If you only have one local commit you want to push,
+just "git show" is enough.
+
+> It is not clear to me how these two differ.  Does "git show origin/master.."
+> output everything that "git diff origin/master" outputs, plus log messages?
+
+Yes, that's the only real difference between them, when you have no
+uncommitted changes.  (When you do have uncommitted changes, "git
+diff" will include them, while "git show" will not.)
 #+end_note
 
-#+begin_src shell :tangle no
-git log --all -S "foo" --since="1 week ago"
+The ~out~ command returns a list of *unpushed* (outgoing) commits for the *current
+branch*, the next time you do a push.
+
+#+begin_src conf
+    out = log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)' @{u}..
 #+end_src
 
-By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
-~--pickaxe-regex~.
-
-*** Whose changes include your regexp
-
-String contained in added/removed lines from Commit contents (Diff)
-
-With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
-any *line* that was added, removed, or changed.
-
-#+begin_src shell :tangle no
-git log --all -G "foo" --since="1 week ago"
+#+begin_src conf
+    outgoing = log @{u}.. --stat
 #+end_src
 
-** Grep (Print lines matching a pattern)
-
-*** Pattern in working directory (and its subdirectories)
-
-The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
-your project files (i.e. no files in =.git=), but also that is allows you to
-interface with your repository's Git database; for example, for searching:
-
-- files registered in the index, rather than the working tree,
-- for your regexp in some files from another branch (XXX does not work? XXX).
+This causes git log to show all commits reachable from ~HEAD~ excluding those
+reachable from the upstream branch. The ~@{u}..~ argument is equivalent to
+~@{u}..HEAD~, where ~HEAD~ stands for the last commit in your local branch, but ~HEAD~
+can be omitted for shorthand purposes.
 
 #+begin_note
-It doesn't search files that are not revisioned (untracked, excluded/ignored,
-etc.).
+Use ~git push -u origin new/branch~ to push the ~new/branch~ branch to the ~origin~
+remote and to set up tracking.
 #+end_note
 
-More readable output, with *grouping* (like Ripgrep, ~rg~):
+If you want to see all *unpushed* commits from *all branches*, do this:
 
 #+begin_src conf
-    rg = "grep --break --heading"
+    out-all = log --branches --not --remotes --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)'
 #+end_src
-
-Broader search (*case-sensitive*), output without grouping:
 
 #+begin_src conf
-    g = "grep -I"
-    gno = "grep -I --name-only"
+    pof = !git push origin -f $(git branch | grep \\* | cut -d ' ' -f2)
 #+end_src
 
-(Don't match the pattern in binary files.)
+is a shortcut for manually typing the branch name:
 
-*** Find files that contain some terms, not necessarily on the same line
+: git push origin -f <current-branch>
 
-Match any of these patterns, but print matches only from files that have /all/ of
-them (files must have lines that match each of them):
+** PUBLISH - Find out if a change is part of a release
+
+#+begin_src conf
+    sha1-tag = '!f() { git name-rev --name-only "$@"; }; f'
+#+end_src
+
+The ~name-rev~ command indicates the *position of a commit relative to tags* in the
+project. For example, ~v2.3~5~ means that this commit is located 5 commits *before*
+the v2.3 tag -- we can be certain that this change is part of v2.3, then.
+
+** PUBLISH - Prepare a release
+
+Save a repo as a tarball:
+
+#+begin_src conf
+    export = archive -o latest.tar.gz -9 --prefix=latest/
+#+end_src
+
+** PUBLISH - Tag
+
+Show the last tag:
+
+#+begin_src conf
+    lasttag = describe --tags --abbrev=0
+#+end_src
+
+List tags using (better) version sorting (if your ~sort~ supports it):
+
+#+begin_src conf
+    # Show verbose output about tags.
+    tags = tag -l
+    tags = !git tag | sort -V
+#+end_src
+
+You can do a lot better with:
+
+#+begin_src conf
+    releases = log --decorate --oneline --simplify-by-decoration --all
+#+end_src
+
+** Debugging
+
+Sometimes it's nice to see what is going on under the hood. Try this alias:
+
+#+begin_src conf
+    debug  = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
+#+end_src
+
+Just insert ~debug~ between ~git~ and whatever would usually follow; for example:
 
 #+begin_src shell :tangle no
-git grep --all-match -e <regexp> -e <regexp>
+git debug unwip
 #+end_src
+
+** Abbreviations
+
+Basic shortcuts.
+
+#+begin_src conf
+    ci = commit
+#+end_src
+
+#+begin_src conf
+    cp = cherry-pick -x
+    pick = cherry-pick -s
+#+end_src
+
+#+begin_src conf
+    h = help
+#+end_src
+
+** Get the Git root directory
+
+#+begin_src conf
+    root = rev-parse --show-toplevel
+#+end_src
+
+#+begin_src conf
+    # Get the path cleaned up.
+    root = !pwd -P
+#+end_src
+
+#+begin_note
+This works because Shell aliases are always executed in the top-level directory.
+#+end_note
+
+** Remove deleted files
+
+Removing multiple files from a Git repo that have already been deleted from
+disk:
+
+#+begin_src conf
+    rma = !git ls-files --deleted -z | xargs -0 git rm
+#+end_src
+
+** Sync
+
+#+begin_src conf
+    sync = !git pull && git push
+#+end_src
+
+#+begin_src conf
+    sync = !git update && git co master && git pull && git commit @{-1}
+#+end_src
+
+That's rather basic - it doesn't actually rebase my branch that I'm on.
+
+Let's do a slightly different command: ~resync~
+
+#+begin_src conf
+    # git resync -> sync repository and rebase current branch.
+    resync = !sh -c 'BRANCH_NAME=master && git checkout master && git fetch && git reset --hard origin/master && git rebase master'
+#+end_src
+
+** Cherrypick style recording
+
+Ask interactively which patch hunk to commit, and then do the commit:
+
+#+begin_src conf
+    record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+#+end_src
+
+It will not only do ~git add -p~ (with an optional file list), but it will also
+immediately do the ~commit~. Upon abandonment of either the add or the commit, it
+will ~reset~ the index.
 
 ** Dangling
 
@@ -2158,6 +2237,25 @@ git grep --all-match -e <regexp> -e <regexp>
     lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 #+end_src
 
+** Tips and tricks
+
+Directed Acyclic Graph:
+
+#+begin_src conf
+    graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
+#+end_src
+
+** TODO To sort out
+
+#+begin_src conf
+    grep4d = !sh -c 'git log -p -S'$1' $2' -
+
+    # 2009-05-26  (merged-bed-bug) 6fe85ff regenerate rules Brad Bowman
+    logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
+    brdate = !"sh -c 'for b in `git branch --no-merged` ; \
+               do git logdate -1 -r $b --; done'"
+#+end_src
+
 ** COMMENT Git and Subversion
 
 #+begin_src conf :tangle no
@@ -2170,106 +2268,6 @@ git grep --all-match -e <regexp> -e <regexp>
     cvs-full-log = log --reverse --pretty=format:'%B\n--------------------------------------------\n'
     cvsmerge = merge --no-ff --log
 #+end_src
-
-** Tips and tricks
-
-Directed Acyclic Graph:
-
-#+begin_src conf
-    graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
-#+end_src
-
-** Find out if a change is part of a release
-
-#+begin_src conf
-    sha1-tag = '!f() { git name-rev --name-only "$@"; }; f'
-#+end_src
-
-The ~name-rev~ command indicates the *position of a commit relative to tags* in the
-project. For example, ~v2.3~5~ means that this commit is located 5 commits *before*
-the v2.3 tag -- we can be certain that this change is part of v2.3, then.
-
-** Rename branch
-
-Sometimes we name a branch poorly or maybe we thought the name was "good" but
-not meaningful to the work we are doing.
-
-To rename the branch locally:
-
-#+begin_src conf
-    rename = branch -m
-#+end_src
-
-One thing to keep in mind is that this command works in two different ways:
-
-- if we are on the branch we want to rename, we can just ~git rename new-name~.
-- If we are not on the branch, we have to use ~git rename target-branch new-name~.
-
-** List branches that contain a given commit ID (SHA1)
-
-Filter the list of *branches* to only those which have the given *commit ID* among
-their ancestors.
-
-#+begin_src conf
-    where = "branch -a --contains"
-#+end_src
-
-This also includes *remote tracking branches* in the list, that is "local
-branches that have a direct relationship to a remote branch".
-
-List all *tags* that contain a commit ID:
-
-#+begin_src shell :tangle no
-git tag --contains a2c71a6
-#+end_src
-
-** See which changes from a branch are already present upstream
-
-While on "feature" branch:
-
-#+begin_src shell :tangle no
-git cherry -v master
-#+end_src
-
-#+begin_example
-+ 497034f2 Listener.new now accepts a hash of options
-- 2d0333ff cache the absolute images path for growl messages
-+ e4406858 rename Listener#run to #start
-#+end_example
-
-The ~cherry~ command is useful to see which commits have been cherry-picked from
-a development branch to the stable branch, for instance. This command compares
-changes on the current (~feature~) branch to upstream (~master~) and indicates which
-are present on both with the ~-~ sign. Changes still missing from upstream are
-marked with ~+~.
-
-** Show blame information about original authors of lines changed or removed
-
-#+begin_src conf
-    praise = blame -w
-    archeology = blame -w -C -n
-    whodoikill = blame -w -C -n
-#+end_src
-
-Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
-original authors of lines changed or removed in a given branch:
-
-#+begin_src shell :tangle no
-git overwritten feature origin/master
-#+end_src
-
-This is useful when opening pull requests per GitHub Flow; you'll want your pull
-request reviewed by colleagues but you might not be sure who to ping. With
-git-overwritten you'll get the names of people who wrote the lines you just
-changed, so you'll know who to @-mention when opening a pull request.
-
-> So, given a patch (or a branch) together with a "base revision", you'd get
-> a list of code chunks modified by that patch, then run "annotate" on the
-> base revision, and look for those code chunks, collecting the names of
-> corresponding authors.
-
-Sounds like git-guilt (which I've just read about today), might be
-relevant: https://bitbucket.org/tpettersen/git-guilt
 
 * What if
 
