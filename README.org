@@ -58,7 +58,7 @@ changes and then automatically re-commit your work on top of them, as if
 you had those changes all along.  You could then push.  So, something
 like:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 # Commit all changes and attempt to push, pulling in changes if necessary and
 # re-pushing; on failure, restore to previous state with changes uncomitted.
 git commit -am Foo \
@@ -195,7 +195,7 @@ http://rogerdudler.github.io/git-guide/
 
 ** Git rebase branch
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git pull --rebase -r origin master
 #+end_src
 
@@ -549,9 +549,12 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 
 #+begin_src conf
 [format]
-    pretty = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset
-    # pretty = format:%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset
+    pretty = format:%C(yellow)%h%C(reset) %C(green)%ad%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)
 #+end_src
+
+See
+- https://devhints.io/git-log-format and
+- https://git-scm.com/docs/pretty-formats.
 
 * Aliases
 
@@ -617,10 +620,10 @@ clean and relevant commits, no experiments or fixing typos.
     ft = "!f() { git describe --always --contains $1; }; f"
 
     # Find commits by source code
-    fc = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+    fc = "!f() { git log --pretty=format:'%C(yellow)%h  %C(blue)%ad  %C(reset)%s%C(green)  <%cn> %C(red)%d' --decorate --date=short -S$1; }; f"
 
     # Find commits by commit message
-    fm = "!f() { git log --pretty=format:'%C(yellow)%h  %Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+    fm = "!f() { git log --pretty=format:'%C(yellow)%h  %C(blue)%ad  %C(reset)%s%C(green)  <%cn> %C(red)%d' --decorate --date=short --grep=$1; }; f"
 #+end_src
 
 #+begin_src conf
@@ -641,7 +644,7 @@ Sometimes it's nice to see what is going on under the hood. Try this alias:
 
 Just insert ~debug~ between ~git~ and whatever would usually follow; for example:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git debug unwip
 #+end_src
 
@@ -656,10 +659,6 @@ Basic shortcuts.
 #+begin_src conf
     cp = cherry-pick -x
     pick = cherry-pick -s
-#+end_src
-
-#+begin_src conf
-    ls = ls-files
 #+end_src
 
 #+begin_src conf
@@ -682,7 +681,6 @@ Basic shortcuts.
 *** Initialize a repository
 
 #+begin_src conf
-    this = !git init && git add . && git commit -m \"Initial commit\"
     this = !git init && ( [[ -n $(ls) ]] || touch .gitignore ) && git add . && git commit -m \"Initial commit\"
 #+end_src
 
@@ -804,18 +802,31 @@ List ignored files (*marked unchanged*):
     assumed = "!git ls-files -v | grep '^h' | cut -c 3-"
 #+end_src
 
+Unassume all the assumed files:
+
+#+begin_src conf
+    unassumeall = "!git assumed | xargs git update-index --no-assume-unchanged"
+#+end_src
+
+Assume all:
+
+#+begin_src conf
+    assumeall = "!git status -s | awk {'print $2'} | xargs git assume"
+#+end_src
+
 ** View your changes
 
 *** Changes between the working tree and the index (staged for the next commit)
 
 #+begin_src conf
     df = diff
+    diff = diff --word-diff
     dw = diff --word-diff
 #+end_src
 
 *** Changes between the working tree and the latest commit (HEAD)
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
     diff-all = diff HEAD
 #+end_src
 
@@ -891,24 +902,34 @@ disk:
 
 ** View the commit history
 
+#+begin_note
+The ~git log~ command shows, by default, the "author date" -- not the "committer
+date".
+#+end_note
+
 #+begin_src conf
-    lp = log -p
-    lg = log --decorate --oneline --graph
-    lgr = log --decorate --date=relative --graph
-    lga = log --decorate --date=short --graph
+    ls = log --decorate --date=short
+    ld = log --decorate --date=relative
+#+end_src
 
-    ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
-    ld = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --graph
-    ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
-    ls = "!git status -suno"
+List commits *showing changed files*:
 
+#+begin_src conf
+    ll = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ <%cn>" --decorate --date=short --numstat
+#+end_src
+
+#+begin_src conf
     lg80 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[33m%s\\033[0m %-80s \\033[34m%14s\\033[0m \\033[32m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{79}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
+#+end_src
+
+#+begin_src conf
+    lg = log --decorate --graph --date=short
 #+end_src
 
 To see real *timeline* of who is working on what and when:
 
 #+begin_src conf
-    graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %Creset %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
+    graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 #+end_src
 
 #+begin_src conf
@@ -922,15 +943,6 @@ To see real *timeline* of who is working on what and when:
 #+end_src
 
 #+begin_src conf
-    heads = !"git log --format='%C(yellow)%h%Creset;%C(cyan)%H%Creset;%s %Cgreen<%an>%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
-#+end_src
-
-#+begin_note
-The ~git log~ command shows, by default, the "author date" -- not the "committer
-date".
-#+end_note
-
-#+begin_src conf
     last = log -1 --stat
 #+end_src
 
@@ -939,13 +951,13 @@ date".
 Prettier and concise ~whatchanged~:
 
 #+begin_src conf
-    what = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=short --stat
+    what = log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ad)%C(reset)' --date=short --stat
 #+end_src
 
 Prettier ~whatchanged~ with full diffs based on text search:
 
 #+begin_src conf
-    whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ad)%Creset' --date=iso -p -S
+    whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ad)%C(reset)' --date=iso -p -S
 #+end_src
 
 *** List all the changed files in a commit
@@ -967,7 +979,7 @@ List all the changed files *between 2 commits*:
 
 XXX They don't show the same files (test with ~git changed HEAD~1~ and ~git diffn HEAD~1~) XXX
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git changed                             # List files modified in last commit.
 git changed bAda55                      # List files modified in this commit.
 git changed bAda55..ff0021              # List files modified between those commits.
@@ -1057,6 +1069,11 @@ Modify the *last* commit:
     amend = commit --amend
 # fixlastcommit?
 
+
+    ca = commit --amend
+    cm = commit -a --amend -C HEAD
+
+
 # Commit changes to current head as amended commit.
     plus = commit --amend -a -C HEAD
 
@@ -1067,7 +1084,7 @@ Modify the *last* commit:
 Note that the ~-a~ switch which tells Git to automatically *stage all your changes*,
 as if you ran ~git add .~ right before the commit.
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git commit --amend                      # Correct the PREVIOUS commit, with the staged changes.
 #+end_src
 
@@ -1229,7 +1246,7 @@ However, Git offers you an easy way to undo a patch by committing a change that
 effectively reverses the patch in question. The simplest usage is to revert an
 entire commit:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git revert [hash]
 #+end_src
 
@@ -1239,7 +1256,7 @@ your repository.
 If you want to revert that commit without committing it (putting the reversion
 into your index), use:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git revert -n [hash]
 #+end_src
 
@@ -1269,8 +1286,8 @@ after a ~git fetch~, to fetch down *all the data* it has for the *current remote
 you do not --, the next time you do a merge.
 
 #+begin_src conf
-    in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
-    inf = !(git remote update -p              && git log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' ..@{u})
+    in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)' ..@{u})
+    inf = !(git remote update -p              && git log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)' ..@{u})
 #+end_src
 
 #+begin_src conf
@@ -1292,6 +1309,10 @@ if any, with the ~..~ notation --- not with the ~...~ notation!
 #+end_warning
 
 *** Update with local modifications
+
+#+begin_src conf
+    pull = pull -v
+#+end_src
 
 #+begin_note
 ~git pull~ with uncommitted changes can succeed if the newly pulled changes don't
@@ -1353,7 +1374,7 @@ Pull all:
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
 (+ interesting comments about *rebase vs merge during a pull*!)
 
-#+begin_src sh :tangle ~/.dotfiles/bin/git-up-all
+#+begin_src shell :tangle ~/.dotfiles/bin/git-up-all
 #!/bin/bash
 
 REMOTES="$@";
@@ -1437,7 +1458,7 @@ The ~out~ command returns a list of *unpushed* (outgoing) commits for the *curre
 branch*, the next time you do a push.
 
 #+begin_src conf
-    out = log --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset' @{u}..
+    out = log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)' @{u}..
 #+end_src
 
 #+begin_src conf
@@ -1457,8 +1478,16 @@ remote and to set up tracking.
 If you want to see all *unpushed* commits from *all branches*, do this:
 
 #+begin_src conf
-    out-all = log --branches --not --remotes --pretty=format:'%C(yellow)%h%C(auto)%d%Creset %s %Cgreen<%an>%Creset %C(bold blue)(%ar)%Creset'
+    out-all = log --branches --not --remotes --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)'
 #+end_src
+
+#+begin_src conf
+    pof = !git push origin -f $(git branch | grep \\* | cut -d ' ' -f2)
+#+end_src
+
+is a shortcut for manually typing the branch name:
+
+: git push origin -f <current-branch>
 
 *** Sync
 
@@ -1481,6 +1510,12 @@ Let's do a slightly different command: ~resync~
 
 ** Tag
 
+Show the last tag:
+
+#+begin_src conf
+    lasttag = describe --tags --abbrev=0
+#+end_src
+
 List tags using (better) version sorting (if your ~sort~ supports it):
 
 #+begin_src conf
@@ -1493,12 +1528,6 @@ You can do a lot better with:
 
 #+begin_src conf
     releases = log --decorate --oneline --simplify-by-decoration --all
-#+end_src
-
-Show the last tag:
-
-#+begin_src conf
-    lasttag = describe --tags --abbrev=0
 #+end_src
 
 ** Branch
@@ -1518,17 +1547,14 @@ interesting stuff, such as:
 
 #+begin_src conf
     # Switch to a branch, creating it if necessary.
-    go = checkout -B
-
     cob = checkout -b
-# grow?
 #+end_src
 
 #+begin_note
 I think the recommended approach is to create a branch pointing at a
 specific commit. So:
 
-git checkout -b test_branch 7e09ef09
+: git checkout -b test_branch 7e09ef09
 
 Otherwise you're in a "detached head" state, which can have odd results.
 The branch method is at least a little more stable.
@@ -1544,9 +1570,6 @@ resolved, ie. like so
  git checkout master
  git checkout -b sb-master
  git revert sha1-of-offending-commit
-
-(that's what I did with gnus, when cram-md5 auth disappeared from nnimap
-with SSL/TLS...)
 #+end_note
 
 Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][common branches]] (useful if you have feature branches):
@@ -1560,8 +1583,8 @@ In case of error "The following untracked working tree files would be
 overwritten by checkout", *move the untracked files*, instead of *deleting them*.
 For example:
 
-#+begin_src sh :tangle no
-cd "`git rev-parse --show-toplevel`"
+#+begin_src shell :tangle no
+cd "$(git rev-parse --show-toplevel)"
 git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f".bak; done
 #+end_src
 
@@ -1571,6 +1594,12 @@ commit subject line for each head, along with the name of the upstream branch
 
 #+begin_src conf
     br = branch -a -vv
+#+end_src
+
+Delete a branch:
+
+#+begin_src conf
+    bd = branch -d
 #+end_src
 
 ~git bclean~ is meant to be run from your master (or default) branch and does the
@@ -1640,7 +1669,7 @@ even if it is a fast-forward merge.
 
 Naive (but slow) way:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 rm -Rf /tmp/repository
 cp -r repository /tmp/
 cd /tmp/repository
@@ -1657,7 +1686,7 @@ Performing a Git merge with *no commit* and *no fast-forward* will merge the two
 code bases together -- it will *modify your working copy*.  This will allow you to
 examine, test, and undo the merge if required.
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git merge --no-commit --no-ff $BRANCH
 #+end_src
 
@@ -1698,7 +1727,7 @@ respectively:
 
 Best (and safest) way to merge a Git local branch into ~master~:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git checkout master
 git pull origin master                  # Get the latest changes from the remote.
 git merge test
@@ -1745,86 +1774,138 @@ A *stash* is nothing but a *(temporary) branch*.
 ~git stash~ makes a temporary copy of the changes in your *index* (staging area) and
 *working tree*, and clears the decks so you can easily work on something else; it
 reverts your local modifications, allowing you to get rid of some incomplete
-changes:
-
-#+begin_src conf :tangle no
-git stash save "DESCRIBE WHAT YOU DID HERE"
-#+end_src
-
-This command is useful in saving all changes not ready to be committed and the
-user wants to have an updated repository.
+changes.
 
 #+begin_tip
 Use ~git stash~ if Git refused to merge because it foresees conflicts.
 #+end_tip
 
-Take named stash:
+Information that is used by default if you don't provide a message:
 
-#+begin_src conf
-    snapshot = !git stash save "Snapshot: $(date +\"%F %a %R\")" && git stash apply "stash@{0}"
+#+begin_example
+stash@{0}: WIP on <branch>: <sha1 of head> <title line of head>
+#+end_example
+
+You can operate on the "stash" ref as if it were any other ref.
+
+*** Stash save
+
+~git stash save~ also optionally takes a message describing the contents of the
+stash (much, much more useful):
+
+#+begin_src conf :tangle no
+git stash save "DESCRIBE WHAT YOU DID HERE"
 #+end_src
 
-https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
+#+begin_example
+stash@{0}: On <branch>: DESCRIBE WHAT YOU DID HERE
+#+end_example
+
+This command is useful in saving all changes not ready to be committed and the
+user wants to have an updated repository.
 
 #+begin_src conf
-    sshow = "!f() { git stash show stash^{/$*} -p; }; f"
-    sapply = "!f() { git stash apply stash^{/$*}; }; f"
+    ss = stash save
 #+end_src
+
+#+begin_src conf
+    sspatch = stash save --patch
+    ssscratch = stash save --keep-index
+#+end_src
+
+*** Apply the stash only, don't delete it
 
 When you're done, with ~git stash apply~ (top stash by default), you're back where
 you were.  But if that doesn't work, for whatever reason, you can use any of
 Git's other branch merging tools to put things back they way you want them.
 
-Be aware that, unlike ~git stash apply~ (though it has its use), ~git stash pop~
-*deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
-conflicts, Git will not remove it (but it will still apply it)!
-
-#+begin_src sh :tangle no
-git stash clear
-#+end_src
-
-You can operate on the "stash" ref as if it were any other ref.
-
 #+begin_src conf
-    ss = stash save
-    sl = stash list
     sa = stash apply
 #+end_src
 
+https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
+
 #+begin_src conf
+    sapply = "!f() { git stash apply stash^{/$*}; }; f"
+#+end_src
+
+*** Show a list of all stashes
+
+#+begin_src conf
+    sl = stash list
     stashes = stash list
 #+end_src
 
-#+begin_src conf
-    save = stash save
-    savepatch = stash save --patch
-    savescratch = stash save --keep-index
-    pop = stash pop
-#+end_src
+*** Stash pop
 
 ~git stash pop~ removes the most recent stash or any stash specified and applies
 changes as a merge.  If merge fails, the stash is not removed from the list and
 must be removed manually.
 
 #+begin_src conf
-    hide = stash
-    unhide = stash apply
-# bad aliases, used by some instead to mean assume and unassume...
+    sp = stash pop
 #+end_src
 
+#+begin_warning
+Be aware that, unlike ~git stash apply~ (though it has its use), ~git stash pop~
+*deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
+conflicts, Git will not remove it (but it will still apply it)!
+#+end_warning
+
+*** Show the stash
+
 #+begin_src conf
-    stp = stash pop
+    ssh = stash show -p
+    stashdiff = stash show -p
+#+end_src
+
+https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
+
+#+begin_src conf
+    sshow = "!f() { git stash show stash^{/$*} -p; }; f"
+#+end_src
+
+One very useful feature one may consider is to list contents of all local
+stashes:
+
+#+begin_src shell :tangle no
+git stash list | awk -F: '{ print "\n\n\n\n"; print $0; print "\n\n"; system("git stash show -p " $1); }'
+#+end_src
+
+Press [Q] to exit each stash.
+
+It helped me a lot in the past (cleaning stashes stack).
+
+*** Stash show name-only
+
+#+begin_src conf
+    sshno = stash show --name-only
+#+end_src
+
+*** Drop the stash
+
+#+begin_src conf
     std = stash drop
 #+end_src
 
+*** Take named stash
+
 #+begin_src conf
-    stashdiff = stash show -p -w stash@{0}
+    snapshot = !git stash save "Snapshot: $(date +\"%F %a %R\")" && git stash apply "stash@{0}"
+#+end_src
+
+*** Other commands
+
+#+begin_src shell :tangle no
+git stash clear
+#+end_src
+
+#+begin_src conf
     stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
 #+end_src
 
 #+begin_src conf
-    # plop = "!git stash && git pull && git stash pop"
-    # up = !git stash && git pull origin master && git stash apply
+    # up = "!git stash && git pull && git stash pop"
 # `up' used many times
 #+end_src
 
@@ -1832,6 +1913,10 @@ must be removed manually.
 The above approach is *unsafe*: if there's nothing to stash, the first command
 will do nothing, and then ~stash pop~ will unstash some random stuff from before.
 #+end_warning
+
+#+begin_src conf
+    stashpull-tmpname = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash && git pull && git stash pop
+#+end_src
 
 #+begin_src conf
 # cleanpull
@@ -1842,31 +1927,20 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
 ... but read "you're not using git as it was intended" on
 https://news.ycombinator.com/item?id=2301765.
 
-#+begin_src conf
-    sp = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash && git pull && git stash pop
-    spp = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash && git pull && git push && git stash pop
-#+end_src
-
-#+begin_src sh :tangle no
-git stash list                          # Show a list of all stashes.
-git stash show                          # Show the last stash.
-git stash show stash@{1}                # Show the previous stash.
-
-git stash apply                         # Apply the stash only, don't delete it.
-git stash drop                          # Drop the last stash.
-git stash drop stash@{1}                # Drop a previous stash.
-#+end_src
-
 XXX What about ~git stash --include-untracked~ and ~git stash pop~?
 
 Git's fix is to ask you to commit (or stash) before you pull (which is fetch
 followed by merge). XXX
 
+*** Workflows
+
 Alternative to ~stash~ (writing a commit with a default message):
+
+XXX See doc of git help stash for workflows...
 
 1. Do a regular ~commit~:
 
-   #+begin_src sh :tangle no
+   #+begin_src shell :tangle no
    git add -A && git commit -m 'WIP'       # Add all changes (including untracked files).
    #+end_src
 
@@ -1874,7 +1948,7 @@ Alternative to ~stash~ (writing a commit with a default message):
 
 3. Return to previous work:
 
-   #+begin_src sh :tangle no
+   #+begin_src shell :tangle no
    git reset --mixed                       # Reset the previous commit (but
                                            # keeps all the changes from that
                                            # commit in the working directory).
@@ -1884,7 +1958,7 @@ Alternative to ~stash~ (writing a commit with a default message):
 
    Or, if I merely need to modify the *previous* commit:
 
-   #+begin_src sh :tangle no
+   #+begin_src shell :tangle no
    git commit -a --amend
    #+end_src
 
@@ -1969,27 +2043,27 @@ Add ~--name-status~ to show only names and status of *changed files*.
 
 For example, to find all commits referencing bug #382:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git find "Bug #382"
 #+end_src
 
 To find commits that match *either* of patterns (implicit *OR* semantic), you can
 use:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git log --grep=<foo> --grep=<bar>
 #+end_src
 
 To find /commit/ that has *both* line matching first and line matching second
 somewhere, use the *AND* semantic:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git log --all-match --grep=<foo> --grep=<bar>
 #+end_src
 
 Show the *last commit* which *message matches a regex*:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 # Show the last commit which has the word "fix" in its message.
 git show :/fix
 
@@ -2012,7 +2086,7 @@ If the number of times "foo" appears in the file is the same before and after
 a commit, it will not match using ~-S "foo"~.
 #+end_note
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git log --all -S "foo" --since="1 week ago"
 #+end_src
 
@@ -2026,7 +2100,7 @@ String contained in added/removed lines from Commit contents (Diff)
 With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
 any *line* that was added, removed, or changed.
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git log --all -G "foo" --since="1 week ago"
 #+end_src
 
@@ -2052,18 +2126,21 @@ More readable output, with *grouping* (like Ripgrep, ~rg~):
     rg = "grep --break --heading"
 #+end_src
 
-Broader search (*case-insensitive*), output without grouping:
+Broader search (*case-sensitive*), output without grouping:
 
 #+begin_src conf
-    gr = "grep -i -I"
+    g = "grep -I"
+    gno = "grep -I --name-only"
 #+end_src
+
+(Don't match the pattern in binary files.)
 
 *** Find files that contain some terms, not necessarily on the same line
 
 Match any of these patterns, but print matches only from files that have /all/ of
 them (files must have lines that match each of them):
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git grep --all-match -e <regexp> -e <regexp>
 #+end_src
 
@@ -2078,7 +2155,7 @@ git grep --all-match -e <regexp> -e <regexp>
   directly or by any of its ancestors. You can get these back too!
 
 #+begin_src conf
-    lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+    lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 #+end_src
 
 ** COMMENT Git and Subversion
@@ -2142,7 +2219,7 @@ branches that have a direct relationship to a remote branch".
 
 List all *tags* that contain a commit ID:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git tag --contains a2c71a6
 #+end_src
 
@@ -2150,7 +2227,7 @@ git tag --contains a2c71a6
 
 While on "feature" branch:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git cherry -v master
 #+end_src
 
@@ -2177,7 +2254,7 @@ marked with ~+~.
 Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
 original authors of lines changed or removed in a given branch:
 
-#+begin_src sh :tangle no
+#+begin_src shell :tangle no
 git overwritten feature origin/master
 #+end_src
 
@@ -2224,7 +2301,7 @@ I don't really know how to proof the instructions against that.
 
 It is POSSIBLE that a safe way to recover from your problems is as follows:
 
-#+begin_src sh
+#+begin_src shell
 git stash
 git reset --hard HEAD
 git pull --ff-only
@@ -2240,7 +2317,7 @@ the latter until all merge conflicts are dealt with.
 In any case, do run git status before finally doing git commit. If all succeeds,
 you can clean up with:
 
-#+begin_src sh
+#+begin_src shell
 git stash drop
 #+end_src
 
@@ -2258,25 +2335,25 @@ This command tells you which files have conflicts after merging.
 If your master branch is busted, rename it to something else so that it's out of
 the way:
 
-#+begin_src sh
+#+begin_src shell
 git branch -m master master-busted
 #+end_src
 
 Create a new branch ~master~ that tracks the origin:
 
-#+begin_src sh
+#+begin_src shell
 git branch --track master origin/master
 #+end_src
 
 Check it out (be careful, this will discard all your local changes):
 
-#+begin_src sh
+#+begin_src shell
 git checkout -f master
 #+end_src
 
 Make sure the ~master~ is up-to-date:
 
-#+begin_src sh
+#+begin_src shell
 git pull
 #+end_src
 
@@ -2294,25 +2371,25 @@ https://github.com/brianleetest/testGit/blob/master/README.md
 
 ** Force push
 
-#+begin_src sh
+#+begin_src shell
 git push --force origin master
 #+end_src
 
 ** Push tags
 
-#+begin_src sh
+#+begin_src shell
 git push --tags
 #+end_src
 
 ** Get user pubkeys
 
-#+begin_src sh
+#+begin_src shell
 curl https://github.com/abo-abo.keys
 #+end_src
 
 ** Routine
 
-#+begin_src sh
+#+begin_src shell
 git fetch --all
 #+end_src
 
@@ -2321,7 +2398,7 @@ namespace.
 
 To check out e.g. PR #42:
 
-#+begin_src sh
+#+begin_src shell
 git checkout -b foo refs/pull/upstream/42
 #+end_src
 
@@ -2350,4 +2427,3 @@ http://williamdurand.fr/2012/01/17/my-git-branching-model/
 * Free private repositories
 
 I use the *free private repos* from https://bitbucket.org/.
-
