@@ -10,6 +10,8 @@
 
 #+EXPORT_EXCLUDE_TAGS: noexport
 
+Doc: http://liris.cnrs.fr/seminaires/documents/seminaire_tuto_SVN.pdf
+
 * Use colordiff
 
 Use ~colordiff~ for my ~svn diff~ command (set in =~/.subversion/config=):
