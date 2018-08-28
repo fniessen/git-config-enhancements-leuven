@@ -20,6 +20,25 @@ Use ~colordiff~ for my ~svn diff~ command (set in =~/.subversion/config=):
 diff-cmd = colordiff
 #+end_src
 
+* SHOW - View your changes
+
+To *compare all modified files* in your working copy with the ~HEAD~ revision in the
+repository, use the following command:
+
+#+begin_src shell
+alias svn-diffall="svn status | grep '^M' | awk '{print $2}' | xargs svn diff -r HEAD"
+#+end_src
+
+Colored ~svn diff~ command like ~git diff~.
+
+#+begin_src shell
+alias svn-diff='svn diff --diff-cmd=colordiff --extensions=" -u --strip-trailing-cr --ignore-space-change " | less --quit-if-one-screen'
+#+end_src
+
+#+begin_tip
+EXCELLENT option ~--strip-trailing-cr~!
+#+end_tip
+
 * SHOW - View the commit history
 
 The following aliases are interesting for using SVN a bit like Git.
@@ -27,6 +46,17 @@ The following aliases are interesting for using SVN a bit like Git.
 ** One-line log format ('git log')
 
 See ~svn-log~ in my Shell configuration.
+
+** Make status checks of your working copy easier
+
+Add them to your ~.bashrc~:
+
+#+begin_src shell
+alias svnl="svn log -r 1:HEAD -v"       # Show log messages.
+alias svnm="svn status -u -q"           # Show locally/repository changed items.
+alias svnn="svn status -q"              # Show locally changed items.
+alias svns="svn status -u -q -v"        # Show status of all items.
+#+end_src
 
 ** Show a single revision ('git show')
 
@@ -61,31 +91,6 @@ svn log --diff path/to/file
 #+end_src
 
 See ~svn-logfile-p~ in my Shell configuration.
-
-* Others
-
-We also supply four bash shell aliases that make status checks of your working
-copy easier, add them to your ~.bashrc~:
-
-#+begin_src shell
-alias svnl="svn log -r 1:HEAD -v"       # Show log messages.
-alias svnm="svn status -u -q"           # Show locally/repository changed items.
-alias svnn="svn status -q"              # Show locally changed items.
-alias svns="svn status -u -q -v"        # Show status of all items.
-#+end_src
-
-To *compare all modified files* in your working copy with the ~HEAD~ revision in the
-repository, use the following command:
-
-#+begin_src shell
-alias svn-diffall="echo svn status | grep '^M' | awk '{print $2}' | xargs svn diff -r HEAD"
-#+end_src
-
-Colored ~svn diff~ command like ~git diff~.
-
-#+begin_src shell
-alias svn-diff='svn diff --diff-cmd=colordiff --extensions=" -u --strip-trailing-cr --ignore-space-change " | less --quit-if-one-screen'
-#+end_src
 
 * REVERT - Undo things
 
