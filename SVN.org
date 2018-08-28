@@ -12,7 +12,7 @@
 
 Doc: http://liris.cnrs.fr/seminaires/documents/seminaire_tuto_SVN.pdf
 
-* Use colordiff
+* colordiff
 
 Use ~colordiff~ for my ~svn diff~ command (set in =~/.subversion/config=):
 
@@ -20,7 +20,7 @@ Use ~colordiff~ for my ~svn diff~ command (set in =~/.subversion/config=):
 diff-cmd = colordiff
 #+end_src
 
-* Subversion equivalent to Git commands
+* SHOW - View the commit history
 
 The following aliases are interesting for using SVN a bit like Git.
 
@@ -36,7 +36,7 @@ svn diff -c 4795                        # Or svn diff -r 4795:4792.
 
 See ~svn-show~ and ~svn-showtool~ in my Shell configuration.
 
-** Show what changed
+** List all the changed files in a commit
 
 Output filenames of files changed in each commit:
 
@@ -46,7 +46,7 @@ svn log -v
 
 See ~svn-whatchanged~ in my Shell configuration.
 
-* View history of file
+** Show the history of a file
 
 To view all historical changes to a file in SVN:
 
@@ -61,27 +61,6 @@ svn log --diff path/to/file
 #+end_src
 
 See ~svn-logfile-p~ in my Shell configuration.
-
-* svn diff zip revision to deploy
-
-Make release package (get list of changed files via ~svn diff~ log and zip them):
-
-svn-rev-patch:
-
-#+begin_src shell
-# For one release only.
-svn diff -c 124 --summarize | cut -c 9- | xargs zip -9 patch.zip
-
-# For a range of releases.
-svn diff -r 123:124 --summarize | cut -c 9- | xargs zip -9 patch.zip
-#+end_src
-
-This will create a ZIP file with the changed file(s) -- in an intact directory
-structure -- from revision ~123:HEAD~.
-
-#+begin_note
-The ~-c REV~ option is equivalent to ~-r REV-1:REV~.
-#+end_note
 
 * Others
 
@@ -108,7 +87,19 @@ Colored ~svn diff~ command like ~git diff~.
 alias svn-diff='svn diff --diff-cmd=colordiff --extensions=" -u --strip-trailing-cr --ignore-space-change " | less --quit-if-one-screen'
 #+end_src
 
-* Incoming
+* REVERT - Undo things
+
+SVN conflict
+
+Quand problème avec psvn, s'en sortir en faisant :
+
+#+begin_src shell
+svn status (-q)
+svn resolved (FILE)
+svn status (-q)
+#+end_src
+
+* UPDATE - Pull
 
 http://stackoverflow.com/questions/182945/how-to-see-what-will-be-updated-from-repository-before-issuing-svn-update-comm
 
@@ -165,9 +156,7 @@ that were changed on the trunk between when the branch was created and "now"):
 svn diff -r 22334:HEAD --summarize <url of the branch>
 #+end_src
 
-* Incoming changes
-
-** Check for modifications
+** Check for incoming changes
 
 Show which files are modified in the repository (with an ~*~):
 
@@ -188,17 +177,7 @@ See what has been changed (how it's different from my working copy):
 svn diff -r BASE:HEAD
 #+end_src
 
-* SVN conflict
-
-Quand problème avec psvn, s'en sortir en faisant :
-
-#+begin_src shell
-svn status (-q)
-svn resolved (FILE)
-svn status (-q)
-#+end_src
-
-* Checkout a specific older version of the source code
+** Checkout a specific older version of the source code
 
 Assuming that the source has already been checked out (that is you have an
 already existing folder...), update the revision (say we want to get r4732):
@@ -206,3 +185,26 @@ already existing folder...), update the revision (say we want to get r4732):
 #+begin_src shell
 svn update -r 4732
 #+end_src
+
+* PUBLISH - Prepare a release
+
+SVN diff zip revision to deploy.
+
+Make release package (get list of changed files via ~svn diff~ log and zip them):
+
+svn-rev-patch:
+
+#+begin_src shell
+# For one release only.
+svn diff -c 124 --summarize | cut -c 9- | xargs zip -9 patch.zip
+
+# For a range of releases.
+svn diff -r 123:124 --summarize | cut -c 9- | xargs zip -9 patch.zip
+#+end_src
+
+This will create a ZIP file with the changed file(s) -- in an intact directory
+structure -- from revision ~123:HEAD~.
+
+#+begin_note
+The ~-c REV~ option is equivalent to ~-r REV-1:REV~.
+#+end_note
