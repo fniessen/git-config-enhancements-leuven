@@ -70,6 +70,7 @@
   pre.src-fortran:before { content: 'Fortran'; }
   pre.src-gnuplot:before { content: 'gnuplot'; }
   pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
   pre.src-java:before { content: 'Java'; }
   pre.src-js:before { content: 'Javascript'; }
   pre.src-latex:before { content: 'LaTeX'; }
@@ -195,26 +196,26 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org914a540">Use colordiff</a></li>
-<li><a href="#org7ca320e">Subversion equivalent to Git commands</a>
+<li><a href="#orgfccbb24">colordiff</a></li>
+<li><a href="#org6719e23">SHOW - View your changes</a></li>
+<li><a href="#orgeee034f">SHOW - View the commit history</a>
 <ul>
-<li><a href="#org1d487cd">One-line log format (&rsquo;git log&rsquo;)</a></li>
-<li><a href="#orgaa41fd8">Show a single revision (&rsquo;git show&rsquo;)</a></li>
-<li><a href="#orgbf3f35b">Show what changed</a></li>
+<li><a href="#org24afc01">One-line log format (&rsquo;git log&rsquo;)</a></li>
+<li><a href="#org9866291">Make status checks of your working copy easier</a></li>
+<li><a href="#org6fe39ba">Show a single revision (&rsquo;git show&rsquo;)</a></li>
+<li><a href="#org971313d">List all the changed files in a commit</a></li>
+<li><a href="#org3a6aaf2">Show the history of a file</a></li>
 </ul>
 </li>
-<li><a href="#org561de83">View history of file</a></li>
-<li><a href="#org2d007d1">svn diff zip revision to deploy</a></li>
-<li><a href="#orgaa64485">Others</a></li>
-<li><a href="#orge611b1f">Incoming</a></li>
-<li><a href="#orgfa2677d">Incoming changes</a>
+<li><a href="#orgefe54a9">REVERT - Undo things</a></li>
+<li><a href="#orgbeddca7">UPDATE - Pull</a>
 <ul>
-<li><a href="#org1e102a6">Check for modifications</a></li>
-<li><a href="#org88e6165">Preview incoming changes</a></li>
+<li><a href="#org26732e1">Check for incoming changes</a></li>
+<li><a href="#org8d9a63f">Preview incoming changes</a></li>
+<li><a href="#orgd7ccfe0">Checkout a specific older version of the source code</a></li>
 </ul>
 </li>
-<li><a href="#orged145d4">SVN conflict</a></li>
-<li><a href="#org9f6b266">Checkout a specific older version of the source code</a></li>
+<li><a href="#org1139383">PUBLISH - Prepare a release</a></li>
 </ul>
 </div>
 </div>
@@ -222,9 +223,9 @@
 Doc: <a href="http://liris.cnrs.fr/seminaires/documents/seminaire_tuto_SVN.pdf">http://liris.cnrs.fr/seminaires/documents/seminaire_tuto_SVN.pdf</a>
 </p>
 
-<div id="outline-container-org914a540" class="outline-2">
-<h2 id="org914a540">Use colordiff</h2>
-<div class="outline-text-2" id="text-org914a540">
+<div id="outline-container-orgfccbb24" class="outline-2">
+<h2 id="orgfccbb24">colordiff</h2>
+<div class="outline-text-2" id="text-orgfccbb24">
 <p>
 Use <code>colordiff</code> for my <code>svn diff</code> command (set in <code>~/.subversion/config</code>):
 </p>
@@ -236,26 +237,74 @@ Use <code>colordiff</code> for my <code>svn diff</code> command (set in <code>~/
 </div>
 </div>
 
-<div id="outline-container-org7ca320e" class="outline-2">
-<h2 id="org7ca320e">Subversion equivalent to Git commands</h2>
-<div class="outline-text-2" id="text-org7ca320e">
+<div id="outline-container-org6719e23" class="outline-2">
+<h2 id="org6719e23">SHOW - View your changes</h2>
+<div class="outline-text-2" id="text-org6719e23">
+<p>
+To <b>compare all modified files</b> in your working copy with the <code>HEAD</code> revision in the
+repository, use the following command:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span class="org-builtin">alias</span> svn-diffall=<span class="org-string">"svn status | grep '^M' | awk '{print $2}' | xargs svn diff -r HEAD"</span>
+</pre>
+</div>
+
+<p>
+Colored <code>svn diff</code> command like <code>git diff</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span class="org-builtin">alias</span> svn-diff=<span class="org-string">'svn diff --diff-cmd=colordiff --extensions=" -u --strip-trailing-cr --ignore-space-change " | less --quit-if-one-screen'</span>
+</pre>
+</div>
+
+<div class="tip">
+<p>
+EXCELLENT option <code>--strip-trailing-cr</code>!
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgeee034f" class="outline-2">
+<h2 id="orgeee034f">SHOW - View the commit history</h2>
+<div class="outline-text-2" id="text-orgeee034f">
 <p>
 The following aliases are interesting for using SVN a bit like Git.
 </p>
 </div>
 
-<div id="outline-container-org1d487cd" class="outline-3">
-<h3 id="org1d487cd">One-line log format (&rsquo;git log&rsquo;)</h3>
-<div class="outline-text-3" id="text-org1d487cd">
+<div id="outline-container-org24afc01" class="outline-3">
+<h3 id="org24afc01">One-line log format (&rsquo;git log&rsquo;)</h3>
+<div class="outline-text-3" id="text-org24afc01">
 <p>
 See <code>svn-log</code> in my Shell configuration.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgaa41fd8" class="outline-3">
-<h3 id="orgaa41fd8">Show a single revision (&rsquo;git show&rsquo;)</h3>
-<div class="outline-text-3" id="text-orgaa41fd8">
+<div id="outline-container-org9866291" class="outline-3">
+<h3 id="org9866291">Make status checks of your working copy easier</h3>
+<div class="outline-text-3" id="text-org9866291">
+<p>
+Add them to your <code>.bashrc</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span class="org-builtin">alias</span> <span class="org-variable-name">svnl</span>=<span class="org-string">"svn log -r 1:HEAD -v"</span>       <span class="org-comment-delimiter"># </span><span class="org-comment">Show log messages.</span>
+<span class="org-builtin">alias</span> <span class="org-variable-name">svnm</span>=<span class="org-string">"svn status -u -q"</span>           <span class="org-comment-delimiter"># </span><span class="org-comment">Show locally/repository changed items.</span>
+<span class="org-builtin">alias</span> <span class="org-variable-name">svnn</span>=<span class="org-string">"svn status -q"</span>              <span class="org-comment-delimiter"># </span><span class="org-comment">Show locally changed items.</span>
+<span class="org-builtin">alias</span> <span class="org-variable-name">svns</span>=<span class="org-string">"svn status -u -q -v"</span>        <span class="org-comment-delimiter"># </span><span class="org-comment">Show status of all items.</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6fe39ba" class="outline-3">
+<h3 id="org6fe39ba">Show a single revision (&rsquo;git show&rsquo;)</h3>
+<div class="outline-text-3" id="text-org6fe39ba">
 <div class="org-src-container">
 <pre class="src src-shell">svn diff -c 4795                        <span class="org-comment-delimiter"># </span><span class="org-comment">Or svn diff -r 4795:4792.</span>
 </pre>
@@ -267,9 +316,9 @@ See <code>svn-show</code> and <code>svn-showtool</code> in my Shell configuratio
 </div>
 </div>
 
-<div id="outline-container-orgbf3f35b" class="outline-3">
-<h3 id="orgbf3f35b">Show what changed</h3>
-<div class="outline-text-3" id="text-orgbf3f35b">
+<div id="outline-container-org971313d" class="outline-3">
+<h3 id="org971313d">List all the changed files in a commit</h3>
+<div class="outline-text-3" id="text-org971313d">
 <p>
 Output filenames of files changed in each commit:
 </p>
@@ -284,11 +333,10 @@ See <code>svn-whatchanged</code> in my Shell configuration.
 </p>
 </div>
 </div>
-</div>
 
-<div id="outline-container-org561de83" class="outline-2">
-<h2 id="org561de83">View history of file</h2>
-<div class="outline-text-2" id="text-org561de83">
+<div id="outline-container-org3a6aaf2" class="outline-3">
+<h3 id="org3a6aaf2">Show the history of a file</h3>
+<div class="outline-text-3" id="text-org3a6aaf2">
 <p>
 To view all historical changes to a file in SVN:
 </p>
@@ -312,81 +360,31 @@ See <code>svn-logfile-p</code> in my Shell configuration.
 </p>
 </div>
 </div>
+</div>
 
-<div id="outline-container-org2d007d1" class="outline-2">
-<h2 id="org2d007d1">svn diff zip revision to deploy</h2>
-<div class="outline-text-2" id="text-org2d007d1">
+<div id="outline-container-orgefe54a9" class="outline-2">
+<h2 id="orgefe54a9">REVERT - Undo things</h2>
+<div class="outline-text-2" id="text-orgefe54a9">
 <p>
-Make release package (get list of changed files via <code>svn diff</code> log and zip them):
+SVN conflict
 </p>
 
 <p>
-svn-rev-patch:
+Quand problème avec psvn, s&rsquo;en sortir en faisant :
 </p>
 
 <div class="org-src-container">
-<pre class="src src-shell"><span class="org-comment-delimiter"># </span><span class="org-comment">For one release only.</span>
-svn diff -c 124 --summarize | cut -c 9- | xargs zip -9 patch.zip
-
-<span class="org-comment-delimiter"># </span><span class="org-comment">For a range of releases.</span>
-svn diff -r 123:124 --summarize | cut -c 9- | xargs zip -9 patch.zip
-</pre>
-</div>
-
-<p>
-This will create a ZIP file with the changed file(s) &#x2013; in an intact directory
-structure &#x2013; from revision <code>123:HEAD</code>.
-</p>
-
-<div class="note">
-<p>
-The <code>-c REV</code> option is equivalent to <code>-r REV-1:REV</code>.
-</p>
-
-</div>
-</div>
-</div>
-
-<div id="outline-container-orgaa64485" class="outline-2">
-<h2 id="orgaa64485">Others</h2>
-<div class="outline-text-2" id="text-orgaa64485">
-<p>
-We also supply four bash shell aliases that make status checks of your working
-copy easier, add them to your <code>.bashrc</code>:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-shell"><span class="org-builtin">alias</span> <span class="org-variable-name">svnl</span>=<span class="org-string">"svn log -r 1:HEAD -v"</span>       <span class="org-comment-delimiter"># </span><span class="org-comment">Show log messages.</span>
-<span class="org-builtin">alias</span> <span class="org-variable-name">svnm</span>=<span class="org-string">"svn status -u -q"</span>           <span class="org-comment-delimiter"># </span><span class="org-comment">Show locally/repository changed items.</span>
-<span class="org-builtin">alias</span> <span class="org-variable-name">svnn</span>=<span class="org-string">"svn status -q"</span>              <span class="org-comment-delimiter"># </span><span class="org-comment">Show locally changed items.</span>
-<span class="org-builtin">alias</span> <span class="org-variable-name">svns</span>=<span class="org-string">"svn status -u -q -v"</span>        <span class="org-comment-delimiter"># </span><span class="org-comment">Show status of all items.</span>
-</pre>
-</div>
-
-<p>
-To <b>compare all modified files</b> in your working copy with the <code>HEAD</code> revision in the
-repository, use the following command:
-</p>
-
-<div class="org-src-container">
-<pre class="src src-shell"><span class="org-builtin">alias</span> svn-diffall=<span class="org-string">"echo svn status | grep '^M' | awk '{print $2}' | xargs svn diff -r HEAD"</span>
-</pre>
-</div>
-
-<p>
-Colored <code>svn diff</code> command like <code>git diff</code>.
-</p>
-
-<div class="org-src-container">
-<pre class="src src-shell"><span class="org-builtin">alias</span> svn-diff=<span class="org-string">'svn diff --diff-cmd=colordiff --extensions=" -u --strip-trailing-cr --ignore-space-change " | less --quit-if-one-screen'</span>
+<pre class="src src-shell">svn status (-q)
+svn resolved (FILE)
+svn status (-q)
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orge611b1f" class="outline-2">
-<h2 id="orge611b1f">Incoming</h2>
-<div class="outline-text-2" id="text-orge611b1f">
+<div id="outline-container-orgbeddca7" class="outline-2">
+<h2 id="orgbeddca7">UPDATE - Pull</h2>
+<div class="outline-text-2" id="text-orgbeddca7">
 <p>
 <a href="http://stackoverflow.com/questions/182945/how-to-see-what-will-be-updated-from-repository-before-issuing-svn-update-comm">http://stackoverflow.com/questions/182945/how-to-see-what-will-be-updated-from-repository-before-issuing-svn-update-comm</a>
 </p>
@@ -467,14 +465,10 @@ that were changed on the trunk between when the branch was created and &ldquo;no
 </pre>
 </div>
 </div>
-</div>
 
-<div id="outline-container-orgfa2677d" class="outline-2">
-<h2 id="orgfa2677d">Incoming changes</h2>
-<div class="outline-text-2" id="text-orgfa2677d">
-</div><div id="outline-container-org1e102a6" class="outline-3">
-<h3 id="org1e102a6">Check for modifications</h3>
-<div class="outline-text-3" id="text-org1e102a6">
+<div id="outline-container-org26732e1" class="outline-3">
+<h3 id="org26732e1">Check for incoming changes</h3>
+<div class="outline-text-3" id="text-org26732e1">
 <p>
 Show which files are modified in the repository (with an <code>*</code>):
 </p>
@@ -492,9 +486,9 @@ svn log --diff -r BASE:HEAD             <span class="org-comment-delimiter"># </
 </div>
 </div>
 
-<div id="outline-container-org88e6165" class="outline-3">
-<h3 id="org88e6165">Preview incoming changes</h3>
-<div class="outline-text-3" id="text-org88e6165">
+<div id="outline-container-org8d9a63f" class="outline-3">
+<h3 id="org8d9a63f">Preview incoming changes</h3>
+<div class="outline-text-3" id="text-org8d9a63f">
 <p>
 See what has been changed (how it&rsquo;s different from my working copy):
 </p>
@@ -505,27 +499,10 @@ See what has been changed (how it&rsquo;s different from my working copy):
 </div>
 </div>
 </div>
-</div>
 
-<div id="outline-container-orged145d4" class="outline-2">
-<h2 id="orged145d4">SVN conflict</h2>
-<div class="outline-text-2" id="text-orged145d4">
-<p>
-Quand problème avec psvn, s&rsquo;en sortir en faisant :
-</p>
-
-<div class="org-src-container">
-<pre class="src src-shell">svn status (-q)
-svn resolved (FILE)
-svn status (-q)
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org9f6b266" class="outline-2">
-<h2 id="org9f6b266">Checkout a specific older version of the source code</h2>
-<div class="outline-text-2" id="text-org9f6b266">
+<div id="outline-container-orgd7ccfe0" class="outline-3">
+<h3 id="orgd7ccfe0">Checkout a specific older version of the source code</h3>
+<div class="outline-text-3" id="text-orgd7ccfe0">
 <p>
 Assuming that the source has already been checked out (that is you have an
 already existing folder&#x2026;), update the revision (say we want to get r4732):
@@ -534,6 +511,45 @@ already existing folder&#x2026;), update the revision (say we want to get r4732)
 <div class="org-src-container">
 <pre class="src src-shell">svn update -r 4732
 </pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1139383" class="outline-2">
+<h2 id="org1139383">PUBLISH - Prepare a release</h2>
+<div class="outline-text-2" id="text-org1139383">
+<p>
+SVN diff zip revision to deploy.
+</p>
+
+<p>
+Make release package (get list of changed files via <code>svn diff</code> log and zip them):
+</p>
+
+<p>
+svn-rev-patch:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell"><span class="org-comment-delimiter"># </span><span class="org-comment">For one release only.</span>
+svn diff -c 124 --summarize | cut -c 9- | xargs zip -9 patch.zip
+
+<span class="org-comment-delimiter"># </span><span class="org-comment">For a range of releases.</span>
+svn diff -r 123:124 --summarize | cut -c 9- | xargs zip -9 patch.zip
+</pre>
+</div>
+
+<p>
+This will create a ZIP file with the changed file(s) &#x2013; in an intact directory
+structure &#x2013; from revision <code>123:HEAD</code>.
+</p>
+
+<div class="note">
+<p>
+The <code>-c REV</code> option is equivalent to <code>-r REV-1:REV</code>.
+</p>
+
 </div>
 </div>
 </div>
