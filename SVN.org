@@ -94,9 +94,10 @@ See ~svn-logfile-p~ in my Shell configuration.
 
 * REVERT - Undo things
 
-SVN conflict
+Files marked as *conflicted* show up with a C in ~svn status~, and SVN will refuse
+to commit such files.
 
-Quand problème avec psvn, s'en sortir en faisant :
+Use ~svn resolved filename~ to mark a conflicted file as resolved:
 
 #+begin_src shell
 svn status (-q)
@@ -203,13 +204,13 @@ svn-rev-patch:
 # For one release only.
 svn diff -c 124 --summarize | cut -c 9- | xargs zip -9 patch.zip
 
-# For a range of releases.
-svn diff -r 123:124 --summarize | cut -c 9- | xargs zip -9 patch.zip
+# For a range of releases (124 up to and INCLUDING 145).
+svn diff -r 123:145 --summarize | cut -c 9- | xargs zip -9 patch.zip
 #+end_src
+
+#+begin_note
+~-c REV~ is equivalent to ~-r REV-1:REV~.
+#+end_note
 
 This will create a ZIP file with the changed file(s) -- in an intact directory
 structure -- from revision ~123:HEAD~.
-
-#+begin_note
-The ~-c REV~ option is equivalent to ~-r REV-1:REV~.
-#+end_note
