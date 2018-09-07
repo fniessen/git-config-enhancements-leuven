@@ -837,7 +837,7 @@ git changed bAda55                      # List files modified in this commit.
 git changed bAda55..ff0021              # List files modified between those commits.
 #+end_src
 
-*** List all commits that changed a specific file
+*** Show the history of a file
 
 *List all commits* that changed a *specific file* (it accounts for renames!):
 
@@ -1199,7 +1199,7 @@ When you grab a file from a previous time, it sits *in your index*, modified.
 
 *** Unstage a staged file
 
-*Remove* the specified files *from the index* (proposed next commit):
+*Remove* the specified *files from the index* (proposed next commit, staging area):
 
 #+begin_src conf
     unstage = reset HEAD --
@@ -1397,22 +1397,43 @@ touch the locally changed files, but will fail otherwise.  Which makes a lot of
 sense.
 #+end_note
 
-Before doing work (in a new branch), *ensure that the working directory is*
-*up-to-date* with the ~origin~ (pull and get latest for all submodules):
+Git's fix is to ask you to commit (or stash) before you pull (which is fetch
+followed by merge).
 
 #+begin_src conf
-    update = !git pull --rebase --prune $@ && git submodule update --init --recursive
-    update = !git pull                     && git submodule update --init --recursive
+    # up = "!git stash && git pull && git stash pop"
 #+end_src
 
-[[https://gist.github.com/gitaarik/8735255][Git Submodules basic explanation]]
+#+begin_warning
+The above approach is *unsafe*: if there's nothing to stash, the first command
+will do nothing, and then ~stash pop~ will unstash some random stuff from before.
+#+end_warning
+
+#+begin_src conf
+    pull-autostash = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash save "autostash" && git pull && git stash pop
+#+end_src
+
+XXX What about ~git stash --include-untracked~ and ~git stash pop~?
 
 #+begin_src conf
     up = pull --rebase --autostash
-# `up' used many times
+    up = !git fetch && git rebase --autostash FETCH_HEAD
 #+end_src
 
-See [[http://aanandprasad.com/git-up/][git-up]] (no longer maintained).
+See https://www.praqma.com/stories/git-autostash/.
+
+See [[http://aanandprasad.com/git-up/][git-up]] (no longer maintained), which is (roughly) equivalent of executing the following:
+
+#+begin_src shell :tangle no
+git stash
+git fetch --all
+[foreach branch]
+    git rebase --preserve-merges <branch> <remote>/<branch>
+    git merge --ff-only <branch>
+[end foreach]
+git checkout <prev_branch>
+git stash pop
+#+end_src
 
 #+begin_warning
 Use with care: the final stash application after a successful rebase might
@@ -1422,8 +1443,7 @@ result in non-trivial conflicts.
 With *all versions* of Git, I recommend using ~git up~ instead of ~git pull~.
 
 #+begin_src conf
-    up = "!f() { git remote update -p; git merge --ff-only @{u} ; }; f"
-# `up' used many times
+    up-tmpname = "!f() { git remote update -p; git merge --ff-only @{u} ; }; f"
 #+end_src
 
 It is pretty safe: it will abort the merge if it can't be done using
@@ -1439,6 +1459,25 @@ one; ~merge~ then merges the appropriate *single branch*.
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
     upr = "!f() { git remote update -p; git rebase -p @{u} ; }; f"
 #+end_src
+
+#+begin_src conf
+# cleanpull
+# update (like svn? if we add a git reset in front?)
+# sync
+#+end_src
+
+... but read "you're not using git as it was intended" on
+https://news.ycombinator.com/item?id=2301765.
+
+Before doing work (in a new branch), *ensure that the working directory is*
+*up-to-date* with the ~origin~ (pull and get latest for all submodules):
+
+#+begin_src conf
+    update = !git pull --rebase --prune $@ && git submodule update --init --recursive
+    update = !git pull                     && git submodule update --init --recursive
+#+end_src
+
+[[https://gist.github.com/gitaarik/8735255][Git Submodules basic explanation]]
 
 *** Update all local branches
 
@@ -1917,34 +1956,6 @@ git stash clear
 #+begin_src conf
     stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
 #+end_src
-
-#+begin_src conf
-    # up = "!git stash && git pull && git stash pop"
-# `up' used many times
-#+end_src
-
-#+begin_warning
-The above approach is *unsafe*: if there's nothing to stash, the first command
-will do nothing, and then ~stash pop~ will unstash some random stuff from before.
-#+end_warning
-
-#+begin_src conf
-    stashpull-tmpname = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash && git pull && git stash pop
-#+end_src
-
-#+begin_src conf
-# cleanpull
-# update (like svn? if we add a git reset in front?)
-# sync
-#+end_src
-
-... but read "you're not using git as it was intended" on
-https://news.ycombinator.com/item?id=2301765.
-
-XXX What about ~git stash --include-untracked~ and ~git stash pop~?
-
-Git's fix is to ask you to commit (or stash) before you pull (which is fetch
-followed by merge). XXX
 
 *** Workflows
 
