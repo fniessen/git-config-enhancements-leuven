@@ -2128,9 +2128,36 @@ Save a repo as a tarball:
 
 ** PUBLISH - Tag
 
+When tagging releases in a version control system, the tag for a version should
+be ~X.Y.Z~ (*without* prefix ~v~).  The advantages of ~X.Y.Z~ are that gitweb or GitHub
+can automatically offer a tarball or zip download of the form
+~packagename-$tag.tar.gz~ (and it's quite established that a tarball should be
+named ~package-X.Y.Z.tar.gz~).
+
+Basically, *lightweight tags* are just pointers to specific commits. *No further
+information is saved*; on the other hand, *annotated tags* are *regular objects*,
+which have an author and a date and can be referred because they have their own
+SHA key.
+
+If knowing *who* tagged *what* and *when* is relevant for you, then use annotated
+tags. If you *just want to tag a specific point in your development*, no matter
+who and when did that, then lightweight tags are good enough.
+
+#+begin_note
+Annotated tags are meant for release while lightweight tags are meant for
+private or temporary object labels.
+#+end_note
+
+#+begin_src shell :tangle no
+git tag <tagname>
+#+end_src
+
+The tag will be a *lightweight tag* by default.
+
 Show the last tag:
 
 #+begin_src conf
+    version = describe --tags
     lasttag = describe --tags --abbrev=0
 #+end_src
 
