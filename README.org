@@ -842,8 +842,8 @@ git changed bAda55..ff0021              # List files modified between those comm
 *List all commits* that changed a *specific file* (it accounts for renames!):
 
 #+begin_src conf
-    lf = "log --follow"
-    logfile = log --follow -C
+    filelog = log --follow -C
+    fl = log --follow -C
 #+end_src
 
 #+begin_src conf
