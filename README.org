@@ -595,7 +595,7 @@ are always executed in the top-level directory.
     # Pull in remote changes for the current repository and all its submodules
     p = !"git pull; git submodule foreach git pull origin master"
 
-    # Commit all changes
+    # Commit all changes (all local modifications/additions/deletions).
     ca = !git add -A && git commit -av
 
     # Credit an author on the LATEST commit
@@ -842,8 +842,8 @@ git changed bAda55..ff0021              # List files modified between those comm
 *List all commits* that changed a *specific file* (it accounts for renames!):
 
 #+begin_src conf
-    filelog = log --follow -C
-    fl = log --follow -C
+    filelog = log --date=short --follow -C
+    fl = log --date=short --follow -C
 #+end_src
 
 #+begin_src conf
@@ -1050,6 +1050,12 @@ List untracked *files ignored* by a =.gitignore= statement somewhere.
     ignored = ls-files --others --ignored --exclude-standard
 #+end_src
 
+Remove ignored files that are still on the repository:
+
+#+begin_src shell :tangle ~/.dotfiles/bin/git-delete-ignored :shebang #!/usr/bin/env bash
+git ignored | xargs rm
+#+end_src
+
 *** ~git ignore~ command
 
 Quickly add a file or directory to =.gitignore=:
@@ -1161,7 +1167,8 @@ Modify the *last* commit:
 #+end_src
 
 Note that the ~-a~ switch which tells Git to automatically *stage all your changes*,
-as if you ran ~git add .~ right before the commit.
+as if you ran ~git add .~ (stage all local modifications/additions) right before
+the commit.
 
 #+begin_src shell :tangle no
 git commit --amend                      # Correct the PREVIOUS commit, with the staged changes.
@@ -1231,9 +1238,9 @@ Go back before last commit, with files in uncommitted state:
 # OK (or undolast)
 #+end_src
 
-~uncommit~ *removes the last commit* from your repository, and *puts the changes
-into your index*, keeping changes in the working tree. It's like going back in
-time to the moment right before you committed.
+~uncommit~ *removes the last commit* from your repository, and *puts the changes into
+your index*, keeping changes in the working directory -- it doesn't touch it.
+It's like going back in time to the moment right before you committed.
 
 #+begin_note
 ~uncommit~ here means to do just the reverse of commit, i.e. just like commit it
@@ -1266,6 +1273,7 @@ Remove the last commit, *delete changes in your staging area and in your working
 directory*:
 
 #+begin_src conf
+    # Reset every file in your working directory to its committed state.
     wipe = reset --hard HEAD~1
 # rollback?
 #+end_src
@@ -1346,7 +1354,7 @@ branch; e.g., ~origin/foo~ (or ~github/foo~, etc., since the remote doesn't have
 be called ~origin~) if the checked out branch is ~foo~.
 
 #+begin_src conf
-    r = "remote -v"
+    r = remote -v
     remotes = remote -v
 #+end_src
 
@@ -1560,6 +1568,8 @@ repository) *into the current branch*. [...]  Merging is performed by an automat
 process that identifies changes made since the branches diverged, and then
 applies all those changes together.
 
+: Merge branch 'branch_name' into master
+
 #+begin_src conf
     # Will only try to "merge" if your current HEAD commit is in the branch
     # you're merging in.  This will allow you to merge some commits whilst being
@@ -1613,13 +1623,13 @@ See if the merge is applicable to the current working tree and/or the index file
 and *detects conflicts*:
 
 #+begin_src conf
-    mergetest = "!f() { git merge --no-commit --no-ff $1; git merge --abort; echo 'Merge aborted'; }; f"
+    merge-test = "!f() { git merge --no-commit --no-ff $1; git merge --abort; echo 'Merge aborted'; }; f"
 
     # Check how the merge of `dev' into master will go: git mergedryrun dev.
-    mergedryrun = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflict detected' || echo 'Merged cleanly'; }; f"
+    merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflict detected' || echo 'Merged cleanly'; }; f"
 
     # Extract the "changed in both" lines as well as the conflicting parts.
-    mergedryrunconflicts = "!f() { git merge-tree $(git merge-base $1 $2) $1 $2 | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' | cdiff; }; f"
+    merge-dry-run-conflicts = "!f() { git merge-tree $(git merge-base $1 $2) $1 $2 | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' | cdiff; }; f"
 #+end_src
 
 *** Branch/Integration manager
@@ -1661,6 +1671,11 @@ git push origin master
 
 git branch -d branch_name               # Delete local branch.
 #+end_src
+
+#+begin_warning
+*Update first the branch (to merge in) of the RIGHT LOCAL CLONE.* -- if you do
+have many clones on your file system.
+#+end_warning
 
 Best answer I have seen on ~git merge~ *strategies*:
 https://stackoverflow.com/questions/366860/when-would-you-use-the-different-git-merge-strategies
@@ -1731,18 +1746,31 @@ cd "$(git rev-parse --show-toplevel)"
 git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f".bak; done
 #+end_src
 
-*List all branches* (both remote-tracking and local branches), showing SHA1 and
-commit subject line for each head, along with the name of the upstream branch
-(if any).
+*List all branches* (both local remote-tracking and local branches), showing SHA1
+and commit subject line for each head, along with the name of the upstream
+branch (if any).
 
 #+begin_src conf
     br = branch -a -vv
 #+end_src
 
-Delete a branch:
+Delete a *local* branch:
 
 #+begin_src conf
     bd = branch -d
+#+end_src
+
+#+begin_note
+The -d (--delete) option only deletes the branch if it has already been fully
+merged in its upstream branch. You could also use -D, which is an alias
+for --delete --force, which deletes the branch "irrespective of its merged
+status."
+#+end_note
+
+Delete a *remote* branch:
+
+#+begin_src shell :tangle no
+git push origin --delete <remote_branch_name>
 #+end_src
 
 ~git bclean~ is meant to be run from your master (or default) branch and does the
@@ -1753,7 +1781,7 @@ cleanup of merged branches.
 #+end_src
 
 When I'm done with this topic branch and I want to clean everything up on my
-local machine, I use git bdone:
+local machine, I use ~git bdone~:
 
 1. Switch to master (though you can specify a different default branch)
 2. Run git up to bring master up to speed with the origin
