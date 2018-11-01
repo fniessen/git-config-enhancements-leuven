@@ -1623,9 +1623,17 @@ and *detects conflicts*:
 If you're the Branch/Integration manager, you can use these aliases to *merge*
 stuff (to select the entirety of either our or their file in a 3-way merge).
 
-Often, during a merge, you know you want to take a file from one side
-wholesale. The following aliases expose the ~ours~ and ~theirs~ commands which will
-let you pick a file(s) from the current branch or the merged branch
+Often, during a merge, you know you want to take a file from one side wholesale.
+The following aliases expose the:
+
+- ~ours~ (stage #2) and
+- ~theirs~ (stage #3)
+
+commands which will let you pick a file(s) from
+
+- the current branch (local) or
+- the merged branch (remote)
+
 respectively:
 
 #+begin_src conf
@@ -1633,7 +1641,13 @@ respectively:
     theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 #+end_src
 
-Best (and safest) way to merge a Git local branch into ~master~:
+#+begin_note
+Using ~git checkout~ with ~--ours~ or ~--theirs~ expects at least one argument: the
+*path(s)* of the *files / directories* to checkout.  If you use ~git checkout~ without
+any files, then it takes the meaning of /switching branches/.
+#+end_note
+
+*Best (and safest) way to merge* a Git local branch into ~master~:
 
 #+begin_src shell :tangle no
 git checkout master
