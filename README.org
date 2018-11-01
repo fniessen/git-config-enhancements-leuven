@@ -1490,9 +1490,7 @@ Pull all:
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
 (+ interesting comments about *rebase vs merge during a pull*!)
 
-#+begin_src shell :tangle ~/.dotfiles/bin/git-up-all
-#!/bin/bash
-
+#+begin_src shell :tangle ~/.dotfiles/bin/git-up-all :shebang #!/usr/bin/env bash
 REMOTES="$@";
 if [ -z "$REMOTES" ]; then
     REMOTES=$(git remote);
@@ -1502,7 +1500,8 @@ REMOTES=$(echo "$REMOTES" | xargs -n1 echo)
 CLB=$(git branch -l | awk '/^\*/{print $2}');
 
 echo "$REMOTES" | while read REMOTE; do
-    git remote update $REMOTE
+    git remote update --prune $REMOTE
+    echo
     git remote show $REMOTE -n \
         | awk '/merges with remote/ {print $5" "$1}' \
         | while read line; do
@@ -1514,16 +1513,21 @@ echo "$REMOTES" | while read REMOTE; do
               NAHEAD=$(( $(git rev-list --count $ARB..$ALB 2> /dev/null) + 0));
               if [ "$NBEHIND" -gt 0 ]; then
                   if [ "$NAHEAD" -gt 0 ]; then
-                      echo -e "$LB \tis $NBEHIND commit(s) behind and $NAHEAD commit(s) ahead of $REMOTE/$RB.  Could not be fast-forwarded";
+                      echo -e "[$LB \tis $NBEHIND commit(s) behind and $NAHEAD commit(s) ahead of $REMOTE/$RB.]  Not possible to fast-forward, aborting.";
                   elif [ "$LB" = "$CLB" ]; then
-                      echo -e "$LB \twas $NBEHIND commit(s) behind of $REMOTE/$RB.  Fast-forwarding merge...";
-                      echo git merge -q $ARB;
+                      echo -e "[$LB \tis $NBEHIND commit(s) behind of $REMOTE/$RB.  Fast-forwarding merge...]";
+                      # git merge --quiet $ARB;
+                      git merge --ff-only --verbose $ARB;
                   else
-                      echo -e "$LB \twas $NBEHIND commit(s) behind of $REMOTE/$RB.  Resetting local branch to remote...";
-                      echo git branch -l -f $LB -t $ARB > /dev/null;
+                      echo -e "[$LB \tis $NBEHIND commit(s) behind of $REMOTE/$RB.  Resetting local branch to remote...]";
+                      # git branch -l -f $LB -t $ARB > /dev/null;
+                      git branch -l -f $LB -t $ARB;
                   fi
+              else
+                  echo -e "$LB \tAlready up to date.";
               fi
-    done
+              echo
+          done
 done
 #+end_src
 
