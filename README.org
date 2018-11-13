@@ -512,7 +512,9 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 [color "diff"]
     plain = normal
     meta = yellow bold
+    func = "#cc99cc"
     frag = magenta bold
+    context = "#999999"
     old = red bold
     new = green bold
     commit = yellow
@@ -524,13 +526,15 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 #+begin_src conf
 [color "status"]
     header = normal
-    added = green
-    updated = yellow
-    changed = magenta
-    untracked = red
+    added = green bold
+    changed = red bold
+    untracked = cyan
     branch = cyan bold
-    nobranch = red reverse
+    nobranch = bold ul blink 12
 #+end_src
+
+- added = modified
+- changed = updated
 
 ** Grep
 
@@ -1808,8 +1812,8 @@ Show all commits in a git branch since original branching point from master:
 #+end_src
 
 When you use three dots, ~git diff~ finds the merge-base between the left and
-right side commit SHA-1s (as obtained from the names, or defaulting to ~HEAD~) and
-substitutes that in for the left-side SHA-1. The right-side SHA-1 (as resolved
+right side commit SHA1s (as obtained from the names, or defaulting to ~HEAD~) and
+substitutes that in for the left-side SHA1. The right-side SHA1 (as resolved
 from the name) remains intact.
 
 *** Rename branch
@@ -1825,8 +1829,9 @@ To rename the branch locally:
 
 One thing to keep in mind is that this command works in two different ways:
 
-- if we are on the branch we want to rename, we can just ~git rename new-name~.
-- If we are not on the branch, we have to use ~git rename target-branch new-name~.
+- If we are on the branch we want to rename, we can just ~git rename <new-name>~.
+- If we are not on the branch, we have to use ~git rename <target-branch>
+  <new-name>~.
 
 *** List branches that contain a given commit ID (SHA1)
 
@@ -1865,6 +1870,21 @@ a development branch to the stable branch, for instance. This command compares
 changes on the current (~feature~) branch to upstream (~master~) and indicates which
 are present on both with the ~-~ sign. Changes still missing from upstream are
 marked with ~+~.
+
+*** Recover a branch after its deletion in Git
+
+Most of the time unreachable commits are in the reflog. So, the *first thing to
+try is to look at the reflog* using the command ~git reflog~ (which display the
+reflog for ~HEAD~).
+
+1. Perhaps something easier if the commit was part of a specific branch still
+   existing is to use the command ~git reflog name-of-my-branch~ to *find the SHA1*
+   for the commit at the tip of your deleted branch -- It works also with
+   a remote, for example if you forced push.  Otherwise, use ~git reflog~.
+2. Then, you can just ~git checkout -b <branch> <sha1>~ to recreate the branch
+   from there.
+
+See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its-deletion-in-git
 
 ** Stash
 
@@ -2135,24 +2155,30 @@ reachable from the upstream branch. The ~@{u}..~ argument is equivalent to
 ~@{u}..HEAD~, where ~HEAD~ stands for the last commit in your local branch, but ~HEAD~
 can be omitted for shorthand purposes.
 
-#+begin_note
-Use ~git push -u origin new/branch~ to push the ~new/branch~ branch to the ~origin~
-remote and to set up tracking.
-#+end_note
-
 If you want to see all *unpushed* commits from *all branches*, do this:
 
 #+begin_src conf
     out-all = log --branches --not --remotes --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)'
 #+end_src
 
+*** Upload your changes
+
+Use ~git push -u origin new/branch~ to push the ~new/branch~ branch to the ~origin~
+remote and to set up tracking.
+
 #+begin_src conf
-    pof = !git push origin -f $(git branch | grep \\* | cut -d ' ' -f2)
+    # Get the current branch name (not so useful in itself, but used in other
+    # aliases).
+    branch-name = !git rev-parse --abbrev-ref HEAD
+
+    # Push the current branch to the remote "origin", and set it to track the
+    # upstream branch.
+    publish = !git push -u origin $(git branch-name)
 #+end_src
 
-is a shortcut for manually typing the branch name:
+~git publish~ is a shortcut for manually typing the branch name:
 
-: git push origin -f <current-branch>
+: git push origin -u <current-branch>
 
 ** PUBLISH - Find out if a change is part of a release
 
