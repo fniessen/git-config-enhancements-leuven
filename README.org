@@ -14,6 +14,10 @@
 *Commit early, commit often*: it is a bad idea to do a lot of work without
 committing.
 
+Branch out often.
+http://kentnguyen.com/development/visualized-git-practices-for-team/
+(definition of git rebase)
+
 * TODO See more Git configs (and aliases)
 
 - https://github.com/alikins/gitconfig/blob/master/gitconfig
@@ -527,7 +531,7 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 [color "status"]
     header = normal
     added = green bold
-    changed = red bold
+    changed = yellow bold
     untracked = cyan
     branch = cyan bold
     nobranch = bold ul blink 12
@@ -614,20 +618,6 @@ clean and relevant commits, no experiments or fixing typos.
 #+begin_src conf
     # Interactive rebase with the given number of latest commits
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
-#+end_src
-
-#+begin_src conf
-    # Find branches containing commit
-    fb = "!f() { git branch -a --contains $1; }; f"
-
-    # Find tags containing commit
-    ft = "!f() { git describe --always --contains $1; }; f"
-
-    # Find commits by source code
-    fc = "!f() { git log --pretty=format:'%C(yellow)%h  %C(blue)%ad  %C(reset)%s%C(green)  <%cn> %C(red)%d' --decorate --date=short -S$1; }; f"
-
-    # Find commits by commit message
-    fm = "!f() { git log --pretty=format:'%C(yellow)%h  %C(blue)%ad  %C(reset)%s%C(green)  <%cn> %C(red)%d' --decorate --date=short --grep=$1; }; f"
 #+end_src
 
 #+begin_src conf
@@ -768,10 +758,10 @@ date".
     ld = log --decorate --date=relative
 #+end_src
 
-List commits *showing changed files*:
+List commits *showing changed files* (prettier and concise ~whatchanged~):
 
 #+begin_src conf
-    ll = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ <%cn>" --decorate --date=short --numstat
+    ll = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ <%cn>" --date=short --stat
 #+end_src
 
 #+begin_src conf
@@ -800,20 +790,6 @@ To see real *timeline* of who is working on what and when:
 
 #+begin_src conf
     last = log -1 --stat
-#+end_src
-
-*** What changed
-
-Prettier and concise ~whatchanged~:
-
-#+begin_src conf
-    what = log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ad)%C(reset)' --date=short --stat
-#+end_src
-
-Prettier ~whatchanged~ with full diffs based on text search:
-
-#+begin_src conf
-    whatwhen = log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ad)%C(reset)' --date=iso -p -S
 #+end_src
 
 *** List all the changed files in a commit
@@ -908,7 +884,10 @@ of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-    find = "log --all -i --grep"
+    find = "log --decorate --all -i --grep"
+
+    # Find commits by commit message.
+    fm = "!f() { git log --decorate --date=short --grep=$1; }; f"
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -946,8 +925,8 @@ git show :/^Merge
 *** String added/removed in Commit contents (Diff)
 
 If you want to find all commits where a *string* was *added or removed* in the /file
-contents/ (to be more exact: where its *number of occurrences changed*),
-i.e. search the /commit contents/, use ~-S~.
+contents/ (to be more exact: where its *number of occurrences changed* in the
+source file), i.e. search the /commit contents/, use ~-S~.
 
 You can dig up commits that have, for example,
 - removed calls to a specific function, or
@@ -960,6 +939,17 @@ a commit, it will not match using ~-S "foo"~.
 
 #+begin_src shell :tangle no
 git log --all -S "foo" --since="1 week ago"
+#+end_src
+
+#+begin_src conf
+    whatwhen = log --decorate --date=short -p -S
+#+end_src
+
+Prettier ~whatchanged~ with full diffs based on text search:
+
+#+begin_src conf
+    # Find commits by source code.
+    fc = "!f() { git log --decorate --date=short -S $1; }; f"
 #+end_src
 
 By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
@@ -1144,42 +1134,25 @@ new history.
 https://stackoverflow.com/questions/27692954/change-mail-address-in-each-commit/27709938#27709938
 #+end_verse
 
-Amend with the same message (without your editor prompting you for the message
-you've already entered).
+Modify the *last* commit, amending with the same message (without your editor
+prompting you for the message you've already entered):
 
 #+begin_src conf
-    amend = "!git log -n 1 --pretty=tformat:%s%n%n%b | git commit -F - --amend"
-#+end_src
+    # Append additional (staged) changes to the PREVIOUS commit.
+    fixup = commit -v --amend --reuse-message HEAD
+    # fixlastcommit?
 
-Modify the *last* commit:
-
-#+begin_src conf
-    amend = commit -a -v --amend
-    amend = commit --amend
-# fixlastcommit?
-
-
-    ca = commit --amend
-    cm = commit -a --amend -C HEAD
-
-
-# Commit changes to current head as amended commit.
-    plus = commit --amend -a -C HEAD
-
-# Append additional changes to the previous commit.
-    fixup = commit --amend --reuse-message HEAD
+    # Commit changes to current HEAD (modified and deleted files) as amended commit.
+    plus = commit -a -v --amend --reuse-message HEAD
 #+end_src
 
 Note that the ~-a~ switch which tells Git to automatically *stage all your changes*,
 as if you ran ~git add .~ (stage all local modifications/additions) right before
 the commit.
 
-#+begin_src shell :tangle no
-git commit --amend                      # Correct the PREVIOUS commit, with the staged changes.
-#+end_src
-
 #+begin_warning
-Never do this to a commit that you've already pushed to a remote repository.
+*Never amend a commit* that you've *already pushed* to a remote repository.
+https://stackoverflow.com/questions/17176859/amending-a-pushed-commit-message
 #+end_warning
 
 Solution for *amending older commits*:
@@ -1616,6 +1589,12 @@ examine, test, and undo the merge if required.
 git merge --no-commit --no-ff $BRANCH
 #+end_src
 
+You can do ~git merge --abort~ after seeing that there are conflicts.
+
+#+begin_src conf
+    merge-check = "!f() { git merge --no-commit --no-ff $1; git merge --abort; echo 'Merge aborted'; }; f"
+#+end_src
+
 #+begin_warning
 If your repository is a live Web server, then you could be serving files with
 conflicts in.  That's why you should *never* be *handling merges on a live Web
@@ -1627,9 +1606,7 @@ See if the merge is applicable to the current working tree and/or the index file
 and *detects conflicts*:
 
 #+begin_src conf
-    merge-test = "!f() { git merge --no-commit --no-ff $1; git merge --abort; echo 'Merge aborted'; }; f"
-
-    # Check how the merge of `dev' into master will go: git mergedryrun dev.
+    # Check how the merge of `dev' into master will go: git merge-dry-run dev.
     merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflict detected' || echo 'Merged cleanly'; }; f"
 
     # Extract the "changed in both" lines as well as the conflicting parts.
@@ -1673,7 +1650,7 @@ git pull origin master                  # Get the latest changes from the remote
 git merge test
 git push origin master
 
-git branch -d branch_name               # Delete local branch.
+git branch -d local_branch_name         # Delete local branch.
 #+end_src
 
 #+begin_warning
@@ -1698,7 +1675,7 @@ See http://nuclearsquid.com/writings/git-tricks-tips-workflows/ for more
 interesting stuff, such as:
 
 - When branching off a remote branch, automatically let the local branch track
-  the remote branch:
+  the remote branch.
 
 - When pushing without giving a refspec, push the current branch to its upstream
   branch. See the git config man page for more possible options.
@@ -1747,7 +1724,7 @@ For example:
 
 #+begin_src shell :tangle no
 cd "$(git rev-parse --show-toplevel)"
-git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f".bak; done
+git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f.bak"; done
 #+end_src
 
 *List all branches* (both local remote-tracking and local branches), showing SHA1
@@ -1840,6 +1817,9 @@ their ancestors.
 
 #+begin_src conf
     where = "branch -a --contains"
+
+    # Find branches containing commit
+    fb = "!f() { git branch -a --contains $1; }; f"
 #+end_src
 
 This also includes *remote tracking branches* in the list, that is "local
@@ -1849,6 +1829,9 @@ List all *tags* that contain a commit ID:
 
 #+begin_src shell :tangle no
 git tag --contains a2c71a6
+
+    # Find tags containing commit
+    ft = "!f() { git describe --always --contains $1; }; f"
 #+end_src
 
 *** See which changes from a branch are already present upstream
