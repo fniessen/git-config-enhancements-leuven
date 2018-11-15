@@ -605,9 +605,6 @@ are always executed in the top-level directory.
 
     # Commit all changes (all local modifications/additions/deletions).
     ca = !git add -A && git commit -av
-
-    # Credit an author on the LATEST commit
-    credit = "!f() { git commit --amend --author \"$1 <$2>\" -C HEAD; }; f"
 #+end_src
 
 Clean up your commits before publishing.  Before you push your commits to the
@@ -887,7 +884,7 @@ expression), use ~find~.
     find = "log --decorate --all -i --grep"
 
     # Find commits by commit message.
-    fm = "!f() { git log --decorate --date=short --grep=$1; }; f"
+    findm = "!f() { git log --decorate --date=short --grep=$1; }; f"
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -949,7 +946,7 @@ Prettier ~whatchanged~ with full diffs based on text search:
 
 #+begin_src conf
     # Find commits by source code.
-    fc = "!f() { git log --decorate --date=short -S $1; }; f"
+    findc = "!f() { git log --decorate --date=short -S $1; }; f"
 #+end_src
 
 By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
@@ -1013,6 +1010,9 @@ git grep --all-match -e <regexp> -e <regexp>
 Tell if a file is being tracked:
 
 #+begin_src conf
+    # List all tracked files.
+    ls-tracked = ls-files -t
+
     tracked1 = "!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
 
     tracked2 = "!f() { echo -n ${1}': '; if [[ -f ${1} ]]; then tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
@@ -1020,15 +1020,15 @@ Tell if a file is being tracked:
 #+end_src
 
 #+begin_note
-[[ has fewer surprises and is generally safer to use. But it is not portable -
+~[[~ has fewer surprises and is generally safer to use. But it is not portable --
 POSIX doesn't specify what it does and only some shells support it (beside bash,
 I heard ksh supports it too). For example, you can do
 
 : [[ -e $b ]]
 
-to test whether a file exists. But with [, you have to quote $b, because it
-splits the argument and expands things like "a*" (where [[ takes it
-literally). That has also to do with how [ can be an external program and
+to test whether a file exists. But with ~[~, you have to quote ~$b~, because it
+splits the argument and expands things like ~"a*"~ (where ~[[~ takes it
+literally). That has also to do with how ~[~ can be an external program and
 receives its argument just normally like every other program (although it can
 also be a builtin, but then it still has not this special handling).
 #+end_note
@@ -1041,13 +1041,13 @@ List untracked *files ignored* by a =.gitignore= statement somewhere.
 #+end_src
 
 #+begin_src conf
-    ignored = ls-files --others --ignored --exclude-standard
+    ls-ignored = ls-files --others --ignored --exclude-standard
 #+end_src
 
 Remove ignored files that are still on the repository:
 
 #+begin_src shell :tangle ~/.dotfiles/bin/git-delete-ignored :shebang #!/usr/bin/env bash
-git ignored | xargs rm
+git ls-ignored | xargs rm
 #+end_src
 
 *** ~git ignore~ command
@@ -1096,19 +1096,31 @@ Assume all:
 
 ** REVERT - Undo things
 
-*** Change your last commit
-
 > The reason I don't commit a change immediately after I write it is
 > that I want to test it in real (and varied) use.  Sometimes I find
 > bugs and have to change it.  After some period in which it works well,
 > I decide it is ready to install.
 
-That is a good reason. However, for your information there is the variant “git
-commit --amend”, which as the option suggests amends the *current* commit. Just
-“git add“ the files you changed and run “git commit --amend”. It also lets you
-edit the commit message. After discovering this option, I find I am less fearful
-of making premature commits, since they are easily fixed. (But not after
-pushing, of course. That way lies madness.)
+That is a good reason. However, for your information there is the variant ~git
+commit --amend~, which as the option suggests amends the *current* commit. Just
+~git add~ the files you changed and run ~git commit --amend~. It also lets you edit
+the commit message. After discovering this option, I find I am less fearful of
+making premature commits, since they are easily fixed. (But not after pushing,
+of course. That way lies madness.)
+
+*** Change your last commit
+
+This will help when we need to change the most recent commit.
+
+#+begin_warning
+~git commit --amend~ is a dangerous operation.  Someone might forget that the
+current commit has already been pushed, and amend it anyway.  What will they do
+then?
+
+Try to push the result, see a message about non-fast-forward pushes being not
+allowed, then go along the "If pushing fails" section (pull, resolve, commit,
+push), and we'll have two similar commits in the history.
+#+end_warning
 
 #+begin_verse
 The key to understanding that is that Git does not rewrite history, it creates
@@ -1144,6 +1156,9 @@ prompting you for the message you've already entered):
 
     # Commit changes to current HEAD (modified and deleted files) as amended commit.
     plus = commit -a -v --amend --reuse-message HEAD
+
+    # Credit an author on the LATEST commit.
+    credit = "!f() { git commit --amend --author \"$1 <$2>\" --reuse-message HEAD; }; f"
 #+end_src
 
 Note that the ~-a~ switch which tells Git to automatically *stage all your changes*,
@@ -1257,8 +1272,8 @@ directory*:
 
 If you reset work that you /never committed/, it is gone for good.  Too bad!  This
 is quite a dangerous command (~git reset --hard~ is one of the few Git commands
-which deletes information with no backout), and must be used with *extreme
-caution*.
+which deletes information with no backout), and must be used with *EXTREME
+CAUTION*.
 
 #+begin_warning
 This command will also *overwrite changed files* in the working tree!
@@ -1818,8 +1833,8 @@ their ancestors.
 #+begin_src conf
     where = "branch -a --contains"
 
-    # Find branches containing commit
-    fb = "!f() { git branch -a --contains $1; }; f"
+    # Find branches containing commit.
+    findb = "!f() { git branch -a --contains $1; }; f"
 #+end_src
 
 This also includes *remote tracking branches* in the list, that is "local
@@ -1829,9 +1844,11 @@ List all *tags* that contain a commit ID:
 
 #+begin_src shell :tangle no
 git tag --contains a2c71a6
+#+end_src
 
-    # Find tags containing commit
-    ft = "!f() { git describe --always --contains $1; }; f"
+#+begin_src conf
+    # Find tags containing commit.
+    findt = "!f() { git describe --always --contains $1; }; f"
 #+end_src
 
 *** See which changes from a branch are already present upstream
@@ -2373,18 +2390,6 @@ http://stackoverflow.com/questions/2569459/git-create-a-branch-from-unstaged-unc
 
 # Absolutely read https://github.com/blog/2019-how-to-undo-almost-anything-with-git!
 
-This will help when we need to change the most recent commit.
-
-'git commit --amend' is already a dangerous operation. Someone might forget that
-the current commit has already been pushed, and amend it anyway. What will they
-do then?
-
-Try to push the result, see a message about non-fast-forward pushes being not
-allowed, then go along the "If pushing fails" section (pull, resolve, commit,
-push), and we'll have two similar commits in the history.
-
-I don't really know how to proof the instructions against that.
-
 * Recover from problems
 :PROPERTIES:
 :header-args+: :tangle no
@@ -2400,8 +2405,8 @@ git stash apply
 #+end_src
 
 Of course, if any of the commands but the last fails, stop and ask for advice
-again. If the last one reports merge conflicts, fix them by hand and run “git
-add” on each file after you fixed it. DO NOT use C-x v v after fixing a merge
+again. If the last one reports merge conflicts, fix them by hand and run ~git add~
+on each file after you fixed it. DO NOT use C-x v v after fixing a merge
 conflict, since that runs both git add and git commit, and you are not ready for
 the latter until all merge conflicts are dealt with.
 
