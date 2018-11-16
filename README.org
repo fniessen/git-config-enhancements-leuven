@@ -18,6 +18,39 @@ Branch out often.
 http://kentnguyen.com/development/visualized-git-practices-for-team/
 (definition of git rebase)
 
+These are common Git commands used in various situations:
+
+- start a working area (see also: git help tutorial)
+  + clone ::      Clone a repository into a new directory
+  + init ::       Create an empty Git repository or reinitialize an existing one
+
+- work on the current change (see also: git help everyday)
+  + add ::        Add file contents to the index
+  + mv ::         Move or rename a file, a directory, or a symlink
+  + reset ::      Reset current HEAD to the specified state
+  + rm ::         Remove files from the working tree and from the index
+
+- examine the history and state (see also: git help revisions)
+  + bisect ::     Use binary search to find the commit that introduced a bug
+  + grep ::       Print lines matching a pattern
+  + log ::        Show commit logs
+  + show ::       Show various types of objects
+  + status ::     Show the working tree status
+
+- grow, mark and tweak your common history
+  + branch ::     List, create, or delete branches
+  + checkout ::   Switch branches or restore working tree files
+  + commit ::     Record changes to the repository
+  + diff ::       Show changes between commits, commit and working tree, etc
+  + merge ::      Join two or more development histories together
+  + rebase ::     Reapply commits on top of another base tip
+  + tag ::        Create, list, delete or verify a tag object signed with GPG
+
+- collaborate (see also: git help workflows)
+  + fetch ::      Download objects and refs from another repository
+  + pull ::       Fetch from and integrate with another repository or a local branch
+  + push ::       Update remote refs along with associated objects
+
 * TODO See more Git configs (and aliases)
 
 - https://github.com/alikins/gitconfig/blob/master/gitconfig
@@ -514,11 +547,11 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 
 #+begin_src conf
 [color "diff"]
+    context = "#888888"
     plain = normal
     meta = yellow bold
     func = "#cc99cc"
     frag = magenta bold
-    context = "#999999"
     old = red bold
     new = green bold
     commit = yellow
@@ -535,6 +568,7 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
     untracked = cyan
     branch = cyan bold
     nobranch = bold ul blink 12
+    unmerged = red reverse bold
 #+end_src
 
 - added = modified
@@ -544,13 +578,15 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 
 #+begin_src conf
 [color "grep"]
+    context = "#888888"
     filename = yellow bold
+    function = red
     linenumber = magenta bold
     match = green reverse bold
+    matchContext = yellow reverse bold
+    matchSelected = blue reverse bold
     separator = red bold
     selected = white bold
-    context = black
-    function = red
 #+end_src
 
 * Format
@@ -786,7 +822,7 @@ To see real *timeline* of who is working on what and when:
 #+end_src
 
 #+begin_src conf
-    last = log -1 --stat
+    last = log --decorate --date=short -1 --stat
 #+end_src
 
 *** List all the changed files in a commit
