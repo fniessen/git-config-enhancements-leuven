@@ -12,7 +12,7 @@
 #+PROPERTY:  header-args :tangle ~/.dotfiles/home/.gitconfig :eval no
 
 *Commit early, commit often*: it is a bad idea to do a lot of work without
-committing.
+committing... But don't push every single commit: push when changes are tested!
 
 Branch out often.
 http://kentnguyen.com/development/visualized-git-practices-for-team/
@@ -90,7 +90,7 @@ After a failed push, you are in no different state than you were before
 the push (aside from a possibly puzzled mental state).
 
 In your case, since you just want to commit and push in one operation,
-you likely want to run `git pull --rebase`, which would get those
+you likely want to run ~git pull --rebase~, which would get those
 changes and then automatically re-commit your work on top of them, as if
 you had those changes all along.  You could then push.  So, something
 like:
@@ -114,23 +114,23 @@ git commit -am Foo \
 
 But what if rebasing fails?  Then you are left resolving a conflict
 before you can attempt the push operation again.  I do not know how you
-would want to handle this.  `handle-pull-conflicts` might simply perform
-a `git rebase --abort` and exit with a non-zero status, or it may open a
+would want to handle this.  ~handle-pull-conflicts~ might simply perform
+a ~git rebase --abort~ and exit with a non-zero status, or it may open a
 UI/shell to help resolve changes.  If you are pushing after every
 change, this amounts to correcting a single commit, so it might be worth
 having VC maintain the state here, allow you to correct your commit, and
-then the vc-next-action would be to run `git rebase --continue` after
+then the vc-next-action would be to run ~git rebase --continue~ after
 adding the files that conflicted.
 
 This will be how the majority of Git users will resolve rejected pushes.
 
 Does that make sense?
 
-  [Aside: `git pull` without `--rebase` performs a `git fetch && git
-  merge whatever-branch-you-are-tracking`, which has the unfortunate
+  [Aside: ~git pull~ without ~--rebase~ performs a ~git fetch && git
+  merge whatever-branch-you-are-tracking~, which has the unfortunate
   side-effect of creating a merge commit if histories are different;
-  this muddies up history.  `git pull --rebase` performs `git fetch &&
-  git rebase whatever-branch-you-are-tracking`.  The difference in the
+  this muddies up history.  ~git pull --rebase~ performs ~git fetch &&
+  git rebase whatever-branch-you-are-tracking~.  The difference in the
   two styles of conflicts here is that, with rebasing, since you are
   re-committing each and every changeset, you may get multiple
   conflicts on any number of commits, whereas a merge will give you a
@@ -151,7 +151,7 @@ branch, or pushing to the wrong repository.  Git allows you to set a
 "tracking branch", which can be anything---a local branch, a remote
 branch, or a branch in an entirely different repository, local or
 remote.  Further, you can override the tracking branch by specifying
-which remote to push to as part of the `push` command.
+which remote to push to as part of the ~push~ command.
 
 In your case, you'd always want to respect the tracking branch and
 assume that there are no problems pushing, since you use only one
@@ -159,7 +159,7 @@ remote, and the tracking branch is always a branch of the same name on
 origin.
 
 A failed push could also mean that someone rudely rewrote history on the
-remote branch (using `git push --force`) and someone needs a talkin' to.
+remote branch (using ~git push --force~) and someone needs a talkin' to.
 
 ** TODO Outsource and include private entries in .gitconfig
 
@@ -633,7 +633,7 @@ are always executed in the top-level directory.
     # Show the diff between the latest commit and the current state
     d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-    # `git di $number` shows the diff between the state `$number` revisions ago and the current state
+    # `git di $number' shows the diff between the state `$number' revisions ago and the current state
     di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
 
     # Pull in remote changes for the current repository and all its submodules
@@ -708,7 +708,10 @@ Staging for commit is typically done by ~git add~.
 
 #+begin_src conf
     df = diff
-    diff = diff --word-diff
+    #+end_src
+
+    #+begin_src conf
+    wdiff = diff --word-diff
     dw = diff --word-diff
 #+end_src
 
@@ -740,11 +743,20 @@ I don't need to use the undo commands.
 Quickly see what you've done today (commits that aren't merges on all branches):
 
 #+begin_src conf
-    today = !git log --since=midnight --author=\"`git config user.name`\" --no-merges --all
+    today = !git log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad <<<DEL %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad <<<DEL %s' --date=format:'%Y-%m-%d %a %H:%M'
+    this-week = !git log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad - %s' --date=format:'%Y-%m-%d %a %H:%M'
 #+end_src
 
 #+begin_src conf
     today-all = !git log --since=midnight --no-merges --all
+#+end_src
+
+*** When
+
+#+begin_src conf
+    # when was this file last updated, on each local branch
+    wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do echo -e `git log --format=%at:%ar -1 $b -- \"$1\"`\\\\t$b; done | sort -r |cut -f2 -d: ; }; f"
 #+end_src
 
 *** Diff of branch
@@ -917,10 +929,10 @@ of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-    find = "log --decorate --all -i --grep"
+    find = "log --decorate -i --all --date=short --grep"
 
     # Find commits by commit message.
-    findm = "!f() { git log --decorate --date=short --grep=$1; }; f"
+    findm = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -928,7 +940,7 @@ Add ~--name-status~ to show only names and status of *changed files*.
 For example, to find all commits referencing bug #382:
 
 #+begin_src shell :tangle no
-git find "Bug #382"
+git findm "Bug #382"
 #+end_src
 
 To find commits that match *either* of patterns (implicit *OR* semantic), you can
@@ -1192,6 +1204,9 @@ prompting you for the message you've already entered):
 
     # Commit changes to current HEAD (modified and deleted files) as amended commit.
     plus = commit -a -v --amend --reuse-message HEAD
+
+    # Change previous commit's message to what you type in.
+    medit = commit --amend -m
 
     # Credit an author on the LATEST commit.
     credit = "!f() { git commit --amend --author \"$1 <$2>\" --reuse-message HEAD; }; f"
@@ -1683,7 +1698,7 @@ commands which will let you pick a file(s) from
 respectively:
 
 #+begin_src conf
-    ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+    ours   = "!f() { git checkout --ours   $@ && git add $@; }; f"
     theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 #+end_src
 
@@ -2161,40 +2176,36 @@ branch.
 
 #+begin_note
 It is a good idea to examine what you are about to push, before actually doing
-so, because fixing mistakes before pushing is much easier (see the next
-section). To do that, use the command "git diff origin/master". If you want to
-show your unpushed commits with their commit log messages, use "git show
-origin/master.." instead. If you only have one local commit you want to push,
-just "git show" is enough.
+so, because fixing mistakes before pushing is much easier. To do that, use the
+command "git diff origin/master". If you want to show your unpushed commits with
+their commit log messages, use "git show origin/master.." instead. If you only
+have one local commit you want to push, just "git show" is enough.
 
 > It is not clear to me how these two differ.  Does "git show origin/master.."
 > output everything that "git diff origin/master" outputs, plus log messages?
 
-Yes, that's the only real difference between them, when you have no
-uncommitted changes.  (When you do have uncommitted changes, "git
-diff" will include them, while "git show" will not.)
+Yes, that's the only real difference between them, when you have no uncommitted
+changes.  (When you do have uncommitted changes, "git diff" will include them,
+while "git show" will not.)
 #+end_note
 
 The ~out~ command returns a list of *unpushed* (outgoing) commits for the *current
 branch*, the next time you do a push.
 
 #+begin_src conf
-    out = log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)' @{u}..
+    out = log --date=short @{u}..
+    out-stat = log --stat --date=short @{u}..
 #+end_src
 
-#+begin_src conf
-    outgoing = log @{u}.. --stat
-#+end_src
-
-This causes git log to show all commits reachable from ~HEAD~ excluding those
-reachable from the upstream branch. The ~@{u}..~ argument is equivalent to
+This causes ~git log~ to show all commits reachable from ~HEAD~ excluding those
+reachable from the upstream branch.  The ~@{u}..~ argument is equivalent to
 ~@{u}..HEAD~, where ~HEAD~ stands for the last commit in your local branch, but ~HEAD~
 can be omitted for shorthand purposes.
 
 If you want to see all *unpushed* commits from *all branches*, do this:
 
 #+begin_src conf
-    out-all = log --branches --not --remotes --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)'
+    outgoing = log --branches --not --remotes --decorate
 #+end_src
 
 *** Upload your changes
@@ -2398,7 +2409,7 @@ Directed Acyclic Graph:
 
     # 2009-05-26  (merged-bed-bug) 6fe85ff regenerate rules Brad Bowman
     logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
-    brdate = !"sh -c 'for b in `git branch --no-merged` ; \
+    br-date = !"sh -c 'for b in $(git branch --no-merged) ; \
                do git logdate -1 -r $b --; done'"
 #+end_src
 
