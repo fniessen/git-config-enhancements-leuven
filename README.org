@@ -308,7 +308,48 @@ variable/.
 #+begin_src conf
 [diff]
     renames = copies
-    renameLimit = 12000
+    renameLimit = 30000
+    #+end_src
+
+Using the patience diff algorithm to compare large swathes of repetitive text
+(hello, xml!) often produces a much more readable diff that will reveal context
+and therefore hopefully bugs/typos etc.
+
+Here's a quick snippet of a diff to show it helping. Bare LCS-based diff:
+
+#+begin_src diff :tangle no
+ def thing1 {
+     something += 1
++}
++
++def somethingelse {
++    something += 1
+ }
+
+ def thing2 {
+     something += 2
+ }
+#+end_src
+
+With ~patience~ becomes:
+
+#+begin_src diff :tangle no
+ def thing1 {
+     something += 1
+ }
+
++def somethingelse {
++    something += 1
++}
++
+ def thing2 {
+     something += 2
+ }
+#+end_src
+
+Same end result but much easier to read.
+
+    #+begin_src conf
     algorithm = patience
 #+end_src
 
@@ -743,8 +784,8 @@ I don't need to use the undo commands.
 Quickly see what you've done today (commits that aren't merges on all branches):
 
 #+begin_src conf
-    today = !git log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad <<<DEL %s' --date=format:'%Y-%m-%d %a %H:%M'
-    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad <<<DEL %s' --date=format:'%Y-%m-%d %a %H:%M'
+    today = !git log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad - %s' --date=format:'%Y-%m-%d %a %H:%M'
     this-week = !git log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad - %s' --date=format:'%Y-%m-%d %a %H:%M'
 #+end_src
 
@@ -806,15 +847,13 @@ date".
 List commits *showing changed files* (prettier and concise ~whatchanged~):
 
 #+begin_src conf
-    ll = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%C(auto)%d\\ %C(reset)%s%C(blue)\\ <%cn>" --date=short --stat
+    ll = log --decorate --date=short --stat
 #+end_src
 
-#+begin_src conf
-    lg80 = "!git log --graph --abbrev-commit --date=relative --pretty=format:'%x00%h%x00%s%x00%cd%x00%an%x00%d' | gawk -F '\\0' '{ printf \"%s\\033[33m%s\\033[0m %-80s \\033[34m%14s\\033[0m \\033[32m%s\\033[0m\\033[33m%s\\n\", $1, $2, gensub(/(.{79}).{2,}/, \"\\\\1...\",\"g\",$3), $4, $5, $6 }' | less -R"
-#+end_src
+View the Git history tree:
 
 #+begin_src conf
-    lg = log --decorate --graph --date=short
+    tree = log --decorate --all --date=short --graph
 #+end_src
 
 To see real *timeline* of who is working on what and when:
@@ -1409,17 +1448,20 @@ That's exactly why some decide to avoid ~rebase~ (but to ~pull~ instead), becaus
 has bad effects if one merges from another branch and then wants to push.
 #+end_note
 
+About rebase (with visual aid):
+https://itnext.io/become-a-git-pro-in-just-one-blog-a-thorough-guide-to-git-architecture-and-command-line-interface-93fbe9bdb395
+
 The ~in~ command returns a list of *incoming* commits for the *current branch* --
 after a ~git fetch~, to fetch down *all the data* it has for the *current remote* that
 you do not --, the next time you do a merge.
 
 #+begin_src conf
-    in = !(echo "Please fetch origin before." && git log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)' ..@{u})
-    inf = !(git remote update -p              && git log --pretty=format:'%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset) %C(bold blue)(%ar)%C(reset)' ..@{u})
+    in = !(echo "Please fetch origin before." && git log --decorate ..@{u})
+    inf = !(git remote update -p              && git log --decorate ..@{u})
 #+end_src
 
 #+begin_src conf
-    incoming = log ..@{u} --stat
+    in-stat = log --stat ..@{u}
 #+end_src
 
 Show the changes between the last local commit and the *remote* branch:
