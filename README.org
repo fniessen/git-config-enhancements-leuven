@@ -784,9 +784,9 @@ I don't need to use the undo commands.
 Quickly see what you've done today (commits that aren't merges on all branches):
 
 #+begin_src conf
-    today = !git log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    this-week = !git log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%ad - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    today = !git log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    this-week = !git log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 #+end_src
 
 #+begin_src conf
@@ -796,8 +796,8 @@ Quickly see what you've done today (commits that aren't merges on all branches):
 *** When
 
 #+begin_src conf
-    # when was this file last updated, on each local branch
-    wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do echo -e `git log --format=%at:%ar -1 $b -- \"$1\"`\\\\t$b; done | sort -r |cut -f2 -d: ; }; f"
+    # When was this file last updated, on each local branch.
+    wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do echo -e `git log --format=%at:%ar -1 $b -- \"$1\"`\\\\t$b; done | sort -r | cut -f2 -d: ; }; f"
 #+end_src
 
 *** Diff of branch
@@ -873,7 +873,21 @@ To see real *timeline* of who is working on what and when:
 #+end_src
 
 #+begin_src conf
+    ls-del  = ls-files -d
+    ls-mod  = ls-files -m   # This will include deleted files also.
+    ls-new  = ls-files --exclude-standard -o
+    # this one is a MUST have
+    ls-ign  = ls-files --exclude-standard -o -i
+    lsfiles = ls-files --exclude-per-directory=.gitignore \
+                     --exclude-from=.git/info/exclude \
+                     -v -d -o -m -s -u
+#+end_src
+
+#+begin_src conf
     last = log --decorate --date=short -1 --stat
+
+    # Show last x commits
+    last = !git log -$1 ${*:2} && :
 #+end_src
 
 *** List all the changed files in a commit
@@ -932,6 +946,10 @@ The ~--~ signals the end of options, that the rest of the parameters are limiter
 #+end_note
 
 ** SHOW - Show blame information about original authors of lines changed or removed
+
+$ git blame -w  # ignores white space
+$ git blame -M  # ignores moving text
+$ git blame -C  # ignores moving text into other files
 
 #+begin_src conf
     praise = blame -w
@@ -1016,10 +1034,28 @@ You can dig up commits that have, for example,
 - removed calls to a specific function, or
 - added a certain CSS classname.
 
-#+begin_note
+#+begin_warning
 If the number of times "foo" appears in the file is the same before and after
 a commit, it will not match using ~-S "foo"~.
-#+end_note
+#+end_warning
+
+In other words, to find the following commit:
+
+#+begin_src diff :tangle no
+@@ -4211,9 +4211,10 @@ public class MovesHandler extends EventHandlerBase {
+      */
+
+     private boolean actionsNotCompleted(final EventHandlerContext context, final String mo_id) {
+         final Object found_mo_id =
+                 selectDbValue(context, "activity_log", "activity_log_id", "mo_id=" + mo_id
+-                    + " AND status NOT IN ('COMPLETED-V','REJECTED','CANCELLED')");
++                    + " AND status NOT IN ('COMPLETED-V','CLOSED','REJECTED','CANCELLED')");
+         return (found_mo_id != null);
+     }
+#+end_src
+
+you *need to search on 'CLOSED'*.  Searching on 'COMPLETED-V' would not bring back
+that commit!
 
 #+begin_src shell :tangle no
 git log --all -S "foo" --since="1 week ago"
@@ -1034,6 +1070,9 @@ Prettier ~whatchanged~ with full diffs based on text search:
 #+begin_src conf
     # Find commits by source code.
     findc = "!f() { git log --decorate --date=short -S $1; }; f"
+
+    grep4d = !sh -c 'git log -p -S'$1' $2' -
+# Not the best example, but: git grep4d CLOSED '*.java'
 #+end_src
 
 By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
@@ -1066,20 +1105,27 @@ It doesn't search files that are not revisioned (untracked, excluded/ignored,
 etc.).
 #+end_note
 
-More readable output, with *grouping* (like Ripgrep, ~rg~):
+Example:
 
-#+begin_src conf
-    rg = "grep --break --heading"
+#+begin_src shell :tangle no
+git grep "foo" -- '*.java'
 #+end_src
 
-Broader search (*case-sensitive*), output without grouping:
+More readable output, *with grouping* (like Ripgrep, ~rg~):
 
 #+begin_src conf
+    # Case-sensitive.
+    rg = "grep --break --heading --line-number"
+grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
+#+end_src
+
+Broader search (*case-sensitive*), output *without grouping*:
+
+#+begin_src conf
+    # `-I' = Don't match the pattern in binary files.
     g = "grep -I"
     gno = "grep -I --name-only"
 #+end_src
-
-(Don't match the pattern in binary files.)
 
 *** Find files that contain some terms, not necessarily on the same line
 
@@ -1701,6 +1747,7 @@ You can do ~git merge --abort~ after seeing that there are conflicts.
 
 #+begin_src conf
     merge-check = "!f() { git merge --no-commit --no-ff $1; git merge --abort; echo 'Merge aborted'; }; f"
+# works for git fetch & git merge
 #+end_src
 
 #+begin_warning
@@ -1715,7 +1762,8 @@ and *detects conflicts*:
 
 #+begin_src conf
     # Check how the merge of `dev' into master will go: git merge-dry-run dev.
-    merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflict detected' || echo 'Merged cleanly'; }; f"
+    merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflicts!' || echo 'No merge conflicts'; }; f"
+# DOESN'T work for git fetch & git merge
 
     # Extract the "changed in both" lines as well as the conflicting parts.
     merge-dry-run-conflicts = "!f() { git merge-tree $(git merge-base $1 $2) $1 $2 | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' | cdiff; }; f"
@@ -2017,7 +2065,21 @@ This command is useful in saving all changes not ready to be committed and the
 user wants to have an updated repository.
 
 #+begin_src conf
+    # Save with name.
     ss = stash save
+    ssave = stash save
+#+end_src
+
+#+begin_src conf
+    sshow = "!f() { git stash show stash^{/$@} -p; }; f" # Like sapply but shows it only
+
+    sapply = "!f() { git stash apply stash^{/$@}; }; f" # Find stash with name like text
+
+    spop = "!f() { git stash pop stash@{$(git stashid $@)}; }; f" # Like sapply but pops it off
+
+    stashid = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
+
+    hide = stash save --include-untracked # hides all files, including untracked files (faster than using --all)
 #+end_src
 
 #+begin_src conf
@@ -2103,7 +2165,13 @@ It helped me a lot in the past (cleaning stashes stack).
 *** Take named stash
 
 #+begin_src conf
-    snapshot = !git stash save "Snapshot: $(date +\"%F %a %R\")" && git stash apply "stash@{0}"
+    snapshot = !git stash save "Snapshot [$(date +\"%F %a %R\")]" && git stash apply "stash@{0}"
+#+end_src
+
+#+begin_src conf
+    # checkpoint and checkpoint recover
+    cp      = !git stash save $(date +%F--%T) && git stash pop --index
+    cpr     = "!f() { git fsck | grep commit | cut -d' ' -f3 | while read hash; do git rev-parse --verify --no-revs --quiet $hash^2 2>/dev/null && echo $hash | xargs git rev-list --since=${1:-1day} -1; done | xargs -L 1 git log --format=%at:%h -1 | sort|cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3 ; }; f"
 #+end_src
 
 *** Other commands
@@ -2114,6 +2182,15 @@ git stash clear
 
 #+begin_src conf
     stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
+#+end_src
+
+#+begin_src conf
+    # "show-branch -g=N" can't be aliased for N easily, so we stop here:
+    sb  = show-branch
+    # pg sbt master pu -- if the last line is 'master' and not 'master^'
+    # or 'master~N' then pu is a descendent of master
+    sbt = show-branch --topics
+    sbs = show-branch --sha1-name
 #+end_src
 
 *** Workflows
@@ -2260,14 +2337,22 @@ remote and to set up tracking.
     # aliases).
     branch-name = !git rev-parse --abbrev-ref HEAD
 
+upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
+
     # Push the current branch to the remote "origin", and set it to track the
     # upstream branch.
     publish = !git push -u origin $(git branch-name)
+
+    unpublish = !git push origin :$(git branch-name)
 #+end_src
 
 ~git publish~ is a shortcut for manually typing the branch name:
 
 : git push origin -u <current-branch>
+
+#+begin_src conf
+    export-branch = !git format-patch --stdout $1 > ~/$(git branch-name).diff
+#+end_src
 
 ** PUBLISH - Find out if a change is part of a release
 
@@ -2285,6 +2370,13 @@ Save a repo as a tarball:
 
 #+begin_src conf
     export = archive -o latest.tar.gz -9 --prefix=latest/
+#+end_src
+
+#+begin_src conf
+  # # Deploy
+  # staging = !git push heroku-staging $(git name):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
+  # dev = !git push heroku-dev $(git name):master -f && git track 'Deployed to dev ' # push current branch to dev
+  # deploy = !git push heroku $(git name):master -f && git track 'Deployed to produciton ' # push current branch to production
 #+end_src
 
 ** PUBLISH - Tag
@@ -2447,8 +2539,6 @@ Directed Acyclic Graph:
 ** TODO To sort out
 
 #+begin_src conf
-    grep4d = !sh -c 'git log -p -S'$1' $2' -
-
     # 2009-05-26  (merged-bed-bug) 6fe85ff regenerate rules Brad Bowman
     logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
     br-date = !"sh -c 'for b in $(git branch --no-merged) ; \
