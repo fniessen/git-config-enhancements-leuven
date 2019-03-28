@@ -1827,6 +1827,16 @@ Unmerged files after a merge failure:
 
 ** BRANCH - Branch
 
+#+begin_tip
+Consistent *naming conventions*:
+- ~master~ or ~develop~ (used as integration branch for feature work)
+- ~master~ or ~production~ (used for deploying a release)
+- ~bugfix/~ (typically used to fix Release branches, such as Jira *bugs*)
+- ~feature/MSW-709-add-support-for-webm~ (for new features, such as Jira *stories*)
+- ~hotfix/fix-123-for-production~ (used to urgently fix a Production branch)
+- ~release/2018-12-24~ (used for preparing and testing release tasks)
+#+end_tip
+
 See http://nuclearsquid.com/writings/git-tricks-tips-workflows/ for more
 interesting stuff, such as:
 
