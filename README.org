@@ -11,6 +11,9 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  header-args :tangle ~/.dotfiles/home/.gitconfig :eval no
 
+Squash commits:
+https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
+
 *Commit early, commit often*: it is a bad idea to do a lot of work without
 committing... But don't push every single commit: push when changes are tested!
 
@@ -50,6 +53,23 @@ These are common Git commands used in various situations:
   + fetch ::      Download objects and refs from another repository
   + pull ::       Fetch from and integrate with another repository or a local branch
   + push ::       Update remote refs along with associated objects
+
+* Comments on branching (from Matthias)
+
+If you have finished your work, feel free to merge the branch into master (maybe
+you want to rebase your WIP branch before based on master):
+
+The following sequence is here very helpful:
+
+1. git checkout master
+2. git pull (this makes sure that your local master branch matches the remote one)
+3. git checkout WIP
+4. git rebase master
+5. git checkout master
+6. git merge WIP
+
+after this you can delete your local WIP branch and or if you pushed it the
+remote one too.
 
 * TODO See more Git configs (and aliases)
 
@@ -630,6 +650,13 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
     selected = white bold
 #+end_src
 
+* Proxy
+
+#+begin_src conf :tangle no
+[http]
+    proxy = http://proxy-guest.forem.be:8080
+#+end_src
+
 * Format
 
 #+begin_src conf
@@ -716,6 +743,11 @@ always executed in the top-level directory.
     # Clone a repository including all submodules.
     cl = clone --recursive
 #+end_src
+
+#+begin_tip
+For *passwordless Git pull* (permanently authenticating with Git repositories),
+*use SSH* when cloning, and *add* your *public key* to the remote server.
+#+end_tip
 
 ** SHOW - Check the status of your files
 
@@ -934,16 +966,19 @@ Put a end of options character (--) after lf and before the path!!
 
 *** Show a "top contributors" list
 
-Show a "top contributors" list:
+Show a "top contributors" list (rank):
 
 #+begin_src conf
-    who = shortlog -n -s --
-    # who = shortlog -n -s -e --
+    who = shortlog -n -s -e --no-merges --
 #+end_src
 
 #+begin_note
 The ~--~ signals the end of options, that the rest of the parameters are limiters.
 #+end_note
+
+*** Inspect the commits for each edit
+
+: git log ... | xargs -n 1 git show
 
 ** SHOW - Show blame information about original authors of lines changed or removed
 
@@ -1087,6 +1122,14 @@ any *line* that was added, removed, or changed.
 
 #+begin_src shell :tangle no
 git log --all -G "foo" --since="1 week ago"
+#+end_src
+
+** SHOW - find all "unpushed" commits for all projects in a directory
+
+See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
+
+#+begin_src conf
+    status-all = "!for d in `find . -name \".git\"`; do echo \"\n*** Repository: $d ***\" && git --git-dir=$d --work-tree=$d/.. status | grep -q \"is ahead of\"; done"
 #+end_src
 
 ** Grep (Print lines matching a pattern)
@@ -1634,7 +1677,7 @@ REMOTES="$@";
 if [ -z "$REMOTES" ]; then
     REMOTES=$(git remote);
 fi
-REMOTES=$(echo "$REMOTES" | xargs -n1 echo)
+REMOTES=$(echo "$REMOTES" | xargs -n 1 echo)
 
 CLB=$(git branch -l | awk '/^\*/{print $2}');
 
@@ -1670,6 +1713,8 @@ echo "$REMOTES" | while read REMOTE; do
 done
 #+end_src
 
+XXX Is this ~sync~?
+
 *** Delete all old local branches
 
 Remove local branches no longer on remote (by deleting the local ones that show
@@ -1685,6 +1730,12 @@ they are "gone" in ~git branch -vv~):
     # Here is a correct solution (which does not need access to the remote Git repo).
     prunelocal = "!f() { git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d ; }; f"
 #+end_src
+
+What about
+
+: git remote update --prune
+
+instead?
 
 *** Get timestamp of last pull
 
@@ -1828,13 +1879,14 @@ Unmerged files after a merge failure:
 ** BRANCH - Branch
 
 #+begin_tip
-Consistent *naming conventions*:
-- ~master~ or ~develop~ (used as integration branch for feature work)
-- ~master~ or ~production~ (used for deploying a release)
-- ~bugfix/~ (typically used to fix Release branches, such as Jira *bugs*)
-- ~feature/MSW-709-add-support-for-webm~ (for new features, such as Jira *stories*)
-- ~hotfix/fix-123-for-production~ (used to urgently fix a Production branch)
-- ~release/2018-12-24~ (used for preparing and testing release tasks)
+Consistent *naming conventions* (from the [[https://fr.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow][Gitflow]] Git workflow):
+- ~master~ (used for deploying *production releases*)
+- ~develop~ (used as integration branch for *"next release" development*)
+- prefix ~feature/MSW-709-add-support-for-webm~ (for new *features*, such as Jira *stories*)
+- prefix ~release/2018-12-24~ (used for preparing and testing *release* tasks)
+- prefix ~hotfix/fix-123-for-production~ (used to *urgently fix* a Production branch)
+- prefix ~support/~
+- prefix ~bugfix/~ (typically used to fix Release branches, such as Jira *bugs*)
 #+end_tip
 
 See http://nuclearsquid.com/writings/git-tricks-tips-workflows/ for more
@@ -1951,7 +2003,18 @@ See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 Show all commits in a git branch since original branching point from master:
 
 #+begin_src conf
-    sincemaster = diff master...
+    diffsincemaster = diff master...
+    logsincemaster = log master...
+#+end_src
+
+https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git:
+
+#+begin_src conf
+    oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
+    branchdiff = !sh -c 'git diff $(git oldest-ancestor)..'
+    branchlog  = !sh -c 'git log $(git oldest-ancestor)..'
+
+    diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
 #+end_src
 
 When you use three dots, ~git diff~ finds the merge-base between the left and
@@ -2373,6 +2436,22 @@ upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-re
 The ~name-rev~ command indicates the *position of a commit relative to tags* in the
 project. For example, ~v2.3~5~ means that this commit is located 5 commits *before*
 the v2.3 tag -- we can be certain that this change is part of v2.3, then.
+
+** PUBLISH - ChangeLog
+
+Generate an Org mode version of your ChangeLog:
+
+#+begin_src conf
+    chlogm =  !sh -c 'git log $1...$2  --pretty=format:\"%s [[http://github.com/$3/$4/commit/%H][view commit]]\"' -
+#+end_src
+
+Use it like this:
+
+#+begin_src shell :tangle no
+git chlogm first_tag last_tag github_user github_repo
+#+end_src
+
+See also https://github.com/github-changelog-generator/github-changelog-generator.
 
 ** PUBLISH - Prepare a release
 
