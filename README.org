@@ -11,6 +11,9 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  header-args :tangle ~/.dotfiles/home/.gitconfig :eval no
 
+XXX Git-extras (extra commands!)
+https://github.com/tj/git-extras/blob/master/Commands.md
+
 Squash commits:
 https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
 
@@ -1477,14 +1480,14 @@ Use:
 - ~git clean -n~ (dry run) to see what ~git clean -f~ will do, so you can be sure
   it's what you want.
 - ~git clean -f~ (to *remove* the *untracked files*) and
-- ~git clean -fd~ (to also *remove untracked directories* in addition to untracked
+- ~git clean -d -f~ (to also *remove untracked directories* in addition to untracked
   files).
 #+end_note
 
-Nuclear version:
-
 #+begin_src conf
-    nevermind = !git reset --hard HEAD && git clean -d -f
+    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
+    # Files and directories in .gitignore will be preserved.
+    clear-soft = !git clean -d -f && git reset --hard
 #+end_src
 
 which:
@@ -1494,6 +1497,14 @@ which:
 
 XXX What is the difference with ~git checkout .~?  See
 https://wiki.mozilla.org/Cjku/git#git-reset_and_git-checkout.
+
+Nuclear version:
+
+#+begin_src conf
+    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
+    # including those in .gitignore.
+    clear = git clean -d -f -x && git reset --hard
+#+end_src
 
 *** Revert a commit
 
@@ -1904,7 +1915,7 @@ interesting stuff, such as:
 
 #+begin_src conf
     # Switch to a branch, creating it if necessary.
-    cob = checkout -b
+    create-branch = checkout -b
 #+end_src
 
 #+begin_note
@@ -1956,7 +1967,7 @@ branch (if any).
 Delete a *local* branch:
 
 #+begin_src conf
-    bd = branch -d
+    delete-local-branch = branch -d
 #+end_src
 
 #+begin_note
