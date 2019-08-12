@@ -1403,13 +1403,13 @@ else.
 
 See « Undo 'git add' before commit ».
 
-**** Do not touch the index file or the working tree at all
+**** Soft option -- Do not touch the index file or the working tree at all
 
 Go back before last commit, with files in uncommitted state:
 
 #+begin_src conf
+    undo-soft = reset --soft HEAD~1
     uncommit = reset --soft HEAD~1
-# OK (or undolast)
 #+end_src
 
 ~uncommit~ *removes the last commit* from your repository, and *puts the changes into
@@ -1423,14 +1423,18 @@ shouldn't touch the files's contents, only the metadata.
 
 This is a useful technique in resuming work on an unfinished changeset.
 
-**** Reset the index (but not the working tree)
+Other scenario: squash change in several commits into one commit so that people
+think you are smart.
+
+**** Mixed option -- Do not touch the working tree (but regenerate the index)
 
 Reset the previous commit, but *puts* all *the changes* from that commit *in the
 working directory*:
 
 #+begin_src conf :tangle no
-    undo = reset --mixed HEAD~1
-# popcommit?
+    undo-mixed = reset --mixed HEAD~1
+    uncommit-unstage = reset --mixed HEAD~1
+# good name???  Is this what it does?
 #+end_src
 
 #+begin_note
@@ -1441,15 +1445,18 @@ This is a useful technique if your pull fails to merge the new stuff from
 upstream: ~git reset HEAD~1~, pull again, fix the conflicts, then commit your
 changes again.
 
-**** Reset both the index and working tree
+Other scenario: slice a single big commit to different small commits to haste
+review process.
+
+**** Hard option -- Regenerate both the index and working tree
 
 Remove the last commit, *delete changes in your staging area and in your working
 directory*:
 
 #+begin_src conf
-    # Reset every file in your working directory to its committed state.
-    wipe = reset --hard HEAD~1
-# rollback?
+    # Erase any changes since your last commit (reset every file in your working
+    # directory to its committed state).
+    undo = reset --hard HEAD~1
 #+end_src
 
 If you reset work that you /never committed/, it is gone for good.  Too bad!  This
@@ -1458,7 +1465,8 @@ which deletes information with no backout), and must be used with *EXTREME
 CAUTION*.
 
 #+begin_warning
-This command will also *overwrite changed files* in the working tree!
+This command will *overwrite all CHANGED tracked files* in the working tree!
+(/Untracked files/ are out of scope.)
 #+end_warning
 
 #+begin_tip
@@ -1466,23 +1474,36 @@ If you have changes in your working directory or staging area, you'll probably
 want to stash them before doing the above.
 #+end_tip
 
+#+begin_note
+See the functionality of the partly overlapping ~git checkout .~ command (note
+that it will only erase all your unstaged changes: the *files in your staging
+index will be untouched*), by comparing [[https://wiki.mozilla.org/Cjku/git#git-reset_and_git-checkout][git reset and git checkout]].
+#+end_note
+
 Use ~git reset --hard @{u}~ to make sure the integration branch is up-to-date
 before merging.
 
-#+begin_note
-~git reset --hard~ will not *remove untracked files*, where as ~git clean~ will remove
-any files from the tracked root directory that are not under Git tracking.
+Other scenarios:
+- Overtime working, did lots of stupid things. You don't want to face what had
+  been done...
+- Recover context before a stale merge.
 
+**** Soft option -- Clean branch
+
+~git clean~ will *remove any files* from the tracked root directory *that are not
+under Git tracking*, whereas ~git reset --hard~ will /not remove untracked files/.
+
+#+begin_note
 *WARNING -- BE CAREFUL WITH THIS!*  It is helpful to run a dry-run with ~git clean~
 first, to see what it will delete.
+#+end_note
 
-Use:
+Usage:
 - ~git clean -n~ (dry run) to see what ~git clean -f~ will do, so you can be sure
   it's what you want.
 - ~git clean -f~ (to *remove* the *untracked files*) and
 - ~git clean -d -f~ (to also *remove untracked directories* in addition to untracked
   files).
-#+end_note
 
 #+begin_src conf
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
@@ -1493,12 +1514,11 @@ Use:
 which:
 - unstages changes in the index,
 - discards changes in the working directory, and
-- removes any new files.
+- removes any new files (*all untracked changes will be lost*).
 
-XXX What is the difference with ~git checkout .~?  See
-https://wiki.mozilla.org/Cjku/git#git-reset_and_git-checkout.
+**** Hard option -- Clean branch
 
-Nuclear version:
+*NUCLEAR VERSION*:
 
 #+begin_src conf
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
@@ -2599,7 +2619,7 @@ Let's do a slightly different command: ~resync~
 
 #+begin_src conf
     # git resync -> sync repository and rebase current branch.
-    resync = !sh -c 'BRANCH_NAME=master && git checkout master && git fetch && git reset --hard origin/master && git rebase master'
+    resync = !sh -c 'git checkout master && git fetch && git reset --hard origin/master && git rebase master'
 #+end_src
 
 ** Cherrypick style recording
