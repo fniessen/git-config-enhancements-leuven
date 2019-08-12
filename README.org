@@ -685,6 +685,12 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 #+end_src
 
 #+begin_src conf
+    # Proxy.
+    setproxy = !git config --global http.proxy http://proxy-guest.forem.be:8080 && git config --global https.proxy https://proxy-guest.forem.be:8080
+    rmvproxy = !git config --global --unset http.proxy && git config --global --unset https.proxy
+    #+end_src
+
+    #+begin_src conf
     type = cat-file -t
     dump = cat-file -p
 #+end_src
@@ -802,6 +808,7 @@ Staging for commit is typically done by ~git add~.
 Just before committing the *staged* changes, check what your commit changes:
 
 #+begin_src conf
+    # Review.
     dc = diff --cached
 #+end_src
 
@@ -921,7 +928,7 @@ To see real *timeline* of who is working on what and when:
 #+begin_src conf
     last = log --decorate --date=short -1 --stat
 
-    # Show last x commits
+    # Show the last N commits on the current branch.
     last = !git log -$1 ${*:2} && :
 #+end_src
 
@@ -936,7 +943,9 @@ To see real *timeline* of who is working on what and when:
 List all the changed files *between 2 commits*:
 
     #+begin_src conf
+    # Show the names of all files changed between two commits.  Usage: "git dname SHA1 SHA2".
     diffn = diff --name-only
+    dname = diff --name-only
 #+end_src
 
 (See ~git what~ as well!)
@@ -1242,8 +1251,8 @@ Quickly add a file or directory to =.gitignore=:
 Ignore/unignore changes to *tracked file(s)* without =.gitignore=:
 
 #+begin_src conf
-    assume = update-index --assume-unchanged
-    unassume = update-index --no-assume-unchanged
+    skip = update-index --assume-unchanged
+    unskip = update-index --no-assume-unchanged
 #+end_src
 
 It has to be configured for each project member individually.
@@ -1258,19 +1267,20 @@ that.
 List ignored files (*marked unchanged*):
 
 #+begin_src conf
-    assumed = "!git ls-files -v | grep '^h' | cut -c 3-"
+    skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
+    # skipped = '!git ls-files -v | grep ^[a-z]'
 #+end_src
 
-Unassume all the assumed files:
+Unskip all the skipped files:
 
 #+begin_src conf
-    unassumeall = "!git assumed | xargs git update-index --no-assume-unchanged"
+    unskipall = "!git skipped | xargs git update-index --no-assume-unchanged"
 #+end_src
 
-Assume all:
+Skip all:
 
 #+begin_src conf
-    assumeall = "!git status -s | awk {'print $2'} | xargs git assume"
+    skipall = "!git status -s | awk {'print $2'} | xargs git skip"
 #+end_src
 
 ** REVERT - Undo things
@@ -1329,17 +1339,16 @@ Modify the *last* commit, amending with the same message (without your editor
 prompting you for the message you've already entered):
 
 #+begin_src conf
-    # Append additional (staged) changes to the PREVIOUS commit.
-    fixup = commit -v --amend --reuse-message HEAD
-    # fixlastcommit?
-
     # Commit changes to current HEAD (modified and deleted files) as amended commit.
     plus = commit -a -v --amend --reuse-message HEAD
+
+    # Append staged changes to the PREVIOUS commit (changes its SHA-1, keeps the commit message).
+    fix = commit -v --amend --reuse-message HEAD
 
     # Change previous commit's message to what you type in.
     medit = commit --amend -m
 
-    # Credit an author on the LATEST commit.
+    # Credit an author on the PREVIOUS commit.
     credit = "!f() { git commit --amend --author \"$1 <$2>\" --reuse-message HEAD; }; f"
 #+end_src
 
@@ -1366,6 +1375,7 @@ It can also recover *deleted files* -- if the deletion has not been committed.
 #+end_tip
 
 #+begin_src conf
+    # Discard.
     unmodify = checkout --
     undelete = checkout --
 #+end_src
@@ -1484,8 +1494,8 @@ Use ~git reset --hard @{u}~ to make sure the integration branch is up-to-date
 before merging.
 
 Other scenarios:
-- Overtime working, did lots of stupid things. You don't want to face what had
-  been done...
+- Overtime working, did lots of stupid things.  You want to run away from what
+  had been done...
 - Recover context before a stale merge.
 
 **** Soft option -- Clean branch
@@ -1766,6 +1776,10 @@ What about
 
 : git remote update --prune
 
+or
+
+: git fetch --prune
+
 instead?
 
 *** Get timestamp of last pull
@@ -1787,11 +1801,18 @@ applies all those changes together.
     # Will only try to "merge" if your current HEAD commit is in the branch
     # you're merging in.  This will allow you to merge some commits whilst being
     # sure you won't get conflicts.
-    ff = merge --ff-only
-    ff = merge --ff-only @{u}
+    mff = merge --ff-only
+    mff = merge --ff-only @{u}
 
     # Avoid a fast-forward commit.
-    mm = merge --no-ff
+    mnf = merge --no-ff
+#+end_src
+
+*** Merge master
+
+#+begin_src conf
+    # Merge remote master into the current branch.
+    mm = !git fetch -p && git merge origin/master
 #+end_src
 
 *** Undo the merge
@@ -1930,11 +1951,12 @@ interesting stuff, such as:
   branch. See the git config man page for more possible options.
 
 #+begin_src conf
+    # Shortcut for checkout.
     co = checkout
 #+end_src
 
 #+begin_src conf
-    # Switch to a branch, creating it if necessary.
+    # Create a new branch, and then switch to it.
     create-branch = checkout -b
 #+end_src
 
@@ -1981,12 +2003,16 @@ and commit subject line for each head, along with the name of the upstream
 branch (if any).
 
 #+begin_src conf
+    # Show local and remote branches.
     br = branch -a -vv
+
+    local-branch-dates  = !git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
 #+end_src
 
 Delete a *local* branch:
 
 #+begin_src conf
+    # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
 #+end_src
 
@@ -1999,8 +2025,9 @@ status."
 
 Delete a *remote* branch:
 
-#+begin_src shell :tangle no
-git push origin --delete <remote_branch_name>
+#+begin_src conf
+    # Delete remote branch.
+    delete-remote-branch = push origin --delete
 #+end_src
 
 ~git bclean~ is meant to be run from your master (or default) branch and does the
@@ -2143,6 +2170,10 @@ changes.
 #+begin_tip
 Use ~git stash~ if Git refused to merge because it foresees conflicts.
 #+end_tip
+
+If you anticipate that you might have trouble merging the work you want to stash
+with the work you're about to do on the clean tree, you can create a new branch
+with ~git stash branch <new branchname>~.
 
 Information that is used by default if you don't provide a message:
 
@@ -2433,8 +2464,8 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 
 *** Upload your changes
 
-Use ~git push -u origin new/branch~ to push the ~new/branch~ branch to the ~origin~
-remote and to set up tracking.
+Use ~git push -u origin <current-branch>~ to push the ~<current-branch>~ branch to
+the ~origin~ remote and to set up tracking.
 
 #+begin_src conf
     # Get the current branch name (not so useful in itself, but used in other
@@ -2443,16 +2474,12 @@ remote and to set up tracking.
 
 upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
 
-    # Push the current branch to the remote "origin", and set it to track the
-    # upstream branch.
+    # Create a copy of the current branch on the remote "origin", and set it to
+    # track the upstream branch.
     publish = !git push -u origin $(git branch-name)
 
     unpublish = !git push origin :$(git branch-name)
 #+end_src
-
-~git publish~ is a shortcut for manually typing the branch name:
-
-: git push origin -u <current-branch>
 
 #+begin_src conf
     export-branch = !git format-patch --stdout $1 > ~/$(git branch-name).diff
@@ -2490,6 +2517,10 @@ Save a repo as a tarball:
 
 #+begin_src conf
     export = archive -o latest.tar.gz -9 --prefix=latest/
+    #+end_src
+
+    #+begin_src conf
+    release = '!git commit -am "Release $1" && git tag -a -m $1'
 #+end_src
 
 #+begin_src conf
@@ -2567,6 +2598,7 @@ git debug unwip
 Basic shortcuts.
 
 #+begin_src conf
+    # Shortcut for commit.
     ci = commit
 #+end_src
 
@@ -2606,6 +2638,7 @@ disk:
 ** Sync
 
 #+begin_src conf
+    # Pull then push current branch.
     sync = !git pull && git push
 #+end_src
 
@@ -2756,6 +2789,12 @@ git pull
 
 You can experiment with resolving a Git conflict with this repository:
 https://github.com/brianleetest/testGit/blob/master/README.md
+
+* Issues
+
+#+begin_src conf
+    issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
+#+end_src
 
 * GitHub tasks
 :PROPERTIES:
