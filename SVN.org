@@ -12,11 +12,19 @@
 
 Doc: http://liris.cnrs.fr/seminaires/documents/seminaire_tuto_SVN.pdf
 
+* How to fix "unable to create pristine install stream"
+
+#+begin_src shell
+cd .svn
+rm -rf tmp
+mkdir tmp
+#+end_src
+
 * colordiff
 
 Use ~colordiff~ for my ~svn diff~ command (set in =~/.subversion/config=):
 
-#+begin_src diff
+#+begin_src shell
 diff-cmd = colordiff
 #+end_src
 
