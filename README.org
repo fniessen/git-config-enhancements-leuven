@@ -665,6 +665,15 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 #+begin_src conf
 [format]
     pretty = format:%C(yellow)%h%C(reset) %C(green)%ad%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)
+
+
+
+# https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
+[custom.formats]
+    ls   = "[%C(auto,yellow)%<|(10)%h%C(reset)] [%C(auto,bold blue)%<(15trunc)%cn%C(reset)]  %C(auto)%d% C(reset)%s"
+    find = "[%C(yellow)%<|(20)%h%C(reset)] [%C(bold blue)%<(10)%cn%C(reset)]  %C(auto)%d %C(reset)  %s"
+    graph="%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)%n %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)"
+
 #+end_src
 
 See
@@ -895,7 +904,7 @@ List commits *showing changed files* (prettier and concise ~whatchanged~):
 View the Git history tree:
 
 #+begin_src conf
-    tree = log --decorate --all --date=short --graph
+    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 #+end_src
 
 To see real *timeline* of who is working on what and when:
@@ -929,7 +938,7 @@ To see real *timeline* of who is working on what and when:
     last = log --decorate --date=short -1 --stat
 
     # Show the last N commits on the current branch.
-    last = !git log -$1 ${*:2} && :
+    last = !git log --name-status -$1 ${*:2} && :
 #+end_src
 
 *** List all the changed files in a commit
@@ -964,6 +973,7 @@ git changed bAda55..ff0021              # List files modified between those comm
 *List all commits* that changed a *specific file* (it accounts for renames!):
 
 #+begin_src conf
+    # History of a file.
     filelog = log --date=short --follow -C
     fl = log --date=short --follow -C
 #+end_src
@@ -2006,6 +2016,9 @@ branch (if any).
     # Show local and remote branches.
     br = branch -a -vv
 
+    # I want to change branches; which are my recent ones again?
+    coto = branch --sort=-committerdate
+
     local-branch-dates  = !git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
 #+end_src
 
@@ -2058,11 +2071,13 @@ See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
 *** How to git diff all changes since branching from master?
 
-Show all commits in a git branch since original branching point from master:
+Show all commits in a git branch since original branching point from ~master~:
 
 #+begin_src conf
-    diffsincemaster = diff master...
-    logsincemaster = log master...
+    # log since master.
+    missing-master = log master...
+    # diff since master.
+    missing-master-diff = diff master...
 #+end_src
 
 https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git:
@@ -2075,9 +2090,9 @@ https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git:
     diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
 #+end_src
 
-When you use three dots, ~git diff~ finds the merge-base between the left and
-right side commit SHA1s (as obtained from the names, or defaulting to ~HEAD~) and
-substitutes that in for the left-side SHA1. The right-side SHA1 (as resolved
+When you use three dots (...), ~git diff~ finds the merge-base between the left
+and right side commit SHA1s (as obtained from the names, or defaulting to ~HEAD~)
+and substitutes that in for the left-side SHA1. The right-side SHA1 (as resolved
 from the name) remains intact.
 
 *** Rename branch
