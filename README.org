@@ -1638,7 +1638,7 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
     pull-autostash = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash push -m "autostash" && git pull && git stash pop
 #+end_src
 
-XXX What about ~git stash --include-untracked~ and ~git stash pop~?
+XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
 
 #+begin_src conf
     up = pull --rebase --autostash
@@ -2244,18 +2244,30 @@ user wants to have an updated repository.
     hide = stash push --include-untracked # Hide all files, including untracked files (faster than using --all).
 #+end_src
 
+*** Take named stash
+
+#+begin_src conf
+    snapshot = !git stash push -m "Snapshot [$(date +\"%F %a %R\")]" && git stash apply "stash@{0}"
+#+end_src
+
+#+begin_src conf
+    # checkpoint and checkpoint recover
+    cp = !git stash push -m "$(date +%F--%T)" && git stash pop --index
+    cpr = "!f() { git fsck | grep commit | cut -d' ' -f3 | while read hash; do git rev-parse --verify --no-revs --quiet $hash^2 2>/dev/null && echo $hash | xargs git rev-list --since=${1:-1day} -1; done | xargs -L 1 git log --format=%at:%h -1 | sort|cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3 ; }; f"
+#+end_src
+
 *** Show a list of all stashes
 
 #+begin_src conf
     sl = stash list
-    stashes = stash list
+    stashes = stash list --date=local
 #+end_src
 
 *** Show the stash
 
 #+begin_src conf
     ssh = stash show -p
-    stashdiff = stash show -p
+    stash-diff = stash show -p
 #+end_src
 
 https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
@@ -2275,7 +2287,7 @@ Press [Q] to exit each stash.
 
 It helped me a lot in the past (cleaning stashes stack).
 
-*** Stash show name-only
+*** Show name-only
 
 #+begin_src conf
     sshno = stash show --name-only
@@ -2295,6 +2307,10 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
 
 #+begin_src conf
     sapply = "!f() { git stash apply stash^{/$*}; }; f"
+#+end_src
+
+#+begin_src conf
+    stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
 #+end_src
 
 *** Stash pop
@@ -2319,26 +2335,10 @@ conflicts, Git will not remove it (but it will still apply it)!
     std = stash drop
 #+end_src
 
-*** Take named stash
-
-#+begin_src conf
-    snapshot = !git stash push "Snapshot [$(date +\"%F %a %R\")]" && git stash apply "stash@{0}"
-#+end_src
-
-#+begin_src conf
-    # checkpoint and checkpoint recover
-    cp      = !git stash push $(date +%F--%T) && git stash pop --index
-    cpr     = "!f() { git fsck | grep commit | cut -d' ' -f3 | while read hash; do git rev-parse --verify --no-revs --quiet $hash^2 2>/dev/null && echo $hash | xargs git rev-list --since=${1:-1day} -1; done | xargs -L 1 git log --format=%at:%h -1 | sort|cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3 ; }; f"
-#+end_src
-
-*** Other commands
+*** Clear
 
 #+begin_src shell :tangle no
 git stash clear
-#+end_src
-
-#+begin_src conf
-    stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
 #+end_src
 
 *** Workflows
