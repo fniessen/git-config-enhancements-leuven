@@ -1935,12 +1935,12 @@ Unmerged files after a merge failure:
 #+begin_tip
 Consistent *naming conventions* (from the [[https://fr.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow][Gitflow]] Git workflow):
 - =master= (used for deploying *production releases*)
-- ~develop~ (used as integration branch for *"next release" development*)
-- prefix ~feature/MSW-709-add-support-for-webm~ (for new *features*, such as Jira *stories*)
-- prefix ~release/2018-12-24~ (used for preparing and testing *release* tasks)
-- prefix ~hotfix/fix-123-for-production~ (used to *urgently fix* a Production branch)
-- prefix ~support/~
-- prefix ~bugfix/~ (typically used to fix Release branches, such as Jira *bugs*)
+- =develop= (used as integration branch for *"next release" development*)
+- prefix =feature/MSW-709-add-support-for-webm= (for new *features*, such as Jira *stories*)
+- prefix =release/2018-12-24= (used for preparing and testing *release* tasks)
+- prefix =hotfix/fix-123-for-production= (used to *urgently fix* a Production branch)
+- prefix =support/=
+- prefix =bugfix/= (typically used to fix Release branches, such as Jira *bugs*)
 #+end_tip
 
 See http://nuclearsquid.com/writings/git-tricks-tips-workflows/ for more
@@ -2092,7 +2092,7 @@ https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git:
 #+end_src
 
 When you use three dots (...), ~git diff~ finds the merge-base between the left
-and right side commit SHA1s (as obtained from the names, or defaulting to ~HEAD~)
+and right side commit SHA1s (as obtained from the names, or defaulting to =HEAD=)
 and substitutes that in for the left-side SHA1. The right-side SHA1 (as resolved
 from the name) remains intact.
 
@@ -2104,14 +2104,16 @@ not meaningful to the work we are doing.
 To rename the branch locally:
 
 #+begin_src conf
-    rename = branch -m
+    rename-branch = branch -m
 #+end_src
 
 One thing to keep in mind is that this command works in two different ways:
 
-- If we are on the branch we want to rename, we can just ~git rename <new-name>~.
-- If we are not on the branch, we have to use ~git rename <target-branch>
-  <new-name>~.
+- If we are on the branch we want to rename, we can just
+  ~git rename-branch <new-name>~.
+
+- If we are not on the branch, we have to use
+  ~git rename-branch <target-branch> <new-name>~.
 
 *** List branches that contain a given commit ID (SHA1)
 
@@ -2141,7 +2143,7 @@ git tag --contains a2c71a6
 
 *** See which changes from a branch are already present upstream
 
-While on "feature" branch:
+While on =feature= branch:
 
 #+begin_src shell :tangle no
 git cherry -v master
@@ -2149,13 +2151,13 @@ git cherry -v master
 
 #+begin_example
 + 497034f2 Listener.new now accepts a hash of options
-- 2d0333ff cache the absolute images path for growl messages
-+ e4406858 rename Listener#run to #start
+- 2d0333ff Cache the absolute images path for growl messages
++ e4406858 Rename Listener#run to #start
 #+end_example
 
 The ~cherry~ command is useful to see which commits have been cherry-picked from
 a development branch to the stable branch, for instance. This command compares
-changes on the current (~feature~) branch to upstream (=master=) and indicates which
+changes on the current (=feature=) branch to upstream (=master=) and indicates which
 are present on both with the ~-~ sign. Changes still missing from upstream are
 marked with ~+~.
 
@@ -2163,7 +2165,7 @@ marked with ~+~.
 
 Most of the time unreachable commits are in the reflog. So, the *first thing to
 try is to look at the reflog* using the command ~git reflog~ (which display the
-reflog for ~HEAD~).
+reflog for =HEAD=).
 
 1. Perhaps something easier if the commit was part of a specific branch still
    existing is to use the command ~git reflog name-of-my-branch~ to *find the SHA1*
@@ -2464,9 +2466,9 @@ branch*, the next time you do a push.
     out-stat = log --stat --date=short @{u}..
 #+end_src
 
-This causes ~git log~ to show all commits reachable from ~HEAD~ excluding those
+This causes ~git log~ to show all commits reachable from =HEAD= excluding those
 reachable from the upstream branch.  The ~@{u}..~ argument is equivalent to
-~@{u}..HEAD~, where ~HEAD~ stands for the last commit in your local branch, but ~HEAD~
+~@{u}..HEAD~, where =HEAD= stands for the last commit in your local branch, but =HEAD=
 can be omitted for shorthand purposes.
 
 If you want to see all *unpushed* commits from *all branches*, do this:
@@ -2478,7 +2480,7 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 *** Upload your changes
 
 Use ~git push -u origin <current-branch>~ to push the ~<current-branch>~ branch to
-the ~origin~ remote and to set up tracking.
+the =origin= remote and to set up tracking.
 
 #+begin_src conf
     # Get the current branch name (not so useful in itself, but used in other
@@ -2548,8 +2550,8 @@ Save a repo as a tarball:
 When tagging releases in a version control system, the tag for a version should
 be ~X.Y.Z~ (*without* prefix ~v~).  The advantages of ~X.Y.Z~ are that gitweb or GitHub
 can automatically offer a tarball or zip download of the form
-~packagename-$tag.tar.gz~ (and it's quite established that a tarball should be
-named ~package-X.Y.Z.tar.gz~).
+=packagename-$tag.tar.gz= (and it's quite established that a tarball should be
+named =package-X.Y.Z.tar.gz=).
 
 Basically, *lightweight tags* are just pointers to specific commits. *No further
 information is saved*; on the other hand, *annotated tags* are *regular objects*,
