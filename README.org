@@ -2626,11 +2626,7 @@ Basic shortcuts.
     h = help
 #+end_src
 
-** Get the Git root directory
-
-#+begin_src conf
-    root = rev-parse --show-toplevel
-#+end_src
+** Show the path to root directory of Git repo
 
 #+begin_src conf
     # Get the path cleaned up.
@@ -2640,6 +2636,11 @@ Basic shortcuts.
 #+begin_note
 This works because Shell aliases are always executed in the top-level directory.
 #+end_note
+
+#+begin_src conf
+    root = rev-parse --show-toplevel
+    root-relative = rev-parse --show-prefix
+#+end_src
 
 ** Remove deleted files
 
