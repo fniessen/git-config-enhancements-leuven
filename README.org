@@ -739,14 +739,6 @@ clean and relevant commits, no experiments or fixing typos.
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
 #+end_src
 
-#+begin_src conf
-    # Remove branches that have already been merged with master
-    dm = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
-#+end_src
-
-So, I can do things like ~git exec make~. This works because shell aliases are
-always executed in the top-level directory.
-
 ** CREATE - Getting a Git repository
 
 *** Create a repository
@@ -1508,10 +1500,10 @@ Other scenarios:
   had been done...
 - Recover context before a stale merge.
 
-**** Soft option -- Clean branch
+**** Soft option -- Clean branch (clean the untracked files)
 
 ~git clean~ will *remove any files* from the tracked root directory *that are not
-under Git tracking*, whereas ~git reset --hard~ will /not remove untracked files/.
+under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
 
 #+begin_note
 *WARNING -- BE CAREFUL WITH THIS!*  It is helpful to run a dry-run with ~git clean~
@@ -1536,7 +1528,7 @@ which:
 - discards changes in the working directory, and
 - removes any new files (*all untracked changes will be lost*).
 
-**** Hard option -- Clean branch
+**** Hard option -- Clean branch (clean the ignored files in addition to the untracked files)
 
 *NUCLEAR VERSION*:
 
@@ -1643,7 +1635,7 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
 #+end_warning
 
 #+begin_src conf
-    pull-autostash = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash save "autostash" && git pull && git stash pop
+    pull-autostash = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash push -m "autostash" && git pull && git stash pop
 #+end_src
 
 XXX What about ~git stash --include-untracked~ and ~git stash pop~?
@@ -2016,6 +2008,11 @@ branch (if any).
     # Show local and remote branches.
     br = branch -a -vv
 
+    # Current branch.
+    cb = "name-rev --name-only HEAD"
+#+end_src
+
+#+begin_src conf
     # I want to change branches; which are my recent ones again?
     coto = branch --sort=-committerdate
 
@@ -2065,8 +2062,8 @@ local machine, I use ~git bdone~:
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
 #+begin_src conf
-    # Current branch.
-    cb = "name-rev --name-only HEAD"
+    # Remove branches that have already been merged with master
+    delete-merged-branches = "!git branch --no-color --merged | grep -v '\\*' | grep -v master | xargs -n 1 git branch -d"
 #+end_src
 
 *** Diff all changes since branching from master
@@ -2177,6 +2174,17 @@ reflog for ~HEAD~).
 
 See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its-deletion-in-git
 
+*** Show branches and their commits
+
+#+begin_src conf
+    # "show-branch -g=N" can't be aliased for N easily, so we stop here:
+    sb  = show-branch
+    # pg sbt master pu -- if the last line is 'master' and not 'master^'
+    # or 'master~N' then pu is a descendent of master
+    sbt = show-branch --topics
+    sbs = show-branch --sha1-name
+#+end_src
+
 ** Stash
 
 A *stash* is nothing but a *(temporary) branch*.
@@ -2202,13 +2210,13 @@ stash@{0}: WIP on <branch>: <sha1 of head> <title line of head>
 
 You can operate on the "stash" ref as if it were any other ref.
 
-*** Stash save
+*** Stash push
 
-~git stash save~ also optionally takes a message describing the contents of the
+~git stash push~ also optionally takes a message describing the contents of the
 stash (much, much more useful):
 
 #+begin_src conf :tangle no
-git stash save "DESCRIBE WHAT YOU DID HERE"
+git stash push -m "DESCRIBE WHAT YOU DID HERE"
 #+end_src
 
 #+begin_example
@@ -2219,9 +2227,7 @@ This command is useful in saving all changes not ready to be committed and the
 user wants to have an updated repository.
 
 #+begin_src conf
-    # Save with name.
-    ss = stash save
-    ssave = stash save
+    spush = stash push
 #+end_src
 
 #+begin_src conf
@@ -2232,29 +2238,10 @@ user wants to have an updated repository.
     spop = "!f() { git stash pop stash@{$(git stashid $@)}; }; f" # Like sapply but pops it off
 
     stashid = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
-
-    hide = stash save --include-untracked # hides all files, including untracked files (faster than using --all)
 #+end_src
 
 #+begin_src conf
-    sspatch = stash save --patch
-    ssscratch = stash save --keep-index
-#+end_src
-
-*** Apply the stash only, don't delete it
-
-When you're done, with ~git stash apply~ (top stash by default), you're back where
-you were.  But if that doesn't work, for whatever reason, you can use any of
-Git's other branch merging tools to put things back they way you want them.
-
-#+begin_src conf
-    sa = stash apply
-#+end_src
-
-https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
-
-#+begin_src conf
-    sapply = "!f() { git stash apply stash^{/$*}; }; f"
+    hide = stash push --include-untracked # Hide all files, including untracked files (faster than using --all).
 #+end_src
 
 *** Show a list of all stashes
@@ -2263,22 +2250,6 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
     sl = stash list
     stashes = stash list
 #+end_src
-
-*** Stash pop
-
-~git stash pop~ removes the most recent stash or any stash specified and applies
-changes as a merge.  If merge fails, the stash is not removed from the list and
-must be removed manually.
-
-#+begin_src conf
-    sp = stash pop
-#+end_src
-
-#+begin_warning
-Be aware that, unlike ~git stash apply~ (though it has its use), ~git stash pop~
-*deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
-conflicts, Git will not remove it (but it will still apply it)!
-#+end_warning
 
 *** Show the stash
 
@@ -2310,6 +2281,38 @@ It helped me a lot in the past (cleaning stashes stack).
     sshno = stash show --name-only
 #+end_src
 
+*** Apply the stash only, don't delete it from the stash list
+
+When you're done, with ~git stash apply~ (top stash by default), you're back where
+you were.  But if that doesn't work, for whatever reason, you can use any of
+Git's other branch merging tools to put things back they way you want them.
+
+#+begin_src conf
+    sa = stash apply
+#+end_src
+
+https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
+
+#+begin_src conf
+    sapply = "!f() { git stash apply stash^{/$*}; }; f"
+#+end_src
+
+*** Stash pop
+
+~git stash pop~ removes the most recent stash or any stash specified and applies
+changes as a merge.  If merge fails, the stash is not removed from the list and
+must be removed manually.
+
+#+begin_src conf
+    sp = stash pop
+#+end_src
+
+#+begin_warning
+Be aware that, unlike ~git stash apply~ (though it has its use), ~git stash pop~
+*deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
+conflicts, Git will not remove it (but it will still apply it)!
+#+end_warning
+
 *** Drop the stash
 
 #+begin_src conf
@@ -2319,12 +2322,12 @@ It helped me a lot in the past (cleaning stashes stack).
 *** Take named stash
 
 #+begin_src conf
-    snapshot = !git stash save "Snapshot [$(date +\"%F %a %R\")]" && git stash apply "stash@{0}"
+    snapshot = !git stash push "Snapshot [$(date +\"%F %a %R\")]" && git stash apply "stash@{0}"
 #+end_src
 
 #+begin_src conf
     # checkpoint and checkpoint recover
-    cp      = !git stash save $(date +%F--%T) && git stash pop --index
+    cp      = !git stash push $(date +%F--%T) && git stash pop --index
     cpr     = "!f() { git fsck | grep commit | cut -d' ' -f3 | while read hash; do git rev-parse --verify --no-revs --quiet $hash^2 2>/dev/null && echo $hash | xargs git rev-list --since=${1:-1day} -1; done | xargs -L 1 git log --format=%at:%h -1 | sort|cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3 ; }; f"
 #+end_src
 
@@ -2336,15 +2339,6 @@ git stash clear
 
 #+begin_src conf
     stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
-#+end_src
-
-#+begin_src conf
-    # "show-branch -g=N" can't be aliased for N easily, so we stop here:
-    sb  = show-branch
-    # pg sbt master pu -- if the last line is 'master' and not 'master^'
-    # or 'master~N' then pu is a descendent of master
-    sbt = show-branch --topics
-    sbs = show-branch --sha1-name
 #+end_src
 
 *** Workflows
@@ -2422,11 +2416,11 @@ XXX See doc of git help stash for workflows...
                # ... continue hacking ...
 
        Testing partial commits
-           You can use git stash save --keep-index when you want to make two or more commits out of the changes in the work tree, and you want to test each change before committing:
+           You can use git stash push --keep-index when you want to make two or more commits out of the changes in the work tree, and you want to test each change before committing:
 
                # ... hack hack hack ...
                $ git add --patch foo            # add just first part to the index
-               $ git stash save --keep-index    # save all other changes to the stash
+               $ git stash push --keep-index    # save all other changes to the stash
                $ edit/build/test first part
                $ git commit -m 'First part'     # commit fully tested change
                $ git stash pop                  # prepare to work on all other changes
@@ -2632,7 +2626,7 @@ Basic shortcuts.
 
 ** Show the path to root directory of Git repo
 
-#+begin_src conf
+#+begin_src conf :tangle no
     # Get the path cleaned up.
     root = !pwd -P
 #+end_src
