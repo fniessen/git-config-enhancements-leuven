@@ -892,17 +892,6 @@ Show changes for a daily standup meeting:
     wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do echo -e `git log --format=%at:%ar -1 $b -- \"$1\"`\\\\t$b; done | sort -r | cut -f2 -d:; }; f"
 #+end_src
 
-*** Diff of branch since it forked from another branch, or since the last merge
-
-To see the changes in a branch since it was forked from another branch, or
-since the last merge with the origin branch, you can use:
-
-: git diff forked_from_branch..forked_branch --stat
-
-Example:
-
-: git diff origin/master..my_forked_branch --stat
-
 *** Finding new commits
 
 Diverging from ~origin/master~, whatever the branch?
@@ -923,29 +912,11 @@ date".
     ld = log --decorate --date=relative
 #+end_src
 
-List commits *showing changed files* (prettier and concise ~whatchanged~):
+List commits *showing changed files* (prettier and more concise version of
+~whatchanged~):
 
 #+begin_src conf
     ll = log --decorate --date=short --stat
-    lll = log -u
-#+end_src
-
-View the Git history tree:
-
-#+begin_src conf
-    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
-#+end_src
-
-#+begin_src conf
-# history: This is pretty much the only way I look at my log. Aside from providing one-line logs,
-#          it also shows the branching in/out
-hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
-#+end_src
-
-To see real *timeline* of who is working on what and when:
-
-#+begin_src conf
-    graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 #+end_src
 
 #+begin_src conf
@@ -984,35 +955,13 @@ To see real *timeline* of who is working on what and when:
     changed = show --pretty="format:" --name-only
     #+end_src
 
-List all the changed files *between 2 commits*:
-
-    #+begin_src conf
-    # Show the names of all files changed between two commits.  Usage: "git diffn SHA1 SHA2".
-    diffn = diff --name-only
-
-    # diff status: A git diff, but with only the filenames (which reminds me of git status)
-    diffst = diff --name-only
-#+end_src
-
-(See ~git what~ as well!)
-(Use Tig?  Use git blame?)
-
-XXX They don't show the same files (test with ~git changed HEAD~1~ and ~git diffn HEAD~1~) XXX
-
-#+begin_src shell :tangle no
-git changed                             # List files modified in last commit.
-git changed bada55                      # List files modified in this commit.
-git changed bada55..ff0021              # List files modified between those commits.
-#+end_src
-
 *** Show the history of a file
 
 *List all commits* that changed a *specific file* (it accounts for renames!):
 
 #+begin_src conf
-    # History of a file.
+    # Show Git log for a file.
     filelog = log --date=short --follow -C
-    fl = log --date=short --follow -C
 #+end_src
 
 #+begin_src conf
@@ -1398,7 +1347,7 @@ prompting you for the message you've already entered!
     # Commit changes to current HEAD (modified and deleted files) as amended commit.
     plus = commit -a -v --amend --reuse-message HEAD
 
-    # Append staged changes to the PREVIOUS commit (changes its SHA-1, keeps the commit message).
+    # Append staged changes to the PREVIOUS commit (changes its SHA1, keeps the commit message).
     fix = commit -v --amend --reuse-message HEAD
 
     # Change PREVIOUS commit's message to what you type in.
@@ -2116,9 +2065,6 @@ branch (if any).
 #+begin_src conf
     # Show local and remote branches.
     br = branch -a -vv
-
-    # Current branch.
-    cb = "name-rev --name-only HEAD"
 #+end_src
 
 #+begin_src conf
@@ -2129,10 +2075,11 @@ branch (if any).
     # I want to change branches; which are my recent ones again?
     coto = branch --sort=-committerdate
 
-    local-branch-dates = !git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
-
     # List branches sorted by last modified.
     b = "!git for-each-ref --sort='-authordate' --format='%(authordate)%09%(objectname:short)%09%(refname)' refs/heads | sed -e 's-refs/heads/--'"
+
+    local-branch-dates = !git for-each-ref --sort=-committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
+    # TODO Invert the order!
 #+end_src
 
 Delete a *local* branch:
@@ -2197,6 +2144,7 @@ Show all commits in a git branch since original branching point from =master=:
 #+begin_src conf
     # log since master.
     missing-master = log master...
+
     # diff since master.
     missing-master-diff = diff master...
 #+end_src
@@ -2627,6 +2575,9 @@ Use ~git push -u origin <current-branch>~ to push the ~<current-branch>~ branch 
 the =origin= remote and to set up tracking.
 
 #+begin_src conf
+    # Current branch.
+    cb = "name-rev --name-only HEAD"
+
     # Get the current branch name (not so useful in itself, but used in other
     # aliases).
     branch-name = !git rev-parse --abbrev-ref HEAD
@@ -2677,6 +2628,10 @@ git chlogm first_tag last_tag github_user github_repo
 See also https://github.com/github-changelog-generator/github-changelog-generator.
 
 ** Create patches
+
+#+begin_src conf
+    lll = log -u
+#+end_src
 
 *** Creating a patch
 
@@ -2785,7 +2740,7 @@ Save a repo as a tarball:
 #+end_src
 
 #+begin_src conf
-    release = '!git commit -am "Release $1" && git tag -a -m $1'
+    release = "!f() { git commit -am \"Release version $1\"; git tag $1 -m \"Release version $1\"; }; f"
 #+end_src
 
 #+begin_src conf
@@ -2995,17 +2950,38 @@ will ~reset~ the index.
 * Branches
 
 - Show active branches
+- Show merged branches
 - Show stale branches
 
 (Sort by Last updated)
 
 * Tags
 
+Tags give the ability to mark specific points in history as being important.
+
 * Contributors
 
 * Graph
 
-= --graph option!
+See example at https://gitlab.com/procps-ng/procps/-/network/master
+
+#+begin_src conf
+# history: This is pretty much the only way I look at my log. Aside from providing one-line logs,
+#          it also shows the branching in/out
+hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+#+end_src
+
+To see real *timeline* of who is working on what and when:
+
+#+begin_src conf
+    graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+#+end_src
+
+View the Git history tree:
+
+#+begin_src conf
+    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
+#+end_src
 
 Directed Acyclic Graph:
 
@@ -3013,10 +2989,60 @@ Directed Acyclic Graph:
     graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
 #+end_src
 
-* Compare Revisions
+* Compare Revisions (branches, tags or commits)
 
-- Inline
-- Side-by-side
+*See what's changed*: easily determine which commits are on the source but not on
+the destination.
+
+See + in Bitbucket (Get to work)
+
+** Files changed
+
+List all the changed files *between 2 commits*:
+
+: git diff --stat DST...SRC
+: git diff --stat v1...v2
+
+See the changed files in a branch *since it was forked from another branch*:
+
+: git diff --stat forked_from_branch...my_forked_branch
+
+See the changed files in a branch since the last merge with the origin branch:
+
+: git diff --stat origin/master...my_forked_branch
+
+    #+begin_src conf
+    # Show the names of all files changed between two commits.  Usage: "git diffn SHA1v1 SHA1v2".
+    diffn = diff --name-only
+
+    # diff status: A git diff, but with only the filenames (which reminds me of git status)
+    diffst = diff --name-only
+#+end_src
+
+(See ~git what~ as well!)
+(Use Tig?  Use git blame?)
+
+XXX They don't show the same files (test with ~git changed HEAD~1~ and ~git diffn HEAD~1~) XXX
+
+#+begin_src shell :tangle no
+git changed                             # List files modified in last commit.
+git changed bada55                      # List files modified in this commit.
+git changed bada55..ff0021              # List files modified between those commits.
+#+end_src
+
+** Diff
+
+: git diff DST...SRC
+
+- Inline diff
+- Side-by-side diff
+
+** Commits
+
+: git log --pretty=oneline DST...SRC
+: git whatchanged DST...SRC
+
+** Merged pull requests
 
 * Pull requests
 
