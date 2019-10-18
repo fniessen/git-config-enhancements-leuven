@@ -2969,6 +2969,7 @@ Push all your tags (a regular push won't push a tag):
 
 #+begin_src shell :tangle no
 git push --tags
+git push --tags origin master
 #+end_src
 
 ** List the tags in a repository
