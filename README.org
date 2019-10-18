@@ -1335,7 +1335,7 @@ prompting you for the message you've already entered!
     # Commit changes to current HEAD (modified and deleted files) as amended commit.
     plus = commit -a -v --amend --reuse-message HEAD
 
-    # Append staged changes to the PREVIOUS commit (changes its SHA1, keeps the commit message).
+    # Append staged changes to the PREVIOUS commit (changes its SHA, keeps the commit message).
     fix = commit -v --amend --reuse-message HEAD
 
     # Change PREVIOUS commit's message to what you type in.
@@ -2044,7 +2044,7 @@ cd "$(git rev-parse --show-toplevel)"
 git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f.bak"; done
 #+end_src
 
-*List all branches* (both local remote-tracking and local branches), showing SHA1
+*List all branches* (both local remote-tracking and local branches), showing SHA
 and commit subject line for each head, along with the name of the upstream
 branch (if any).
 
@@ -2095,20 +2095,10 @@ Delete a *remote* branch:
 to the current branch* that you are in.
 
 #+begin_src conf
-    # Remove branches that have already been merged with master.
-    delete-merged-branches = "!git branch --no-color --merged | grep -v '\\*' | grep -v master | xargs -n 1 git branch -d"
-#+end_src
-
-When I'm done with this topic branch and I want to clean everything up on my
-local machine, I use ~git bdone~:
-
-1. Switch to =master= (though you can specify a different default branch)
-2. Run ~git up~ to bring =master= up to speed with the =origin=
-3. Delete all branches already merged into =master= using:
-   ~git delete-merged-branches~
-
-#+begin_src conf
-    bdone = "!f() { git checkout ${1-master} && git up && git delete-merged-branches; }; f"
+    # Remove branches that have already been merged.
+    delete-merged-branches = "!git branch --no-color --merged | grep -v '\\*' | \
+                               grep -v master | \
+                               xargs -n 1 git branch -d"
 #+end_src
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
@@ -2150,8 +2140,8 @@ https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git:
 #+end_src
 
 When you use three dots (...), ~git diff~ finds the merge-base between the left
-and right side commit SHA1s (as obtained from the names, or defaulting to =HEAD=)
-and substitutes that in for the left-side SHA1. The right-side SHA1 (as resolved
+and right side commit SHAs (as obtained from the names, or defaulting to =HEAD=)
+and substitutes that in for the left-side SHA. The right-side SHA (as resolved
 from the name) remains intact.
 
 *** Rename branch
@@ -2173,7 +2163,7 @@ One thing to keep in mind is that this command works in two different ways:
 - If we are not on the branch, we have to use
   ~git rename-branch <target-branch> <new-name>~.
 
-*** List branches that contain a given commit ID (SHA1)
+*** List branches that contain a given commit ID (SHA)
 
 Filter the list of *branches* to only those which have the given *commit ID* among
 their ancestors.
@@ -2226,7 +2216,7 @@ try is to look at the reflog* using the command ~git reflog~ (which display the
 reflog for =HEAD=).
 
 1. Perhaps something easier if the commit was part of a specific branch still
-   existing is to use the command ~git reflog name-of-my-branch~ to *find the SHA1*
+   existing is to use the command ~git reflog name-of-my-branch~ to *find the SHA*
    for the commit at the tip of your deleted branch -- It works also with
    a remote, for example if you forced push.  Otherwise, use ~git reflog~.
 2. Then, you can just ~git checkout -b <branch> <sha1>~ to recreate the branch
@@ -2596,19 +2586,20 @@ the v2.3 tag -- we can be certain that this change is part of v2.3, then.
 
 ** PUBLISH - ChangeLog
 
-Generate an Org mode version of your ChangeLog:
+Generate a version of your [[https://keepachangelog.com/][CHANGELOG.md]]:
 
 #+begin_src conf
+    # Detailed list of changes.
     # repo-user
     # repo-name
-    changelog-github-md  = !sh -c 'git log $1...$2 --pretty=format:\"  * %s [[http://github.com/$3/$4/commit/%H][view commit]]\"' -
+    changelog-github = !sh -c 'git log $1...$2 --pretty=format:\"* %s [view commit](http://github.com/$3/$4/commit/%H)\"' -
     changelog-github-org = !sh -c 'git log $1...$2 --pretty=format:\"- %s [[http://github.com/$3/$4/commit/%H][view commit]]\"' -
 #+end_src
 
 Use it like this:
 
 #+begin_src shell :tangle no
-git changelog-github-org first_tag last_tag github_user github_repo
+git changelog-github first_tag last_tag github_username github_repo
 #+end_src
 
 See also https://github.com/github-changelog-generator/github-changelog-generator.
@@ -2764,7 +2755,7 @@ named =package-X.Y.Z.tar.gz=).
 Basically, *lightweight tags* are just pointers to specific commits. *No further
 information is saved*; on the other hand, *annotated tags* are *regular objects*,
 which have an author and a date and can be referred because they have their own
-SHA1 key.
+SHA key.
 
 If knowing *who* tagged *what* and *when* is relevant for you, then use annotated
 tags. If you *just want to tag a specific point in your development*, no matter
@@ -2908,7 +2899,7 @@ will ~reset~ the index.
   directly or by any of its ancestors. You can get these back too!
 
 #+begin_src conf
-    lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+    lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
 #+end_src
 
 ** TODO To sort out
@@ -3111,7 +3102,7 @@ See the changed files in a branch since the last merge with the origin branch:
 : git diff --stat origin/master...my_forked_branch
 
     #+begin_src conf
-    # Show the names of all files changed between two commits.  Usage: "git diffn SHA1v1 SHA1v2".
+    # Show the names of all files changed between two commits.  Usage: "git diffn SHAv1 SHAv2".
     diffn = diff --name-only
 
     # diff status: A git diff, but with only the filenames (which reminds me of git status)
