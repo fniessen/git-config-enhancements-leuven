@@ -2729,10 +2729,6 @@ Save a repo as a tarball:
 #+end_src
 
 #+begin_src conf
-    release = "!f() { git commit -am \"Release version $1\"; git tag $1 -m \"Release version $1\"; }; f"
-#+end_src
-
-#+begin_src conf
   # # Deploy
   # staging = !git push heroku-staging $(git name):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
   # dev = !git push heroku-dev $(git name):master -f && git track 'Deployed to dev ' # push current branch to dev
@@ -2766,7 +2762,7 @@ named =package-X.Y.Z.tar.gz=).
 Basically, *lightweight tags* are just pointers to specific commits. *No further
 information is saved*; on the other hand, *annotated tags* are *regular objects*,
 which have an author and a date and can be referred because they have their own
-SHA key.
+SHA1 key.
 
 If knowing *who* tagged *what* and *when* is relevant for you, then use annotated
 tags. If you *just want to tag a specific point in your development*, no matter
@@ -2807,6 +2803,7 @@ You can do a lot better with:
 
 #+begin_src conf
     releases = log --decorate --oneline --simplify-by-decoration --all
+    # XXX Add date
 #+end_src
 
 ** Debugging
@@ -2950,9 +2947,6 @@ will ~reset~ the index.
 Tags give the ability to *mark a specific commit* in your repository history as
 being important.
 
-Tags are commonly used to mark *release* versions, with the *version number* as the
-*tag name*. We recommend naming tags that fit within [[https://semver.org/][semantic versioning]].
-
 ** Create a tag
 
 While Git supports annotated and lightweight tags, you can only create and see
@@ -2986,6 +2980,28 @@ git tag
 
 git tag -d <tag_name>
 git push origin :refs/tags/<tag_name>
+
+* Releases
+
+You can create a release to package software, along with release notes and links
+to binary files, for other people to use.
+
+Releases are based on *Git tags*: tags are used to mark *release* versions, with the
+*version number* as the *tag name*.
+
+We recommend naming tags that fit within [[https://semver.org/][semantic versioning]], i.e. having the
+form ~v<major>.<minor>.<patch>~:
+- *Major* release (from ~v0.8.1~ to ~v1.0.0~) for bug fixes and new features that
+  break backwards compatibility,
+- *Minor* release (from ~v0.8.1~ to ~v0.9.0~) for bug fixes and new features that
+  maintain backwards compatibility, and
+- *Patch* release (from ~v0.8.1~ to ~v0.8.2~) only for bug fixes.
+
+Tag the final commit:
+
+#+begin_src conf
+    release = "!f() { git tag -a v$1 -m \"Release version $1\"; }; f"
+#+end_src
 
 * Contributors
 
