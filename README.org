@@ -1879,11 +1879,8 @@ git merge --no-commit --no-ff $BRANCH
 You can do ~git merge --abort~ after seeing that there are conflicts.
 
 #+begin_src conf
-    merge-check = "!f() { git merge --no-commit --no-ff $1; git merge --abort; echo 'Merge aborted'; }; f"
-# works for git fetch & git merge
-
-# This one is also useful to run merge test before merge to check for any conflicts.
-    merge-test = "!f() { git merge --no-commit --no-ff \"$1\"; git merge --abort; echo \"Merge aborted\"; };f"
+    # Run merge test (before merge) to check for any conflicts beforehand.
+    mergetest = "!f() { git merge --no-commit --no-ff \"$1\"; git merge --abort; echo \"Merge aborted\"; }; f"
 #+end_src
 
 #+begin_warning
