@@ -2948,15 +2948,17 @@ being important.
 
 ** Create a tag
 
-While Git supports annotated and lightweight tags, you can only create and see
-annotated tags in Bitbucket. Git stores annotated tags as full objects in the
-repository, which means they include the name, email, date, and have
-a message. Lightweight tags don't include all this additional information.
+While Git supports annotated and lightweight tags, you can only *create
+annotated tags in Bitbucket*.
+
+Git stores annotated tags as full objects in the repository, which means they
+include the name, email, date, and have a message. Lightweight tags don't
+include all this additional information.
 
 Create an annotated tag
 git tag -a <tag_name> -m '<tag_message>'
 
-Create a lightweight tag
+Create a lightweight tag (no message!)
 git tag <tag_name>
 
 ** See the commits for a tag
@@ -2968,13 +2970,24 @@ See the list of all the commits for that tag.
 Push all your tags (a regular push won't push a tag):
 
 #+begin_src shell :tangle no
-git push --tags
-git push --tags origin master
+git push --tags                         # Only tags.
+git push --tags origin master           # Code and tags.
 #+end_src
 
 ** List the tags in a repository
 
 git tag
+
+#+begin_src shell :tangle no
+# Show annotated and lightweight tags.
+git show-ref -d --tags       |
+cut -b 42-                   | # Remove the commit-id.
+sort                         |
+sed 's/\^{}//'               | # Remove ^{} markings.
+uniq -c                      | # Count identical lines.
+sed 's/2\ refs\/tags\// a /' | # 2 identicals = annotated.
+sed 's/1\ refs\/tags\//lw /'
+#+end_src
 
 ** Remove a tag from a repository
 
@@ -2996,6 +3009,10 @@ form ~v<major>.<minor>.<patch>~:
 - *Minor* release (from ~v0.8.1~ to ~v0.9.0~) for bug fixes and new features that
   maintain backwards compatibility, and
 - *Patch* release (from ~v0.8.1~ to ~v0.8.2~) only for bug fixes.
+
+#+begin_note
+It's common practice to prefix your version names with the letter ~v~.
+#+end_note
 
 Tag the final commit:
 
@@ -3095,8 +3112,8 @@ git changed bada55..ff0021              # List files modified between those comm
 
 : git diff DST...SRC
 
-- Inline diff
-- Side-by-side diff
+- Inline diff (unified)
+- Side-by-side diff (split)
 
 ** Commits
 
