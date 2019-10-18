@@ -889,7 +889,7 @@ Show changes for a daily standup meeting:
 
 #+begin_src conf
     # When was this file last updated, on each local branch.
-    wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do echo -e `git log --format=%at:%ar -1 $b -- \"$1\"`\\\\t$b; done | sort -r | cut -f2 -d:; }; f"
+    wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; done | sort -r | cut -f2 -d:; }; f"
 #+end_src
 
 *** Finding new commits
@@ -971,18 +971,6 @@ List commits *showing changed files* (prettier and more concise version of
 #+begin_warning
 Put a end of options character (--) after lf and before the path!!
 #+end_warning
-
-*** Show a "top contributors" list
-
-Show a "top contributors" list (rank):
-
-#+begin_src conf
-    who = shortlog -n -s -e --no-merges --
-#+end_src
-
-#+begin_note
-The ~--~ signals the end of options, that the rest of the parameters are limiters.
-#+end_note
 
 *** Inspect the commits for each edit
 
@@ -1138,7 +1126,7 @@ git log --all -G "foo" --since="1 week ago"
 See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
 
 #+begin_src conf
-    status-all = "!for d in `find . -name \".git\"`; do echo \"\n*** Repository: $d ***\" && git --git-dir=$d --work-tree=$d/.. status | grep -q \"is ahead of\"; done"
+    status-all = "!for d in $(find . -name \".git\"); do echo \"\n*** Repository: $d ***\" && git --git-dir=$d --work-tree=$d/.. status | grep -q \"is ahead of\"; done"
 #+end_src
 
 ** Grep (Print lines matching a pattern)
@@ -1846,6 +1834,8 @@ applies all those changes together.
 
     # Avoid a fast-forward commit.
     mnf = merge --no-ff
+
+    cvsmerge = merge --no-ff --log
 #+end_src
 
 *** Merge master
@@ -1984,7 +1974,6 @@ Consistent *naming conventions* (from the [[https://fr.atlassian.com/git/tutoria
 - prefix =bugfix/= (typically used to fix Release branches, such as Jira *bugs*)
 - prefix =hotfix/fix-123-for-production= (used to *urgently fix* bugs on *production*,
   that have high impact)
-# - prefix =support/=
 
 Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
 
@@ -2134,8 +2123,8 @@ See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 #+end_src
 
     # Quickly solve conflicts using an editor and then add the conflicted files
-    edit-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; vim `f`"
-    add-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; git add `f`"
+    edit-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; vim $(f)"
+    add-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; git add $(f)"
 
 *** Diff all changes since branching from master
 
@@ -2710,25 +2699,25 @@ patches.
 # the patch and apply it. Hat tip to @chrisjlee for making me reconsider curl.
 
 # Apply
-alias cap='curl `pbpaste` | git apply -v'
+alias cap='curl $(pbpaste) | git apply -v'
 
 # Apply and stage
-alias cape='curl `pbpaste` | git apply -v --index'
+alias cape='curl $(pbpaste) | git apply -v --index'
 
-# Apply with `patch`
-alias capp='curl `pbpaste` | patch -p1'
+# Apply with `patch'
+alias capp='curl $(pbpaste) | patch -p1'
 
 # Reverse apply
-alias carp='curl `pbpaste` | git apply -Rv'
+alias carp='curl $(pbpaste) | git apply -Rv'
 
 # Reverse apply and stage
-alias carpe='curl `pbpaste` | git apply -Rv --index'
+alias carpe='curl $(pbpaste) | git apply -Rv --index'
 
 # Verify patch
-alias cav='curl `pbpaste` | git apply -v --check'
+alias cav='curl $(pbpaste) | git apply -v --check'
 
-# Verify patch with `patch`
-alias capv='curl `pbpaste` | patch -p1 --dry-run'
+# Verify patch with `patch'
+alias capv='curl $(pbpaste) | patch -p1 --dry-run'
 #+end_src
 
 ** PUBLISH - Prepare a release
@@ -2941,14 +2930,15 @@ will ~reset~ the index.
 #+end_src
 
 #+begin_src conf :tangle no
-    cvs-full-log = log --reverse --pretty=format:'%B\n--------------------------------------------\n'
-    cvsmerge = merge --no-ff --log
+    cvs-full-log = log --reverse --pretty=format:'%B------------------------------------------------------------------------'
 #+end_src
 
 * Commits
 
 * Branches
 
+- Show all branches
+- Show your branches
 - Show active branches
 - Show merged branches
 - Show stale branches
@@ -2957,9 +2947,59 @@ will ~reset~ the index.
 
 * Tags
 
-Tags give the ability to mark specific points in history as being important.
+Tags give the ability to *mark a specific commit* in your repository history as
+being important.
+
+Tags are commonly used to mark *release* versions, with the *version number* as the
+*tag name*. We recommend naming tags that fit within [[https://semver.org/][semantic versioning]].
+
+** Create a tag
+
+While Git supports annotated and lightweight tags, you can only create and see
+annotated tags in Bitbucket. Git stores annotated tags as full objects in the
+repository, which means they include the name, email, date, and have
+a message. Lightweight tags don't include all this additional information.
+
+Create an annotated tag
+git tag -a <tag_name> -m '<tag_message>'
+
+Create a lightweight tag
+git tag <tag_name>
+
+** See the commits for a tag
+
+See the list of all the commits for that tag.
+
+** Push a tag to your repository
+
+Push all your tags (a regular push won't push a tag):
+
+#+begin_src shell :tangle no
+git push --tags
+#+end_src
+
+** List the tags in a repository
+
+git tag
+
+** Remove a tag from a repository
+
+git tag -d <tag_name>
+git push origin :refs/tags/<tag_name>
 
 * Contributors
+
+** Show a "top contributors" list
+
+Show a "top contributors" list (rank), excluding merge commits:
+
+#+begin_src conf
+    who = shortlog -n -s -e --no-merges --
+#+end_src
+
+#+begin_note
+The ~--~ signals the end of options, that the rest of the parameters are limiters.
+#+end_note
 
 * Graph
 
@@ -2993,6 +3033,11 @@ Directed Acyclic Graph:
 
 *See what's changed*: easily determine which commits are on the source but not on
 the destination.
+
+You can see:
+- a diff,
+- a list of commits, and
+- any pull requests merged between the two versions.
 
 See + in Bitbucket (Get to work)
 
@@ -3170,12 +3215,6 @@ https://github.com/brianleetest/testGit/blob/master/README.md
 
 #+begin_src shell
 git push --force origin master
-#+end_src
-
-** Push tags
-
-#+begin_src shell
-git push --tags
 #+end_src
 
 ** Get user pubkeys
