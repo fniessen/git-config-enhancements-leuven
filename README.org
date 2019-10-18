@@ -2948,18 +2948,22 @@ being important.
 
 ** Create a tag
 
-While Git supports annotated and lightweight tags, you can only *create
-annotated tags in Bitbucket*.
+While Git supports annotated and lightweight tags, you can only *create*
+- *annotated tags* in /Bitbucket/, and
+- *lightweight tags* via /GitHub/ interface (for releases).
 
 Git stores annotated tags as full objects in the repository, which means they
-include the name, email, date, and have a message. Lightweight tags don't
-include all this additional information.
+include the name, email, date, and have a message.
+
+Lightweight tags don't include all this additional information.
 
 Create an annotated tag
-git tag -a <tag_name> -m '<tag_message>'
+
+: git tag -a <tag_name> -m '<tag_message>'
 
 Create a lightweight tag (no message!)
-git tag <tag_name>
+
+: git tag <tag_name>
 
 ** See the commits for a tag
 
@@ -2991,8 +2995,20 @@ sed 's/1\ refs\/tags\//lw /'
 
 ** Remove a tag from a repository
 
-git tag -d <tag_name>
-git push origin :refs/tags/<tag_name>
+Delete similar tags:
+
+: git delete-tag 'v0.8.*'
+
+#+begin_src conf
+    # Delete local and remote tags.
+    delete-tag = "!f() { [ -z ${1} ] \
+                         && echo \"No tags given as an argument!\" \
+                         || (git tag -l ${1} | \
+                             xargs -I % echo \"git tag -d % \
+                                            && git push --delete origin %\" | \
+                             sh); \
+                       }; f"
+#+end_src
 
 * Releases
 
