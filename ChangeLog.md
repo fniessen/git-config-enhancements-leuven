@@ -1,61 +1,151 @@
-* Update aliases `changelog' and `release' [view commit](http://github.com/fniessen/git-config/commit/45ff1ec7f79a9eb88565e0d3eecc2ce73d323929)
-* Add ChangeLog file [view commit](http://github.com/fniessen/git-config/commit/3c89c704132dea23edf6a62fdee0f26bbae80430)
-* Add alias `delete-tag' [view commit](http://github.com/fniessen/git-config/commit/6be3270fe2c233f7ae320ce0d4397207b8d88b41)
-* Add code to distinguish lw and annotated tags [view commit](http://github.com/fniessen/git-config/commit/a5c933ba1cdb80041c0fcfd7163f16b5c617ce60)
-* Add command to push code and tags [view commit](http://github.com/fniessen/git-config/commit/7e13e94d30ce00d045158fa2339d5ef5091a2343)
-* Improve alias `mbase' [view commit](http://github.com/fniessen/git-config/commit/68e86f3cdde6862548397892860dd725864347fb)
-* Pick only one alias (which works well) for current branch name [view commit](http://github.com/fniessen/git-config/commit/d543cc0cb3ea4b6e5f0e575719ae601c8c871471)
-* Add alias `mbase' [view commit](http://github.com/fniessen/git-config/commit/188c306aba9bf3aee0274f8b3990760e75a84ce9)
-* Keep one version of duplicate alias [view commit](http://github.com/fniessen/git-config/commit/53e60fd593c6eeb5282a1107a09661c5a4a6272b)
-* Add Semantic Versioning examples to releases section [view commit](http://github.com/fniessen/git-config/commit/867824e9ec83b539f3b284da78d117db7190e1f7)
-* Improve section over tags [view commit](http://github.com/fniessen/git-config/commit/39fcef80291ebc3728db782b4cd721e936f97aad)
-* Fix `release' and reorder sections about `Compare' and `Graph' [view commit](http://github.com/fniessen/git-config/commit/9d96fc1549f5102f4200681a9bb38f8cce877457)
-* Begin improving structure, add new temporary aliases (to be tested) [view commit](http://github.com/fniessen/git-config/commit/ca07746f28e072aeca90d38f9bf91d1cadf3da4b)
-* Add alias `squash' [view commit](http://github.com/fniessen/git-config/commit/88500c2270bbf5d9a41828dfc6d6765286f20556)
-* Rename alias to rename-branch [view commit](http://github.com/fniessen/git-config/commit/7d67e56a71a50ec889d7c44bedaf3594b4d3744c)
-* Improve documentation of stashes [view commit](http://github.com/fniessen/git-config/commit/4991bb6fa6687119474ccf5679a8ca7978f5a320)
-* Replace stash save by stash push [view commit](http://github.com/fniessen/git-config/commit/ecc1833bc9d2464a38bfae60cf43ee5f018ac529)
-* Rename alias to prune-local-branches [view commit](http://github.com/fniessen/git-config/commit/b069f1e4b159fa13de2a547088131fad0aaaf0ff)
-* Add root-relative [view commit](http://github.com/fniessen/git-config/commit/b6b379666775822d9ab2a708c3b319be13a7b45c)
-* Improve code blocks [view commit](http://github.com/fniessen/git-config/commit/b91f99de935edb4fcbac1a887d2a2b29aaeef58b)
-* Add some comments and improve some aliases [view commit](http://github.com/fniessen/git-config/commit/cac0e92c8f32f35504471fc20d04c7a40c7764df)
-* Add and improve aliases and comments [view commit](http://github.com/fniessen/git-config/commit/11f78d2073de89bbdbd839ca68e08088bae2814a)
-* Improve text over git reset and git checkout . [view commit](http://github.com/fniessen/git-config/commit/c02e16671e74ce81988854b049188dae7453cd65)
-* Rename some aliases [view commit](http://github.com/fniessen/git-config/commit/876ebb68f6d9a23b9edd6d138fd393d32dfd1e39)
-* Add aliases [view commit](http://github.com/fniessen/git-config/commit/e0ed9bd4d5a3aaad26017966e9b6202a2ab5681c)
-* Add consistent naming conventions [view commit](http://github.com/fniessen/git-config/commit/ef12c22293ac43bc3534863881600f357da639ab)
-* Add various aliases [view commit](http://github.com/fniessen/git-config/commit/0894e00d0492aab3976e1f2ffcb4f669c8903cb8)
-* Improve `log' aliases [view commit](http://github.com/fniessen/git-config/commit/b4ddd15d549f0ac817d3ed345bb86ef51be159e2)
-* Improve some aliases and text [view commit](http://github.com/fniessen/git-config/commit/eeb65d7d9dc66393840a45427297cb6b8550b397)
-* Improve colors and add summary of all commands [view commit](http://github.com/fniessen/git-config/commit/3c4e98542d20df0b91afc3125d1cd67cd32f003c)
-* Reorganize sections, and rename `find' aliases [view commit](http://github.com/fniessen/git-config/commit/b1ce2a9bd90e8cbf10147f339fe48538d864c165)
-* Improve find and amend commands [view commit](http://github.com/fniessen/git-config/commit/d1a42c19aa190ed309104aabb2e17c0740565331)
-* Add alias `publish' and improve colors [view commit](http://github.com/fniessen/git-config/commit/9769069cbbbc8d53addad68202692197f1c42f97)
-* Add notes and improve alias `filelog' [view commit](http://github.com/fniessen/git-config/commit/eea3f0a48a768e6f61223599f68d85f803115878)
-* Update script [view commit](http://github.com/fniessen/git-config/commit/425f9e7d899268c53053d4036dd64a1c948c949a)
-* Add comment [view commit](http://github.com/fniessen/git-config/commit/f825772e37da4d59e6bc46dcf8a95a7b160a9c0f)
-* Replace alias `logfile' by `filelog' [view commit](http://github.com/fniessen/git-config/commit/237bb3b276ebfa29d5e70bf77765d627ec392fb7)
-* Add info about git tag [view commit](http://github.com/fniessen/git-config/commit/427611bc913255b803f196bfd6446e17dd683b14)
-* Improve doc about conflicts and range of releases [view commit](http://github.com/fniessen/git-config/commit/822749fbc3443d0b5720aafc3573cc3e43ded132)
-* Improve doc about "git up" [view commit](http://github.com/fniessen/git-config/commit/7302a6773bc23c6d3a339a22d20d75c999153d8d)
-* Update [view commit](http://github.com/fniessen/git-config/commit/773e0050b1d6b1121770fb2d1a93f4554a84df89)
-* Rename and reorder sections [view commit](http://github.com/fniessen/git-config/commit/c747bc2339beff9c6040b3ca02c5e09b8aa6303c)
-* Rename and reorder sections [view commit](http://github.com/fniessen/git-config/commit/d0f8fd5c731708d3b2a7d940e588aabbd1eefd90)
-* Reorder sections in commands sequence (following Git Cheat Sheet) [view commit](http://github.com/fniessen/git-config/commit/9ce7dc4a5e3c68266bfa7761cf5002295a78b8a9)
-* Add link to doc [view commit](http://github.com/fniessen/git-config/commit/77859a510983ea4176abd6a1e4fa59e2317f8e7d)
-* Improve `log', `stash' and `grep' aliases (mainly) [view commit](http://github.com/fniessen/git-config/commit/57c950888ba20b34e8853c8eb9136705dce1163d)
-* Add aliases `related', `sshow' and `sapply' [view commit](http://github.com/fniessen/git-config/commit/3172a1e3182eb4dda8d797736dc3006b535e1370)
-* Update comment [view commit](http://github.com/fniessen/git-config/commit/4ecb39b31c1ed7430edaaa5a6caefb69ed23ac66)
-* Add svn-logfile and svn-logfile-p [view commit](http://github.com/fniessen/git-config/commit/b663dc01c1685fdd15f4bc07c4cd0603602b9280)
-* Improve naming of SVN aliases [view commit](http://github.com/fniessen/git-config/commit/ac1a4d619006c256ce28f90d411a3de5ed309753)
-* Rename alias `diffall' (for directory comparisons) [view commit](http://github.com/fniessen/git-config/commit/e72ecdb4a12d53d95af79e00ca0a0f940b01377d)
-* Use Meld as Git difftool [view commit](http://github.com/fniessen/git-config/commit/8437c711d4e7318eff55703d2492c8fe7d1e34ea)
-* Remove alias definition (as it is in shellrc-leuven/README.org) [view commit](http://github.com/fniessen/git-config/commit/93e1c3ab90a2932eb19c56d9d11e609e3a842a74)
-* Concatenate sections together and add comments [view commit](http://github.com/fniessen/git-config/commit/a5c408c9dac53ba041dfc59c14314bc4e165c3af)
-* Test for inexisting files (in git tracked alias) [view commit](http://github.com/fniessen/git-config/commit/4cbe3411f51faab5a103175e92445495443014f7)
-* Improve command for untracked files [view commit](http://github.com/fniessen/git-config/commit/abae3fc7051d3647d1bf758a7fdb8afcc8b2c0ea)
-* Add Shell code for moving untracked files that would be overwritten [view commit](http://github.com/fniessen/git-config/commit/43d6df59c03389a76544c178d3b692b164768c50)
-* Get the Git root directory [view commit](http://github.com/fniessen/git-config/commit/2b41b392b641fb30dcbe55b2abc92d807fafa2b6)
-* Update comments [view commit](http://github.com/fniessen/git-config/commit/227de94c8d96c8dd6558172666759065bfe4c307)
-* Improve alias `up' [view commit](http://github.com/fniessen/git-config/commit/235b4a05f0cf9892af9cde89dba0f744e95a29c7)
-* Add "delete all old local branches" + "debugging" sections [view commit](http://github.com/fniessen/git-config/commit/de71da92ff0284ebb16e5b1414afde829dd93a65)
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [1.0.0] - 2017-06-20
+### Added
+- New visual identity by [@tylerfortune8](https://github.com/tylerfortune8).
+- Version navigation.
+- Links to latest released version in previous versions.
+- "Why keep a changelog?" section.
+- "Who needs a changelog?" section.
+- "How do I make a changelog?" section.
+- "Frequently Asked Questions" section.
+- New "Guiding Principles" sub-section to "How do I make a changelog?".
+- Simplified and Traditional Chinese translations from [@tianshuo](https://github.com/tianshuo).
+- German translation from [@mpbzh](https://github.com/mpbzh) & [@Art4](https://github.com/Art4).
+- Italian translation from [@azkidenz](https://github.com/azkidenz).
+- Swedish translation from [@magol](https://github.com/magol).
+- Turkish translation from [@karalamalar](https://github.com/karalamalar).
+- French translation from [@zapashcanon](https://github.com/zapashcanon).
+- Brazilian Portugese translation from [@Webysther](https://github.com/Webysther).
+- Polish translation from [@amielucha](https://github.com/amielucha) & [@m-aciek](https://github.com/m-aciek).
+- Russian translation from [@aishek](https://github.com/aishek).
+- Czech translation from [@h4vry](https://github.com/h4vry).
+- Slovak translation from [@jkostolansky](https://github.com/jkostolansky).
+- Korean translation from [@pierceh89](https://github.com/pierceh89).
+- Croatian translation from [@porx](https://github.com/porx).
+- Persian translation from [@Hameds](https://github.com/Hameds).
+- Ukrainian translation from [@osadchyi-s](https://github.com/osadchyi-s).
+
+### Changed
+- Start using "changelog" over "change log" since it's the common usage.
+- Start versioning based on the current English version at 0.3.0 to help
+translation authors keep things up-to-date.
+- Rewrite "What makes unicorns cry?" section.
+- Rewrite "Ignoring Deprecations" sub-section to clarify the ideal
+  scenario.
+- Improve "Commit log diffs" sub-section to further argument against
+  them.
+- Merge "Why can’t people just use a git log diff?" with "Commit log
+  diffs"
+- Fix typos in Simplified Chinese and Traditional Chinese translations.
+- Fix typos in Brazilian Portuguese translation.
+- Fix typos in Turkish translation.
+- Fix typos in Czech translation.
+- Fix typos in Swedish translation.
+- Improve phrasing in French translation.
+- Fix phrasing and spelling in German translation.
+
+### Removed
+- Section about "changelog" vs "CHANGELOG".
+
+## [0.3.0] - 2015-12-03
+### Added
+- RU translation from [@aishek](https://github.com/aishek).
+- pt-BR translation from [@tallesl](https://github.com/tallesl).
+- es-ES translation from [@ZeliosAriex](https://github.com/ZeliosAriex).
+
+## [0.2.0] - 2015-10-06
+### Changed
+- Remove exclusionary mentions of "open source" since this project can
+benefit both "open" and "closed" source projects equally.
+
+## [0.1.0] - 2015-10-06
+### Added
+- Answer "Should you ever rewrite a change log?".
+
+### Changed
+- Improve argument against commit logs.
+- Start following [SemVer](https://semver.org) properly.
+
+## [0.0.8] - 2015-02-17
+### Changed
+- Update year to match in every README example.
+- Reluctantly stop making fun of Brits only, since most of the world
+  writes dates in a strange way.
+
+### Fixed
+- Fix typos in recent README changes.
+- Update outdated unreleased diff link.
+
+## [0.0.7] - 2015-02-16
+### Added
+- Link, and make it obvious that date format is ISO 8601.
+
+### Changed
+- Clarified the section on "Is there a standard change log format?".
+
+### Fixed
+- Fix Markdown links to tag comparison URL with footnote-style links.
+
+## [0.0.6] - 2014-12-12
+### Added
+- README section on "yanked" releases.
+
+## [0.0.5] - 2014-08-09
+### Added
+- Markdown links to version tags on release headings.
+- Unreleased section to gather unreleased changes and encourage note
+keeping prior to releases.
+
+## [0.0.4] - 2014-08-09
+### Added
+- Better explanation of the difference between the file ("CHANGELOG")
+and its function "the change log".
+
+### Changed
+- Refer to a "change log" instead of a "CHANGELOG" throughout the site
+to differentiate between the file and the purpose of the file -- the
+logging of changes.
+
+### Removed
+- Remove empty sections from CHANGELOG, they occupy too much space and
+create too much noise in the file. People will have to assume that the
+missing sections were intentionally left out because they contained no
+notable changes.
+
+## [0.0.3] - 2014-08-09
+### Added
+- "Why should I care?" section mentioning The Changelog podcast.
+
+## [0.0.2] - 2014-07-10
+### Added
+- Explanation of the recommended reverse chronological release ordering.
+
+## [0.0.1] - 2014-05-31
+### Added
+- This CHANGELOG file to hopefully serve as an evolving example of a
+  standardized open source project CHANGELOG.
+- CNAME file to enable GitHub Pages custom domain
+- README now contains answers to common questions about CHANGELOGs
+- Good examples and basic guidelines, including proper date formatting.
+- Counter-examples: "What makes unicorns cry?"
+
+[Unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.3.0...v1.0.0
+[0.3.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.8...v0.1.0
+[0.0.8]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.7...v0.0.8
+[0.0.7]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.6...v0.0.7
+[0.0.6]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.5...v0.0.6
+[0.0.5]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.4...v0.0.5
+[0.0.4]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.3...v0.0.4
+[0.0.3]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.2...v0.0.3
+[0.0.2]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.1...v0.0.2
+[0.0.1]: https://github.com/olivierlacan/keep-a-changelog/releases/tag/v0.0.1
