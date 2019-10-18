@@ -2599,13 +2599,16 @@ the v2.3 tag -- we can be certain that this change is part of v2.3, then.
 Generate an Org mode version of your ChangeLog:
 
 #+begin_src conf
-    chlogm =  !sh -c 'git log $1...$2  --pretty=format:\"%s [[http://github.com/$3/$4/commit/%H][view commit]]\"' -
+    # repo-user
+    # repo-name
+    changelog-github-md  = !sh -c 'git log $1...$2 --pretty=format:\"  * %s [[http://github.com/$3/$4/commit/%H][view commit]]\"' -
+    changelog-github-org = !sh -c 'git log $1...$2 --pretty=format:\"- %s [[http://github.com/$3/$4/commit/%H][view commit]]\"' -
 #+end_src
 
 Use it like this:
 
 #+begin_src shell :tangle no
-git chlogm first_tag last_tag github_user github_repo
+git changelog-github-org first_tag last_tag github_user github_repo
 #+end_src
 
 See also https://github.com/github-changelog-generator/github-changelog-generator.
@@ -3030,10 +3033,12 @@ form ~v<major>.<minor>.<patch>~:
 It's common practice to prefix your version names with the letter ~v~.
 #+end_note
 
-Tag the final commit:
+Tag and push changes to the repository:
 
 #+begin_src conf
-    release = "!f() { git tag -a v$1 -m \"Release version $1\"; }; f"
+    release = "!f() { git tag -a v$1 -m \"Release version $1\" \
+                   && git push origin --tags \
+                   && git push origin; }; f"
 #+end_src
 
 * Contributors
