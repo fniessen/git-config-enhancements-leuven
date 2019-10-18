@@ -944,7 +944,7 @@ List commits *showing changed files* (prettier and more concise version of
     last = log --decorate --date=short -1 --stat
 
     # Show the last N commits on the current branch.
-    last = !git log --name-status -$1 ${*:2} && :
+    last = !git log --name-status -$1 ${*:2}
 #+end_src
 
 *** List all the changed files in a commit
@@ -2723,7 +2723,8 @@ Save a repo as a tarball:
 #+end_src
 
 #+begin_src conf
-    mbase = !git merge-base $(git branch-name) origin/$1 && :
+    # Best common ancestor (when it was branched off).
+    mbase = !git show --summary $(git merge-base origin/$1 $(git branch-name))
 #+end_src
 
 #+begin_src conf
@@ -2734,7 +2735,7 @@ Save a repo as a tarball:
 
 
  # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
- # stage='git push staging $(current_branch):master'
+ # stage='git push staging $(git branch-name):master'
 #+end_src
 
 *** Release assets
