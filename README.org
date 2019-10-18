@@ -2561,12 +2561,9 @@ Use ~git push -u origin <current-branch>~ to push the ~<current-branch>~ branch 
 the =origin= remote and to set up tracking.
 
 #+begin_src conf
-    # Current branch.
-    cb = "name-rev --name-only HEAD"
-
     # Get the current branch name (not so useful in itself, but used in other
-    # aliases).
-    branch-name = !git rev-parse --abbrev-ref HEAD
+    # aliases).  Works well in detached mode.
+    branch-name = name-rev --name-only HEAD
     # branch-name = !git branch --show-current # v2.22+
 #+end_src
 
@@ -2726,16 +2723,14 @@ Save a repo as a tarball:
 #+end_src
 
 #+begin_src conf
-    name = !git symbolic-ref -q HEAD | cut -b 12-
-    mbase = !git merge-base $(git name) origin/$1 && :
+    mbase = !git merge-base $(git branch-name) origin/$1 && :
 #+end_src
 
 #+begin_src conf
   # # Deploy
-  # name = !git symbolic-ref -q HEAD | cut -b 12-
-  # staging = !git push heroku-staging $(git name):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
-  # dev = !git push heroku-dev $(git name):master -f && git track 'Deployed to dev ' # push current branch to dev
-  # deploy = !git push heroku $(git name):master -f && git track 'Deployed to production ' # push current branch to production
+  # staging = !git push heroku-staging $(git branch-name):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
+  # dev = !git push heroku-dev $(git branch-name):master -f && git track 'Deployed to dev ' # push current branch to dev
+  # deploy = !git push heroku $(git branch-name):master -f && git track 'Deployed to production ' # push current branch to production
 
 
  # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
