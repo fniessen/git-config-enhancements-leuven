@@ -2726,7 +2726,13 @@ Save a repo as a tarball:
 #+end_src
 
 #+begin_src conf
+    name = !git symbolic-ref -q HEAD | cut -b 12-
+    mbase = !git merge-base $(git name) origin/$1 && :
+#+end_src
+
+#+begin_src conf
   # # Deploy
+  # name = !git symbolic-ref -q HEAD | cut -b 12-
   # staging = !git push heroku-staging $(git name):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
   # dev = !git push heroku-dev $(git name):master -f && git track 'Deployed to dev ' # push current branch to dev
   # deploy = !git push heroku $(git name):master -f && git track 'Deployed to production ' # push current branch to production
