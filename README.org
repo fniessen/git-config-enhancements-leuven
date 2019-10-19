@@ -2788,9 +2788,11 @@ List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
 Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin
 de savoir ce qu’embarquera la « prochaine release » de mon projet.
 
-alias nxtrlz='git log --oneline $(git lasttag)..HEAD && git lasttag'
-
-$ nxtrlz     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la branche courante
+#+begin_src conf
+    # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
+    # branche courante.
+    unreleased = !git log --oneline $(git lasttag)...HEAD && git lasttag
+#+end_src
 
 You can do a lot better with:
 
@@ -3076,8 +3078,8 @@ Directed Acyclic Graph:
 
 * Compare Revisions (branches, tags or commits)
 
-*See what's changed*: easily determine which commits are on the source but not on
-the destination.
+*See what's changed*: easily determine which commits are on the "compare" source
+but not on the "base" destination.
 
 You can see:
 - a diff,
