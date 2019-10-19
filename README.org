@@ -2590,16 +2590,16 @@ Generate a version of your [[https://keepachangelog.com/][CHANGELOG.md]]:
 
 #+begin_src conf
     # Detailed list of changes.
-    # repo-user
-    # repo-name
-    changelog-github = !sh -c 'git log $1...$2 --pretty=format:\"* %s [view commit](http://github.com/$3/$4/commit/%H)\"' -
-    changelog-github-org = !sh -c 'git log $1...$2 --pretty=format:\"- %s [[http://github.com/$3/$4/commit/%H][view commit]]\"' -
+    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $1...$2' -
+    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $1...$2' -
 #+end_src
+
+XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries
 
 Use it like this:
 
 #+begin_src shell :tangle no
-git changelog-github first_tag last_tag github_username github_repo
+git changelog <first-tag-name> <last-tag-name>
 #+end_src
 
 See also https://github.com/github-changelog-generator/github-changelog-generator.
@@ -2775,7 +2775,7 @@ The tag will be a *lightweight tag* by default.
 Show the last tag:
 
 #+begin_src conf
-    lasttag = describe --tags --abbrev=0
+    last-tag = describe --tags --abbrev=0
 #+end_src
 
 List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
@@ -2791,7 +2791,7 @@ de savoir ce qu’embarquera la « prochaine release » de mon projet.
 #+begin_src conf
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
     # branche courante.
-    unreleased = !git log --oneline $(git lasttag)...HEAD && git lasttag
+    unreleased = !git log --oneline $(git last-tag)...HEAD && git last-tag
 #+end_src
 
 You can do a lot better with:
@@ -2799,6 +2799,11 @@ You can do a lot better with:
 #+begin_src conf
     releases = log --decorate --oneline --simplify-by-decoration --all
     # XXX Add date
+#+end_src
+
+#+begin_src conf
+    # Rename a tag (locally and remotely).
+    rename-tag = "!f() { git tag $2 $1; git tag -d $1; git push origin $2; git push origin :refs/tags/$1; }; f"
 #+end_src
 
 ** Debugging
@@ -2812,7 +2817,7 @@ Sometimes it's nice to see what is going on under the hood. Try this alias:
 Just insert ~debug~ between ~git~ and whatever would usually follow; for example:
 
 #+begin_src shell :tangle no
-git debug unwip
+git debug changed
 #+end_src
 
 ** Abbreviations
@@ -2847,15 +2852,6 @@ This works because Shell aliases are always executed in the top-level directory.
 #+begin_src conf
     root = rev-parse --show-toplevel
     root-relative = rev-parse --show-prefix
-#+end_src
-
-** Remove deleted files
-
-Removing multiple files from a Git repo that have already been deleted from
-disk:
-
-#+begin_src conf
-    rma = !git ls-files --deleted -z | xargs -0 git rm
 #+end_src
 
 ** Sync
@@ -2964,6 +2960,10 @@ Create a lightweight tag (no message!)
 ** See the commits for a tag
 
 See the list of all the commits for that tag.
+
+#+begin_src shell :tangle no
+git ls <tag>
+#+end_src
 
 ** Push a tag to your repository
 
