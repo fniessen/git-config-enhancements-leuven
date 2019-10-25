@@ -982,6 +982,21 @@ $ git blame -w  # ignores white space
 $ git blame -M  # ignores moving text
 $ git blame -C  # ignores moving text into other files
 
+git blame -w README.md
+The -w option ignores whitespace changes. If a previous author has modified the
+spacing of a file by switching from tabs to spaces or adding new lines this,
+unfortunately, obscures the output of git blame by showing these changes.
+
+git blame -M README.md
+The -M option detects moved or copied lines within in the same file. This will
+report the original author of the lines instead of the last author that moved or
+copied the lines.
+
+git blame -C README.md
+The -C option detects lines that were moved or copied from other files. This
+will report the original author of the lines instead of the last author that
+moved or copied the lines.
+
 #+begin_src conf
     praise = blame -w
     archeology = blame -w -C -n
@@ -1010,7 +1025,10 @@ relevant: https://bitbucket.org/tpettersen/git-guilt
 
 ** SHOW - Search for commits
 
-*** Whose commit message mention your regexp
+*** Search regexp within commit messages
+
+You can find commits that contain particular words in the message. For example,
+fix typo matches commits containing the words "fix" and "typo."
 
 If you want to find all commits (*across all branches*, showing names and status
 of changed files) where *log message* matches a specified pattern (regular
@@ -1019,7 +1037,7 @@ expression), use ~find~.
 #+begin_src conf
     find = "log --decorate -i --all --date=short --grep"
 
-    # Find commits by commit message.
+    # Search commits (Filter by commit message).
     findm = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
 #+end_src
 
@@ -1045,7 +1063,7 @@ somewhere, use the *AND* semantic:
 git log --all-match --grep=<foo> --grep=<bar>
 #+end_src
 
-Show the *last commit* which *message matches a regex*:
+Show the *last commit* whose *message matches a regexp*:
 
 #+begin_src shell :tangle no
 # Show the last commit which has the word "fix" in its message.
@@ -1055,7 +1073,7 @@ git show :/fix
 git show :/^Merge
 #+end_src
 
-*** String added/removed in Commit contents (Diff)
+*** Search string (added/removed) in code
 
 If you want to find all commits where a *string* was *added or removed* in the /file
 contents/ (to be more exact: where its *number of occurrences changed* in the
@@ -1110,7 +1128,7 @@ Prettier ~whatchanged~ with full diffs based on text search:
 By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
 ~--pickaxe-regex~.
 
-*** Whose changes include your regexp
+*** Search regexp (added/removed/changed?) in code
 
 String contained in added/removed lines from Commit contents (Diff)
 
@@ -1119,6 +1137,7 @@ any *line* that was added, removed, or changed.
 
 #+begin_src shell :tangle no
 git log --all -G "foo" --since="1 week ago"
+git log --all -G "foo" --full-history --since="1 week ago"
 #+end_src
 
 ** SHOW - find all "unpushed" commits for all projects in a directory
@@ -2584,26 +2603,6 @@ The ~name-rev~ command indicates the *position of a commit relative to tags* in 
 project. For example, ~v2.3~5~ means that this commit is located 5 commits *before*
 the v2.3 tag -- we can be certain that this change is part of v2.3, then.
 
-** PUBLISH - ChangeLog
-
-Generate a version of your [[https://keepachangelog.com/][CHANGELOG.md]]:
-
-#+begin_src conf
-    # Detailed list of changes.
-    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $1...$2' -
-    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $1...$2' -
-#+end_src
-
-XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries
-
-Use it like this:
-
-#+begin_src shell :tangle no
-git changelog <first-tag-name> <last-tag-name>
-#+end_src
-
-See also https://github.com/github-changelog-generator/github-changelog-generator.
-
 ** Create patches
 
 #+begin_src conf
@@ -2731,6 +2730,26 @@ Save a repo as a tarball:
  # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
  # stage='git push staging $(git branch-name):master'
 #+end_src
+
+*** ChangeLog
+
+Generate a version of your [[https://keepachangelog.com/][CHANGELOG.md]]:
+
+#+begin_src conf
+    # Detailed list of changes.
+    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $1...$2' -
+    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $1...$2' -
+#+end_src
+
+XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries on mcpflow repo
+
+Use it like this:
+
+#+begin_src shell :tangle no
+git changelog <first-tag-name> <last-tag-name>
+#+end_src
+
+See also https://github.com/github-changelog-generator/github-changelog-generator.
 
 *** Release assets
 
@@ -2905,8 +2924,9 @@ will ~reset~ the index.
 #+begin_src conf
     # 2009-05-26  (merged-bed-bug) 6fe85ff regenerate rules Brad Bowman
     logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
-    br-date = !"sh -c 'for b in $(git branch --no-merged) ; \
-               do git logdate -1 -r $b --; done'"
+    br-date = !"sh -c 'for b in $(git branch --no-merged); do \
+                           git logdate -1 -r $b --; \
+                       done'"
 #+end_src
 
 ** COMMENT Git and Subversion
@@ -2919,6 +2939,23 @@ will ~reset~ the index.
 
 #+begin_src conf :tangle no
     cvs-full-log = log --reverse --pretty=format:'%B------------------------------------------------------------------------'
+#+end_src
+
+* Files
+
+Find file (by path) in the current branch.
+
+#+begin_src conf
+    find-file = !git ls-tree -r --name-only $(git branch-name) | grep --color=auto
+#+end_src
+
+Find file in all branches.
+
+#+begin_src conf
+    find-file-all = "!f() { for branch in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
+                            echo \"${branch}:\"; \
+                                git ls-tree -r --name-only $branch | nl -bn -w3 | grep --color=auto \"$1\"; \
+                            done; }; f"
 #+end_src
 
 * Commits
@@ -2951,11 +2988,15 @@ Lightweight tags don't include all this additional information.
 
 Create an annotated tag
 
-: git tag -a <tag_name> -m '<tag_message>'
+#+begin_src shell :tangle no
+git tag -a <tag-name> -m '<tag-message>'
+#+end_src
 
 Create a lightweight tag (no message!)
 
-: git tag <tag_name>
+#+begin_src shell :tangle no
+git tag <tag-name>
+#+end_src
 
 ** See the commits for a tag
 
