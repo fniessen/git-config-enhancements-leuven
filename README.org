@@ -1679,6 +1679,7 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
 
 #+begin_src conf
     pull-autostash = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash push -m "autostash" && git pull && git stash pop
+# XXX Does not work in WSL (unexpected operator [[)
 #+end_src
 
 XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
