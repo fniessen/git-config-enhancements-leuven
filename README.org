@@ -325,9 +325,18 @@ variable/.
     safecrlf = false
 #+end_src
 
+Performance:
+
 #+begin_src conf
+    # Do filesystem operations in parallel to hide latency (default since v2.1).
+    preloadindex = true
+
+    # Fix UAC issues so you don't need to run Git as administrator (default since v2.8).
+    fscache = true
+
 [gc]
-    auto = 1
+    # Minimize the number of files in .git/.
+    auto = 256
 #+end_src
 
 ** Diff
@@ -417,7 +426,7 @@ Diff the last commit for a given file:
 
 #+begin_src conf
     diff-file-last-commit = "!f() { \
-            project_root_dir=$(git rev-parse --show-toplevel); \
+            project_root_dir=$(git root); \
             echo finding full file path of $1 in $project_root_dir; \
             filepath=$(find $project_root_dir -type f -name $1); \
             echo full file path $filepath; \
@@ -684,6 +693,24 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
     proxy = http://proxy-guest.forem.be:8080
 #+end_src
 
+#+begin_src conf
+[alias]
+    # Proxy.
+    setproxy = !git config --global http.proxy http://proxy-guest.forem.be:8080 && git config --global https.proxy https://proxy-guest.forem.be:8080
+    rmvproxy = !git config --global --unset http.proxy && git config --global --unset https.proxy
+#+end_src
+
+If unable to clone Git repository due to self signed certificate, disable Git
+SSL verification:
+
+#+begin_src conf :tangle no
+[http]
+    sslVerify = false
+#+end_src
+
+Please be advised disabling SSL verification globally *might be considered
+a security risk* and should be implemented only temporary.
+
 ** Format
 
 #+begin_src conf
@@ -717,12 +744,6 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 #+end_src
 
 #+begin_src conf
-    # Proxy.
-    setproxy = !git config --global http.proxy http://proxy-guest.forem.be:8080 && git config --global https.proxy https://proxy-guest.forem.be:8080
-    rmvproxy = !git config --global --unset http.proxy && git config --global --unset https.proxy
-    #+end_src
-
-    #+begin_src conf
     type = cat-file -t
     dump = cat-file -p
 #+end_src
@@ -889,7 +910,9 @@ Show changes for a daily standup meeting:
 
 #+begin_src conf
     # When was this file last updated, on each local branch.
-    wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; done | sort -r | cut -f2 -d:; }; f"
+    wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
+                        echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; \
+                    done | sort -r | cut -f2 -d:; }; f"
 #+end_src
 
 *** Finding new commits
@@ -1145,7 +1168,10 @@ git log --all -G "foo" --full-history --since="1 week ago"
 See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
 
 #+begin_src conf
-    status-all = "!for d in $(find . -name \".git\"); do echo \"\n*** Repository: $d ***\" && git --git-dir=$d --work-tree=$d/.. status | grep -q \"is ahead of\"; done"
+    status-all = "!for d in $(find . -name \".git\"); do \
+                     echo \"\n*** Repository: $d ***\" \
+                     && git --git-dir=$d --work-tree=$d/.. status | grep -q \"is ahead of\"; \
+                   done"
 #+end_src
 
 ** Grep (Print lines matching a pattern)
@@ -1381,7 +1407,9 @@ My new favorite alias is fixup --amend. Lets you amend to a specific commit, *no
 need to be the *latest* one.
 
 #+begin_src conf
-    fixup = "!f() { TARGET=$(git rev-parse "$1"); git commit --fixup=$TARGET ${@:2} && EDITOR=true git rebase -i --autostash --autosquash $TARGET^; }; f"
+    fixup = "!f() { TARGET=$(git rev-parse \"$1\"); \
+                    git commit --fixup=$TARGET ${@:2} \
+                        && EDITOR=true git rebase -i --autostash --autosquash $TARGET^; }; f"
 #+end_src
 
 For aliases and shell/git configuration, a few pearls:
@@ -1755,7 +1783,12 @@ Before doing work (in a new branch), *ensure that the working directory is*
 Pull all:
 
 #+begin_src conf
-    pull-all = !"old=$(git rev-parse --abbrev-ref HEAD) ; for b in $(git for-each-ref refs/heads --format='%(refname)') ; do git checkout ${b#refs/heads/} ; git pull --ff-only ; done; git checkout ${old}"
+    pull-all = !"old=$(git rev-parse --abbrev-ref HEAD); \
+                 for b in $(git for-each-ref refs/heads --format='%(refname)'); do \
+                     git checkout ${b#refs/heads/}; \
+                     git pull --ff-only; \
+                 done; \
+                 git checkout ${old}"
 #+end_src
 
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
@@ -2060,7 +2093,7 @@ overwritten by checkout", *move the untracked files*, instead of *deleting them*
 For example:
 
 #+begin_src shell :tangle no
-cd "$(git rev-parse --show-toplevel)"
+cd "$(git root)"
 git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f.bak"; done
 #+end_src
 
@@ -2343,7 +2376,10 @@ user wants to have an updated repository.
 #+begin_src conf
     # checkpoint and checkpoint recover
     cp = !git stash push -m "$(date +%F--%T)" && git stash pop --index
-    cpr = "!f() { git fsck | grep commit | cut -d' ' -f3 | while read hash; do git rev-parse --verify --no-revs --quiet $hash^2 2>/dev/null && echo $hash | xargs git rev-list --since=${1:-1day} -1; done | xargs -L 1 git log --format=%at:%h -1 | sort|cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; }; f"
+    cpr = "!f() { git fsck | grep commit | cut -d' ' -f3 | \
+                  while read hash; do \
+                      git rev-parse --verify --no-revs --quiet $hash^2 2>/dev/null && echo $hash | xargs git rev-list --since=${1:-1day} -1; \
+                  done | xargs -L 1 git log --format=%at:%h -1 | sort | cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; }; f"
 #+end_src
 
 *** Show a list of all stashes
@@ -3340,3 +3376,11 @@ git checkout -b foo refs/pull/upstream/42
 * Free private repositories
 
 I use the *free private repos* from https://bitbucket.org/.
+
+* Use Git and SVN together
+
+You can combine both Git and SVN on the same project codebase, *in the same
+working directory*:
+
+- http://www.netinstructions.com/git-and-svn-together/
+- https://www.belatrixsf.com/blog/a-happy-way-to-combine-svn-and-git
