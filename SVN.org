@@ -108,9 +108,12 @@ to commit such files.
 Use ~svn resolved filename~ to mark a conflicted file as resolved:
 
 #+begin_src shell
-svn status (-q)
+svn status -q
+
+svn resolve --accept=theirs-full
 svn resolved (FILE)
-svn status (-q)
+
+svn status -q
 #+end_src
 
 * UPDATE - Pull
@@ -199,6 +202,28 @@ already existing folder...), update the revision (say we want to get r4732):
 #+begin_src shell
 svn update -r 4732
 #+end_src
+
+* Ignore files
+
+Edit the file ignoring.txt to put the files you want actually to ignore. Then
+use this one to ignore the files listed in the file:
+
+: svn propset svn:ignore -F ignoring.txt .
+
+Note the dot at the end of the line. It tells SVN that the property is being set
+on the current directory.
+
+Delete the file:
+
+: rm ignoring.txt
+
+Finally commit,
+
+: svn ci --message "Ignore some files"
+
+You can then check which files are ignored via:
+
+: svn proplist -v
 
 * PUBLISH - Prepare a release
 
