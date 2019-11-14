@@ -64,6 +64,9 @@
     # Detect whitespace errors when applying a patch.
     whitespace = fix
 
+[status]
+    submoduleSummary = true
+
 [pull]
     rebase = merges
 

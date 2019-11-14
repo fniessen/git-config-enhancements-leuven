@@ -376,6 +376,25 @@ https://github.com/wmanley/git-meld:
     whitespace = fix
 #+end_src
 
+** Fetch
+
+Automatically delete local branches that have been removed from remote on
+fetch/pull:
+
+#+begin_src conf :tangle no
+[fetch]
+    prune = true
+#+end_src
+
+** Status
+
+If you are using submodules, it might be useful to turn on the submodule summary.
+
+#+begin_src conf
+[status]
+    submoduleSummary = true
+#+end_src
+
 ** Pull
 
 Configure Git to do the ~--rebase~ part automatically.
@@ -514,6 +533,10 @@ Set ~rebase.stat = true~, so the ~diffstat~ output is still shown when they pull
 [rebase]
     stat = true
 #+end_src
+
+#+begin_warning
+At this point, let us remind you of [[https://git-scm.com/book/en/v2/Git-Branching-Rebasing#The-Perils-of-Rebasing][the perils of rebasing]].
+#+end_warning
 
 ** Grep
 
@@ -1751,8 +1774,9 @@ XXX Is this ~sync~?
 
 *** Delete all old local branches
 
-Remove local branches no longer on remote (by deleting the local ones that show
-they are "gone" in ~git branch -vv~):
+Remove stale branches in your local repository that *no longer exist in the
+remote* one (by deleting the local ones that show they are "gone" in ~git
+branch -vv~):
 
 #+begin_src conf
     # Git config alias escaping...  This DOES NOT work.
@@ -1765,15 +1789,19 @@ they are "gone" in ~git branch -vv~):
     prune-local-branches = "!f() { git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d; }; f"
 #+end_src
 
-What about
+To remove all tracking branches that you have locally but are no more present in
+the remote repository (origin):
 
-: git remote update --prune
+: git remote prune origin
 
-or
+Use the ~--dry-run~ flag to only see what branches will be pruned, but not
+actually prune them:
 
-: git fetch --prune
+: git remote prune origin --dry-run
 
-instead?
+If you want this to be run automatically every time you fetch/pull:
+
+: git config --global fetch.prune true
 
 *** Get timestamp of last pull
 
@@ -2169,6 +2197,12 @@ to the current branch* that you are in.
                                xargs -n 1 git branch -d; }; f"
                                # xargs -r git branch -d; }; f"
 #+end_src
+
+#+begin_tip
+In the event that you accidentally delete ~master~, get it back with:
+
+: git checkout -b master origin/master
+#+end_tip
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
