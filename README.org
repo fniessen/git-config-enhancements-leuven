@@ -17,9 +17,6 @@ https://github.com/tj/git-extras/blob/master/Commands.md
 XXX GitAlias.com file of many git alias items, including shortcuts, helpers, workflows, etc.
 https://github.com/gitalias/gitalias/blob/master/gitalias.txt
 
-Squash commits:
-https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
-
 *Commit early, commit often*: it is a bad idea to do a lot of work without
 committing... But don't push every single commit: push when changes are tested!
 
@@ -106,88 +103,6 @@ https://www.youtube.com/playlist?list=PLDshL1Z581YYxLsjYwM25HkIYrymXb7H_
 
 http://marlacorinne.4parkers.com/2012/07/20/git-pull-vs-git-fetch-then-merge/
 https://adamcod.es/2014/12/10/git-pull-correct-workflow.html
-
-** TODO Add doc about push failure
-
-If a push fails, that does not necessarily indicate a "bad state"---it
-simply represents that your history is different than what the remote
-server has, and that the tip of the branch you are pushing to cannot
-simply be "fast-forwarded" to your commit.
-
-After a failed push, you are in no different state than you were before
-the push (aside from a possibly puzzled mental state).
-
-In your case, since you just want to commit and push in one operation,
-you likely want to run ~git pull --rebase~, which would get those
-changes and then automatically re-commit your work on top of them, as if
-you had those changes all along.  You could then push.  So, something
-like:
-
-#+begin_src shell :tangle no
-# Commit all changes and attempt to push, pulling in changes if necessary and
-# re-pushing; on failure, restore to previous state with changes uncomitted.
-git commit -am Foo \
-  && {
-    git push \
-      |   | { |
-        { git pull --rebase || handle-pull-conflicts; } \
-          && git push;
-      }
-  } \
-  |   | { |
-    git reset --soft HEAD^
-    echo 'Commit failed.'
-  }
-#+end_src
-
-But what if rebasing fails?  Then you are left resolving a conflict
-before you can attempt the push operation again.  I do not know how you
-would want to handle this.  ~handle-pull-conflicts~ might simply perform
-a ~git rebase --abort~ and exit with a non-zero status, or it may open a
-UI/shell to help resolve changes.  If you are pushing after every
-change, this amounts to correcting a single commit, so it might be worth
-having VC maintain the state here, allow you to correct your commit, and
-then the vc-next-action would be to run ~git rebase --continue~ after
-adding the files that conflicted.
-
-This will be how the majority of Git users will resolve rejected pushes.
-
-Does that make sense?
-
-  [Aside: ~git pull~ without ~--rebase~ performs a ~git fetch && git
-  merge whatever-branch-you-are-tracking~, which has the unfortunate
-  side-effect of creating a merge commit if histories are different;
-  this muddies up history.  ~git pull --rebase~ performs ~git fetch &&
-  git rebase whatever-branch-you-are-tracking~.  The difference in the
-  two styles of conflicts here is that, with rebasing, since you are
-  re-committing each and every changeset, you may get multiple
-  conflicts on any number of commits, whereas a merge will give you a
-  single conflict that must be resolved at once.  The benefit of
-  rebasing is that it gives you a clean history and does not produce an
-  unnecessary merge conflict which you would then push to origin, akin
-  to leaving a bag of poop on origin's doorstep.]
-
-For other users, it may represent a wholly different problem.  For
-example, if I were to push to GNU ease.js' repo and get that message,
-that would be a problem, since that means that someone has committed to
-my repository without my permission.  An automatic pull and re-push
-would be bad in this case, since that makes it look like I'm okay with
-that.
-
-A failed push could also mean that you are tracking the wrong
-branch, or pushing to the wrong repository.  Git allows you to set a
-"tracking branch", which can be anything---a local branch, a remote
-branch, or a branch in an entirely different repository, local or
-remote.  Further, you can override the tracking branch by specifying
-which remote to push to as part of the ~push~ command.
-
-In your case, you'd always want to respect the tracking branch and
-assume that there are no problems pushing, since you use only one
-remote, and the tracking branch is always a branch of the same name on
-origin.
-
-A failed push could also mean that someone rudely rewrote history on the
-remote branch (using ~git push --force~) and someone needs a talkin' to.
 
 ** TODO Outsource and include private entries in .gitconfig
 
@@ -700,16 +615,27 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
     rmvproxy = !git config --global --unset http.proxy && git config --global --unset https.proxy
 #+end_src
 
-If unable to clone Git repository due to self signed certificate, disable Git
-SSL verification:
+** Repository administration
 
-#+begin_src conf :tangle no
-[http]
-    sslVerify = false
-#+end_src
+If unable to clone Git repository due to *self-signed certificate*...
 
-Please be advised disabling SSL verification globally *might be considered
-a security risk* and should be implemented only temporary.
+- For a one-time fix, you can use the ~env~ command to create an environment
+  variable of ~GIT_SSL_NO_VERIFY=TRUE~:
+
+  #+begin_src shell :tangle no
+  env GIT_SSL_NO_VERIFY=TRUE git <command> <arguments>
+  #+end_src
+
+- If you don't want to do this all the time, you can disable Git SSL
+  verification:
+
+  #+begin_src conf :tangle no
+  [http]
+      sslVerify = false
+  #+end_src
+
+  Please be advised disabling SSL verification globally *might be considered
+  a security risk* and should be implemented only temporary.
 
 ** Format
 
@@ -1026,26 +952,6 @@ moved or copied the lines.
     whodoikill = blame -w -C -n
 #+end_src
 
-Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
-original authors of lines changed or removed in a given branch:
-
-#+begin_src shell :tangle no
-git overwritten feature origin/master
-#+end_src
-
-This is useful when opening pull requests per GitHub Flow; you'll want your pull
-request reviewed by colleagues but you might not be sure who to ping. With
-git-overwritten you'll get the names of people who wrote the lines you just
-changed, so you'll know who to @-mention when opening a pull request.
-
-> So, given a patch (or a branch) together with a "base revision", you'd get
-> a list of code chunks modified by that patch, then run "annotate" on the
-> base revision, and look for those code chunks, collecting the names of
-> corresponding authors.
-
-Sounds like git-guilt (which I've just read about today), might be
-relevant: https://bitbucket.org/tpettersen/git-guilt
-
 ** SHOW - Search for commits
 
 *** Search regexp within commit messages
@@ -1292,6 +1198,8 @@ Ignore/unignore changes to *tracked file(s)* without =.gitignore=:
     skip = update-index --assume-unchanged
     unskip = update-index --no-assume-unchanged
 #+end_src
+
+XXX Have a look at Git lock = skip-worktree
 
 It has to be configured for each project member individually.
 
@@ -1624,11 +1532,15 @@ git revert -n [hash]
 
 *** Squash
 
+Squash commits:
+https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
+
 #+begin_src conf
     squash = "!f() { git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
 #+end_src
 
-Now it is possible to use this command to *combine together the last N commits*:
+Now it is possible to use this command to *combine together the last N commits*
+into one commit:
 
 : git squash N
 
@@ -1783,7 +1695,7 @@ Before doing work (in a new branch), *ensure that the working directory is*
 Pull all:
 
 #+begin_src conf
-    pull-all = !"old=$(git rev-parse --abbrev-ref HEAD); \
+    pull-all = !"old=$(git current-branch); \
                  for b in $(git for-each-ref refs/heads --format='%(refname)'); do \
                      git checkout ${b#refs/heads/}; \
                      git pull --ff-only; \
@@ -1904,6 +1816,26 @@ If you tried a merge which resulted in complex conflicts and want to start over,
 you can recover with ~git merge --abort~.  It will allow you to *undo the merge*,
 even if it is a fast-forward merge.
 
+*** Merge current branch into another one
+
+On projects where we work with a staging or test branch, I regularly merge my
+work in progress into it so others can test it.
+
+#+begin_src conf
+    m = "!f() { OLD=$(git current-branch); \
+                git co \"$1\" && git pu && git merge $OLD && git p && git co $OLD; }; f"
+#+end_src
+
+If you now type ~git m staging~ while on the ~feature~ branch, this will happen:
+
+- First, the function checks out the ~staging~ branch.
+- It then pulls the latest changes to the ~staging~ branch from origin.
+- Then it merges ~feature~ into ~staging~.
+- Next, it pushes the updated ~staging~ branch back to origin.
+- Finally, it checks out the ~feature~ branch again.
+
+Such a timesaver!
+
 *** Dry run (do not make changes)
 
 Naive (but slow) way:
@@ -1957,26 +1889,28 @@ and *detects conflicts*:
 
 *** Branch/Integration manager
 
-If you're the Branch/Integration manager, you can use these aliases to *merge*
-stuff (to select the entirety of either our or their file in a 3-way merge).
+Often, during a *merge*, you know you want to take a file from one side wholesale;
+that is, to select the entirety of either our or their file.
 
-Often, during a merge, you know you want to take a file from one side wholesale.
-The following aliases expose the:
+Pick a file(s) from:
 
-- ~ours~ (stage #2) and
-- ~theirs~ (stage #3)
-
-commands which will let you pick a file(s) from
-
-- the current branch (local) or
-- the merged branch (remote)
-
-respectively:
+- the *current branch*
 
 #+begin_src conf
     ours   = "!f() { git checkout --ours   $@ && git add $@; }; f"
+#+end_src
+
+- the *branch being merged in*
+
+#+begin_src conf
     theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 #+end_src
+
+#+begin_warning
+During a *rebase*, the commits being merged into the current branch /are/ the
+commits from your original feature branch.  So ~--ours~ and ~--theirs~ will appear
+to be *flipped* around.
+#+end_warning
 
 #+begin_note
 Using ~git checkout~ with ~--ours~ or ~--theirs~ expects at least one argument: the
@@ -2015,15 +1949,38 @@ Unmerged files after a merge failure:
 
 *** Branching model
 
-Consistent *naming conventions* (from the [[https://fr.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow][Gitflow]] Git workflow):
+Consistent *naming conventions* (from the [[https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow][Gitflow]] Git workflow):
 
-- =master= (used for deploying *production releases*)
+- =master= (used for *production releases*)
+
+  It should be the most stable branch. Merges commits from develop, release and
+  hotfix branches.
+
 - =develop= (used as integration branch for *"next release" development*)
-- prefix =feature/MSW-709-add-support-for-webm= (for new *features*, such as Jira *stories*)
-- prefix =release/2018-12-24= (used for preparing and testing *release* tasks)
+
+  It has the newest features and fixes. Merges commits from feature and bugfix
+  branches.
+
+- prefix =feature/MSW-709-add-support-for-webm= (for new *features*, such as Jira
+  *stories*)
+
+  These branches are short lived as they only exist while a specific feature is
+  being developed. Usually does not merge any commits unto it, unless there is
+  another feature derived from it.
+
 - prefix =bugfix/= (typically used to fix Release branches, such as Jira *bugs*)
+
+  Used to fix bugs found that either exist in develop but have not made it into
+  production, or that do exist in production but can wait until the next
+  release. These branches merge into develop.
+
+- prefix =release/2018-12-24= (used for preparing and testing *release* tasks)
+
 - prefix =hotfix/fix-123-for-production= (used to *urgently fix* bugs on *production*,
   that have high impact)
+
+  Used to fix pressing issues that are found in production. Hotfix branches
+  merge directly to master.
 
 Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
 
@@ -2031,6 +1988,21 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
     master = checkout master
     develop = checkout develop
 #+end_src
+
+#+begin_src conf
+    # Create branch with prefix feature.
+    feature = "!f() { git create-branch feature/$1; }; f"
+    # XXX or feature-start?
+
+    feature-finish = "!f() { git merge --no-ff feature/$1 && git delete-branch feature/$1; }; f"
+
+    # XXX Also bug and refactor.
+
+    # XXX release-start
+    # XXX release-finish
+#+end_src
+
+https://medium.com/gumgum-tech/git-and-git-flow-a-guide-871d46a0ebcb
 
 *** Git workflows
 
@@ -2057,6 +2029,13 @@ interesting stuff, such as:
 #+begin_src conf
     # Shortcut for checkout.
     co = checkout
+#+end_src
+
+Check out the next commit in the commit history -- quite useful for demos to
+jump across commits:
+
+#+begin_src conf
+    next = "!f() { git checkout $(git rev-list --topo-order HEAD..master | tail -1; }; f"
 #+end_src
 
 *** Create a branch
@@ -2097,6 +2076,30 @@ cd "$(git root)"
 git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f.bak"; done
 #+end_src
 
+#+begin_src conf :tangle no
+echo 'setting up gh-pages'
+echo '-------------------'
+
+echo 'Tell me your github account username: '
+read username
+
+echo 'Now, tell me your repository name: '
+read repository
+
+git stash \
+&& git checkout -b 'gh-pages' \
+&& echo 'My Page' > index.html \
+&& git add . \
+&& git commit -a -m 'Initial commit' \
+&& git remote add origin https://github.com/"$username"/"$repository".git \
+&& git push -u origin gh-pages \
+&& echo 'Complete' \
+&& echo '-------------------' \
+&& echo 'You can find your last changes in the stash!'
+#+end_src
+
+*** List all branches
+
 *List all branches* (both local remote-tracking and local branches), showing SHA
 and commit subject line for each head, along with the name of the upstream
 branch (if any).
@@ -2121,6 +2124,8 @@ branch (if any).
     # TODO Invert the order!
 #+end_src
 
+*** Delete a branch
+
 Delete a *local* branch:
 
 #+begin_src conf
@@ -2129,10 +2134,11 @@ Delete a *local* branch:
 #+end_src
 
 #+begin_note
-The -d (--delete) option only deletes the branch if it has already been fully
-merged in its upstream branch. You could also use -D, which is an alias
-for --delete --force, which deletes the branch "irrespective of its merged
-status."
+The ~-d~ (~--delete~) option only deletes the branch if it has already been fully
+merged in its upstream branch.
+
+You could also use ~-D~, which is an alias for ~--delete --force~, which deletes the
+branch "irrespective of its merged status."
 #+end_note
 
 Delete a *remote* branch:
@@ -2148,10 +2154,11 @@ Delete a *remote* branch:
 to the current branch* that you are in.
 
 #+begin_src conf
-    # Remove branches that have already been merged.
-    delete-merged-branches = "!git branch --no-color --merged | grep -v '\\*' | \
+    # Remove branches that have already been merged to the current branch.
+    delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
                                grep -v master | \
-                               xargs -n 1 git branch -d"
+                               xargs -n 1 git branch -d; }; f"
+                               # xargs -r git branch -d; }; f"
 #+end_src
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
@@ -2299,11 +2306,11 @@ Create a new topic branch:
 
 Update the topic branch:
 
-: topic-pull = '!branch=$(git branch-name); git checkout master; git pull; git checkout "$branch"; git rebase master'
+: topic-pull = '!branch=$(git current-branch); git checkout master; git pull; git checkout "$branch"; git rebase master'
 
 Share the topic branch:
 
-: topic-push = '!branch=$(git branch-name); git push -u origin "$branch"'
+: topic-push = '!branch=$(git current-branch); git push -u origin "$branch"'
 
 If your team uses a different topic flow, you may want to skip including these
 aliases, or you may want to edit these aliases to match your team's topic flow.
@@ -2609,8 +2616,8 @@ the =origin= remote and to set up tracking.
 #+begin_src conf
     # Get the current branch name (not so useful in itself, but used in other
     # aliases).  Works well in detached mode.
-    branch-name = name-rev --name-only HEAD
-    # branch-name = !git branch --show-current # v2.22+
+    current-branch = name-rev --name-only HEAD
+    # current-branch = !git branch --show-current # v2.22+
 #+end_src
 
 #+begin_src conf
@@ -2618,16 +2625,16 @@ the =origin= remote and to set up tracking.
 #+end_src
 
 #+begin_src conf
-    # Create a copy of the current branch on the remote "origin", and set it to
-    # track the upstream branch.
-    publish = !git push -u origin $(git branch-name)
+    # Push current branch to remote server (create a copy of the current branch
+    # on the remote "origin", and set it to track the upstream branch).
+    publish = !git push -u origin $(git current-branch)
 
-    # Unpublish the current branch by deleting the remote branch.
-    unpublish = !git push origin :$(git branch-name)
+    # Delete current branch on remote server.
+    unpublish = !git push origin :$(git current-branch)
 #+end_src
 
 #+begin_src conf
-    export-branch = !git format-patch --stdout $1 > ~/$(git branch-name).diff
+    export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
 #+end_src
 
 ** PUBLISH - Find out if a change is part of a release
@@ -2754,18 +2761,18 @@ Save a repo as a tarball:
 
 #+begin_src conf
     # Best common ancestor (when it was branched off).
-    mbase = !git show --summary $(git merge-base origin/$1 $(git branch-name))
+    mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
 #+end_src
 
 #+begin_src conf
   # # Deploy
-  # staging = !git push heroku-staging $(git branch-name):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
-  # dev = !git push heroku-dev $(git branch-name):master -f && git track 'Deployed to dev ' # push current branch to dev
-  # deploy = !git push heroku $(git branch-name):master -f && git track 'Deployed to production ' # push current branch to production
+  # staging = !git push heroku-staging $(git current-branch):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
+  # dev = !git push heroku-dev $(git current-branch):master -f && git track 'Deployed to dev ' # push current branch to dev
+  # deploy = !git push heroku $(git current-branch):master -f && git track 'Deployed to production ' # push current branch to production
 
 
  # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
- # stage='git push staging $(git branch-name):master'
+ # stage='git push staging $(git current-branch):master'
 #+end_src
 
 *** ChangeLog
@@ -2793,11 +2800,15 @@ See also https://github.com/github-changelog-generator/github-changelog-generato
 Generate =zip= archived source code from the given Git tag.
 
 I use this when zipping the current branch with the name of the zip file as the
-current tag. Its been useful for uploading to Elasticbeanstalk
+current tag.  Useful for uploading to Elasticbeanstalk.
 
 #+begin_src conf
 currentTag = tag --points-at HEAD
 zip = "!f() { git archive --format=zip -o $(git currentTag).zip HEAD; }; f"
+#+end_src
+
+#+begin_src conf
+zip-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 patch-${1:-HEAD}.zip; }; f"
 #+end_src
 
 ** PUBLISH - Tag
@@ -2959,14 +2970,13 @@ will ~reset~ the index.
 ** TODO To sort out
 
 #+begin_src conf
-    # 2009-05-26  (merged-bed-bug) 6fe85ff regenerate rules Brad Bowman
     logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
-    br-date = !"sh -c 'for b in $(git branch --no-merged); do \
-                           git logdate -1 -r $b --; \
+    br-date = !"sh -c 'for branch in $(git branch --no-merged); do \
+                           git logdate -1 -r $branch --; \
                        done'"
 #+end_src
 
-** COMMENT Git and Subversion
+** Git and Subversion
 
 #+begin_src conf :tangle no
     spull = svn rebase
@@ -2978,12 +2988,14 @@ will ~reset~ the index.
     cvs-full-log = log --reverse --pretty=format:'%B------------------------------------------------------------------------'
 #+end_src
 
+* ------------------------------------------------------------------------------
+
 * Files
 
 Find file (by path) in the current branch.
 
 #+begin_src conf
-    find-file = !git ls-tree -r --name-only $(git branch-name) | grep --color=auto
+    find-file = !git ls-tree -r --name-only $(git current-branch) | grep --color=auto
 #+end_src
 
 Find file in all branches.
@@ -3221,6 +3233,103 @@ git changed bada55..ff0021              # List files modified between those comm
 - Closed
 - All
 
+Git aliases for pull requests and other useful stuff
+https://gist.github.com/metlos/9368527
+
+For GitHub
+: git ls-remote origin 'refs/pull/*'
+
+** Check out pull request
+
+Sometimes, just reading the code of a pull request might not be enough to verify
+if it should be merged.  Maybe you want to add something, or some tests are
+failing, and you want to run them locally on your computer.
+
+#+begin_src conf
+    # Checkout a single PR (for GitHub).
+    gpr = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
+#+end_src
+
+#+begin_src conf
+    # For GitHub.
+    copr = "!f() { git fetch -fu origin refs/pull/$1/head:pr/$1 && \
+                   git checkout pr/$1; }; f"
+#+end_src
+
+** Merge pull request
+
+#+begin_src conf
+    # For GitHub.
+    mpr = "!f() { \
+            declare currentBranch=\"$(git symbolic-ref --short HEAD)\"; \
+            declare branch=\"${2:-$currentBranch}\"; \
+            if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
+                git fetch origin refs/pull/$1/head:pr/$1 && \
+                git checkout -B $branch && \
+                git rebase $branch pr/$1 && \
+                git checkout -B $branch && \
+                git merge --ff-only pr/$1 && \
+                git branch -D pr/$1; \
+            fi \
+        }; f"
+#+end_src
+
+This is actually quite useful if you are a maintainer of a project on
+GitHub.
+
+There are two ways you can call it:
+
+- ~git mpr 123~
+
+  This will merge pull request number 123 on top of the current branch.
+
+- ~git mpr 123 master~.
+
+  This will merge pull request number 123 on top of the branch called master.
+
+If you are using GitHub, you can easily merge a pull request using the web
+interface, but if you want a bit more control over how you are merging the pull
+requests (for example, I’m using the ~git merge --ff-only~ option, while GitHub
+will use ~git merge --no-ff~), or you just want to merge a bunch of pull requests
+without leaving your terminal -- this function will help you.
+
+** How?
+
+#+begin_src shell :tangle no
+git fetch --all
+#+end_src
+
+This results in all pull requests available in the local repo in the local pull/
+namespace.
+
+To check out e.g. PR #42:
+
+#+begin_src shell :tangle no
+git checkout -b foo refs/pull/upstream/42
+#+end_src
+
+** Who?
+
+Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
+original authors of lines changed or removed in a given branch:
+
+#+begin_src shell :tangle no
+git overwritten feature origin/master
+#+end_src
+
+This is useful when opening pull requests per GitHub Flow; you'll want your pull
+request reviewed by colleagues but you might not be sure who to ping. With
+git-overwritten you'll get the names of people who wrote the lines you just
+changed, so you'll know who to @-mention when opening a pull request.
+
+> So, given a patch (or a branch) together with a "base revision", you'd get
+> a list of code chunks modified by that patch, then run "annotate" on the
+> base revision, and look for those code chunks, collecting the names of
+> corresponding authors.
+
+Sounds like git-guilt (which I've just read about today), might be
+relevant: https://bitbucket.org/tpettersen/git-guilt
+
 * Pipelines
 
 * Deployments
@@ -3234,6 +3343,8 @@ List:
 #+begin_src conf
     issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
 #+end_src
+
+* ------------------------------------------------------------------------------
 
 * Download repository
 
@@ -3259,7 +3370,7 @@ http://stackoverflow.com/questions/2569459/git-create-a-branch-from-unstaged-unc
 
 * If you made a mistake
 
-# Absolutely read https://github.com/blog/2019-how-to-undo-almost-anything-with-git!
+Absolutely read https://github.com/blog/2019-how-to-undo-almost-anything-with-git!
 
 * Recover from problems
 :PROPERTIES:
@@ -3342,25 +3453,86 @@ https://github.com/brianleetest/testGit/blob/master/README.md
 git push --force origin master
 #+end_src
 
+*** Doc about push failure
+
+If a push fails, that does not necessarily indicate a "bad state" -- it simply
+represents that your history is different than what the remote server has, and
+that the tip of the branch you are pushing to cannot simply be "fast-forwarded"
+to your commit.
+
+After a failed push, you are in no different state than you were before the push
+(aside from a possibly puzzled mental state).
+
+In your case, since you just want to commit and push in one operation, you
+likely want to run ~git pull --rebase~, which would get those changes and then
+automatically re-commit your work on top of them, as if you had those changes
+all along.  You could then push.  So, something like:
+
+#+begin_src shell :tangle no
+# Commit all changes and attempt to push, pulling in changes if necessary and
+# re-pushing; on failure, restore to previous state with changes uncomitted.
+git commit -am Foo \
+  && {
+    git push \
+      |   | { |
+        { git pull --rebase || handle-pull-conflicts; } \
+          && git push;
+      }
+  } \
+  |   | { |
+    git reset --soft HEAD^
+    echo 'Commit failed.'
+  }
+#+end_src
+
+But what if rebasing fails?  Then you are left resolving a conflict before you
+can attempt the push operation again.  I do not know how you would want to
+handle this.  ~handle-pull-conflicts~ might simply perform a ~git rebase --abort~
+and exit with a non-zero status, or it may open a UI/shell to help resolve
+changes.  If you are pushing after every change, this amounts to correcting
+a single commit, so it might be worth having VC maintain the state here, allow
+you to correct your commit, and then the vc-next-action would be to run ~git
+rebase --continue~ after adding the files that conflicted.
+
+This will be how the majority of Git users will resolve rejected pushes.
+
+Does that make sense?
+
+  [Aside: ~git pull~ without ~--rebase~ performs a ~git fetch && git merge
+  whatever-branch-you-are-tracking~, which has the unfortunate side-effect of
+  creating a merge commit if histories are different; this muddies up history.
+  ~git pull --rebase~ performs ~git fetch && git rebase
+  whatever-branch-you-are-tracking~.  The difference in the two styles of
+  conflicts here is that, with rebasing, since you are re-committing each and
+  every changeset, you may get multiple conflicts on any number of commits,
+  whereas a merge will give you a single conflict that must be resolved at once.
+  The benefit of rebasing is that it gives you a clean history and does not
+  produce an unnecessary merge conflict which you would then push to origin,
+  akin to leaving a bag of poop on origin's doorstep.]
+
+For other users, it may represent a wholly different problem.  For example, if
+I were to push to GNU ease.js' repo and get that message, that would be
+a problem, since that means that someone has committed to my repository without
+my permission.  An automatic pull and re-push would be bad in this case, since
+that makes it look like I'm okay with that.
+
+A failed push could also mean that you are tracking the wrong branch, or pushing
+to the wrong repository.  Git allows you to set a "tracking branch", which can
+be anything---a local branch, a remote branch, or a branch in an entirely
+different repository, local or remote.  Further, you can override the tracking
+branch by specifying which remote to push to as part of the ~push~ command.
+
+In your case, you'd always want to respect the tracking branch and assume that
+there are no problems pushing, since you use only one remote, and the tracking
+branch is always a branch of the same name on origin.
+
+A failed push could also mean that someone rudely rewrote history on the remote
+branch (using ~git push --force~) and someone needs a talkin' to.
+
 ** Get user pubkeys
 
 #+begin_src shell
 curl https://github.com/abo-abo.keys
-#+end_src
-
-** Routine
-
-#+begin_src shell
-git fetch --all
-#+end_src
-
-This results in all pull requests available in the local repo in the local pull/
-namespace.
-
-To check out e.g. PR #42:
-
-#+begin_src shell
-git checkout -b foo refs/pull/upstream/42
 #+end_src
 
 * References
