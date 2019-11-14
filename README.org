@@ -382,7 +382,7 @@ Configure Git to do the ~--rebase~ part automatically.
 
 #+begin_src conf
 [pull]
-    rebase = preserve
+    rebase = merges
 #+end_src
 
 (The merge commit doesn't get deleted!)
@@ -1637,7 +1637,7 @@ See [[http://aanandprasad.com/git-up/][git-up]] (no longer maintained), which is
 git stash
 git fetch --all
 [foreach branch]
-    git rebase --preserve-merges <branch> <remote>/<branch>
+    git rebase --rebase-merges <branch> <remote>/<branch>
     git merge --ff-only <branch>
 [end foreach]
 git checkout <prev_branch>

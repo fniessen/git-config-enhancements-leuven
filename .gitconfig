@@ -65,7 +65,7 @@
     whitespace = fix
 
 [pull]
-    rebase = preserve
+    rebase = merges
 
 [push]
     default = simple
