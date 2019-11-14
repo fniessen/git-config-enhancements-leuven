@@ -9,7 +9,7 @@
 #+SETUPFILE: ~/.dotfiles/org/theme-readtheorg.setup
 
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+PROPERTY:  header-args :tangle ~/.dotfiles/home/.gitconfig :eval no
+#+PROPERTY:  header-args :tangle .gitconfig :eval no
 
 XXX Git-extras (extra commands!)
 https://github.com/tj/git-extras/blob/master/Commands.md
@@ -186,7 +186,7 @@ committer and author of a change in every commit.
 #+begin_src conf
 [user]
     name = John Doe
-    email = johndoe@example.com
+    email = john.doe@example.com
 
 [github]
     user = jdoe
@@ -1945,6 +1945,15 @@ Unmerged files after a merge failure:
     conflicts = "!git ls-files -u | cut -f 2 | sort -u"
 #+end_src
 
+*** Review which file have conflicts
+
+This command tells you which files have conflicts after merging.
+
+#+begin_src conf
+    conflicts = diff --name-only --diff-filter=U
+    unmerged = diff --name-only --diff-filter=U
+#+end_src
+
 ** BRANCH - Branch
 
 *** Branching model
@@ -2633,10 +2642,6 @@ the =origin= remote and to set up tracking.
     unpublish = !git push origin :$(git current-branch)
 #+end_src
 
-#+begin_src conf
-    export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
-#+end_src
-
 ** PUBLISH - Find out if a change is part of a release
 
 #+begin_src conf
@@ -2799,16 +2804,20 @@ See also https://github.com/github-changelog-generator/github-changelog-generato
 
 Generate =zip= archived source code from the given Git tag.
 
-I use this when zipping the current branch with the name of the zip file as the
+I usfe this when zipping the current branch with the name of the zip file as the
 current tag.  Useful for uploading to Elasticbeanstalk.
 
 #+begin_src conf
-currentTag = tag --points-at HEAD
-zip = "!f() { git archive --format=zip -o $(git currentTag).zip HEAD; }; f"
+    currentTag = tag --points-at HEAD
+    zip = "!f() { git archive --format=zip -o $(git currentTag).zip HEAD; }; f"
 #+end_src
 
 #+begin_src conf
-zip-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 patch-${1:-HEAD}.zip; }; f"
+    export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
+#+end_src
+
+#+begin_src conf
+    zip-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 patch-${1:-HEAD}.zip; }; f"
 #+end_src
 
 ** PUBLISH - Tag
@@ -3350,8 +3359,8 @@ List:
 
 ** Easily launch a temporary one-off Git server from any local repository, to enable a peer-to-peer Git workflow
 
-#+begin_src conf :tangle ~/.dotfiles/home/.gitconfig
-    serve="daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
+#+begin_src conf
+    serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
 #+end_src
 
 1. Run git serve. "Ready to rumble," it will report. Git is bad-ass.
@@ -3397,15 +3406,6 @@ you can clean up with:
 
 #+begin_src shell
 git stash drop
-#+end_src
-
-** Review which file have conflicts
-
-This command tells you which files have conflicts after merging.
-
-#+begin_src conf :tangle ~/.dotfiles/home/.gitconfig
-    conflicts = diff --name-only --diff-filter=U
-    unmerged = diff --name-only --diff-filter=U
 #+end_src
 
 ** Alternative
