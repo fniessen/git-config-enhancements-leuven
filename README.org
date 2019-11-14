@@ -401,7 +401,7 @@ Configure Git to do the ~--rebase~ part automatically.
 
 #+begin_src conf
 [pull]
-    rebase = merges
+    rebase = true
 #+end_src
 
 (The merge commit doesn't get deleted!)

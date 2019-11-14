@@ -68,7 +68,7 @@
     submoduleSummary = true
 
 [pull]
-    rebase = merges
+    rebase = true
 
 [push]
     default = simple
