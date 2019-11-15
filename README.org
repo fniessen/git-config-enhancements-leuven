@@ -933,7 +933,7 @@ List commits *showing changed files* (prettier and more concise version of
 
 #+begin_src conf
     # Show Git log for a file.
-    filelog = log --date=short --follow -C
+    filelog = log --date=short --follow -C --
 #+end_src
 
 #+begin_src conf

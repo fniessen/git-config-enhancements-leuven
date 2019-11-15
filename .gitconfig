@@ -264,7 +264,7 @@ dts = diff --word-diff-regex=. --staged
     changed = show --pretty="format:" --name-only
 
     # Show Git log for a file.
-    filelog = log --date=short --follow -C
+    filelog = log --date=short --follow -C --
 
     related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 
