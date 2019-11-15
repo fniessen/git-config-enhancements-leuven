@@ -82,7 +82,7 @@ Output filenames of files changed in each commit:
 svn log -v
 #+end_src
 
-See ~svn-whatchanged~ in my Shell configuration.
+See ~svn-changed~ in my Shell configuration.
 
 ** Show the history of a file
 
