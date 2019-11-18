@@ -102,6 +102,22 @@ See ~svn-filelog-p~ in my Shell configuration.
 
 * REVERT - Undo things
 
+~svn merge -r 1944:1943 .~ should revert the changes of ~r1944~ in your working
+copy. You can then review the changes in your working copy (with diff), but
+you'd need to commit in order to apply the revert into the repository.
+
+** "unadd" a file to SVN before commit
+
+: svn rm --keep-local folder_name
+
+because
+
+: svn revert --recursive folder_name
+
+is unsafe, as it looses all local changes.
+
+* Conflicts
+
 Files marked as *conflicted* show up with a C in ~svn status~, and SVN will refuse
 to commit such files.
 

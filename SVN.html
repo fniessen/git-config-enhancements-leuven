@@ -209,28 +209,33 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgdc5730d">How to fix &ldquo;unable to create pristine install stream&rdquo;</a></li>
-<li><a href="#orge054001">colordiff</a></li>
-<li><a href="#org42c2d6e">SHOW - View your changes</a></li>
-<li><a href="#org07ee211">SHOW - View the commit history</a>
+<li><a href="#org346c543">How to fix &ldquo;unable to create pristine install stream&rdquo;</a></li>
+<li><a href="#orgcc48e53">colordiff</a></li>
+<li><a href="#org71c6af2">SHOW - View your changes</a></li>
+<li><a href="#org9baf406">SHOW - View the commit history</a>
 <ul>
-<li><a href="#org416dfb0">One-line log format (&rsquo;git log&rsquo;)</a></li>
-<li><a href="#orgfec20d9">Make status checks of your working copy easier</a></li>
-<li><a href="#org38e6e99">Show a single revision (&rsquo;git show&rsquo;)</a></li>
-<li><a href="#org211aae7">List all the changed files in a commit</a></li>
-<li><a href="#org7ac1148">Show the history of a file</a></li>
+<li><a href="#orgd723c88">One-line log format (&rsquo;git log&rsquo;)</a></li>
+<li><a href="#org99c19f5">Make status checks of your working copy easier</a></li>
+<li><a href="#org8405a74">Show a single revision (&rsquo;git show&rsquo;)</a></li>
+<li><a href="#org7936006">List all the changed files in a commit</a></li>
+<li><a href="#orgb1f9e9c">Show the history of a file</a></li>
 </ul>
 </li>
-<li><a href="#org183a061">REVERT - Undo things</a></li>
-<li><a href="#orgc67fafd">UPDATE - Pull</a>
+<li><a href="#orgd1f2663">REVERT - Undo things</a>
 <ul>
-<li><a href="#org52cfbc6">Check for incoming changes</a></li>
-<li><a href="#orgc05cf08">Preview incoming changes</a></li>
-<li><a href="#org305897d">Checkout a specific older version of the source code</a></li>
+<li><a href="#org95fa272">&ldquo;unadd&rdquo; a file to SVN before commit</a></li>
 </ul>
 </li>
-<li><a href="#org932861b">Ignore files</a></li>
-<li><a href="#org5714f93">PUBLISH - Prepare a release</a></li>
+<li><a href="#orgd175b98">Conflicts</a></li>
+<li><a href="#org8fbea1c">UPDATE - Pull</a>
+<ul>
+<li><a href="#org41adb18">Check for incoming changes</a></li>
+<li><a href="#orgc5bc5d8">Preview incoming changes</a></li>
+<li><a href="#org1450c18">Checkout a specific older version of the source code</a></li>
+</ul>
+</li>
+<li><a href="#org5d50830">Ignore files</a></li>
+<li><a href="#orgfbc22f4">PUBLISH - Prepare a release</a></li>
 </ul>
 </div>
 </div>
@@ -238,9 +243,9 @@
 Doc: <a href="http://liris.cnrs.fr/seminaires/documents/seminaire_tuto_SVN.pdf">http://liris.cnrs.fr/seminaires/documents/seminaire_tuto_SVN.pdf</a>
 </p>
 
-<div id="outline-container-orgdc5730d" class="outline-2">
-<h2 id="orgdc5730d">How to fix &ldquo;unable to create pristine install stream&rdquo;</h2>
-<div class="outline-text-2" id="text-orgdc5730d">
+<div id="outline-container-org346c543" class="outline-2">
+<h2 id="org346c543">How to fix &ldquo;unable to create pristine install stream&rdquo;</h2>
+<div class="outline-text-2" id="text-org346c543">
 <div class="org-src-container">
 <pre class="src src-shell"><span class="org-builtin">cd</span> .svn
 rm -rf tmp
@@ -250,9 +255,9 @@ mkdir tmp
 </div>
 </div>
 
-<div id="outline-container-orge054001" class="outline-2">
-<h2 id="orge054001">colordiff</h2>
-<div class="outline-text-2" id="text-orge054001">
+<div id="outline-container-orgcc48e53" class="outline-2">
+<h2 id="orgcc48e53">colordiff</h2>
+<div class="outline-text-2" id="text-orgcc48e53">
 <p>
 Use <code>colordiff</code> for my <code>svn diff</code> command (set in <code>~/.subversion/config</code>):
 </p>
@@ -264,9 +269,9 @@ Use <code>colordiff</code> for my <code>svn diff</code> command (set in <code>~/
 </div>
 </div>
 
-<div id="outline-container-org42c2d6e" class="outline-2">
-<h2 id="org42c2d6e">SHOW - View your changes</h2>
-<div class="outline-text-2" id="text-org42c2d6e">
+<div id="outline-container-org71c6af2" class="outline-2">
+<h2 id="org71c6af2">SHOW - View your changes</h2>
+<div class="outline-text-2" id="text-org71c6af2">
 <p>
 To <b>compare all modified files</b> in your working copy with the <code>HEAD</code> revision in the
 repository, use the following command:
@@ -295,26 +300,26 @@ EXCELLENT option <code>--strip-trailing-cr</code>!
 </div>
 </div>
 
-<div id="outline-container-org07ee211" class="outline-2">
-<h2 id="org07ee211">SHOW - View the commit history</h2>
-<div class="outline-text-2" id="text-org07ee211">
+<div id="outline-container-org9baf406" class="outline-2">
+<h2 id="org9baf406">SHOW - View the commit history</h2>
+<div class="outline-text-2" id="text-org9baf406">
 <p>
 The following aliases are interesting for using SVN a bit like Git.
 </p>
 </div>
 
-<div id="outline-container-org416dfb0" class="outline-3">
-<h3 id="org416dfb0">One-line log format (&rsquo;git log&rsquo;)</h3>
-<div class="outline-text-3" id="text-org416dfb0">
+<div id="outline-container-orgd723c88" class="outline-3">
+<h3 id="orgd723c88">One-line log format (&rsquo;git log&rsquo;)</h3>
+<div class="outline-text-3" id="text-orgd723c88">
 <p>
 See <code>svn-log</code> in my Shell configuration.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgfec20d9" class="outline-3">
-<h3 id="orgfec20d9">Make status checks of your working copy easier</h3>
-<div class="outline-text-3" id="text-orgfec20d9">
+<div id="outline-container-org99c19f5" class="outline-3">
+<h3 id="org99c19f5">Make status checks of your working copy easier</h3>
+<div class="outline-text-3" id="text-org99c19f5">
 <p>
 Add them to your <code>.bashrc</code>:
 </p>
@@ -329,9 +334,9 @@ Add them to your <code>.bashrc</code>:
 </div>
 </div>
 
-<div id="outline-container-org38e6e99" class="outline-3">
-<h3 id="org38e6e99">Show a single revision (&rsquo;git show&rsquo;)</h3>
-<div class="outline-text-3" id="text-org38e6e99">
+<div id="outline-container-org8405a74" class="outline-3">
+<h3 id="org8405a74">Show a single revision (&rsquo;git show&rsquo;)</h3>
+<div class="outline-text-3" id="text-org8405a74">
 <div class="org-src-container">
 <pre class="src src-shell">svn diff -c 4795                        <span class="org-comment-delimiter"># </span><span class="org-comment">Or svn diff -r 4795:4792.</span>
 </pre>
@@ -343,9 +348,9 @@ See <code>svn-show</code> and <code>svn-showtool</code> in my Shell configuratio
 </div>
 </div>
 
-<div id="outline-container-org211aae7" class="outline-3">
-<h3 id="org211aae7">List all the changed files in a commit</h3>
-<div class="outline-text-3" id="text-org211aae7">
+<div id="outline-container-org7936006" class="outline-3">
+<h3 id="org7936006">List all the changed files in a commit</h3>
+<div class="outline-text-3" id="text-org7936006">
 <p>
 Output filenames of files changed in each commit:
 </p>
@@ -361,9 +366,9 @@ See <code>svn-changed</code> in my Shell configuration.
 </div>
 </div>
 
-<div id="outline-container-org7ac1148" class="outline-3">
-<h3 id="org7ac1148">Show the history of a file</h3>
-<div class="outline-text-3" id="text-org7ac1148">
+<div id="outline-container-orgb1f9e9c" class="outline-3">
+<h3 id="orgb1f9e9c">Show the history of a file</h3>
+<div class="outline-text-3" id="text-orgb1f9e9c">
 <p>
 To view all historical changes to a file in SVN:
 </p>
@@ -389,9 +394,43 @@ See <code>svn-filelog-p</code> in my Shell configuration.
 </div>
 </div>
 
-<div id="outline-container-org183a061" class="outline-2">
-<h2 id="org183a061">REVERT - Undo things</h2>
-<div class="outline-text-2" id="text-org183a061">
+<div id="outline-container-orgd1f2663" class="outline-2">
+<h2 id="orgd1f2663">REVERT - Undo things</h2>
+<div class="outline-text-2" id="text-orgd1f2663">
+<p>
+<code>svn merge -r 1944:1943 .</code> should revert the changes of <code>r1944</code> in your working
+copy. You can then review the changes in your working copy (with diff), but
+you&rsquo;d need to commit in order to apply the revert into the repository.
+</p>
+</div>
+
+<div id="outline-container-org95fa272" class="outline-3">
+<h3 id="org95fa272">&ldquo;unadd&rdquo; a file to SVN before commit</h3>
+<div class="outline-text-3" id="text-org95fa272">
+<pre class="example">
+svn rm --keep-local folder_name
+</pre>
+
+
+<p>
+because
+</p>
+
+<pre class="example">
+svn revert --recursive folder_name
+</pre>
+
+
+<p>
+is unsafe, as it looses all local changes.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd175b98" class="outline-2">
+<h2 id="orgd175b98">Conflicts</h2>
+<div class="outline-text-2" id="text-orgd175b98">
 <p>
 Files marked as <b>conflicted</b> show up with a C in <code>svn status</code>, and SVN will refuse
 to commit such files.
@@ -413,9 +452,9 @@ svn status -q
 </div>
 </div>
 
-<div id="outline-container-orgc67fafd" class="outline-2">
-<h2 id="orgc67fafd">UPDATE - Pull</h2>
-<div class="outline-text-2" id="text-orgc67fafd">
+<div id="outline-container-org8fbea1c" class="outline-2">
+<h2 id="org8fbea1c">UPDATE - Pull</h2>
+<div class="outline-text-2" id="text-org8fbea1c">
 <p>
 <a href="http://stackoverflow.com/questions/182945/how-to-see-what-will-be-updated-from-repository-before-issuing-svn-update-comm">http://stackoverflow.com/questions/182945/how-to-see-what-will-be-updated-from-repository-before-issuing-svn-update-comm</a>
 </p>
@@ -497,9 +536,9 @@ that were changed on the trunk between when the branch was created and &ldquo;no
 </div>
 </div>
 
-<div id="outline-container-org52cfbc6" class="outline-3">
-<h3 id="org52cfbc6">Check for incoming changes</h3>
-<div class="outline-text-3" id="text-org52cfbc6">
+<div id="outline-container-org41adb18" class="outline-3">
+<h3 id="org41adb18">Check for incoming changes</h3>
+<div class="outline-text-3" id="text-org41adb18">
 <p>
 Show which files are modified in the repository (with an <code>*</code>):
 </p>
@@ -517,9 +556,9 @@ svn log --diff -r BASE:HEAD             <span class="org-comment-delimiter"># </
 </div>
 </div>
 
-<div id="outline-container-orgc05cf08" class="outline-3">
-<h3 id="orgc05cf08">Preview incoming changes</h3>
-<div class="outline-text-3" id="text-orgc05cf08">
+<div id="outline-container-orgc5bc5d8" class="outline-3">
+<h3 id="orgc5bc5d8">Preview incoming changes</h3>
+<div class="outline-text-3" id="text-orgc5bc5d8">
 <p>
 See what has been changed (how it&rsquo;s different from my working copy):
 </p>
@@ -531,9 +570,9 @@ See what has been changed (how it&rsquo;s different from my working copy):
 </div>
 </div>
 
-<div id="outline-container-org305897d" class="outline-3">
-<h3 id="org305897d">Checkout a specific older version of the source code</h3>
-<div class="outline-text-3" id="text-org305897d">
+<div id="outline-container-org1450c18" class="outline-3">
+<h3 id="org1450c18">Checkout a specific older version of the source code</h3>
+<div class="outline-text-3" id="text-org1450c18">
 <p>
 Assuming that the source has already been checked out (that is you have an
 already existing folder&#x2026;), update the revision (say we want to get r4732):
@@ -547,9 +586,9 @@ already existing folder&#x2026;), update the revision (say we want to get r4732)
 </div>
 </div>
 
-<div id="outline-container-org932861b" class="outline-2">
-<h2 id="org932861b">Ignore files</h2>
-<div class="outline-text-2" id="text-org932861b">
+<div id="outline-container-org5d50830" class="outline-2">
+<h2 id="org5d50830">Ignore files</h2>
+<div class="outline-text-2" id="text-org5d50830">
 <p>
 Edit the file ignoring.txt to put the files you want actually to ignore. Then
 use this one to ignore the files listed in the file:
@@ -593,9 +632,9 @@ svn proplist -v
 </div>
 </div>
 
-<div id="outline-container-org5714f93" class="outline-2">
-<h2 id="org5714f93">PUBLISH - Prepare a release</h2>
-<div class="outline-text-2" id="text-org5714f93">
+<div id="outline-container-orgfbc22f4" class="outline-2">
+<h2 id="orgfbc22f4">PUBLISH - Prepare a release</h2>
+<div class="outline-text-2" id="text-orgfbc22f4">
 <p>
 SVN diff zip revision to deploy.
 </p>
