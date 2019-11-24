@@ -263,8 +263,7 @@ dts = diff --word-diff-regex=. --staged
 
     changed = show --pretty="format:" --name-only
 
-    # Show Git log for a file.
-    filelog = log --date=short --follow -C --
+    file-history = log --follow --date-order --date=short -C --
 
     related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 
@@ -280,7 +279,7 @@ dts = diff --word-diff-regex=. --staged
     whatwhen = log --decorate --date=short -p -S
 
     # Find commits by source code.
-    findc = "!f() { git log --decorate --date=short -S $1; }; f"
+    search-code = "!f() { git log --decorate --date=short -S $1; }; f"
 # XXX Does not work for strings with spaces in them...
 
     grep4d = !sh -c 'git log -p -S'$1' $2' -
@@ -328,10 +327,12 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     skipall = "!git status -s | awk {'print $2'} | xargs git skip"
 
-    # Commit changes to current HEAD (modified and deleted files) as amended commit.
+    # Commit changes to current HEAD (modified and deleted files) as amended
+    # commit.
     plus = commit -a -v --amend --reuse-message HEAD
 
-    # Append staged changes to the PREVIOUS commit (changes its SHA, keeps the commit message).
+    # Append staged changes to the PREVIOUS commit (changes its SHA, keeps the
+    # commit message).
     fix = commit -v --amend --reuse-message HEAD
 
     # Change PREVIOUS commit's message to what you type in.
@@ -349,7 +350,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     undelete = checkout --
 
     unstage = reset HEAD --
-# OK
+    unadd = reset HEAD --
 
     undo-soft = reset --soft HEAD~1
     uncommit = reset --soft HEAD~1
@@ -421,7 +422,13 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Here is a correct solution (which does not need access to the remote Git repo).
     prune-local-branches = "!f() { git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d; }; f"
 
-    when = !stat -c %y .git/FETCH_HEAD | cut -d'.' -f1
+    # For the latest pull (even if there's nothing new).
+    last-pulled = !stat -c %y $(git root)/.git/FETCH_HEAD | cut -d'.' -f1
+
+    # For the latest pull resulting in changes coming in from the remote master
+    # branch (the timestamp won't change when git pull reports there are no
+    # changes).
+    last-updated = !stat -c %y $(git root)/.git/refs/heads/$(git current-branch) | cut -d'.' -f1
 
     # Will only try to "merge" if your current HEAD commit is in the branch
     # you're merging in.  This will allow you to merge some commits whilst being
@@ -634,7 +641,8 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
 
-    zip-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 patch-${1:-HEAD}.zip; }; f"
+    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(basename $(git root))-commit-${1:-HEAD}.zip; }; f"
+# Should be {repo-name}-commit-{sha-id}.zip.
 
     last-tag = describe --tags --abbrev=0
 
@@ -739,6 +747,8 @@ hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
                 git branch -D pr/$1; \
             fi \
         }; f"
+
+    pr = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
 
     issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
 

@@ -14,6 +14,12 @@
 XXX Git-extras (extra commands!)
 https://github.com/tj/git-extras/blob/master/Commands.md
 
+XXX Bitbucket API
+https://developer.atlassian.com/bitbucket/api/2/reference/resource/
+
+XXX Bitbucket API client for Browser and Node.js
+https://bitbucketjs.netlify.com/
+
 XXX GitAlias.com file of many git alias items, including shortcuts, helpers, workflows, etc.
 https://github.com/gitalias/gitalias/blob/master/gitalias.txt
 
@@ -25,6 +31,22 @@ http://kentnguyen.com/development/visualized-git-practices-for-team/
 (definition of git rebase)
 
 * Overview
+
+- This is Git.  It tracks collaborative work on projects through a beautiful
+  distributed graph theory model.
+
+- Cool.  How do we use it?
+
+- No idea.  Just memorize these Shell commands and type them to sync up.  If you
+  get errors, save your work elsewhere, delete the project, and download a fresh
+  copy.
+
+  If that doesn't fix it, =git.txt= contains the phone number of a friend of mine
+  who understands git.  Just wait through a few minutes of 'It's really pretty
+  simple, just think of branches as...' and eventually you'll learn the commands
+  that will fix everything.
+
+https://bitbucket.org/blog/get-git-guru-gold-with-bitbuckets-glorious-git-guides
 
 These are common Git commands used in various situations:
 
@@ -837,7 +859,8 @@ I don't need to use the undo commands.
 
 *** Today
 
-Quickly see what you've done today (commits that aren't merges on all branches):
+Quickly see what you've done today (list commits that aren't merges, on all
+branches):
 
 #+begin_src conf
     today = !git log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
@@ -929,20 +952,20 @@ List commits *showing changed files* (prettier and more concise version of
 
 *** Show the history of a file
 
-*List all commits* that changed a *specific file* (it accounts for renames!):
+*List of commits* that modified the *specified file* (will follow renames and
+copies!):
 
 #+begin_src conf
-    # Show Git log for a file.
-    filelog = log --date=short --follow -C --
+    file-history = log --follow --date-order --date=short -C --
 #+end_src
+
+#+begin_warning
+Put a /end of options/ character (~--~) after ~file-history~ and before the path!!
+#+end_warning
 
 #+begin_src conf
     related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 #+end_src
-
-#+begin_warning
-Put a end of options character (--) after lf and before the path!!
-#+end_warning
 
 *** Inspect the commits for each edit
 
@@ -1070,7 +1093,7 @@ Prettier ~whatchanged~ with full diffs based on text search:
 
 #+begin_src conf
     # Find commits by source code.
-    findc = "!f() { git log --decorate --date=short -S $1; }; f"
+    search-code = "!f() { git log --decorate --date=short -S $1; }; f"
 # XXX Does not work for strings with spaces in them...
 
     grep4d = !sh -c 'git log -p -S'$1' $2' -
@@ -1308,10 +1331,12 @@ Modify the *last* commit, amending with the same message -- without your editor
 prompting you for the message you've already entered!
 
 #+begin_src conf
-    # Commit changes to current HEAD (modified and deleted files) as amended commit.
+    # Commit changes to current HEAD (modified and deleted files) as amended
+    # commit.
     plus = commit -a -v --amend --reuse-message HEAD
 
-    # Append staged changes to the PREVIOUS commit (changes its SHA, keeps the commit message).
+    # Append staged changes to the PREVIOUS commit (changes its SHA, keeps the
+    # commit message).
     fix = commit -v --amend --reuse-message HEAD
 
     # Change PREVIOUS commit's message to what you type in.
@@ -1326,7 +1351,7 @@ as if you ran ~git add .~ (stage all local modifications/additions) right before
 the commit.
 
 #+begin_warning
-*Never amend a commit* that you've *already pushed* to a remote repository.
+*NEVER AMEND a commit* that you've *ALREADY PUSHED* to a remote repository.
 https://stackoverflow.com/questions/17176859/amending-a-pushed-commit-message
 #+end_warning
 
@@ -1388,7 +1413,7 @@ When you grab a file from a previous time, it sits *in your index*, modified.
 
 #+begin_src conf
     unstage = reset HEAD --
-# OK
+    unadd = reset HEAD --
 #+end_src
 
 ~unstage~ is the opposite of ~git add~. It lets you remove items from the staging
@@ -1518,6 +1543,14 @@ which:
 - unstages changes in the index,
 - discards changes in the working directory, and
 - removes any new files (*all untracked changes will be lost*).
+
+If you want to save your current branch's state before doing this (just in
+case), you can do:
+
+#+begin_src shell :tangle no
+git commit -a -m "Saving my work, just in case"
+git branch my-saved-work
+#+end_src
 
 **** Hard option -- Clean branch (clean the ignored files in addition to the untracked files)
 
@@ -1806,7 +1839,13 @@ If you want this to be run automatically every time you fetch/pull:
 *** Get timestamp of last pull
 
 #+begin_src conf
-    when = !stat -c %y .git/FETCH_HEAD | cut -d'.' -f1
+    # For the latest pull (even if there's nothing new).
+    last-pulled = !stat -c %y $(git root)/.git/FETCH_HEAD | cut -d'.' -f1
+
+    # For the latest pull resulting in changes coming in from the remote master
+    # branch (the timestamp won't change when git pull reports there are no
+    # changes).
+    last-updated = !stat -c %y $(git root)/.git/refs/heads/$(git current-branch) | cut -d'.' -f1
 #+end_src
 
 ** UPDATE - Merge
@@ -2104,14 +2143,21 @@ resolved, ie. like so
  git revert sha1-of-offending-commit
 #+end_note
 
-In case of error "The following untracked working tree files would be
-overwritten by checkout", *move the untracked files*, instead of *deleting them*.
-For example:
+*** If you get the error "The following untracked working tree files would be overwritten by checkout"
+
+One solution is to *move the untracked files*, instead of *deleting them*.  For
+example:
 
 #+begin_src shell :tangle no
 cd "$(git root)"
 git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f.bak"; done
 #+end_src
+
+Another is to throw away local changes using a *forced checkout*:
+
+: git checkout -f some-branch
+
+*** GitHub Pages
 
 #+begin_src conf :tangle no
 echo 'setting up gh-pages'
@@ -2851,7 +2897,8 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+end_src
 
 #+begin_src conf
-    zip-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 patch-${1:-HEAD}.zip; }; f"
+    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(basename $(git root))-commit-${1:-HEAD}.zip; }; f"
+# Should be {repo-name}-commit-{sha-id}.zip.
 #+end_src
 
 ** PUBLISH - Tag
@@ -3178,7 +3225,7 @@ Show a "top contributors" list (rank), excluding merge commits:
 #+end_src
 
 #+begin_note
-The ~--~ signals the end of options, that the rest of the parameters are limiters.
+The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
 #+end_note
 
 * Graph
@@ -3373,6 +3420,21 @@ changed, so you'll know who to @-mention when opening a pull request.
 Sounds like git-guilt (which I've just read about today), might be
 relevant: https://bitbucket.org/tpettersen/git-guilt
 
+** Search from which PR comes a commit
+
+#+begin_src conf
+    pr = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
+#+end_src
+
+Example:
+
+#+begin_src shell :tangle no
+> git pr a361e276756e6585258dda4014472ca6b3888a7c
+b965075 Merge pull request #255 from yammer/s2s_auth_p4
+#+end_src
+
+In this case, the commit comes from pull request 255.
+
 * Pipelines
 
 * Deployments
@@ -3415,10 +3477,24 @@ http://stackoverflow.com/questions/2569459/git-create-a-branch-from-unstaged-unc
 
 Absolutely read https://github.com/blog/2019-how-to-undo-almost-anything-with-git!
 
-* Recover from problems
+* If you get errors...
 :PROPERTIES:
 :header-args+: :tangle no
 :END:
+
+Many situations may cause "errors":
+
+- merge conflicts (two people editing the same part of the same file)
+
+- unmerged changes (another person committed a change before you did, so you
+  need to merge their changes first)
+
+- attempting to recover from a situation such as an accidental merge, and making
+  the situation worse.
+
+https://explainxkcd.com/wiki/index.php/1597:_Git
+
+** Method 1
 
 It is POSSIBLE that a safe way to recover from your problems is as follows:
 
@@ -3590,3 +3666,11 @@ working directory*:
 
 - http://www.netinstructions.com/git-and-svn-together/
 - https://www.belatrixsf.com/blog/a-happy-way-to-combine-svn-and-git
+
+* Run on all repositories
+
+    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
+
+    # run commands for each repository in the current directory
+
+    all = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
