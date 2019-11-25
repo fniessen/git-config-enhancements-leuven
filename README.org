@@ -859,8 +859,8 @@ I don't need to use the undo commands.
 
 *** Today
 
-Quickly see what you've done today (list commits that aren't merges, on all
-branches):
+Quickly see what you've done today (list commits that aren't merges, on *all
+branches*):
 
 #+begin_src conf
     today = !git log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
@@ -876,6 +876,17 @@ Show changes for a daily standup meeting:
 
 #+begin_src conf
     log-standup = !git log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
+
+    standup = !"git log --branches \
+                        --since=$(if [[ "$(date +%a)" == "Mon" ]]; then \
+                                      echo "friday"; \
+                                  else \
+                                      echo "yesterday"; \
+                                  fi) \
+                        --author=$(git config --get user.email) \
+                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
+                        --date=local"
+# XXX git standup W donne un décompte avec une ligne trop peu !
 #+end_src
 
 *** When
@@ -2065,6 +2076,8 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
     develop = checkout develop
 #+end_src
 
+*** Feature Branches
+
 #+begin_src conf
     # Create branch with prefix feature.
     feature = "!f() { git create-branch feature/$1; }; f"
@@ -2079,6 +2092,24 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
 #+end_src
 
 https://medium.com/gumgum-tech/git-and-git-flow-a-guide-871d46a0ebcb
+
+Alias configuration for our feature branches, like a simple git flow for feature
+stories, or hotfix patches, etc.
+
+Create a new feature branch:
+
+: feature-start = '!branch=$1; git checkout master; git pull; git checkout -b "$branch" master'
+
+Update the feature branch:
+
+: feature-pull = '!branch=$(git current-branch); git checkout master; git pull; git checkout "$branch"; git rebase master'
+
+Share the feature branch:
+
+: feature-push = '!branch=$(git current-branch); git push -u origin "$branch"'
+
+If your team uses a different feature flow, you may want to skip including these
+aliases, or you may want to edit these aliases to match your team's feature flow.
 
 *** Git workflows
 
@@ -2179,32 +2210,6 @@ git stash \
 && echo 'Complete' \
 && echo '-------------------' \
 && echo 'You can find your last changes in the stash!'
-#+end_src
-
-*** List all branches
-
-*List all branches* (both local remote-tracking and local branches), showing SHA
-and commit subject line for each head, along with the name of the upstream
-branch (if any).
-
-#+begin_src conf
-    # Show local and remote branches.
-    br = branch -a -vv
-#+end_src
-
-#+begin_src conf
-    be = branch --edit-description
-#+end_src
-
-#+begin_src conf
-    # I want to change branches; which are my recent ones again?
-    coto = branch --sort=-committerdate
-
-    # List branches sorted by last modified.
-    b = "!git for-each-ref --sort='-authordate' --format='%(authordate)%09%(objectname:short)%09%(refname)' refs/heads | sed -e 's-refs/heads/--'"
-
-    local-branch-dates = !git for-each-ref --sort=-committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
-    # TODO Invert the order!
 #+end_src
 
 *** Delete a branch
@@ -2383,26 +2388,6 @@ See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its
     sbt = show-branch --topics
     sbs = show-branch --sha1-name
 #+end_src
-
-** Topic Branches
-
-Alias configuration for our topic branches, like a simple git flow for feature
-stories, or hotfix patches, etc.
-
-Create a new topic branch:
-
-: topic-start = '!branch=$1; git checkout master; git pull; git checkout -b "$branch" master'
-
-Update the topic branch:
-
-: topic-pull = '!branch=$(git current-branch); git checkout master; git pull; git checkout "$branch"; git rebase master'
-
-Share the topic branch:
-
-: topic-push = '!branch=$(git current-branch); git push -u origin "$branch"'
-
-If your team uses a different topic flow, you may want to skip including these
-aliases, or you may want to edit these aliases to match your team's topic flow.
 
 ** Stash
 
@@ -3101,13 +3086,45 @@ Find file in all branches.
 
 * Branches
 
-- Show all branches
-- Show your branches
-- Show active branches
-- Show merged branches
-- Show stale branches
+** Show all branches
+
+*List all branches* (both local remote-tracking and local branches), showing SHA
+and commit subject line for each head, along with the name of the upstream
+branch (if any).
 
 (Sort by Last updated)
+
+: git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads
+
+fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs/heads/__" | sed "s_refs/remotes/__" | fzf --query="$@" --height=40% --ansi --tac --color=16 --border | awk '{print $1}' | xargs git co; }; f"
+(fuzzy checkout a git branch)
+
+#+begin_src conf
+    # Show local and remote branches.
+    br = branch -a -vv
+#+end_src
+
+#+begin_src conf
+    be = branch --edit-description
+#+end_src
+
+#+begin_src conf
+    track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
+#+end_src
+
+    #+begin_src conf
+    branches = !git for-each-ref \
+                    --sort=-committerdate refs/heads/ \
+                    --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) - %(contents:subject) - %(color:blue)%(authorname)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
+#+end_src
+
+** Show your branches
+
+** Show active branches
+
+** Show merged branches
+
+** Show stale branches
 
 * Tags
 

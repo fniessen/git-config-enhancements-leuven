@@ -227,6 +227,17 @@ dts = diff --word-diff-regex=. --staged
 
     log-standup = !git log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
 
+    standup = !"git log --branches \
+                        --since=$(if [[ "$(date +%a)" == "Mon" ]]; then \
+                                      echo "friday"; \
+                                  else \
+                                      echo "yesterday"; \
+                                  fi) \
+                        --author=$(git config --get user.email) \
+                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
+                        --date=local"
+# XXX git standup W donne un décompte avec une ligne trop peu !
+
     # When was this file last updated, on each local branch.
     wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
                         echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; \
@@ -488,20 +499,6 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Create a new branch, and then switch to it.
     create-branch = checkout -b
 
-    # Show local and remote branches.
-    br = branch -a -vv
-
-    be = branch --edit-description
-
-    # I want to change branches; which are my recent ones again?
-    coto = branch --sort=-committerdate
-
-    # List branches sorted by last modified.
-    b = "!git for-each-ref --sort='-authordate' --format='%(authordate)%09%(objectname:short)%09%(refname)' refs/heads | sed -e 's-refs/heads/--'"
-
-    local-branch-dates = !git for-each-ref --sort=-committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
-    # TODO Invert the order!
-
     # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
 
@@ -695,6 +692,17 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                             echo \"${branch}:\"; \
                                 git ls-tree -r --name-only $branch | nl -bn -w3 | grep --color=auto \"$1\"; \
                             done; }; f"
+
+    # Show local and remote branches.
+    br = branch -a -vv
+
+    be = branch --edit-description
+
+    track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
+
+    branches = !git for-each-ref \
+                    --sort=-committerdate refs/heads/ \
+                    --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) - %(contents:subject) - %(color:blue)%(authorname)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
 
     # Delete local and remote tags.
     delete-tag = "!f() { [ -z ${1} ] \
