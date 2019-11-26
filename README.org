@@ -174,7 +174,7 @@ If that isn't satisfactory, then
  > or putting our work into a new branch, like:
  >
  > --8<---------------cut here---------------start------------->8---
- > git checkout -b new-branch-name
+ > git create-branch new-branch-name
  > git commit -a -m "Edited"
  > git checkout master
  > git pull
@@ -375,7 +375,9 @@ Diff the last commit for a given file:
 
 Usage (no matter where you are in the repo):
 
-: git diff-file-last-commit File.cpp
+#+begin_src shell :tangle no
+git diff-file-last-commit File.cpp
+#+end_src
 
 This opens your configured ~difftool~ with the changes to File.cpp in the last
 commit it was touched.
@@ -719,6 +721,19 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     dump = cat-file -p
 #+end_src
 
+#+begin_src conf
+recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
+	today = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+	changelog = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
+	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
+	local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
+#+end_src
+
+#+begin_src conf
+     catchup = !git fetch; git rebase origin/master
+# For catching up those random feature branches you haven't had to touch in months.
+#+end_src
+
 (see http://gitimmersion.com/lab_11.html)
 
 Define:
@@ -811,6 +826,11 @@ Staging for commit is typically done by ~git add~.
     #+begin_src conf
     wdiff = diff --word-diff
     dw = diff --word-diff
+#+end_src
+
+#+begin_src conf
+    # Configure git-diff to produce the absolutely most minimal diff possible.
+    wdiff = diff -w --word-diff-regex=. --color-words -U0
 #+end_src
 
 #+begin_src conf
@@ -1052,10 +1072,11 @@ git log --all-match --grep=<foo> --grep=<bar>
 Show the *last commit* whose *message matches a regexp*:
 
 #+begin_src shell :tangle no
-# Show the last commit which has the word "fix" in its message.
-git show :/fix
+# Show the LATEST commit which has the text "fix: font" in its message.
+git log :/"fix: font"
+git show :/"fix: font"
 
-# Show the last merge commit.
+# Show the LATEST merge commit.
 git show :/^Merge
 #+end_src
 
@@ -1395,6 +1416,10 @@ github.com/iam4x/zsh-iterm-touchbar
 And obviously for those that didn't know it:
 learngitbranching.js.org/
 
+*** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
+
+: git show commit-hash -- path/to/file.html | git apply --reverse
+
 *** Unmodify a modified file / Undelete a deleted file
 
 *Undo* the local changes *in the working directory*: roll a file back to its last
@@ -1496,6 +1521,7 @@ directory*:
     # Erase any changes since your last commit (reset every file in your working
     # directory to its committed state).
     undo = reset --hard HEAD~1
+    # Delete last commit.
 #+end_src
 
 If you reset work that you /never committed/, it is gone for good.  Too bad!  This
@@ -1548,6 +1574,7 @@ Usage:
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
     # Files and directories in .gitignore will be preserved.
     clear-soft = !git clean -d -f && git reset --hard
+    # Discard current changes and throw out new files.
 #+end_src
 
 which:
@@ -1653,6 +1680,9 @@ files*):
 
 #+begin_src conf
     in-what = diff --stat ...@{u}
+
+    du = diff @{u} HEAD
+    # diff with upstream branch
 #+end_src
 
 #+begin_warning
@@ -1694,9 +1724,14 @@ XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
 #+begin_src conf
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
+    up= "!git fetch origin && git branch -v -a"
 #+end_src
 
 See https://www.praqma.com/stories/git-autostash/.
+
+: git rebase -i --autosquash --autostash
+
+Really handy in projects that don't do merge commits.
 
 See [[http://aanandprasad.com/git-up/][git-up]] (no longer maintained), which is (roughly) equivalent of executing the following:
 
@@ -2034,48 +2069,6 @@ This command tells you which files have conflicts after merging.
 
 ** BRANCH - Branch
 
-*** Branching model
-
-Consistent *naming conventions* (from the [[https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow][Gitflow]] Git workflow):
-
-- =master= (used for *production releases*)
-
-  It should be the most stable branch. Merges commits from develop, release and
-  hotfix branches.
-
-- =develop= (used as integration branch for *"next release" development*)
-
-  It has the newest features and fixes. Merges commits from feature and bugfix
-  branches.
-
-- prefix =feature/MSW-709-add-support-for-webm= (for new *features*, such as Jira
-  *stories*)
-
-  These branches are short lived as they only exist while a specific feature is
-  being developed. Usually does not merge any commits unto it, unless there is
-  another feature derived from it.
-
-- prefix =bugfix/= (typically used to fix Release branches, such as Jira *bugs*)
-
-  Used to fix bugs found that either exist in develop but have not made it into
-  production, or that do exist in production but can wait until the next
-  release. These branches merge into develop.
-
-- prefix =release/2018-12-24= (used for preparing and testing *release* tasks)
-
-- prefix =hotfix/fix-123-for-production= (used to *urgently fix* bugs on *production*,
-  that have high impact)
-
-  Used to fix pressing issues that are found in production. Hotfix branches
-  merge directly to master.
-
-Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
-
-#+begin_src conf
-    master = checkout master
-    develop = checkout develop
-#+end_src
-
 *** Feature Branches
 
 #+begin_src conf
@@ -2098,7 +2091,7 @@ stories, or hotfix patches, etc.
 
 Create a new feature branch:
 
-: feature-start = '!branch=$1; git checkout master; git pull; git checkout -b "$branch" master'
+: feature-start = '!branch=$1; git checkout master; git pull; git create-branch "$branch" master'
 
 Update the feature branch:
 
@@ -2145,35 +2138,6 @@ jump across commits:
     next = "!f() { git checkout $(git rev-list --topo-order HEAD..master | tail -1; }; f"
 #+end_src
 
-*** Create a branch
-
-#+begin_src conf
-    # Create a new branch, and then switch to it.
-    create-branch = checkout -b
-#+end_src
-
-#+begin_note
-I think the recommended approach is to create a branch pointing at a
-specific commit. So:
-
-: git checkout -b test_branch 7e09ef09
-
-Otherwise you're in a "detached head" state, which can have odd results.
-The branch method is at least a little more stable.
-#+end_note
-
-#+begin_note
-I usually branch off from the commit before the offending
-commit and stay there until things are resolved (unless I'm able to
-resolve it myself).
-
-Or I branch off =master= and revert the offending commit until things are
-resolved, ie. like so
- git checkout master
- git checkout -b sb-master
- git revert sha1-of-offending-commit
-#+end_note
-
 *** If you get the error "The following untracked working tree files would be overwritten by checkout"
 
 One solution is to *move the untracked files*, instead of *deleting them*.  For
@@ -2201,7 +2165,7 @@ echo 'Now, tell me your repository name: '
 read repository
 
 git stash \
-&& git checkout -b 'gh-pages' \
+&& git create-branch 'gh-pages' \
 && echo 'My Page' > index.html \
 && git add . \
 && git commit -a -m 'Initial commit' \
@@ -2252,7 +2216,7 @@ to the current branch* that you are in.
 #+begin_tip
 In the event that you accidentally delete ~master~, get it back with:
 
-: git checkout -b master origin/master
+: git create-branch master origin/master
 #+end_tip
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
@@ -2373,7 +2337,7 @@ reflog for =HEAD=).
    existing is to use the command ~git reflog name-of-my-branch~ to *find the SHA*
    for the commit at the tip of your deleted branch -- It works also with
    a remote, for example if you forced push.  Otherwise, use ~git reflog~.
-2. Then, you can just ~git checkout -b <branch> <sha1>~ to recreate the branch
+2. Then, you can just ~git create-branch <branch> <sha1>~ to recreate the branch
    from there.
 
 See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its-deletion-in-git
@@ -2604,7 +2568,7 @@ XXX See doc of git help stash for workflows...
            make the emergency fix, like this:
 
                # ... hack hack hack ...
-               $ git checkout -b my_wip
+               $ git create-branch my_wip
                $ git commit -a -m "WIP"
                $ git checkout master
                $ edit emergency fix
@@ -2847,12 +2811,13 @@ Save a repo as a tarball:
 
 *** ChangeLog
 
-Generate a version of your [[https://keepachangelog.com/][CHANGELOG.md]]:
+Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit message since the
+last tag.
 
 #+begin_src conf
     # Detailed list of changes.
-    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $1...$2' -
-    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $1...$2' -
+    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
+    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 #+end_src
 
 XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries on mcpflow repo
@@ -2924,7 +2889,7 @@ List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
 
 #+begin_src conf
     # Show verbose output about tags.
-    tags = !git tag -l | sort -V
+    tags = !git tag -l --sort=v:refname
 #+end_src
 
 Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin
@@ -3086,6 +3051,69 @@ Find file in all branches.
 
 * Branches
 
+** Branching model
+
+Consistent *naming conventions* (from the [[https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow][Gitflow]] Git workflow):
+
+- =master= (used for *production releases*)
+
+  It should be the most stable branch. Merges commits from develop, release and
+  hotfix branches.
+
+- =develop= (used as integration branch for *"next release" development*)
+
+  It has the newest features and fixes. Merges commits from feature and bugfix
+  branches.
+
+- prefix =feature/MSW-709-add-support-for-webm= (for new *features*, such as Jira
+  *stories*)
+
+  These branches are short lived as they only exist while a specific feature is
+  being developed. Usually does not merge any commits unto it, unless there is
+  another feature derived from it.
+
+- prefix =bugfix/= (typically used to fix Release branches, such as Jira *bugs*)
+
+  Used to fix bugs found that either exist in develop but have not made it into
+  production, or that do exist in production but can wait until the next
+  release. These branches merge into develop.
+
+- prefix =release/2018-12-24= (used for preparing and testing *release* tasks)
+
+- prefix =hotfix/fix-123-for-production= (used to *urgently fix* bugs on *production*,
+  that have high impact)
+
+  Used to fix pressing issues that are found in production. Hotfix branches
+  merge directly to master.
+
+** Create a branch
+
+#+begin_src conf
+    # Create a new branch, and then switch to it.
+    create-branch = checkout -b
+#+end_src
+
+#+begin_note
+To create a branch from a specific commit:
+
+: git create-branch test_branch 7e09ef09
+
+Otherwise you're in a "detached head" state, which can have odd results.
+The branch method is at least a little more stable.
+#+end_note
+
+#+begin_note
+I usually branch off from the commit before the offending
+commit and stay there until things are resolved (unless I'm able to
+resolve it myself).
+
+Or I branch off =master= and revert the offending commit until things are
+resolved, ie. like so
+ git checkout master
+ git create-branch sb-master
+ git revert sha1-of-offending-commit
+#+end_note
+
 ** Show all branches
 
 *List all branches* (both local remote-tracking and local branches), showing SHA
@@ -3115,7 +3143,7 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
     #+begin_src conf
     branches = !git for-each-ref \
                     --sort=-committerdate refs/heads/ \
-                    --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) - %(contents:subject) - %(color:blue)%(authorname)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
+                    --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
 #+end_src
 
 ** Show your branches
@@ -3125,6 +3153,15 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 ** Show merged branches
 
 ** Show stale branches
+
+** Switch
+
+Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
+
+#+begin_src conf
+    master = checkout master
+    develop = checkout develop
+#+end_src
 
 * Tags
 
@@ -3229,6 +3266,12 @@ Tag and push changes to the repository:
     release = "!f() { git tag -a v$1 -m \"Release version $1\" \
                    && git push origin --tags \
                    && git push origin; }; f"
+#+end_src
+
+Remove Git from current project:
+
+#+begin_src conf :tangle no
+find . -name '.git' -exec rm -rf {} \;
 #+end_src
 
 * Contributors
@@ -3412,7 +3455,7 @@ namespace.
 To check out e.g. PR #42:
 
 #+begin_src shell :tangle no
-git checkout -b foo refs/pull/upstream/42
+git create-branch foo refs/pull/upstream/42
 #+end_src
 
 ** Who?
@@ -3689,5 +3732,4 @@ working directory*:
     print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
 
     # run commands for each repository in the current directory
-
     all = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"

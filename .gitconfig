@@ -167,6 +167,15 @@
     type = cat-file -t
     dump = cat-file -p
 
+recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
+	today = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+	changelog = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
+	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
+	local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
+
+     catchup = !git fetch; git rebase origin/master
+# For catching up those random feature branches you haven't had to touch in months.
+
     exec = '!exec '
 
     # Show the diff between the latest commit and the current state
@@ -195,6 +204,9 @@
 
     wdiff = diff --word-diff
     dw = diff --word-diff
+
+    # Configure git-diff to produce the absolutely most minimal diff possible.
+    wdiff = diff -w --word-diff-regex=. --color-words -U0
 
 # Diff line-wise
 d = diff
@@ -372,10 +384,12 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Erase any changes since your last commit (reset every file in your working
     # directory to its committed state).
     undo = reset --hard HEAD~1
+    # Delete last commit.
 
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
     # Files and directories in .gitignore will be preserved.
     clear-soft = !git clean -d -f && git reset --hard
+    # Discard current changes and throw out new files.
 
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
     # including those in .gitignore.
@@ -393,6 +407,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     in-what = diff --stat ...@{u}
 
+    du = diff @{u} HEAD
+    # diff with upstream branch
+
     pull = pull -v
 
     # up = "!git stash && git pull && git stash pop"
@@ -402,6 +419,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
+    up= "!git fetch origin && git branch -v -a"
 
     up-tmpname = "!f() { git remote update -p; git merge --ff-only @{u}; }; f"
 
@@ -477,9 +495,6 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     conflicts = diff --name-only --diff-filter=U
     unmerged = diff --name-only --diff-filter=U
 
-    master = checkout master
-    develop = checkout develop
-
     # Create branch with prefix feature.
     feature = "!f() { git create-branch feature/$1; }; f"
     # XXX or feature-start?
@@ -495,9 +510,6 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     co = checkout
 
     next = "!f() { git checkout $(git rev-list --topo-order HEAD..master | tail -1; }; f"
-
-    # Create a new branch, and then switch to it.
-    create-branch = checkout -b
 
     # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
@@ -630,8 +642,8 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
  # stage='git push staging $(git current-branch):master'
 
     # Detailed list of changes.
-    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $1...$2' -
-    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $1...$2' -
+    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
+    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 
     currentTag = tag --points-at HEAD
     zip = "!f() { git archive --format=zip -o $(git currentTag).zip HEAD; }; f"
@@ -644,7 +656,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     last-tag = describe --tags --abbrev=0
 
     # Show verbose output about tags.
-    tags = !git tag -l | sort -V
+    tags = !git tag -l --sort=v:refname
 
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
     # branche courante.
@@ -693,6 +705,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                                 git ls-tree -r --name-only $branch | nl -bn -w3 | grep --color=auto \"$1\"; \
                             done; }; f"
 
+    # Create a new branch, and then switch to it.
+    create-branch = checkout -b
+
     # Show local and remote branches.
     br = branch -a -vv
 
@@ -702,7 +717,10 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     branches = !git for-each-ref \
                     --sort=-committerdate refs/heads/ \
-                    --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) - %(contents:subject) - %(color:blue)%(authorname)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
+                    --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
+
+    master = checkout master
+    develop = checkout develop
 
     # Delete local and remote tags.
     delete-tag = "!f() { [ -z ${1} ] \
