@@ -1678,37 +1678,6 @@ done
 
 XXX Is this ~sync~?
 
-*** Delete all old local branches
-
-Remove stale branches in your local repository that *no longer exist in the
-remote* one (by deleting the local ones that show they are "gone" in ~git
-branch -vv~):
-
-#+begin_src conf
-    # Git config alias escaping...  This DOES NOT work.
-    # prune-local-branches = !sh -c 'git fetch -p && git branch -vv | grep \": gone]\" | awk \"{print $1}\" | xargs git branch -d'
-
-    # Here is a correct solution (using bash as a command-line).
-    prune-local-branches = "!f() { git fetch -p && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d; }; f"
-
-    # Here is a correct solution (which does not need access to the remote Git repo).
-    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d; }; f"
-#+end_src
-
-To remove all tracking branches that you have locally but are no more present in
-the remote repository (origin):
-
-: git remote prune origin
-
-Use the ~--dry-run~ flag to only see what branches will be pruned, but not
-actually prune them:
-
-: git remote prune origin --dry-run
-
-If you want this to be run automatically every time you fetch/pull:
-
-: git config --global fetch.prune true
-
 *** Get timestamp of last pull
 
 #+begin_src conf
@@ -1899,11 +1868,13 @@ This command tells you which files have conflicts after merging.
 *** Feature Branches
 
 #+begin_src conf
-    # Create branch with prefix feature.
-    feature = "!f() { git create-branch feature/$1; }; f"
+    # Create a feature branch.
+    feature = "!f() { git create-branch feature/$1 develop; }; f"
     # XXX or feature-start?
 
-    feature-finish = "!f() { git merge --no-ff feature/$1 && git delete-branch feature/$1; }; f"
+    # Incorporate a finished feature on develop.
+    feature-finish = "!f() { git checkout develop; \
+                             git merge --no-ff feature/$1 && git delete-local-branch feature/$1; }; f"
 
     # XXX Also bug and refactor.
 
@@ -2002,51 +1973,6 @@ git stash \
 && echo '-------------------' \
 && echo 'You can find your last changes in the stash!'
 #+end_src
-
-*** Delete a branch
-
-Delete a *local* branch:
-
-#+begin_src conf
-    # Politely ask Git to delete a local branch.
-    delete-local-branch = branch -d
-#+end_src
-
-#+begin_note
-The ~-d~ (~--delete~) option only deletes the branch if it has already been fully
-merged in its upstream branch.
-
-You could also use ~-D~, which is an alias for ~--delete --force~, which deletes the
-branch "irrespective of its merged status."
-#+end_note
-
-Delete a *remote* branch:
-
-#+begin_src conf
-    # Delete remote branch.
-    delete-remote-branch = push origin --delete
-#+end_src
-
-*** Delete merged branches
-
-~delete-merged-branches~ *removes* (in bulk) *all* the *branches* that have been *merged
-to the current branch* that you are in.
-
-#+begin_src conf
-    # Remove branches that have already been merged to the current branch.
-    delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
-                               grep -v master | \
-                               xargs -n 1 git branch -d; }; f"
-                               # xargs -r git branch -d; }; f"
-#+end_src
-
-#+begin_tip
-In the event that you accidentally delete ~master~, get it back with:
-
-: git create-branch master origin/master
-#+end_tip
-
-See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 
 *** Show the history difference between a local branch and its remote
 
@@ -3202,6 +3128,88 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
 #+begin_src conf
     master = checkout master
     develop = checkout develop
+#+end_src
+
+** Delete branch
+
+*** Delete local branch
+
+Delete a *local* branch:
+
+#+begin_src conf
+    # Politely ask Git to delete a local branch.
+    delete-local-branch = branch -d
+#+end_src
+
+#+begin_note
+The ~-d~ (~--delete~) option only deletes the branch if it has already been fully
+merged in its upstream branch.
+
+You could also use ~-D~, which is an alias for ~--delete --force~, which deletes the
+branch "irrespective of its merged status."
+#+end_note
+
+*** Delete merged branches
+
+~delete-merged-branches~ *removes* (in bulk) *all* the local *branches* that have been
+*merged to the current branch* that you are in.
+
+#+begin_src conf
+    # Remove branches that have already been merged to the current branch.
+    delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
+                                     egrep -v \"(master|develop)\" | \
+                                     xargs -n 1 git branch -d; }; f"
+                                     # xargs -r git branch -d; }; f"
+#+end_src
+
+#+begin_tip
+In the event that you accidentally delete ~master~, get it back with:
+
+: git create-branch master origin/master
+#+end_tip
+
+See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
+
+*** Delete remote branch
+
+Delete a *remote* branch:
+
+#+begin_src conf
+    # Delete remote branch.
+    delete-remote-branch = push origin --delete
+#+end_src
+
+*** Delete all old local branches
+
+Once you delete the branch from the remote, you can remove all tracking branches
+that you have locally but are no more present in the remote repository (~origin~)
+with:
+
+: git remote prune origin
+
+#+begin_tip
+Use the ~--dry-run~ flag to only see what branches will be pruned, but not
+actually prune them:
+
+: git remote prune origin --dry-run
+#+end_tip
+
+#+begin_tip
+If you want this to be run automatically every time you fetch/pull:
+
+: git config --global fetch.prune true
+#+end_tip
+
+or prune individual remote tracking branches with:
+
+: git branch -dr branchname
+
+Remove stale branches in your local repository that *no longer exist in the
+remote* one (by deleting the local ones that show they are "gone" in ~git
+branch -vv~):
+
+#+begin_src conf
+    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d; }; f"
 #+end_src
 
 * Tags
