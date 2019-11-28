@@ -1029,124 +1029,6 @@ moved or copied the lines.
     whodoikill = blame -w -C -n
 #+end_src
 
-** SHOW - Search for commits
-
-*** Search regexp within commit messages
-
-You can find commits that contain particular words in the message. For example,
-fix typo matches commits containing the words "fix" and "typo."
-
-If you want to find all commits (*across all branches*, showing names and status
-of changed files) where *log message* matches a specified pattern (regular
-expression), use ~find~.
-
-#+begin_src conf
-    find = "log --decorate -i --all --date=short --grep"
-
-    # Search commits (Filter by commit message).
-    findm = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
-#+end_src
-
-Add ~--name-status~ to show only names and status of *changed files*.
-
-For example, to find all commits referencing bug #382:
-
-#+begin_src shell :tangle no
-git findm "Bug #382"
-#+end_src
-
-To find commits that match *either* of patterns (implicit *OR* semantic), you can
-use:
-
-#+begin_src shell :tangle no
-git log --grep=<foo> --grep=<bar>
-#+end_src
-
-To find /commit/ that has *both* line matching first and line matching second
-somewhere, use the *AND* semantic:
-
-#+begin_src shell :tangle no
-git log --all-match --grep=<foo> --grep=<bar>
-#+end_src
-
-Show the *last commit* whose *message matches a regexp*:
-
-#+begin_src shell :tangle no
-# Show the LATEST commit which has the text "fix: font" in its message.
-git log :/"fix: font"
-git show :/"fix: font"
-
-# Show the LATEST merge commit.
-git show :/^Merge
-#+end_src
-
-*** Search string (added/removed) in code
-
-If you want to find all commits where a *string* was *added or removed* in the /file
-contents/ (to be more exact: where its *number of occurrences changed* in the
-source file), i.e. search the /commit contents/, use ~-S~.
-
-You can dig up commits that have, for example,
-- removed calls to a specific function, or
-- added a certain CSS classname.
-
-#+begin_warning
-If the number of times "foo" appears in the file is the same before and after
-a commit, it will not match using ~-S "foo"~.
-#+end_warning
-
-In other words, to find the following commit:
-
-#+begin_src diff :tangle no
-@@ -4211,9 +4211,10 @@ public class MovesHandler extends EventHandlerBase {
-      */
-
-     private boolean actionsNotCompleted(final EventHandlerContext context, final String mo_id) {
-         final Object found_mo_id =
-                 selectDbValue(context, "activity_log", "activity_log_id", "mo_id=" + mo_id
--                    + " AND status NOT IN ('COMPLETED-V','REJECTED','CANCELLED')");
-+                    + " AND status NOT IN ('COMPLETED-V','CLOSED','REJECTED','CANCELLED')");
-         return (found_mo_id != null);
-     }
-#+end_src
-
-you *need to search on 'CLOSED'*.  Searching on 'COMPLETED-V' would not bring back
-that commit!
-
-#+begin_src shell :tangle no
-git log --all -S "foo" --since="1 week ago"
-#+end_src
-
-#+begin_src conf
-    whatwhen = log --decorate --date=short -p -S
-#+end_src
-
-Prettier ~whatchanged~ with full diffs based on text search:
-
-#+begin_src conf
-    # Find commits by source code.
-    search-code = "!f() { git log --decorate --date=short -S $1; }; f"
-# XXX Does not work for strings with spaces in them...
-
-    grep4d = !sh -c 'git log -p -S'$1' $2' -
-# Not the best example, but: git grep4d CLOSED '*.java'
-#+end_src
-
-By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
-~--pickaxe-regex~.
-
-*** Search regexp (added/removed/changed?) in code
-
-String contained in added/removed lines from Commit contents (Diff)
-
-With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
-any *line* that was added, removed, or changed.
-
-#+begin_src shell :tangle no
-git log --all -G "foo" --since="1 week ago"
-git log --all -G "foo" --full-history --since="1 week ago"
-#+end_src
-
 ** SHOW - find all "unpushed" commits for all projects in a directory
 
 See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
@@ -1156,61 +1038,6 @@ See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-co
                      echo \"\n*** Repository: $d ***\" \
                      && git --git-dir=$d --work-tree=$d/.. status | grep -q \"is ahead of\"; \
                    done"
-#+end_src
-
-** Grep (Print lines matching a pattern)
-
-- grep  :: search with basic regular expressions (BRE)
-- egrep :: search with extended regular expressions (ERE)
-- fgrep :: find string
-
-*** Pattern in working directory (and its subdirectories)
-
-The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
-your project files (i.e. no files in =.git=), but also that is allows you to
-interface with your repository's Git database; for example, for searching:
-
-- files registered in the index, rather than the working tree,
-- for your regexp in some files from another branch (XXX does not work? XXX).
-
-#+begin_note
-It doesn't search files that are not revisioned (untracked, excluded/ignored,
-etc.).
-#+end_note
-
-Example:
-
-#+begin_src shell :tangle no
-git grep "foo" -- '*.java'
-#+end_src
-
-More readable output, *with grouping* (like Ripgrep, ~rg~):
-
-#+begin_src conf
-    # Case-sensitive.
-    rg = "grep --break --heading --line-number"
-
-# In all commits, not in all branches!!! Lots of duplicates!!!
-grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
-#+end_src
-
-Broader search (*case-sensitive*), output *without grouping*:
-
-#+begin_src conf
-    # `-I' = Don't match the pattern in binary files.
-    g = "grep -I"
-
-    # Name only.
-    gno = "grep -I --files-with-matches"
-#+end_src
-
-*** Find files that contain some terms, not necessarily on the same line
-
-Match any of these patterns, but print matches only from files that have /all/ of
-them (files must have lines that match each of them):
-
-#+begin_src shell :tangle no
-git grep --all-match -e <regexp> -e <regexp>
 #+end_src
 
 ** Ignoring files
@@ -2851,6 +2678,11 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 # Should be {repo-name}-commit-{sha-id}.zip.
 #+end_src
 
+#+begin_src conf
+    # Create a git archive of the specified commit.
+    export-commit2 = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
+#+end_src
+
 ** PUBLISH - Tag
 
 When tagging releases in a version control system, the tag for a version should
@@ -3030,15 +2862,17 @@ will ~reset~ the index.
 
 * ------------------------------------------------------------------------------
 
-* Files
+* Source
 
-Find file (by path) in the current branch.
+** Search for files
+
+Search file (by file path) in the current branch.
 
 #+begin_src conf
     find-file = !git ls-tree -r --name-only $(git current-branch) | grep --color=auto
 #+end_src
 
-Find file in all branches.
+Search file in all branches.
 
 #+begin_src conf
     find-file-all = "!f() { for branch in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
@@ -3047,7 +2881,214 @@ Find file in all branches.
                             done; }; f"
 #+end_src
 
+** Search for code
+
+*Code search* looks through all lines of code of all the files (by file contents)
+from the working directory (and its subdirectories).
+
+#+begin_src conf
+    search-code = "grep -i --line-number --break --heading -C 1"
+
+# ack = '-c color.grep.linenumber="bold yellow"
+#     -c color.grep.filename="bold green"
+#     -c color.grep.match="reverse yellow"
+#     grep --break --heading --line-number'
+#+end_src
+
+Find all instances of the specified string in code files *with a certain file
+extension*.
+
+#+begin_src conf
+    search-code-extension = "XXX"
+#+end_src
+
+Find all instances of the specified string in code *in the specified path*.
+
+#+begin_src conf
+    search-code-path = "XXX"
+#+end_src
+
+*** Pattern in working directory (and its subdirectories)
+
+The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
+your project files (i.e. no files in =.git=), but also that is allows you to
+interface with your repository's Git database; for example, for searching:
+
+- files registered in the index, rather than the working tree,
+- for your regexp in some files from another branch (XXX does not work? XXX).
+
+#+begin_note
+It doesn't search files that are not revisioned (untracked, excluded/ignored,
+etc.).
+#+end_note
+
+Example:
+
+#+begin_src shell :tangle no
+git grep "foo" -- '*.java'
+#+end_src
+
+More readable output, *with grouping* (like Ripgrep, ~rg~, or ~ack~):
+
+#+begin_src conf
+# In all commits, not in all branches!!! Lots of duplicates!!!
+grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
+#+end_src
+
+Broader search (*case-sensitive*), output *without grouping*:
+
+#+begin_src conf
+    # `-I' = Don't match the pattern in binary files.
+    g = "grep -I"
+
+    # Name only.
+    gno = "grep -I --files-with-matches"
+#+end_src
+
+*** Find files that contain some terms, not necessarily on the same line
+
+Match any of these patterns, but print matches only from files that have /all/ of
+them (files must have lines that match each of them):
+
+#+begin_src shell :tangle no
+git grep --all-match -e <regexp> -e <regexp>
+#+end_src
+
 * Commits
+
+** Search for commits
+
+#+begin_note
+Just for the record -- searching anything "in a branch" is not possible due to
+the principle of branches.  Branch is only a pointer to a single commit, which
+is considered to be "the last commit of the branch", and commits itself do not
+"belong to a branch" anyhow else.
+
+Therefore, Git cannot determine "which branch was which" before merge commits.
+#+end_note
+
+: curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=commits&search=bye
+: curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file
+
+*** Search within Commit Messages
+
+You can find commits that contain particular words in the message. For example,
+~fix typo~ matches commits containing the words ~fix~ *and* ~typo~.
+
+If you want to find all commits (*across all branches*, showing names and status
+of changed files) where *log message* matches a specified pattern (regular
+expression), use ~find~.
+
+#+begin_src conf
+    find = "log --decorate -i --all --date=short --grep"
+
+    # Search for commits (Filter by commit message).
+    search-commits = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
+#+end_src
+
+Add ~--name-status~ to show only names and status of *changed files*.
+
+To find commits that match *either* of patterns (implicit *OR* semantic), you can
+use:
+
+#+begin_src shell :tangle no
+git log --grep=<foo> --grep=<bar>
+#+end_src
+
+To find /commit/ that has *both* line matching first and line matching second
+somewhere, use the *AND* semantic:
+
+#+begin_src shell :tangle no
+git log --all-match --grep=<foo> --grep=<bar>
+#+end_src
+
+Show the *last commit* whose *message matches a regexp*:
+
+#+begin_src shell :tangle no
+# Show the LATEST commit which has the text "fix: font" in its message.
+git log :/"fix: font"
+git show :/"fix: font"
+
+# Show the LATEST merge commit.
+git show :/^Merge
+#+end_src
+
+*** Search by Author
+
+#+begin_src conf
+    search-author = "log --decorate -i --all --date=short --author"
+#+end_src
+
+*** Search on File Changes
+
+**** Search string (added/removed) in code
+
+If you want to find all commits where a *string* was *added or removed* in the /file
+contents/ (to be more exact: where its *number of occurrences changed* in the
+source file), i.e. search the /commit contents/, use ~-S~.
+
+You can dig up commits that have, for example,
+- removed calls to a specific function, or
+- added a certain CSS classname.
+
+#+begin_warning
+If the number of times "foo" appears in the file is the same before and after
+a commit, it will not match using ~-S "foo"~.
+#+end_warning
+
+In other words, to find the following commit:
+
+#+begin_src diff :tangle no
+@@ -4211,9 +4211,10 @@ public class MovesHandler extends EventHandlerBase {
+      */
+
+     private boolean actionsNotCompleted(final EventHandlerContext context, final String mo_id) {
+         final Object found_mo_id =
+                 selectDbValue(context, "activity_log", "activity_log_id", "mo_id=" + mo_id
+-                    + " AND status NOT IN ('COMPLETED-V','REJECTED','CANCELLED')");
++                    + " AND status NOT IN ('COMPLETED-V','CLOSED','REJECTED','CANCELLED')");
+         return (found_mo_id != null);
+     }
+#+end_src
+
+you *need to search on 'CLOSED'*.  Searching on 'COMPLETED-V' would not bring back
+that commit!
+
+#+begin_src shell :tangle no
+git log --all -S "foo" --since="1 week ago"
+#+end_src
+
+#+begin_src conf
+    whatwhen = log --decorate --date=short -p -S
+#+end_src
+
+Prettier ~whatchanged~ with full diffs based on text search:
+
+#+begin_src conf
+    # Find commits by source code.
+    search-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
+# XXX Does not work for strings with spaces in them...
+#+end_src
+
+#+begin_src conf
+    grep4d = !sh -c 'git log -p -S'$1' $2' -
+# Not the best example, but: git grep4d CLOSED '*.java'
+#+end_src
+
+By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
+~--pickaxe-regex~.
+
+**** Search regexp (added/removed/changed?) in code
+
+String contained in added/removed lines from Commit contents (Diff)
+
+With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
+any *line* that was added, removed, or changed.
+
+#+begin_src shell :tangle no
+git log --all -G "foo" --since="1 week ago"
+git log --all -G "foo" --full-history --since="1 week ago"
+#+end_src
 
 * Branches
 
@@ -3507,6 +3548,12 @@ List:
 
 #+begin_src conf
     issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
+#+end_src
+
+You can search through *Open*, *Closed*, or *All* issues.
+
+#+begin_src conf
+    search-issues = XXX
 #+end_src
 
 * ------------------------------------------------------------------------------

@@ -294,36 +294,10 @@ dts = diff --word-diff-regex=. --staged
     archeology = blame -w -C -n
     whodoikill = blame -w -C -n
 
-    find = "log --decorate -i --all --date=short --grep"
-
-    # Search commits (Filter by commit message).
-    findm = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
-
-    whatwhen = log --decorate --date=short -p -S
-
-    # Find commits by source code.
-    search-code = "!f() { git log --decorate --date=short -S $1; }; f"
-# XXX Does not work for strings with spaces in them...
-
-    grep4d = !sh -c 'git log -p -S'$1' $2' -
-# Not the best example, but: git grep4d CLOSED '*.java'
-
     status-all = "!for d in $(find . -name \".git\"); do \
                      echo \"\n*** Repository: $d ***\" \
                      && git --git-dir=$d --work-tree=$d/.. status | grep -q \"is ahead of\"; \
                    done"
-
-    # Case-sensitive.
-    rg = "grep --break --heading --line-number"
-
-# In all commits, not in all branches!!! Lots of duplicates!!!
-grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
-
-    # `-I' = Don't match the pattern in binary files.
-    g = "grep -I"
-
-    # Name only.
-    gno = "grep -I --files-with-matches"
 
     # List all tracked files.
     ls-tracked = ls-files -t
@@ -653,6 +627,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(basename $(git root))-commit-${1:-HEAD}.zip; }; f"
 # Should be {repo-name}-commit-{sha-id}.zip.
 
+    # Create a git archive of the specified commit.
+    export-commit2 = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
+
     last-tag = describe --tags --abbrev=0
 
     # Show verbose output about tags.
@@ -704,6 +681,42 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                             echo \"${branch}:\"; \
                                 git ls-tree -r --name-only $branch | nl -bn -w3 | grep --color=auto \"$1\"; \
                             done; }; f"
+
+    search-code = "grep -i --line-number --break --heading -C 1"
+
+# ack = '-c color.grep.linenumber="bold yellow"
+#     -c color.grep.filename="bold green"
+#     -c color.grep.match="reverse yellow"
+#     grep --break --heading --line-number'
+
+    search-code-extension = "XXX"
+
+    search-code-path = "XXX"
+
+# In all commits, not in all branches!!! Lots of duplicates!!!
+grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
+
+    # `-I' = Don't match the pattern in binary files.
+    g = "grep -I"
+
+    # Name only.
+    gno = "grep -I --files-with-matches"
+
+    find = "log --decorate -i --all --date=short --grep"
+
+    # Search for commits (Filter by commit message).
+    search-commits = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
+
+    search-author = "log --decorate -i --all --date=short --author"
+
+    whatwhen = log --decorate --date=short -p -S
+
+    # Find commits by source code.
+    search-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
+# XXX Does not work for strings with spaces in them...
+
+    grep4d = !sh -c 'git log -p -S'$1' $2' -
+# Not the best example, but: git grep4d CLOSED '*.java'
 
     # Create a new branch, and then switch to it.
     create-branch = checkout -b
@@ -777,5 +790,7 @@ hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
     pr = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
 
     issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
+
+    search-issues = XXX
 
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
