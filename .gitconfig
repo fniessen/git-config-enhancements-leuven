@@ -193,11 +193,6 @@ recap = !git log --all --oneline --no-merges --author=${1-$(git config user.emai
     # Interactive rebase with the given number of latest commits
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
 
-    this = !git init && ( [[ -n $(ls) ]] || touch .gitignore ) && git add . && git commit -m \"Initial commit\"
-
-    # Clone a repository including all submodules.
-    cl = clone --recursive
-
     st = status -s -b
 
     df = diff
@@ -369,7 +364,8 @@ dts = diff --word-diff-regex=. --staged
     # including those in .gitignore.
     clear = git clean -d -f -x && git reset --hard
 
-    squash = "!f() { git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
+    squash = "!f() { git reset --soft HEAD~${1} && \
+                     git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
 
     r = remote -v
     remotes = remote -v
@@ -656,6 +652,13 @@ dts = diff --word-diff-regex=. --staged
                            git logdate -1 -r $branch --; \
                        done'"
 
+    this = !git init \
+         && ( [[ -n $(ls) ]] || touch .gitignore ) \
+         && git add . \
+         && git commit -m \"Initial commit\"
+
+    cl = clone --recursive
+
     find-file = !git ls-tree -r --name-only $(git current-branch) | grep --color=auto
 
     find-file-all = "!f() { for branch in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
@@ -688,6 +691,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Search for commits (Filter by commit message).
     search-commits = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
 
+    search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
+# XXX Add i, all, date short...
+
     search-author = "log --decorate -i --all --date=short --author"
 
     whatwhen = log --decorate --date=short -p -S
@@ -719,16 +725,24 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
 
-    # Remove branches that have already been merged to the current branch.
+    # Clean up.
     delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
                                      egrep -v \"(master|develop)\" | \
                                      xargs -n 1 git branch -d; }; f"
-                                     # xargs -r git branch -d; }; f"
+
+    # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
+    # sweep = '!git branch --merged $([[ $1 != "-f" ]] && git rev-parse master) | \
+    #           egrep -v "(^\*|^\s*(master|develop)$)" | \
+    #           xargs git branch -d'
+
+    delete-merged-remote-branches = "XXX"
 
     # Delete remote branch.
     delete-remote-branch = push origin --delete
 
-    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d; }; f"
+    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
+                                   awk '{print $1}' | \
+                                   xargs git branch -d; }; f"
 
     # Delete local and remote tags.
     delete-tag = "!f() { [ -z ${1} ] \

@@ -769,26 +769,6 @@ clean and relevant commits, no experiments or fixing typos.
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
 #+end_src
 
-** CREATE - Getting a Git repository
-
-*** Create a repository
-
-#+begin_src conf
-    this = !git init && ( [[ -n $(ls) ]] || touch .gitignore ) && git add . && git commit -m \"Initial commit\"
-#+end_src
-
-*** Clone an existing repository
-
-#+begin_src conf
-    # Clone a repository including all submodules.
-    cl = clone --recursive
-#+end_src
-
-#+begin_tip
-For *passwordless Git pull* (permanently authenticating with Git repositories),
-*use SSH* when cloning, and *add* your *public key* to the remote server.
-#+end_tip
-
 ** SHOW - Check the status of your files
 
 Give the status in the *short-format* (preceded by a line showing the /branch name/
@@ -1457,7 +1437,8 @@ Squash commits:
 https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
 
 #+begin_src conf
-    squash = "!f() { git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
+    squash = "!f() { git reset --soft HEAD~${1} && \
+                     git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
 #+end_src
 
 Now it is possible to use this command to *combine together the last N commits*
@@ -2788,6 +2769,30 @@ will ~reset~ the index.
 
 * ------------------------------------------------------------------------------
 
+* Repository
+
+** Create a repository
+
+#+begin_src conf
+    this = !git init \
+         && ( [[ -n $(ls) ]] || touch .gitignore ) \
+         && git add . \
+         && git commit -m \"Initial commit\"
+#+end_src
+
+** Clone a repository
+
+Clone an existing repository including all submodules.
+
+#+begin_src conf
+    cl = clone --recursive
+#+end_src
+
+#+begin_tip
+For *passwordless Git pull* (permanently authenticating with Git repositories),
+*use SSH* when cloning, and *add* your *public key* to the remote server.
+#+end_tip
+
 * Source
 
 ** Search for files
@@ -2910,6 +2915,14 @@ expression), use ~find~.
 
     # Search for commits (Filter by commit message).
     search-commits = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
+#+end_src
+
+Here's the alias which simply loops over each argument and calls ~git
+log --grep~. Equivalent of calling ~git log --grep <a> --grep <b> --grep <c> ...~:
+
+#+begin_src conf
+    search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
+# XXX Add i, all, date short...
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -3081,7 +3094,9 @@ resolved, ie. like so
  git revert sha1-of-offending-commit
 #+end_note
 
-** Show all branches
+** Show branch
+
+*** Show all branches
 
 *List all branches* (both local remote-tracking and local branches), showing SHA
 and commit subject line for each head, along with the name of the upstream
@@ -3113,13 +3128,13 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
                     --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
 #+end_src
 
-** Show your branches
+*** Show your branches
 
-** Show active branches
+*** Show active branches
 
-** Show merged branches
+*** Show merged branches
 
-** Show stale branches
+*** Show stale branches
 
 ** Switch
 
@@ -3151,15 +3166,19 @@ branch "irrespective of its merged status."
 
 *** Delete merged branches
 
-~delete-merged-branches~ *removes* (in bulk) *all* the local *branches* that have been
+~delete-merged-branches~ *removes* (in bulk) *all* the *local branches* that have been
 *merged to the current branch* that you are in.
 
 #+begin_src conf
-    # Remove branches that have already been merged to the current branch.
+    # Clean up.
     delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
                                      egrep -v \"(master|develop)\" | \
                                      xargs -n 1 git branch -d; }; f"
-                                     # xargs -r git branch -d; }; f"
+
+    # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
+    # sweep = '!git branch --merged $([[ $1 != "-f" ]] && git rev-parse master) | \
+    #           egrep -v "(^\*|^\s*(master|develop)$)" | \
+    #           xargs git branch -d'
 #+end_src
 
 #+begin_tip
@@ -3169,6 +3188,13 @@ In the event that you accidentally delete ~master~, get it back with:
 #+end_tip
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
+
+#+begin_src conf
+    delete-merged-remote-branches = "XXX"
+#+end_src
+
+- https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
+- https://github.com/arc90/git-sweep
 
 *** Delete remote branch
 
@@ -3209,7 +3235,9 @@ remote* one (by deleting the local ones that show they are "gone" in ~git
 branch -vv~):
 
 #+begin_src conf
-    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -d; }; f"
+    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
+                                   awk '{print $1}' | \
+                                   xargs git branch -d; }; f"
 #+end_src
 
 * Tags
