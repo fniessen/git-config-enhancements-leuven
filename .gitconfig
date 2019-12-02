@@ -596,15 +596,15 @@ dts = diff --word-diff-regex=. --staged
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 
-    currentTag = tag --points-at HEAD
-    zip = "!f() { git archive --format=zip -o $(git currentTag).zip HEAD; }; f"
+    current-tag = tag --points-at HEAD
+    zip = "!f() { git archive --format=zip -o $(git current-tag).zip HEAD; }; f"
 
     export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
 
     export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(basename $(git root))-commit-${1:-HEAD}.zip; }; f"
 # Should be {repo-name}-commit-{sha-id}.zip.
 
-    # Create a git archive of the specified commit.
+    # Put everything in the current repo in a Zip archive.
     export-commit2 = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
 
     last-tag = describe --tags --abbrev=0

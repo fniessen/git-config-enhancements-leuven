@@ -2572,8 +2572,8 @@ I usfe this when zipping the current branch with the name of the zip file as the
 current tag.  Useful for uploading to Elasticbeanstalk.
 
 #+begin_src conf
-    currentTag = tag --points-at HEAD
-    zip = "!f() { git archive --format=zip -o $(git currentTag).zip HEAD; }; f"
+    current-tag = tag --points-at HEAD
+    zip = "!f() { git archive --format=zip -o $(git current-tag).zip HEAD; }; f"
 #+end_src
 
 #+begin_src conf
@@ -2586,7 +2586,7 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+end_src
 
 #+begin_src conf
-    # Create a git archive of the specified commit.
+    # Put everything in the current repo in a Zip archive.
     export-commit2 = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
 #+end_src
 
