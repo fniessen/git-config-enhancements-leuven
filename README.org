@@ -2809,10 +2809,10 @@ will ~reset~ the index.
 ** Create a repository
 
 #+begin_src conf
-    this = !git init \
-         && ( [[ -n $(ls) ]] || touch .gitignore ) \
-         && git add . \
-         && git commit -m \"Initial commit\"
+    create-repository = !git init \
+                             && ( [[ -n $(ls) ]] || touch .gitignore ) \
+                             && git add . \
+                             && git commit -m \"Initial commit\"
 #+end_src
 
 ** Clone a repository
@@ -2828,7 +2828,7 @@ For *passwordless Git pull* (permanently authenticating with Git repositories),
 *use SSH* when cloning, and *add* your *public key* to the remote server.
 #+end_tip
 
-* Source
+* Source Files
 
 ** Search for files
 
@@ -2978,6 +2978,15 @@ rev-list to your git log:
 
 #+begin_src conf
     search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
+#+end_src
+
+#+begin_src conf
+    search3 = "!f() { cmd=(\"log\" \"--all-match\"); \
+                      for var in \"$@\"; do \
+                              cmd+=('--grep'); \
+                              cmd+=(\"$var\") \
+                      done;`` \
+                      git \"${cmd[@]}\"; }; f"
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -3488,7 +3497,7 @@ See example at https://gitlab.com/procps-ng/procps/-/network/master
 #+begin_src conf
 # history: This is pretty much the only way I look at my log. Aside from providing one-line logs,
 #          it also shows the branching in/out
-hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+    hist = log --pretty=format:'%h %ad | %s%d <%an>' --graph --date=short
 #+end_src
 
 To see real *timeline* of who is working on what and when:
@@ -3513,7 +3522,16 @@ Directed Acyclic Graph:
 
 ** Create a pull request
 
+Create pull request (for GitHub project):
+
+#+begin_src conf
+    pull-request = XXX
+#+end_src
+
 ** List
+
+- Pull Requests assigned to me
+- Pull Requests I've created
 
 - Open
 - Merged
@@ -3532,15 +3550,12 @@ Sometimes, just reading the code of a pull request might not be enough to verify
 if it should be merged.  Maybe you want to add something, or some tests are
 failing, and you want to run them locally on your computer.
 
-#+begin_src conf
-    # Checkout a single PR (for GitHub).
-    gpr = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
-#+end_src
+Check out a pull request locally (for GitHub project):
 
 #+begin_src conf
-    # For GitHub.
-    copr = "!f() { git fetch -fu origin refs/pull/$1/head:pr/$1 && \
-                   git checkout pr/$1; }; f"
+    pr1 = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
+    pr2 = "!f() { git fetch -fu origin refs/pull/$1/head:pr/$1 && \
+                 git checkout pr/$1; }; f"
 #+end_src
 
 ** Merge pull request
@@ -3579,6 +3594,12 @@ interface, but if you want a bit more control over how you are merging the pull
 requests (for example, I’m using the ~git merge --ff-only~ option, while GitHub
 will use ~git merge --no-ff~), or you just want to merge a bunch of pull requests
 without leaving your terminal -- this function will help you.
+
+** Clean up old branches
+
+#+begin_src conf
+    pr-clean = XXX
+#+end_src
 
 ** How?
 
@@ -3640,6 +3661,10 @@ In this case, the commit comes from pull request 255.
 
 * Issues
 
+** Create Issue
+
+** List All Issues
+
 List:
 
 #+begin_src conf
@@ -3657,14 +3682,24 @@ curl -u $username -X GET 'https://api.bitbucket.org/2.0/repositories/mcpflow/pfl
 # curl -s -S
 #+end_src
 
-#+begin_src conf
-    open-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
-#+end_src
+** List Open Issues
 
-You can search through *Open*, *Closed*, or *All* issues.
+** List My Issues (assigned to me)
+
+** List Issues I've created
+
+** Search Issues
+
+You can search through *All*, *Open* or *My* issues.
 
 #+begin_src conf
     search-issues = XXX
+#+end_src
+
+** Open Issues Webpage
+
+#+begin_src conf
+    open-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
 #+end_src
 
 * Downloads

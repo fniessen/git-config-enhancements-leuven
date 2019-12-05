@@ -654,10 +654,10 @@ dts = diff --word-diff-regex=. --staged
                            git logdate -1 -r $branch --; \
                        done'"
 
-    this = !git init \
-         && ( [[ -n $(ls) ]] || touch .gitignore ) \
-         && git add . \
-         && git commit -m \"Initial commit\"
+    create-repository = !git init \
+                             && ( [[ -n $(ls) ]] || touch .gitignore ) \
+                             && git add . \
+                             && git commit -m \"Initial commit\"
 
     cl = clone --recursive
 
@@ -698,6 +698,13 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 # XXX Add i, all, date short...
 
     search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
+
+    search3 = "!f() { cmd=(\"log\" \"--all-match\"); \
+                      for var in \"$@\"; do \
+                              cmd+=('--grep'); \
+                              cmd+=(\"$var\") \
+                      done;`` \
+                      git \"${cmd[@]}\"; }; f"
 
     search-author = "log --decorate -i --all --date=short --author"
 
@@ -773,7 +780,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
 # history: This is pretty much the only way I look at my log. Aside from providing one-line logs,
 #          it also shows the branching in/out
-hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+    hist = log --pretty=format:'%h %ad | %s%d <%an>' --graph --date=short
 
     graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
@@ -781,12 +788,11 @@ hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
 
     graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
 
-    # Checkout a single PR (for GitHub).
-    gpr = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
+    pull-request = XXX
 
-    # For GitHub.
-    copr = "!f() { git fetch -fu origin refs/pull/$1/head:pr/$1 && \
-                   git checkout pr/$1; }; f"
+    pr1 = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
+    pr2 = "!f() { git fetch -fu origin refs/pull/$1/head:pr/$1 && \
+                 git checkout pr/$1; }; f"
 
     # For GitHub.
     mpr = "!f() { \
@@ -802,6 +808,8 @@ hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
             fi \
         }; f"
 
+    pr-clean = XXX
+
     pr = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
 
     list-issues = "!f() { username=$1; repo_slug=$2; \
@@ -810,9 +818,9 @@ hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
             | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'; }; f"
 # --data-urlencode 'priority >= \"major\"'
 
-    open-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
-
     search-issues = XXX
+
+    open-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
 
     # Put everything in the current repo in a Zip archive.
     download-repository = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
