@@ -28,6 +28,9 @@
     # Minimize the number of files in .git/.
     auto = 256
 
+[log]
+    date = iso
+
 [diff]
     renames = copies
     renameLimit = 30000
@@ -141,9 +144,9 @@
     linenumber = magenta bold
     match = green reverse bold
     matchContext = yellow reverse bold
-    matchSelected = blue reverse bold
+    matchSelected = yellow bold blue
     separator = red bold
-    selected = white bold
+    selected = white
 
 [alias]
     # Proxy.
@@ -166,12 +169,6 @@
 
     type = cat-file -t
     dump = cat-file -p
-
-recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
-	today = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-	changelog = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
-	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
-	local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 
      catchup = !git fetch; git rebase origin/master
 # For catching up those random feature branches you haven't had to touch in months.
@@ -231,6 +228,12 @@ dts = diff --word-diff-regex=. --staged
     this-week = !git log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 
     today-all = !git log --since=midnight --no-merges --all
+
+	recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
+	today = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+	changelog = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
+	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
+	local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 
     log-standup = !git log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
 
@@ -308,6 +311,8 @@ dts = diff --word-diff-regex=. --staged
     ls-ignored = ls-files --others --ignored --exclude-standard
 
     ignore = "!f() { echo \"$1\" >> \"${GIT_PREFIX}.gitignore\"; }; f"
+    # ignore=!([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore
+# XXX What is GIT_PREFIX?
 
     skip = update-index --assume-unchanged
     unskip = update-index --no-assume-unchanged
@@ -604,9 +609,6 @@ dts = diff --word-diff-regex=. --staged
     export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(basename $(git root))-commit-${1:-HEAD}.zip; }; f"
 # Should be {repo-name}-commit-{sha-id}.zip.
 
-    # Put everything in the current repo in a Zip archive.
-    export-commit2 = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
-
     last-tag = describe --tags --abbrev=0
 
     # Show verbose output about tags.
@@ -659,6 +661,7 @@ dts = diff --word-diff-regex=. --staged
 
     cl = clone --recursive
 
+    # BUG This is case-sensitive...
     find-file = !git ls-tree -r --name-only $(git current-branch) | grep --color=auto
 
     find-file-all = "!f() { for branch in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
@@ -694,6 +697,8 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
 # XXX Add i, all, date short...
 
+    search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
+
     search-author = "log --decorate -i --all --date=short --author"
 
     whatwhen = log --decorate --date=short -p -S
@@ -715,6 +720,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
 
+    # Show info for branches which have been checked out locally...
     branches = !git for-each-ref \
                     --sort=-committerdate refs/heads/ \
                     --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
@@ -753,6 +759,12 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                              sh); \
                        }; f"
 
+    # Show the names of all files changed between two commits.  Usage: "git diffn SHAv1 SHAv2".
+    diffn = diff --name-only
+
+    # diff status: A git diff, but with only the filenames (which reminds me of git status)
+    diffst = diff --name-only
+
     release = "!f() { git tag -a v$1 -m \"Release version $1\" \
                    && git push origin --tags \
                    && git push origin; }; f"
@@ -768,12 +780,6 @@ hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
     show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 
     graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
-
-    # Show the names of all files changed between two commits.  Usage: "git diffn SHAv1 SHAv2".
-    diffn = diff --name-only
-
-    # diff status: A git diff, but with only the filenames (which reminds me of git status)
-    diffst = diff --name-only
 
     # Checkout a single PR (for GitHub).
     gpr = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
@@ -798,8 +804,17 @@ hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
 
     pr = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
 
-    issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
+    list-issues = "!f() { username=$1; repo_slug=$2; \
+        curl --user $username \
+            https://api.bitbucket.org/2.0/repositories/$username/$repo_slug/issues \
+            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'; }; f"
+# --data-urlencode 'priority >= \"major\"'
+
+    open-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
 
     search-issues = XXX
+
+    # Put everything in the current repo in a Zip archive.
+    download-repository = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
 
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"

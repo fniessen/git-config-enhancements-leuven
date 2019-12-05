@@ -20,6 +20,12 @@ https://developer.atlassian.com/bitbucket/api/2/reference/resource/
 XXX Bitbucket API client for Browser and Node.js
 https://bitbucketjs.netlify.com/
 
+XXX
+https://help.github.com/en/github/searching-for-information-on-github/
+
+XXX GitLab API
+https://docs.gitlab.com/ee/api/
+
 XXX GitAlias.com file of many git alias items, including shortcuts, helpers, workflows, etc.
 https://github.com/gitalias/gitalias/blob/master/gitalias.txt
 
@@ -275,6 +281,15 @@ Performance:
     # Minimize the number of files in .git/.
     auto = 256
 #+end_src
+
+** Log
+
+Get a better date (current format is 2019-11-26 17:35:30 +0100):
+
+#+begin_src conf
+[log]
+    date = iso
+    #+end_src
 
 ** Diff
 
@@ -635,6 +650,10 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 
 *** Grep
 
+The first color given is the foreground; the second is the background.", e.g
+~match 10 22~ -- see ~man 1 git-config~ at "CONFIGURATION FILE" > "Values" >
+"color".
+
 #+begin_src conf
 [color "grep"]
     context = "#888888"
@@ -643,9 +662,9 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
     linenumber = magenta bold
     match = green reverse bold
     matchContext = yellow reverse bold
-    matchSelected = blue reverse bold
+    matchSelected = yellow bold blue
     separator = red bold
-    selected = white bold
+    selected = white
 #+end_src
 
 ** Proxy
@@ -719,14 +738,6 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 #+begin_src conf
     type = cat-file -t
     dump = cat-file -p
-#+end_src
-
-#+begin_src conf
-recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
-	today = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-	changelog = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
-	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
-	local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 #+end_src
 
 #+begin_src conf
@@ -872,6 +883,14 @@ branches*):
     today-all = !git log --since=midnight --no-merges --all
 #+end_src
 
+#+begin_src conf
+	recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
+	today = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+	changelog = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
+	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
+	local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
+#+end_src
+
 Show changes for a daily standup meeting:
 
 #+begin_src conf
@@ -974,6 +993,10 @@ copies!):
 Put a /end of options/ character (~--~) after ~file-history~ and before the path!!
 #+end_warning
 
+#+begin_src conf :tangle no
+curl 'https://api.bitbucket.org/2.0/repositories/mcpflow/pflow/filehistory/master/CHANGELOG.org'
+#+end_src
+
 #+begin_src conf
     related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 #+end_src
@@ -1067,13 +1090,30 @@ Remove ignored files that are still on the repository:
 git ls-ignored | xargs rm
 #+end_src
 
-*** ~git ignore~ command
+*** Add ignore entry to the repository
+
+- Ignore exact filename: filename
+- Ignore everything beneath: folder
+- Ignore all files with this extension: pattern
+- Ignore custom pattern: pattern
 
 Quickly add a file or directory to =.gitignore=:
 
 #+begin_src conf
     ignore = "!f() { echo \"$1\" >> \"${GIT_PREFIX}.gitignore\"; }; f"
+    # ignore=!([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore
+# XXX What is GIT_PREFIX?
 #+end_src
+
+*Note that adding the .gitignore and the file specification will have no effect
+on files that are already being tracked.* If you're already tracking these,
+you'll have to stop tracking them. (Right-click on the folder or file and select
+Stop Tracking.) You'll then see them change from having a green/clean or
+amber/changed icon to a red/removed icon. On your next commit the files will be
+removed from the repository and thereafter appear with a blue/ignored
+icon. Another contributor asked why Ignore was disabled for particular files and
+I believe it was because he was trying to ignore a file that was already being
+tracked. You can only ignore a file that has a blue question mark icon.
 
 *** ~assume-unchanged~ command
 
@@ -2585,11 +2625,6 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 # Should be {repo-name}-commit-{sha-id}.zip.
 #+end_src
 
-#+begin_src conf
-    # Put everything in the current repo in a Zip archive.
-    export-commit2 = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
-#+end_src
-
 ** PUBLISH - Tag
 
 When tagging releases in a version control system, the tag for a version should
@@ -2800,6 +2835,7 @@ For *passwordless Git pull* (permanently authenticating with Git repositories),
 Search file (by file path) in the current branch.
 
 #+begin_src conf
+    # BUG This is case-sensitive...
     find-file = !git ls-tree -r --name-only $(git current-branch) | grep --color=auto
 #+end_src
 
@@ -2814,8 +2850,10 @@ Search file in all branches.
 
 ** Search for code
 
-*Code search* looks through all lines of code of all the files (by file contents)
+*Code search* looks through all lines of code of all the files (by *file contents*)
 from the working directory (and its subdirectories).
+
+https://confluence.atlassian.com/bitbucketserver/search-for-code-in-bitbucket-server-814204781.html
 
 #+begin_src conf
     search-code = "grep -i --line-number --break --heading -C 1"
@@ -2917,12 +2955,29 @@ expression), use ~find~.
     search-commits = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
 #+end_src
 
+#+begin_src conf :tangle no
+curl -H "Accept: application/vnd.github.cloak-preview" \
+    https://api.github.com/search/commits\?q\=repo:fniessen/org-html-themes+local+css \
+    | jq '.items[] | {commit}'
+#+end_src
+
 Here's the alias which simply loops over each argument and calls ~git
 log --grep~. Equivalent of calling ~git log --grep <a> --grep <b> --grep <c> ...~:
 
 #+begin_src conf
     search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
 # XXX Add i, all, date short...
+
+#+end_src
+
+
+
+
+You may want to add history to search through the whole repository, by adding
+rev-list to your git log:
+
+#+begin_src conf
+    search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -3122,7 +3177,8 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
     track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
 #+end_src
 
-    #+begin_src conf
+#+begin_src conf
+    # Show info for branches which have been checked out locally...
     branches = !git for-each-ref \
                     --sort=-committerdate refs/heads/ \
                     --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
@@ -3317,83 +3373,7 @@ Delete similar tags:
                        }; f"
 #+end_src
 
-* Releases
-
-You can create a release to package software, along with release notes and links
-to binary files, for other people to use.
-
-Releases are based on *Git tags*: tags are used to mark *release* versions, with the
-*version number* as the *tag name*.
-
-We recommend naming tags that fit within [[https://semver.org/][semantic versioning]], i.e. having the
-form ~v<major>.<minor>.<patch>~:
-- *Major* release (from ~v0.8.1~ to ~v1.0.0~) for bug fixes and new features that
-  break backwards compatibility,
-- *Minor* release (from ~v0.8.1~ to ~v0.9.0~) for bug fixes and new features that
-  maintain backwards compatibility, and
-- *Patch* release (from ~v0.8.1~ to ~v0.8.2~) only for bug fixes.
-
-#+begin_note
-It's common practice to prefix your version names with the letter ~v~.
-#+end_note
-
-Tag and push changes to the repository:
-
-#+begin_src conf
-    release = "!f() { git tag -a v$1 -m \"Release version $1\" \
-                   && git push origin --tags \
-                   && git push origin; }; f"
-#+end_src
-
-Remove Git from current project:
-
-#+begin_src conf :tangle no
-find . -name '.git' -exec rm -rf {} \;
-#+end_src
-
-* Contributors
-
-** Show a "top contributors" list
-
-Show a "top contributors" list (rank), excluding merge commits:
-
-#+begin_src conf
-    who = shortlog -n -s -e --no-merges --
-#+end_src
-
-#+begin_note
-The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
-#+end_note
-
-* Graph
-
-See example at https://gitlab.com/procps-ng/procps/-/network/master
-
-#+begin_src conf
-# history: This is pretty much the only way I look at my log. Aside from providing one-line logs,
-#          it also shows the branching in/out
-hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
-#+end_src
-
-To see real *timeline* of who is working on what and when:
-
-#+begin_src conf
-    graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
-#+end_src
-
-View the Git history tree:
-
-#+begin_src conf
-    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
-#+end_src
-
-Directed Acyclic Graph:
-
-#+begin_src conf
-    graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
-#+end_src
-
-* Compare Revisions (branches, tags or commits)
+* Compare Revisions (commits, branches or tags)
 
 *See what's changed*: easily determine which commits are on the "compare" source
 but not on the "base" destination.
@@ -3453,7 +3433,87 @@ git changed bada55..ff0021              # List files modified between those comm
 
 ** Merged pull requests
 
+* ?Releases
+
+You can create a release to package software, along with release notes and links
+to binary files, for other people to use.
+
+Releases are based on *Git tags*: tags are used to mark *release* versions, with the
+*version number* as the *tag name*.
+
+We recommend naming tags that fit within [[https://semver.org/][semantic versioning]], i.e. having the
+form ~v<major>.<minor>.<patch>~:
+- *Major* release (from ~v0.8.1~ to ~v1.0.0~) for bug fixes and new features that
+  break backwards compatibility,
+- *Minor* release (from ~v0.8.1~ to ~v0.9.0~) for bug fixes and new features that
+  maintain backwards compatibility, and
+- *Patch* release (from ~v0.8.1~ to ~v0.8.2~) only for bug fixes.
+
+#+begin_note
+It's common practice to prefix your version names with the letter ~v~.
+#+end_note
+
+Tag and push changes to the repository:
+
+#+begin_src conf
+    release = "!f() { git tag -a v$1 -m \"Release version $1\" \
+                   && git push origin --tags \
+                   && git push origin; }; f"
+#+end_src
+
+Remove Git from current project:
+
+#+begin_src conf :tangle no
+find . -name '.git' -exec rm -rf {} \;
+#+end_src
+
+* ?Contributors
+
+** Show a "top contributors" list
+
+Show a "top contributors" list (rank), excluding merge commits:
+
+#+begin_src conf
+    who = shortlog -n -s -e --no-merges --
+#+end_src
+
+#+begin_note
+The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
+#+end_note
+
+* ?Graph
+
+See example at https://gitlab.com/procps-ng/procps/-/network/master
+
+#+begin_src conf
+# history: This is pretty much the only way I look at my log. Aside from providing one-line logs,
+#          it also shows the branching in/out
+hist = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+#+end_src
+
+To see real *timeline* of who is working on what and when:
+
+#+begin_src conf
+    graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+#+end_src
+
+View the Git history tree:
+
+#+begin_src conf
+    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
+#+end_src
+
+Directed Acyclic Graph:
+
+#+begin_src conf
+    graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
+#+end_src
+
 * Pull requests
+
+** Create a pull request
+
+** List
 
 - Open
 - Merged
@@ -3583,13 +3643,49 @@ In this case, the commit comes from pull request 255.
 List:
 
 #+begin_src conf
-    issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
+    list-issues = "!f() { username=$1; repo_slug=$2; \
+        curl --user $username \
+            https://api.bitbucket.org/2.0/repositories/$username/$repo_slug/issues \
+            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'; }; f"
+# --data-urlencode 'priority >= \"major\"'
+#+end_src
+
+#+begin_src conf :tangle no
+# Works!  Need to put quotes around the URL!
+curl -u $username -X GET 'https://api.bitbucket.org/2.0/repositories/mcpflow/pflow/issues?pagelen=100' \
+    | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
+# curl -s -S
+#+end_src
+
+#+begin_src conf
+    open-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
 #+end_src
 
 You can search through *Open*, *Closed*, or *All* issues.
 
 #+begin_src conf
     search-issues = XXX
+#+end_src
+
+* Downloads
+
+Download repository, tag or branch.
+
+#+begin_src conf
+    # Put everything in the current repo in a Zip archive.
+    download-repository = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
+#+end_src
+
+* Settings
+
+** SSH keys
+
+List the user's public SSH keys:
+
+#+begin_src shell :tangle no
+curl -O https://github.com/fniessen.keys
+
+curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
 #+end_src
 
 * ------------------------------------------------------------------------------
@@ -3781,12 +3877,6 @@ branch is always a branch of the same name on origin.
 
 A failed push could also mean that someone rudely rewrote history on the remote
 branch (using ~git push --force~) and someone needs a talkin' to.
-
-** Get user pubkeys
-
-#+begin_src shell
-curl https://github.com/abo-abo.keys
-#+end_src
 
 * References
 
