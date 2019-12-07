@@ -693,18 +693,16 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     # Search for commits (Filter by commit message).
     search-commits = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
+    search-commits = "!f() { str=\"git log --all-match\"; \
+                             for var in \"$@\"; do \
+                                 str=\"$str --grep '$var'\"; \
+                             done; \
+                             eval $str; }; f"
 
     search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
 # XXX Add i, all, date short...
 
     search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
-
-    search3 = "!f() { cmd=(\"log\" \"--all-match\"); \
-                      for var in \"$@\"; do \
-                              cmd+=('--grep'); \
-                              cmd+=(\"$var\") \
-                      done;`` \
-                      git \"${cmd[@]}\"; }; f"
 
     search-author = "log --decorate -i --all --date=short --author"
 
@@ -771,6 +769,10 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     # diff status: A git diff, but with only the filenames (which reminds me of git status)
     diffst = diff --name-only
+
+    # git compare-revisions SOURCE TARGET = git diff TARGET...SOURCE
+    # Example: git compare-revisions master v1.0.0
+    compare-revisions = "!f() { git diff $2...$1; }; f"
 
     release = "!f() { git tag -a v$1 -m \"Release version $1\" \
                    && git push origin --tags \

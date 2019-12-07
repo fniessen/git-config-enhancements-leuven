@@ -2953,6 +2953,11 @@ expression), use ~find~.
 
     # Search for commits (Filter by commit message).
     search-commits = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
+    search-commits = "!f() { str=\"git log --all-match\"; \
+                             for var in \"$@\"; do \
+                                 str=\"$str --grep '$var'\"; \
+                             done; \
+                             eval $str; }; f"
 #+end_src
 
 #+begin_src conf :tangle no
@@ -2967,9 +2972,7 @@ log --grep~. Equivalent of calling ~git log --grep <a> --grep <b> --grep <c> ...
 #+begin_src conf
     search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
 # XXX Add i, all, date short...
-
 #+end_src
-
 
 
 
@@ -2978,15 +2981,6 @@ rev-list to your git log:
 
 #+begin_src conf
     search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
-#+end_src
-
-#+begin_src conf
-    search3 = "!f() { cmd=(\"log\" \"--all-match\"); \
-                      for var in \"$@\"; do \
-                              cmd+=('--grep'); \
-                              cmd+=(\"$var\") \
-                      done;`` \
-                      git \"${cmd[@]}\"; }; f"
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -3313,7 +3307,7 @@ being important.
 ** Create a tag
 
 While Git supports annotated and lightweight tags, you can only *create*
-- *annotated tags* in /Bitbucket/, and
+- *annotated tags* in /Bitbucket/ and in /GitLab/, and
 - *lightweight tags* via /GitHub/ interface (for releases).
 
 Git stores annotated tags as full objects in the repository, which means they
@@ -3388,16 +3382,21 @@ Delete similar tags:
 but not on the "base" destination.
 
 You can see:
-- a diff,
-- a list of commits, and
+- a list of commits,
+- a diff, and
 - any pull requests merged between the two versions.
 
 See + in Bitbucket (Get to work)
+
+** Commits
+
+: git log --pretty=oneline DST...SRC
 
 ** Files changed
 
 List all the changed files *between 2 commits*:
 
+: git log --stat DST...SRC
 : git diff --stat DST...SRC
 : git diff --stat v1...v2
 
@@ -3409,7 +3408,7 @@ See the changed files in a branch since the last merge with the origin branch:
 
 : git diff --stat origin/master...my_forked_branch
 
-    #+begin_src conf
+#+begin_src conf
     # Show the names of all files changed between two commits.  Usage: "git diffn SHAv1 SHAv2".
     diffn = diff --name-only
 
@@ -3430,15 +3429,15 @@ git changed bada55..ff0021              # List files modified between those comm
 
 ** Diff
 
-: git diff DST...SRC
-
 - Inline diff (unified)
+
+  #+begin_src conf
+    # git compare-revisions SOURCE TARGET = git diff TARGET...SOURCE
+    # Example: git compare-revisions master v1.0.0
+    compare-revisions = "!f() { git diff $2...$1; }; f"
+  #+end_src
+
 - Side-by-side diff (split)
-
-** Commits
-
-: git log --pretty=oneline DST...SRC
-: git whatchanged DST...SRC
 
 ** Merged pull requests
 
