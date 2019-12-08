@@ -118,11 +118,10 @@
     plain = yellow reverse
 
 [color "diff"]
-    context = "#888888"
-    plain = normal
+    plain = "#888888"
     meta = yellow bold
-    func = "#cc99cc"
     frag = magenta bold
+    func = "#cc99cc"
     old = red bold
     new = green bold
     commit = yellow
@@ -793,8 +792,10 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     pull-request = XXX
 
     pr1 = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
-    pr2 = "!f() { git fetch -fu origin refs/pull/$1/head:pr/$1 && \
-                 git checkout pr/$1; }; f"
+
+    # For GitHub.
+    pr = "!f() { git fetch origin refs/pull/$1/head:pr/$1 \
+                     && git checkout pr/$1; }; f"
 
     # For GitHub.
     mpr = "!f() { \
@@ -806,11 +807,11 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                 git rebase $branch pr/$1 && \
                 git checkout -B $branch && \
                 git merge --ff-only pr/$1 && \
-                git branch -D pr/$1; \
+                git delete-local-branch pr/$1; \
             fi \
         }; f"
 
-    pr-clean = XXX
+    pr-clean = delete-local-branch pr/$1
 
     pr = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
 

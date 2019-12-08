@@ -619,13 +619,14 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 
 *** Diff
 
+See http://git-scm.com/docs/git-config for the ~slot~ list.
+
 #+begin_src conf
 [color "diff"]
-    context = "#888888"
-    plain = normal
+    plain = "#888888"
     meta = yellow bold
-    func = "#cc99cc"
     frag = magenta bold
+    func = "#cc99cc"
     old = red bold
     new = green bold
     commit = yellow
@@ -3553,8 +3554,10 @@ Check out a pull request locally (for GitHub project):
 
 #+begin_src conf
     pr1 = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
-    pr2 = "!f() { git fetch -fu origin refs/pull/$1/head:pr/$1 && \
-                 git checkout pr/$1; }; f"
+
+    # For GitHub.
+    pr = "!f() { git fetch origin refs/pull/$1/head:pr/$1 \
+                     && git checkout pr/$1; }; f"
 #+end_src
 
 ** Merge pull request
@@ -3570,7 +3573,7 @@ Check out a pull request locally (for GitHub project):
                 git rebase $branch pr/$1 && \
                 git checkout -B $branch && \
                 git merge --ff-only pr/$1 && \
-                git branch -D pr/$1; \
+                git delete-local-branch pr/$1; \
             fi \
         }; f"
 #+end_src
@@ -3594,10 +3597,10 @@ requests (for example, I’m using the ~git merge --ff-only~ option, while GitHu
 will use ~git merge --no-ff~), or you just want to merge a bunch of pull requests
 without leaving your terminal -- this function will help you.
 
-** Clean up old branches
+** Clean up old branch
 
 #+begin_src conf
-    pr-clean = XXX
+    pr-clean = delete-local-branch pr/$1
 #+end_src
 
 ** How?
