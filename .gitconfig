@@ -688,10 +688,10 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Name only.
     gno = "grep -I --files-with-matches"
 
-    find = "log --decorate -i --all --date=short --grep"
+    findc1 = "log --decorate -i --all --date=short --grep"
+    findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
 
     # Search for commits (Filter by commit message).
-    search-commits = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
     search-commits = "!f() { str=\"git log --all-match\"; \
                              for var in \"$@\"; do \
                                  str=\"$str --grep '$var'\"; \
@@ -777,13 +777,11 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                    && git push origin --tags \
                    && git push origin; }; f"
 
-    who = shortlog -n -s -e --no-merges --
+    contributors = shortlog -n -s -e --no-merges --
 
-# history: This is pretty much the only way I look at my log. Aside from providing one-line logs,
-#          it also shows the branching in/out
-    hist = log --pretty=format:'%h %ad | %s%d <%an>' --graph --date=short
+    graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
-    graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+    hist = log --date=short --graph
 
     show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 

@@ -2950,10 +2950,17 @@ of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-    find = "log --decorate -i --all --date=short --grep"
+    findc1 = "log --decorate -i --all --date=short --grep"
+    findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
+#+end_src
 
+#+begin_tip
+If you only add options to one single ~git~ command, there is no benefit to the
+function wrapper.  On the contrary, you can't add other options.
+#+end_tip
+
+#+begin_src conf
     # Search for commits (Filter by commit message).
-    search-commits = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
     search-commits = "!f() { str=\"git log --all-match\"; \
                              for var in \"$@\"; do \
                                  str=\"$str --grep '$var'\"; \
@@ -3483,7 +3490,7 @@ find . -name '.git' -exec rm -rf {} \;
 Show a "top contributors" list (rank), excluding merge commits:
 
 #+begin_src conf
-    who = shortlog -n -s -e --no-merges --
+    contributors = shortlog -n -s -e --no-merges --
 #+end_src
 
 #+begin_note
@@ -3494,16 +3501,14 @@ The ~--~ signals the /end of options/, that the rest of the parameters are limit
 
 See example at https://gitlab.com/procps-ng/procps/-/network/master
 
-#+begin_src conf
-# history: This is pretty much the only way I look at my log. Aside from providing one-line logs,
-#          it also shows the branching in/out
-    hist = log --pretty=format:'%h %ad | %s%d <%an>' --graph --date=short
-#+end_src
-
 To see real *timeline* of who is working on what and when:
 
 #+begin_src conf
-    graph = log --graph -10 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+    graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+#+end_src
+
+#+begin_src conf
+    hist = log --date=short --graph
 #+end_src
 
 View the Git history tree:
