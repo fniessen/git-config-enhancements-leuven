@@ -811,17 +811,25 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     pr-clean = delete-local-branch pr/$1
 
-    pr = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
+    searchprcommit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
 
-    list-issues = "!f() { username=$1; repo_slug=$2; \
+    create-issue = XXX
+
+    issues = "!f() { username=$1; repo_slug=$2; \
         curl --user $username \
             https://api.bitbucket.org/2.0/repositories/$username/$repo_slug/issues \
             | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'; }; f"
 # --data-urlencode 'priority >= \"major\"'
 
-    search-issues = XXX
+    issues-open = XXX
 
-    open-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
+    issues-assigned-to-me = XXX
+
+    issues-created-by-me = XXX
+
+    show-issue = XXX
+
+    browse-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
 
     # Put everything in the current repo in a Zip archive.
     download-repository = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
