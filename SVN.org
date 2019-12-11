@@ -259,10 +259,10 @@ svn-rev-patch:
 
 #+begin_src shell
 # For one release only.
-svn diff -c 124 --summarize | cut -c 9- | xargs zip -9 patch.zip
+svn diff -c 124 --summarize | cut -c 9- | xargs zip -9 commit-124.zip
 
 # For a range of releases (124 up to and INCLUDING 145).
-svn diff -r 123:145 --summarize | cut -c 9- | xargs zip -9 patch.zip
+svn diff -r 123:145 --summarize | cut -c 9- | xargs zip -9 commit-124-145.zip
 #+end_src
 
 #+begin_note
