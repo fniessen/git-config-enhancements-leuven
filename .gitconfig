@@ -199,26 +199,26 @@
     # Configure git-diff to produce the absolutely most minimal diff possible.
     wdiff = diff -w --word-diff-regex=. --color-words -U0
 
-# Diff line-wise
-d = diff
+    # Diff line-wise
+    d = diff
 
-# Diff staged line-wise
-ds = diff --staged
+    # Diff word-wise
+    dw = diff --color-words
 
-# Diff word-wise
-dw = diff --color-words
+    # Diff character-wise
+    dt = diff --word-diff-regex=.
 
-# Diff staged word-wise
-dws = diff --color-words --staged
-
-# Diff character-wise
-dt = diff --word-diff-regex=.
-
-# Diff staged character-wise
-dts = diff --word-diff-regex=. --staged
-
-    # Review.
+    # Review staged changes (about to be committed).
     dc = diff --cached
+
+    # Diff staged line-wise
+    ds = diff --cached
+
+    # Diff staged word-wise
+    dws = diff --color-words --cached
+
+    # Diff staged character-wise
+    dts = diff --word-diff-regex=. --cached
 
     precommit = diff --cached --diff-algorithm=minimal -w
 
@@ -247,6 +247,36 @@ dts = diff --word-diff-regex=. --staged
                         --date=local"
 # XXX git standup W donne un décompte avec une ligne trop peu !
 
+  # Show log of changes, most recent first
+  log-changes = log --oneline --reverse
+
+  # Show log of new commits after you fetched, with stats, excluding merges
+  log-fresh = log ORIG_HEAD.. --stat --no-merges
+
+  # Show log with dates in our local timezone
+  log-local = log --date=local
+
+  # Show the log for my own user email
+  log-me = !git log --author $(git config user.email)
+
+  # Show log as a graph
+  log-graph = log --graph --all --oneline --decorate
+
+  # Show the date of the first commit
+  log-first-date = !"git log --date-order --date=iso --pretty=%ad --reverse | head -1"
+
+  # Show the recent day
+  log-day = log --since yesterday
+
+  # Summarize your own changes since yesterday, suitable for a daily standup meeting.
+  log-standup = !git log --since yesterday --author $(git config user.email) --pretty=short
+
+  # TODO
+  log-refs = log --all --graph --decorate --oneline --simplify-by-decoration --no-merges
+  log-timeline = log --format='%h %an %ar - %s'
+  log-local = log --oneline origin..HEAD
+  log-fetched = log --oneline HEAD..origin/master
+
     # When was this file last updated, on each local branch.
     wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
                         echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; \
@@ -270,8 +300,6 @@ dts = diff --word-diff-regex=. --staged
     ls-del  = ls-files -d
     ls-mod  = ls-files -m   # This will include deleted files also.
     ls-new  = ls-files --exclude-standard -o
-    # this one is a MUST have
-    ls-ign  = ls-files --exclude-standard -o -i
     lsfiles = ls-files --exclude-per-directory=.gitignore \
                      --exclude-from=.git/info/exclude \
                      -v -d -o -m -s -u
@@ -307,21 +335,26 @@ dts = diff --word-diff-regex=. --staged
     # List all untracked files.
     ls-untracked = ls-files --others
 
+    # this one is a MUST have
+    ls-ign  = ls-files --exclude-standard -o -i
     ls-ignored = ls-files --others --ignored --exclude-standard
 
     ignore = "!f() { echo \"$1\" >> \"${GIT_PREFIX}.gitignore\"; }; f"
     # ignore=!([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore
 # XXX What is GIT_PREFIX?
 
+  # Ignore all untracked files by appending them to .gitignore:
+  ignore-untracked = "!git status | grep -P \"^\\t\" | grep -vF .gitignore | sed \"s/^\\t//\" >> .gitignore"
+
     skip = update-index --assume-unchanged
     unskip = update-index --no-assume-unchanged
 
+    skip-all = "!git status -s | awk {'print $2'} | xargs git skip"
+
+    unskip-all = "!git skipped | xargs git update-index --no-assume-unchanged"
+
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
     # skipped = '!git ls-files -v | grep ^[a-z]'
-
-    unskipall = "!git skipped | xargs git update-index --no-assume-unchanged"
-
-    skipall = "!git status -s | awk {'print $2'} | xargs git skip"
 
     # Commit changes to current HEAD (modified and deleted files) as amended
     # commit.
@@ -339,7 +372,8 @@ dts = diff --word-diff-regex=. --staged
 
     fixup = "!f() { TARGET=$(git rev-parse \"$1\"); \
                     git commit --fixup=$TARGET ${@:2} \
-                        && EDITOR=true git rebase -i --autostash --autosquash $TARGET^; }; f"
+                        && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET^; }; f"
+    # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
 
     # Discard.
     unmodify = checkout --
@@ -370,6 +404,20 @@ dts = diff --word-diff-regex=. --staged
 
     squash = "!f() { git reset --soft HEAD~${1} && \
                      git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
+
+  # Given a merge commit, find the span of commits that exist(ed).
+  # Not so useful in itself, but used by other aliases.
+  # Thanks to Rob Miller for the merge-span-* aliaes.
+  merge-span = !"f() { echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); }; f"
+
+  # Find the commits that were introduced by a merge
+  merge-span-log = "!git log `git merge-span .. $1`"
+
+  # Show the changes that were introduced by a merge
+  merge-span-diff = !"git diff `git merge-span ... $1`"
+
+  # Show the changes that were introduced by a merge, in your difftool
+  merge-span-difftool = !"git difftool `git merge-span ... $1`"
 
     r = remote -v
     remotes = remote -v
@@ -408,6 +456,10 @@ dts = diff --word-diff-regex=. --staged
     update = !git pull                     && git submodule update --init --recursive
     get    = !git pull --rebase            && git submodule update --init --recursive
     update = !git pull --rebase --prune $@ && git submodule update --init --recursive
+
+  # Do a push/pull for just one branch
+  push1 = "!git push origin $(git branch-name)"
+  pull1 = "!git pull origin $(git branch-name)"
 
     pull-all = !"old=$(git current-branch); \
                  for b in $(git for-each-ref refs/heads --format='%(refname)'); do \
@@ -466,7 +518,8 @@ dts = diff --word-diff-regex=. --staged
 
     # Incorporate a finished feature on develop.
     feature-finish = "!f() { git checkout develop; \
-                             git merge --no-ff feature/$1 && git delete-local-branch feature/$1; }; f"
+                             git merge --no-ff feature/$1 \
+                             && git delete-local-branch feature/$1; }; f"
 
     # XXX Also bug and refactor.
 
@@ -521,6 +574,7 @@ dts = diff --word-diff-regex=. --staged
 
     hide = stash push --include-untracked # Hide all files, including untracked files (faster than using --all).
 
+    snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
     snapshot = !git stash push -m "Snapshot [$(date +\"%F %a %R\")]" && git stash apply "stash@{0}"
 
     # checkpoint and checkpoint recover
@@ -530,10 +584,8 @@ dts = diff --word-diff-regex=. --staged
                       git rev-parse --verify --no-revs --quiet $hash^2 2>/dev/null && echo $hash | xargs git rev-list --since=${1:-1day} -1; \
                   done | xargs -L 1 git log --format=%at:%h -1 | sort | cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; }; f"
 
-    sl = stash list
     stashes = stash list --date=local
 
-    ssh = stash show -p
     stash-diff = stash show -p
 
     sshow = "!f() { git stash show stash^{/$*} -p; }; f"
@@ -560,6 +612,7 @@ dts = diff --word-diff-regex=. --staged
     current-branch = name-rev --name-only HEAD
     # current-branch = !git branch --show-current # v2.22+
 
+    # Get the upstream branch name.
     upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
 
     # Push current branch to remote server (create a copy of the current branch
@@ -605,13 +658,14 @@ dts = diff --word-diff-regex=. --staged
 
     export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
 
-    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(basename $(git root))-commit-${1:-HEAD}.zip; }; f"
-# Should be {repo-name}-commit-{sha-id}.zip.
+    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo)-commit-${1:-HEAD}.zip; }; f"
 
     last-tag = describe --tags --abbrev=0
 
+    last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
+
     # Show verbose output about tags.
-    tags = !git tag -l --sort=v:refname
+    tags = !git tag -l --sort=v:refname -n1
 
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
     # branche courante.
@@ -631,6 +685,12 @@ dts = diff --word-diff-regex=. --staged
     cp = cherry-pick -x
     pick = cherry-pick -s
 
+    # cherry-pick - apply the changes introduced by some existing commits; useful for moving small chunks of code between branches.
+    cp = cherry-pick
+
+    # cherry-pick without making a commit, and when when recording the commit, append a line that says "(cherry picked from commit ...)"
+    cp-nx = cherry-pick --no-commit -x
+
     h = help
 
     root = rev-parse --show-toplevel
@@ -647,6 +707,7 @@ dts = diff --word-diff-regex=. --staged
     record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 
     lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
+    lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 
     logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
     br-date = !"sh -c 'for branch in $(git branch --no-merged); do \
@@ -657,6 +718,8 @@ dts = diff --word-diff-regex=. --staged
                              && ( [[ -n $(ls) ]] || touch .gitignore ) \
                              && git add . \
                              && git commit -m \"Initial commit\"
+
+    repo = "!f() { git remote show origin -n | grep 'Fetch URL:' | sed -E 's#^.*/(.*)$#\\1#' | sed 's#.git$##'; }; f"
 
     cl = clone --recursive
 
@@ -729,6 +792,11 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                     --sort=-committerdate refs/heads/ \
                     --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
 
+  # Sort by date for branches; can be useful for spring cleaning
+  refs-by-date = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short)'
+
+    branches-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
+
     master = checkout master
     develop = checkout develop
 
@@ -738,7 +806,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Clean up.
     delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
                                      egrep -v \"(master|develop)\" | \
-                                     xargs -n 1 git branch -d; }; f"
+                                     xargs -n 1 git delete-local-branch; }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([[ $1 != "-f" ]] && git rev-parse master) | \
@@ -750,9 +818,14 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Delete remote branch.
     delete-remote-branch = push origin --delete
 
+    # Prune all your stale remote branches: there's no way to tell git remote
+    # update to prune stale branches, and git remote prune does not
+    # understand --all.
+    prune-all = !git remote | xargs -n 1 git remote prune
+
     prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
                                    awk '{print $1}' | \
-                                   xargs git branch -d; }; f"
+                                   xargs git delete-local-branch; }; f"
 
     # Delete local and remote tags.
     delete-tag = "!f() { [ -z ${1} ] \
@@ -778,6 +851,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                    && git push origin; }; f"
 
     contributors = shortlog -n -s -e --no-merges --
+    whorank = shortlog --summary --numbered --no-merges
 
     graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
@@ -785,14 +859,15 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 
-    graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
+    graphviz = "!f() { echo 'digraph git {' ; \
+                           git log --pretty='format:  %h -> { %p }' \"$@\" \
+                               | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
+                       echo '}'; }; f"
 
     pull-request = XXX
 
-    pr1 = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
-
     # For GitHub.
-    pr = "!f() { git fetch origin refs/pull/$1/head:pr/$1 \
+    pr = "!f() { git fetch origin pull/$1/head:pr/$1 \
                      && git checkout pr/$1; }; f"
 
     # For GitHub.
@@ -808,6 +883,25 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                 git delete-local-branch pr/$1; \
             fi \
         }; f"
+
+    # merges given pull request into the current branch
+    # the commit message will have the same for as if done using the
+    # merge button on github.com
+    #
+    # git merge-pr origin 5
+    merge-pr = "!sh -c '\
+        user_and_repo=`git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"`; \
+        user=`echo $user_and_repo | cut -d\" \" -f1`; \
+        repo=`echo $user_and_repo | cut -d\" \" -f2`; \
+        tmpfile=`mktemp`; \
+        curl -si https://api.github.com/repos/$user/$repo/pulls/$2 > $tmpfile; \
+        pull_author=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
+        pull_ref=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
+        pull_title=`cat $tmpfile | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"`; \
+        rm $tmpfile; \
+        git fetch $1 pull/$2/head; \
+        git merge --no-ff -m \"Merged pull request #$2 from $pull_author/$pull_ref\n\n$pull_title\" FETCH_HEAD; \
+        ' -"
 
     pr-clean = delete-local-branch pr/$1
 
@@ -835,3 +929,4 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     download-repository = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
 
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
+    serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"

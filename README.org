@@ -829,23 +829,14 @@ Staging for commit is typically done by ~git add~.
 #+end_src
 
 #+begin_src conf
-# Diff line-wise
-d = diff
+    # Diff line-wise
+    d = diff
 
-# Diff staged line-wise
-ds = diff --staged
+    # Diff word-wise
+    dw = diff --color-words
 
-# Diff word-wise
-dw = diff --color-words
-
-# Diff staged word-wise
-dws = diff --color-words --staged
-
-# Diff character-wise
-dt = diff --word-diff-regex=.
-
-# Diff staged character-wise
-dts = diff --word-diff-regex=. --staged
+    # Diff character-wise
+    dt = diff --word-diff-regex=.
 #+end_src
 
 *** Changes between the working tree and the latest commit (HEAD)
@@ -859,8 +850,19 @@ dts = diff --word-diff-regex=. --staged
 Just before committing the *staged* changes, check what your commit changes:
 
 #+begin_src conf
-    # Review.
+    # Review staged changes (about to be committed).
     dc = diff --cached
+#+end_src
+
+#+begin_src conf
+    # Diff staged line-wise
+    ds = diff --cached
+
+    # Diff staged word-wise
+    dws = diff --color-words --cached
+
+    # Diff staged character-wise
+    dts = diff --word-diff-regex=. --cached
 #+end_src
 
 *** Precommit
@@ -910,6 +912,38 @@ Show changes for a daily standup meeting:
                         --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
                         --date=local"
 # XXX git standup W donne un décompte avec une ligne trop peu !
+#+end_src
+
+#+begin_src conf
+  # Show log of changes, most recent first
+  log-changes = log --oneline --reverse
+
+  # Show log of new commits after you fetched, with stats, excluding merges
+  log-fresh = log ORIG_HEAD.. --stat --no-merges
+
+  # Show log with dates in our local timezone
+  log-local = log --date=local
+
+  # Show the log for my own user email
+  log-me = !git log --author $(git config user.email)
+
+  # Show log as a graph
+  log-graph = log --graph --all --oneline --decorate
+
+  # Show the date of the first commit
+  log-first-date = !"git log --date-order --date=iso --pretty=%ad --reverse | head -1"
+
+  # Show the recent day
+  log-day = log --since yesterday
+
+  # Summarize your own changes since yesterday, suitable for a daily standup meeting.
+  log-standup = !git log --since yesterday --author $(git config user.email) --pretty=short
+
+  # TODO
+  log-refs = log --all --graph --decorate --oneline --simplify-by-decoration --no-merges
+  log-timeline = log --format='%h %an %ar - %s'
+  log-local = log --oneline origin..HEAD
+  log-fetched = log --oneline HEAD..origin/master
 #+end_src
 
 *** When
@@ -962,8 +996,6 @@ List commits *showing changed files* (prettier and more concise version of
     ls-del  = ls-files -d
     ls-mod  = ls-files -m   # This will include deleted files also.
     ls-new  = ls-files --exclude-standard -o
-    # this one is a MUST have
-    ls-ign  = ls-files --exclude-standard -o -i
     lsfiles = ls-files --exclude-per-directory=.gitignore \
                      --exclude-from=.git/info/exclude \
                      -v -d -o -m -s -u
@@ -1085,6 +1117,8 @@ List untracked *files ignored* by a =.gitignore= statement somewhere.
 #+end_src
 
 #+begin_src conf
+    # this one is a MUST have
+    ls-ign  = ls-files --exclude-standard -o -i
     ls-ignored = ls-files --others --ignored --exclude-standard
 #+end_src
 
@@ -1107,6 +1141,9 @@ Quickly add a file or directory to =.gitignore=:
     ignore = "!f() { echo \"$1\" >> \"${GIT_PREFIX}.gitignore\"; }; f"
     # ignore=!([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore
 # XXX What is GIT_PREFIX?
+
+  # Ignore all untracked files by appending them to .gitignore:
+  ignore-untracked = "!git status | grep -P \"^\\t\" | grep -vF .gitignore | sed \"s/^\\t//\" >> .gitignore"
 #+end_src
 
 *Note that adding the .gitignore and the file specification will have no effect
@@ -1139,23 +1176,23 @@ files (*only to spare some stats*).  So do not suggest it as a means to achieve
 that.
 #+end_warning
 
-List ignored files (*marked unchanged*):
+Skip all:
 
 #+begin_src conf
-    skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
-    # skipped = '!git ls-files -v | grep ^[a-z]'
+    skip-all = "!git status -s | awk {'print $2'} | xargs git skip"
 #+end_src
 
 Unskip all the skipped files:
 
 #+begin_src conf
-    unskipall = "!git skipped | xargs git update-index --no-assume-unchanged"
+    unskip-all = "!git skipped | xargs git update-index --no-assume-unchanged"
 #+end_src
 
-Skip all:
+List ignored files (*marked unchanged*):
 
 #+begin_src conf
-    skipall = "!git status -s | awk {'print $2'} | xargs git skip"
+    skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
+    # skipped = '!git ls-files -v | grep ^[a-z]'
 #+end_src
 
 ** REVERT - Undo things
@@ -1248,7 +1285,8 @@ need to be the *latest* one.
 #+begin_src conf
     fixup = "!f() { TARGET=$(git rev-parse \"$1\"); \
                     git commit --fixup=$TARGET ${@:2} \
-                        && EDITOR=true git rebase -i --autostash --autosquash $TARGET^; }; f"
+                        && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET^; }; f"
+    # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
 #+end_src
 
 For aliases and shell/git configuration, a few pearls:
@@ -1490,6 +1528,24 @@ into one commit:
 
 : git squash N
 
+** Merge
+
+#+begin_src conf
+  # Given a merge commit, find the span of commits that exist(ed).
+  # Not so useful in itself, but used by other aliases.
+  # Thanks to Rob Miller for the merge-span-* aliaes.
+  merge-span = !"f() { echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); }; f"
+
+  # Find the commits that were introduced by a merge
+  merge-span-log = "!git log `git merge-span .. $1`"
+
+  # Show the changes that were introduced by a merge
+  merge-span-diff = !"git diff `git merge-span ... $1`"
+
+  # Show the changes that were introduced by a merge, in your difftool
+  merge-span-difftool = !"git difftool `git merge-span ... $1`"
+#+end_src
+
 ** UPDATE - Pull
 
 Starting with Git 1.7.0, ~@{u}~ is shorthand for the *current* branch's *upstream*
@@ -1649,6 +1705,10 @@ Before doing work (in a new branch), *ensure that the working directory is*
 Pull all:
 
 #+begin_src conf
+  # Do a push/pull for just one branch
+  push1 = "!git push origin $(git branch-name)"
+  pull1 = "!git pull origin $(git branch-name)"
+
     pull-all = !"old=$(git current-branch); \
                  for b in $(git for-each-ref refs/heads --format='%(refname)'); do \
                      git checkout ${b#refs/heads/}; \
@@ -1899,7 +1959,8 @@ This command tells you which files have conflicts after merging.
 
     # Incorporate a finished feature on develop.
     feature-finish = "!f() { git checkout develop; \
-                             git merge --no-ff feature/$1 && git delete-local-branch feature/$1; }; f"
+                             git merge --no-ff feature/$1 \
+                             && git delete-local-branch feature/$1; }; f"
 
     # XXX Also bug and refactor.
 
@@ -2193,6 +2254,7 @@ user wants to have an updated repository.
 *** Take named stash
 
 #+begin_src conf
+    snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
     snapshot = !git stash push -m "Snapshot [$(date +\"%F %a %R\")]" && git stash apply "stash@{0}"
 #+end_src
 
@@ -2208,14 +2270,12 @@ user wants to have an updated repository.
 *** Show a list of all stashes
 
 #+begin_src conf
-    sl = stash list
     stashes = stash list --date=local
 #+end_src
 
 *** Show the stash
 
 #+begin_src conf
-    ssh = stash show -p
     stash-diff = stash show -p
 #+end_src
 
@@ -2229,7 +2289,7 @@ One very useful feature one may consider is to list contents of all local
 stashes:
 
 #+begin_src shell :tangle no
-git stash list | awk -F: '{ print "\n\n\n\n"; print $0; print "\n\n"; system("git stash show -p " $1); }'
+git stashes | awk -F: '{ print "\n\n\n\n"; print $0; print "\n\n"; system("git stash show -p " $1); }'
 #+end_src
 
 Press [Q] to exit each stash.
@@ -2437,6 +2497,7 @@ the =origin= remote and to set up tracking.
 #+end_src
 
 #+begin_src conf
+    # Get the upstream branch name.
     upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
 #+end_src
 
@@ -2625,8 +2686,7 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+end_src
 
 #+begin_src conf
-    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(basename $(git root))-commit-${1:-HEAD}.zip; }; f"
-# Should be {repo-name}-commit-{sha-id}.zip.
+    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo)-commit-${1:-HEAD}.zip; }; f"
 #+end_src
 
 ** PUBLISH - Tag
@@ -2657,17 +2717,23 @@ git tag <tagname>
 
 The tag will be a *lightweight tag* by default.
 
-Show the last tag:
+Show the last tag /in the current branch/:
 
 #+begin_src conf
     last-tag = describe --tags --abbrev=0
+#+end_src
+
+Show latest annotated tag /in all branches/:
+
+#+begin_src conf
+    last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
 #+end_src
 
 List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
 
 #+begin_src conf
     # Show verbose output about tags.
-    tags = !git tag -l --sort=v:refname
+    tags = !git tag -l --sort=v:refname -n1
 #+end_src
 
 Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin
@@ -2717,6 +2783,12 @@ Basic shortcuts.
 #+begin_src conf
     cp = cherry-pick -x
     pick = cherry-pick -s
+
+    # cherry-pick - apply the changes introduced by some existing commits; useful for moving small chunks of code between branches.
+    cp = cherry-pick
+
+    # cherry-pick without making a commit, and when when recording the commit, append a line that says "(cherry picked from commit ...)"
+    cp-nx = cherry-pick --no-commit -x
 #+end_src
 
 #+begin_src conf
@@ -2789,6 +2861,7 @@ will ~reset~ the index.
 
 #+begin_src conf
     lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
+    lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 #+end_src
 
 ** TODO To sort out
@@ -2823,6 +2896,17 @@ will ~reset~ the index.
                              && ( [[ -n $(ls) ]] || touch .gitignore ) \
                              && git add . \
                              && git commit -m \"Initial commit\"
+#+end_src
+
+** Create a repository
+
+#+begin_src shell :tangle no
+# $1=username $2=repo
+curl -u "$1" https://api.github.com/user/repos -d "{\"name\":\"$2\"}"
+#+end_src
+
+#+begin_src conf
+    repo = "!f() { git remote show origin -n | grep 'Fetch URL:' | sed -E 's#^.*/(.*)$#\\1#' | sed 's#.git$##'; }; f"
 #+end_src
 
 ** Clone a repository
@@ -3204,15 +3288,34 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
                     --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
 #+end_src
 
-*** Show your branches
+#+begin_src conf
+  # Sort by date for branches; can be useful for spring cleaning
+  refs-by-date = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short)'
+#+end_src
+
+*** Show my branches
 
 *** Show active branches
 
 *** Show merged branches
 
+List branches whose tips are reachable from the specified commit (HEAD if not
+specified).
+
+#+begin_src conf
+    branches-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
+#+end_src
+
 *** Show stale branches
 
-** Switch
+"Stale branches" are Git branches *without commits* for the last few months.  This
+generally indicates old, unmaintained branches for unreleased, incomplete
+features.
+
+For the Github, such period of inactivity is *3 months* (see
+https://help.github.com/articles/viewing-branches-in-your-repository/).
+
+** [#A] Switch
 
 Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
 
@@ -3249,7 +3352,7 @@ branch "irrespective of its merged status."
     # Clean up.
     delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
                                      egrep -v \"(master|develop)\" | \
-                                     xargs -n 1 git branch -d; }; f"
+                                     xargs -n 1 git delete-local-branch; }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([[ $1 != "-f" ]] && git rev-parse master) | \
@@ -3283,11 +3386,18 @@ Delete a *remote* branch:
 
 *** Delete all old local branches
 
-Once you delete the branch from the remote, you can remove all tracking branches
-that you have locally but are no more present in the remote repository (~origin~)
-with:
+Once you delete the branch from the remote, you can *remove all stale
+remote-tracking branches that you have locally*, but are *no more present in the
+remote repository* (~origin~) with:
 
 : git remote prune origin
+
+#+begin_src conf
+    # Prune all your stale remote branches: there's no way to tell git remote
+    # update to prune stale branches, and git remote prune does not
+    # understand --all.
+    prune-all = !git remote | xargs -n 1 git remote prune
+#+end_src
 
 #+begin_tip
 Use the ~--dry-run~ flag to only see what branches will be pruned, but not
@@ -3306,14 +3416,14 @@ or prune individual remote tracking branches with:
 
 : git branch -dr branchname
 
-Remove stale branches in your local repository that *no longer exist in the
+*Remove stale branches in your local repository* that *no longer exist in the
 remote* one (by deleting the local ones that show they are "gone" in ~git
 branch -vv~):
 
 #+begin_src conf
     prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
                                    awk '{print $1}' | \
-                                   xargs git branch -d; }; f"
+                                   xargs git delete-local-branch; }; f"
 #+end_src
 
 * Tags
@@ -3500,6 +3610,7 @@ Show a "top contributors" list (rank), excluding merge commits:
 
 #+begin_src conf
     contributors = shortlog -n -s -e --no-merges --
+    whorank = shortlog --summary --numbered --no-merges
 #+end_src
 
 #+begin_note
@@ -3528,8 +3639,16 @@ View the Git history tree:
 
 Directed Acyclic Graph:
 
+  # Use graphviz for display.
+  # This produces output that can be displayed using dotty, for example:
+  #   $ git graphviz HEAD~100..HEAD~60 | dotty /dev/stdin
+  #   $ git graphviz --first-parent master | dotty /dev/stdin
+
 #+begin_src conf
-    graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
+    graphviz = "!f() { echo 'digraph git {' ; \
+                           git log --pretty='format:  %h -> { %p }' \"$@\" \
+                               | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
+                       echo '}'; }; f"
 #+end_src
 
 * Pull requests
@@ -3568,15 +3687,36 @@ Sometimes, just reading the code of a pull request might not be enough to verify
 if it should be merged.  Maybe you want to add something, or some tests are
 failing, and you want to run them locally on your computer.
 
-Check out a pull request locally (for GitHub project):
+*Check out* a *pull request* locally (for [[https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally][GitHub]] project):
 
 #+begin_src conf
-    pr1 = '!sh -c "git fetch origin pull/$1/head:pr/$1" -'
-
     # For GitHub.
-    pr = "!f() { git fetch origin refs/pull/$1/head:pr/$1 \
+    pr = "!f() { git fetch origin pull/$1/head:pr/$1 \
                      && git checkout pr/$1; }; f"
 #+end_src
+
+With this git alias you can checkout any PR:
+
+: git pr 5150
+
+** Push changes to a pull request
+
+In case you don't want to enter the branch to push to, you can use this small
+snippet:
+
+#+begin_src shell :tangle no
+#!/bin/bash
+tmpfile=$(mktemp)
+repoSlug=$(git remote -v | grep '^upstream' | head -n1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
+prNumber=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
+curl -s https://api.github.com/repos/${repoSlug}/pulls/${prNumber} > $tmpfile
+trap "{ rm -f $tmpfile; }" EXIT
+headRef=$(cat $tmpfile | jq -r '.head.ref')
+headSlug=$(cat $tmpfile | jq -r '.head.repo.full_name')
+git push -f git@github.com:${headSlug} HEAD:${headRef}
+#+end_src
+
+For more details on pushing changes to a PR, please see [[https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork][the official article]].
 
 ** Merge pull request
 
@@ -3594,6 +3734,25 @@ Check out a pull request locally (for GitHub project):
                 git delete-local-branch pr/$1; \
             fi \
         }; f"
+
+    # merges given pull request into the current branch
+    # the commit message will have the same for as if done using the
+    # merge button on github.com
+    #
+    # git merge-pr origin 5
+    merge-pr = "!sh -c '\
+        user_and_repo=`git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"`; \
+        user=`echo $user_and_repo | cut -d\" \" -f1`; \
+        repo=`echo $user_and_repo | cut -d\" \" -f2`; \
+        tmpfile=`mktemp`; \
+        curl -si https://api.github.com/repos/$user/$repo/pulls/$2 > $tmpfile; \
+        pull_author=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
+        pull_ref=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
+        pull_title=`cat $tmpfile | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"`; \
+        rm $tmpfile; \
+        git fetch $1 pull/$2/head; \
+        git merge --no-ff -m \"Merged pull request #$2 from $pull_author/$pull_ref\n\n$pull_title\" FETCH_HEAD; \
+        ' -"
 #+end_src
 
 This is actually quite useful if you are a maintainer of a project on
@@ -3672,6 +3831,46 @@ b965075 Merge pull request #255 from yammer/s2s_auth_p4
 #+end_src
 
 In this case, the commit comes from pull request 255.
+
+** Saved replies
+
+GitHub allows to [[https://github.blog/2016-03-29-saved-replies/][save replies]]. You can set them in [[https://github.com/settings/replies][your GitHub settings]].  Here
+are a couple of commonly used replies:
+
+Missing changelog
+
+#+begin_src text :tangle no
+This still lacks a changelog entry. Please see [the changelog folder](../tree/master/changelog) for instructions.
+Hence, I added the "pending changelog" label.
+#+end_src
+
+Missing spec PR
+
+#+begin_src text :tangle no
+This still needs a PR to the [specification](https://github.com/dlang/dlang.org/tree/master/spec) at [dlang.org](https://github.com/dlang/dlang.org). Hence, I added the label "missing spec PR".
+
+Please refer to the [dlang.org CONTRIBUTING guide](https://github.com/dlang/dlang.org/blob/master/CONTRIBUTING.md) for instructions to build dlang.org locally. If you use Windows, don't worry, you can do your changes "blindly" and preview them at DAutoTest.
+#+end_src
+
+Phantom Zone
+
+#+begin_src text :tangle no
+This PR entered the Phantom Zone
+-----------------------------------------------
+
+
+This PR has entered the [Phantom Zone](http://forum.dlang.org/post/ouuutodvhmnghzbeoqen@forum.dlang.org) as it still needs to have the reviewers' concerns addressed and rebased.
+
+Reason for entering the Phantom Zone
+----------------------------------------------------
+
+This PR is nice, and normally I would revive such a PR if the author was no longer active. I would also revive it if it were an important bug fix or something of higher priority.  This PR, however, is just a refactoring, so I'm going to put it in the [Phantom Zone](http://forum.dlang.org/post/ouuutodvhmnghzbeoqen@forum.dlang.org) and close it for now.
+
+How do I get this PR out of the Phantom Zone
+-------------------------------------------------------------
+
+Easy: Address the comments -> open a new PR (mention this one + short summary in the description).
+#+end_src
 
 * Pipelines
 
@@ -3769,6 +3968,7 @@ curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
 
 #+begin_src conf
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
+    serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
 #+end_src
 
 1. Run git serve. "Ready to rumble," it will report. Git is bad-ass.
