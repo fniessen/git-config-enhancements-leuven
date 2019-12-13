@@ -16,7 +16,8 @@
 
     pager = "less -R"
 
-#    whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    whitespace = cr-at-eol
 
     # Do filesystem operations in parallel to hide latency (default since v2.1).
     preloadindex = true
@@ -31,6 +32,9 @@
 [log]
     date = iso
 
+[commit]
+    template = ~/.git_commit_msg.txt
+
 [diff]
     renames = copies
     renameLimit = 30000
@@ -38,6 +42,8 @@
     algorithm = patience
 
     mnemonicprefix = true
+
+    noprefix = true
 
     tool = meld
 
@@ -229,11 +235,12 @@
     today-all = !git log --since=midnight --no-merges --all
 
 	recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
-	today = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-	changelog = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
+	today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+	changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
 	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
 	local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 
+    # Summarize your own changes since 24h, suitable for a daily standup meeting.
     log-standup = !git log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
 
     standup = !"git log --branches \
@@ -247,42 +254,21 @@
                         --date=local"
 # XXX git standup W donne un décompte avec une ligne trop peu !
 
-  # Show log of changes, most recent first
-  log-changes = log --oneline --reverse
-
   # Show log of new commits after you fetched, with stats, excluding merges
   log-fresh = log ORIG_HEAD.. --stat --no-merges
 
-  # Show log with dates in our local timezone
-  log-local = log --date=local
-
   # Show the log for my own user email
-  log-me = !git log --author $(git config user.email)
-
-  # Show log as a graph
-  log-graph = log --graph --all --oneline --decorate
-
-  # Show the date of the first commit
-  log-first-date = !"git log --date-order --date=iso --pretty=%ad --reverse | head -1"
-
-  # Show the recent day
-  log-day = log --since yesterday
-
-  # Summarize your own changes since yesterday, suitable for a daily standup meeting.
-  log-standup = !git log --since yesterday --author $(git config user.email) --pretty=short
+  log-me = !git log --author=$(git config user.email)
 
   # TODO
-  log-refs = log --all --graph --decorate --oneline --simplify-by-decoration --no-merges
-  log-timeline = log --format='%h %an %ar - %s'
-  log-local = log --oneline origin..HEAD
   log-fetched = log --oneline HEAD..origin/master
+
+    log-local = log --oneline origin..HEAD
 
     # When was this file last updated, on each local branch.
     wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
                         echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; \
                     done | sort -r | cut -f2 -d:; }; f"
-
-    log-local = log --oneline origin..HEAD
 
     ls = log --decorate --date=short
     ld = log --decorate --date=relative
@@ -368,7 +354,7 @@
     medit = commit --amend -m
 
     # Credit an author on the PREVIOUS commit.
-    credit = "!f() { git commit --amend --author \"$1 <$2>\" --reuse-message HEAD; }; f"
+    credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
 
     fixup = "!f() { TARGET=$(git rev-parse \"$1\"); \
                     git commit --fixup=$TARGET ${@:2} \
@@ -555,6 +541,8 @@
     # Find tags containing commit.
     findt = "!f() { git describe --always --contains $1; }; f"
 
+missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git rev-list $1.. --oneline | sed -e '1 iOnly in HEAD:'; }; f"
+
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch
     # pg sbt master pu -- if the last line is 'master' and not 'master^'
@@ -568,9 +556,9 @@
 
     sapply = "!f() { git stash apply stash^{/$@}; }; f" # Find stash with name like text
 
-    spop = "!f() { git stash pop stash@{$(git stashid $@)}; }; f" # Like sapply but pops it off
+    spop = "!f() { git stash pop stash@{$(git stash-id $@)}; }; f" # Like sapply but pops it off
 
-    stashid = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
+    stash-id = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
 
     hide = stash push --include-untracked # Hide all files, including untracked files (faster than using --all).
 
@@ -658,7 +646,7 @@
 
     export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
 
-    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo)-commit-${1:-HEAD}.zip; }; f"
+    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 
     last-tag = describe --tags --abbrev=0
 
@@ -671,8 +659,10 @@
     # branche courante.
     unreleased = !git log --oneline $(git last-tag)...HEAD && git last-tag
 
-    releases = log --decorate --oneline --simplify-by-decoration --all
+    releases = log --decorate --no-merges --all --simplify-by-decoration --oneline --graph
     # XXX Add date
+
+    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { git tag $2 $1; git tag -d $1; git push origin $2; git push origin :refs/tags/$1; }; f"
@@ -710,16 +700,19 @@
     lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 
     logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
-    br-date = !"sh -c 'for branch in $(git branch --no-merged); do \
-                           git logdate -1 -r $branch --; \
-                       done'"
+    branch-date = !"sh -c 'for branch in $(git branch --no-merged); do \
+                               git logdate -1 -r $branch --; \
+                           done'"
+
+    all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
 
     create-repository = !git init \
                              && ( [[ -n $(ls) ]] || touch .gitignore ) \
                              && git add . \
                              && git commit -m \"Initial commit\"
 
-    repo = "!f() { git remote show origin -n | grep 'Fetch URL:' | sed -E 's#^.*/(.*)$#\\1#' | sed 's#.git$##'; }; f"
+    username = "XXX"
+    repo-slug = "!f() { git remote show origin -n | grep 'Fetch URL:' | sed -E 's#^.*/(.*)$#\\1#' | sed 's#.git$##'; }; f"
 
     cl = clone --recursive
 
@@ -855,20 +848,23 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
-    hist = log --date=short --graph
+    # Show log as a graph
+    log-graph = log --graph --all --oneline --decorate
 
-    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
+    hist = log --date=short --graph
 
     graphviz = "!f() { echo 'digraph git {' ; \
                            git log --pretty='format:  %h -> { %p }' \"$@\" \
                                | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
                        echo '}'; }; f"
 
-    pull-request = XXX
+    pull-request-bb = "!f() { username=$1; repo_slug=$2; \
+        curl --user $username \
+            https://bitbucket.org/fniessen/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 
     # For GitHub.
-    pr = "!f() { git fetch origin pull/$1/head:pr/$1 \
-                     && git checkout pr/$1; }; f"
+    pr-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
+                        && git checkout pr/$1; }; f"
 
     # For GitHub.
     mpr = "!f() { \
@@ -909,10 +905,11 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     create-issue = XXX
 
-    issues = "!f() { username=$1; repo_slug=$2; \
+    issues = "!f() { username=$1; \
         curl --user $username \
-            https://api.bitbucket.org/2.0/repositories/$username/$repo_slug/issues \
-            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'; }; f"
+            https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
+            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
+            | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\"; }; f"
 # --data-urlencode 'priority >= \"major\"'
 
     issues-open = XXX
@@ -926,7 +923,8 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     browse-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
 
     # Put everything in the current repo in a Zip archive.
-    download-repository = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
+    download-repository = "!f() { git archive ${1:-HEAD} --format=zip \
+                                      -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
 
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
     serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"

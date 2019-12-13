@@ -32,6 +32,9 @@ https://docs.gitlab.com/ee/api/
 XXX GitAlias.com file of many git alias items, including shortcuts, helpers, workflows, etc.
 https://github.com/gitalias/gitalias/blob/master/gitalias.txt
 
+XXX Today I learned
+https://til.hashrocket.com/git
+
 *Commit early, commit often*: it is a bad idea to do a lot of work without
 committing... But don't push every single commit: push when changes are tested!
 
@@ -259,8 +262,11 @@ variable/.
     pager = "less -R"
 #+end_src
 
+Stop viewing ~^M~ symbols in diff:
+
 #+begin_src conf
-#    whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    whitespace = cr-at-eol
 #+end_src
 
 #+begin_src conf :tangle no
@@ -294,13 +300,49 @@ Get a better date (current format is 2019-11-26 17:35:30 +0100):
     date = iso
     #+end_src
 
+** Commit
+
+A useful template for good commit messages (see
+https://medium.com/compass-true-north/writing-good-commit-messages-fc33af9d6321):
+
+#+begin_src text :tangle ~/.git_commit_msg.txt
+######## 50 characters ###########################
+# If applied, this commit will...
+# [Add / Fix / Remove / Update / Refactor / Document] [issue #id] [summary]
+# :new: Add: input_your_summary
+# :bug: Fix: input_your_summary
+# :x: Remove: input_your_summary
+# :hammer: Update: input_your_summary
+# :recycle: Refactor: input_your_summary
+# :computer: Tool: input_your_summary
+
+######## 72 characters #################################################
+# Why is this change necessary? (Bug fix, feature, improvements?)
+-
+# How does the change address the problem?
+-
+# What side effects does this change have?
+-
+# Include a link to the ticket, if any.
+#+end_src
+
+and you’ll be guided into writing concise commit subjects in the imperative
+mood - a good practice. See rule 5 of Chris Beam’s "How to write a commit
+message" for the inspiration of this tip and more reasoning on the use of the
+imperative mood.
+
+#+begin_src conf
+[commit]
+    template = ~/.git_commit_msg.txt
+#+end_src
+
 ** Diff
 
 #+begin_src conf
 [diff]
     renames = copies
     renameLimit = 30000
-    #+end_src
+#+end_src
 
 Using the patience diff algorithm to compare large swathes of repetitive text
 (hello, xml!) often produces a much more readable diff that will reveal context
@@ -349,6 +391,10 @@ as prefixes for patches:
 
 #+begin_src conf
     mnemonicprefix = true
+#+end_src
+
+#+begin_src conf
+    noprefix = true
 #+end_src
 
 *** Use Meld as Git ~difftool~
@@ -891,8 +937,8 @@ branches*):
 
 #+begin_src conf
 	recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
-	today = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-	changelog = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
+	today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+	changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
 	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
 	local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 #+end_src
@@ -900,6 +946,7 @@ branches*):
 Show changes for a daily standup meeting:
 
 #+begin_src conf
+    # Summarize your own changes since 24h, suitable for a daily standup meeting.
     log-standup = !git log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
 
     standup = !"git log --branches \
@@ -915,35 +962,22 @@ Show changes for a daily standup meeting:
 #+end_src
 
 #+begin_src conf
-  # Show log of changes, most recent first
-  log-changes = log --oneline --reverse
-
   # Show log of new commits after you fetched, with stats, excluding merges
   log-fresh = log ORIG_HEAD.. --stat --no-merges
 
-  # Show log with dates in our local timezone
-  log-local = log --date=local
-
   # Show the log for my own user email
-  log-me = !git log --author $(git config user.email)
-
-  # Show log as a graph
-  log-graph = log --graph --all --oneline --decorate
-
-  # Show the date of the first commit
-  log-first-date = !"git log --date-order --date=iso --pretty=%ad --reverse | head -1"
-
-  # Show the recent day
-  log-day = log --since yesterday
-
-  # Summarize your own changes since yesterday, suitable for a daily standup meeting.
-  log-standup = !git log --since yesterday --author $(git config user.email) --pretty=short
+  log-me = !git log --author=$(git config user.email)
 
   # TODO
-  log-refs = log --all --graph --decorate --oneline --simplify-by-decoration --no-merges
-  log-timeline = log --format='%h %an %ar - %s'
-  log-local = log --oneline origin..HEAD
   log-fetched = log --oneline HEAD..origin/master
+#+end_src
+
+*** Finding new commits
+
+Diverging from ~origin/master~, whatever the branch?
+
+#+begin_src conf
+    log-local = log --oneline origin..HEAD
 #+end_src
 
 *** When
@@ -953,14 +987,6 @@ Show changes for a daily standup meeting:
     wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
                         echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; \
                     done | sort -r | cut -f2 -d:; }; f"
-#+end_src
-
-*** Finding new commits
-
-Diverging from ~origin/master~, whatever the branch?
-
-#+begin_src conf
-    log-local = log --oneline origin..HEAD
 #+end_src
 
 ** SHOW - View the commit history
@@ -1263,7 +1289,7 @@ prompting you for the message you've already entered!
     medit = commit --amend -m
 
     # Credit an author on the PREVIOUS commit.
-    credit = "!f() { git commit --amend --author \"$1 <$2>\" --reuse-message HEAD; }; f"
+    credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
 #+end_src
 
 Note that the ~-a~ switch which tells Git to automatically *stage all your changes*,
@@ -2146,6 +2172,16 @@ git tag --contains a2c71a6
     findt = "!f() { git describe --always --contains $1; }; f"
 #+end_src
 
+*** Comparing the commits between branches
+
+Sometimes I lose track of which branch contains which other branch. This
+shortcut (an idea borrowed from Bazaar) shows the unique revisions in the
+current branch and the specified branch.
+
+#+begin_src conf
+missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git rev-list $1.. --oneline | sed -e '1 iOnly in HEAD:'; }; f"
+#+end_src
+
 *** See which changes from a branch are already present upstream
 
 While on =feature= branch:
@@ -2242,9 +2278,9 @@ user wants to have an updated repository.
 
     sapply = "!f() { git stash apply stash^{/$@}; }; f" # Find stash with name like text
 
-    spop = "!f() { git stash pop stash@{$(git stashid $@)}; }; f" # Like sapply but pops it off
+    spop = "!f() { git stash pop stash@{$(git stash-id $@)}; }; f" # Like sapply but pops it off
 
-    stashid = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
+    stash-id = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
 #+end_src
 
 #+begin_src conf
@@ -2686,7 +2722,7 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+end_src
 
 #+begin_src conf
-    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo)-commit-${1:-HEAD}.zip; }; f"
+    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 #+end_src
 
 ** PUBLISH - Tag
@@ -2748,8 +2784,10 @@ de savoir ce qu’embarquera la « prochaine release » de mon projet.
 You can do a lot better with:
 
 #+begin_src conf
-    releases = log --decorate --oneline --simplify-by-decoration --all
+    releases = log --decorate --no-merges --all --simplify-by-decoration --oneline --graph
     # XXX Add date
+
+    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 #+end_src
 
 #+begin_src conf
@@ -2790,6 +2828,12 @@ Basic shortcuts.
     # cherry-pick without making a commit, and when when recording the commit, append a line that says "(cherry picked from commit ...)"
     cp-nx = cherry-pick --no-commit -x
 #+end_src
+
+This command has some useful parameters:
+- -e to edit git message
+- -x to add a line "Cherry-picked commit" in the commit message
+- --no-commit or -n to apply the commit changes in the unstaged area (unstead of
+  creating a commit in the branch)
 
 #+begin_src conf
     h = help
@@ -2868,9 +2912,9 @@ will ~reset~ the index.
 
 #+begin_src conf
     logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
-    br-date = !"sh -c 'for branch in $(git branch --no-merged); do \
-                           git logdate -1 -r $branch --; \
-                       done'"
+    branch-date = !"sh -c 'for branch in $(git branch --no-merged); do \
+                               git logdate -1 -r $branch --; \
+                           done'"
 #+end_src
 
 ** Git and Subversion
@@ -2883,6 +2927,18 @@ will ~reset~ the index.
 
 #+begin_src conf :tangle no
     cvs-full-log = log --reverse --pretty=format:'%B------------------------------------------------------------------------'
+#+end_src
+
+* All repositories
+
+The biggest use I get out of this alias is making sure I have everything
+committed. Sometimes I'll work on a project and then forget about it for
+a little while without committing. When I want to double-check that I'm not
+forgetting anything, I run ~git all status --short~ to quickly scan which repos
+have uncommitted changes that I need to take care of.
+
+#+begin_src conf
+    all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
 #+end_src
 
 * ------------------------------------------------------------------------------
@@ -2901,12 +2957,15 @@ will ~reset~ the index.
 ** Create a repository
 
 #+begin_src shell :tangle no
-# $1=username $2=repo
-curl -u "$1" https://api.github.com/user/repos -d "{\"name\":\"$2\"}"
+    # $1=username $2=repo-slug
+    create-repository-gh = "!f() { username=$1; repo_slug=$2; \
+        curl -u \"$1\" \
+            https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; }; f"
 #+end_src
 
 #+begin_src conf
-    repo = "!f() { git remote show origin -n | grep 'Fetch URL:' | sed -E 's#^.*/(.*)$#\\1#' | sed 's#.git$##'; }; f"
+    username = "XXX"
+    repo-slug = "!f() { git remote show origin -n | grep 'Fetch URL:' | sed -E 's#^.*/(.*)$#\\1#' | sed 's#.git$##'; }; f"
 #+end_src
 
 ** Clone a repository
@@ -3625,16 +3684,13 @@ To see real *timeline* of who is working on what and when:
 
 #+begin_src conf
     graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+
+    # Show log as a graph
+    log-graph = log --graph --all --oneline --decorate
 #+end_src
 
 #+begin_src conf
     hist = log --date=short --graph
-#+end_src
-
-View the Git history tree:
-
-#+begin_src conf
-    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 #+end_src
 
 Directed Acyclic Graph:
@@ -3657,11 +3713,17 @@ XXX See https://github.com/github/hub/
 
 ** Create a pull request
 
-Create pull request (for GitHub project):
+Create pull request against the default branch:
 
 #+begin_src conf
-    pull-request = XXX
+    pull-request-bb = "!f() { username=$1; repo_slug=$2; \
+        curl --user $username \
+            https://bitbucket.org/fniessen/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 #+end_src
+
+Add a comment in github pull request:
+
+: curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -X POST -d '{\"body\": \"${text_pr}\"}' \"https://api.github.com/repos/${repository_name}/issues/${ghprbPullId}/comments\""
 
 ** List
 
@@ -3691,11 +3753,11 @@ failing, and you want to run them locally on your computer.
 
 #+begin_src conf
     # For GitHub.
-    pr = "!f() { git fetch origin pull/$1/head:pr/$1 \
-                     && git checkout pr/$1; }; f"
+    pr-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
+                        && git checkout pr/$1; }; f"
 #+end_src
 
-With this git alias you can checkout any PR:
+With this Git alias, you can checkout any PR:
 
 : git pr 5150
 
@@ -3891,10 +3953,11 @@ Open an issue in the current repository.
 ** List All Issues
 
 #+begin_src conf
-    issues = "!f() { username=$1; repo_slug=$2; \
+    issues = "!f() { username=$1; \
         curl --user $username \
-            https://api.bitbucket.org/2.0/repositories/$username/$repo_slug/issues \
-            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'; }; f"
+            https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
+            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
+            | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\"; }; f"
 # --data-urlencode 'priority >= \"major\"'
 #+end_src
 
@@ -3902,7 +3965,7 @@ Set color to red or green, depending on issue state.
 
 #+begin_src conf :tangle no
 # Works!  Need to put quotes around the URL!
-curl -u $username -X GET 'https://api.bitbucket.org/2.0/repositories/mcpflow/pflow/issues?pagelen=100' \
+curl -u $username -X GET 'https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues?pagelen=100' \
     | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
 # curl -s -S
 #+end_src
@@ -3945,7 +4008,8 @@ Download repository, tag or branch.
 
 #+begin_src conf
     # Put everything in the current repo in a Zip archive.
-    download-repository = "!f() { git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
+    download-repository = "!f() { git archive ${1:-HEAD} --format=zip \
+                                      -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
 #+end_src
 
 * Settings
