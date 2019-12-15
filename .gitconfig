@@ -32,9 +32,6 @@
 [log]
     date = iso
 
-[commit]
-    template = ~/.git_commit_msg.txt
-
 [diff]
     renames = copies
     renameLimit = 30000
@@ -172,6 +169,7 @@
 
     alias = "!git config -l | grep alias | cut -c 7- | sort"
 
+    # Useful for exploring git.
     type = cat-file -t
     dump = cat-file -p
 
@@ -234,7 +232,6 @@
 
     today-all = !git log --since=midnight --no-merges --all
 
-	recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
 	today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
 	changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
 	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
@@ -360,13 +357,6 @@
                     git commit --fixup=$TARGET ${@:2} \
                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET^; }; f"
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
-
-    # Discard.
-    unmodify = checkout --
-    undelete = checkout --
-
-    unstage = reset HEAD --
-    unadd = reset HEAD --
 
     undo-soft = reset --soft HEAD~1
     uncommit = reset --soft HEAD~1
@@ -679,13 +669,13 @@ missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git 
                              && git add . \
                              && git commit -m \"Initial commit\"
 
+    cl = clone --recursive
+
     username = "XXX"
     repo-slug = "!f() { git remote show origin -n \
                             | grep 'Fetch URL:' \
                             | sed -E 's#^.*/(.*)$#\\1#' \
                             | sed 's#.git$##'; }; f"
-
-    cl = clone --recursive
 
     # BUG This is case-sensitive...
     find-file = !git ls-tree -r --name-only $(git current-branch) | grep --color=auto
@@ -716,8 +706,19 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Name only.
     gno = "grep -I --files-with-matches"
 
+    unmodify = checkout --
+    undelete = checkout --
+
+    unstage = reset HEAD --
+    unadd = reset HEAD --
+
     # Shortcut for commit.
     ci = commit
+
+[commit]
+    template = ~/.git_commit_template.txt
+
+[alias]
 
     findc1 = "log --decorate -i --all --date=short --grep"
     findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
@@ -735,6 +736,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
 
     search-author = "log --decorate -i --all --date=short --author"
+    recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
 
     whatwhen = log --decorate --date=short -p -S
 
@@ -745,7 +747,6 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     grep4d = !sh -c 'git log -p -S'$1' $2' -
 # Not the best example, but: git grep4d CLOSED '*.java'
 
-    # Create a new branch, and then switch to it.
     create-branch = checkout -b
 
     # Push current branch to remote server (create a copy of the current branch

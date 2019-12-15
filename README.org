@@ -301,43 +301,6 @@ Get a better date (current format is 2019-11-26 17:35:30 +0100):
     date = iso
     #+end_src
 
-** Commit
-
-A useful template for good commit messages (see
-https://medium.com/compass-true-north/writing-good-commit-messages-fc33af9d6321):
-
-Implementing a Strong Code-Review Culture
-https://www.youtube.com/watch?v=PJjmw9TRB7s
-
-#+begin_src text :tangle ~/.git_commit_msg.txt
-######## 50 characters ###########################
-# If applied, this commit will...
-# [Add / Fix / Remove / Update / Refactor / Document] [issue #id] [summary]
-
-# :new: Add: input_your_summary
-# :bug: Fix: input_your_summary
-# :x: Remove: input_your_summary
-# :hammer: Update: input_your_summary
-# :recycle: Refactor: input_your_summary
-# :computer: Tool: input_your_summary
-
-######## 72 characters #################################################
-# - Why is this change necessary? (Bug fix, feature, improvements?)
-# - How does the change address the problem?
-# - What side effects does this change have?
-# Include a link to the ticket, if any.
-#+end_src
-
-and you’ll be guided into writing concise commit subjects in the imperative
-mood - a good practice. See rule 5 of Chris Beam’s "How to write a commit
-message" for the inspiration of this tip and more reasoning on the use of the
-imperative mood.
-
-#+begin_src conf
-[commit]
-    template = ~/.git_commit_msg.txt
-#+end_src
-
 ** Diff
 
 #+begin_src conf
@@ -788,6 +751,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 #+end_src
 
 #+begin_src conf
+    # Useful for exploring git.
     type = cat-file -t
     dump = cat-file -p
 #+end_src
@@ -938,7 +902,6 @@ branches*):
 #+end_src
 
 #+begin_src conf
-	recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
 	today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
 	changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
 	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
@@ -1336,43 +1299,6 @@ learngitbranching.js.org/
 *** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
 
 : git show commit-hash -- path/to/file.html | git apply --reverse
-
-*** Unmodify a modified file / Undelete a deleted file
-
-*Undo* the local changes *in the working directory*: roll a file back to its last
-committed version, removing all the changes detected by Git.
-
-#+begin_tip
-It can also recover *deleted files* -- if the deletion has not been committed.
-#+end_tip
-
-#+begin_src conf
-    # Discard.
-    unmodify = checkout --
-    undelete = checkout --
-#+end_src
-
-#+begin_note
-The two dashes there (canonically called the "bare double dashes") ensure that
-the checkout command know that we are trying to roll back a file and not /change
-branches/ (the typical usage of the checkout command).
-#+end_note
-
-When you grab a file from a previous time, it sits *in your index*, modified.
-
-*** Unstage a staged file
-
-*Remove* the specified *files from the index* (proposed next commit, staging area):
-
-#+begin_src conf
-    unstage = reset HEAD --
-    unadd = reset HEAD --
-#+end_src
-
-~unstage~ is the opposite of ~git add~. It lets you remove items from the staging
-area.  This makes it a very useful tool when you're deciding which files to
-stage for a commit.  If you've accidentally added something to the staging area,
-just use ~unstage~ to remove it.
 
 *** Throw away a commit
 
@@ -2735,7 +2661,7 @@ can automatically offer a tarball or zip download of the form
 named =package-X.Y.Z.tar.gz=).
 
 Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin
-de savoir ce qu’embarquera la « prochaine release » de mon projet.
+de savoir ce qu'embarquera la « prochaine release » de mon projet.
 
 #+begin_src conf
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
@@ -2906,10 +2832,43 @@ have uncommitted changes that I need to take care of.
                              && git commit -m \"Initial commit\"
 #+end_src
 
+** Clone a repository
+
+Clone an existing repository including all submodules.
+
+#+begin_src conf
+    cl = clone --recursive
+#+end_src
+
+#+begin_tip
+For *passwordless Git pull* (permanently authenticating with Git repositories),
+*use SSH* when cloning, and *add* your *public key* to the remote server.
+#+end_tip
+
+** Create and add your SSH public key to a repository management platform
+
+https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html
+
+It is best practice to use Git over SSH (instead of Git over HTTP).  In order to
+use SSH, you will need to:
+
+*** Create an SSH key pair on your local computer
+
+Generate a new ED25519 (should always be favored) SSH key pair:
+
+: ssh-keygen -t ed25519 -C "email@example.com"
+
+Or, if you want to use RSA:
+
+: ssh-keygen -t rsa -b 4096 -C "email@example.com"
+
+*** Add the key to the repository management platform
+
+*** Testing that everything is set up correctly
+
 ** Create a repository in GitHub
 
 #+begin_src conf :tangle no
-    # $1=username $2=repo-slug
     create-repository-gh = "!f() { username=$1; repo_slug=$2; \
         curl -u \"$1\" \
             https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; }; f"
@@ -2928,20 +2887,8 @@ The ~sed~ strings contain ~$#~, which will be replaced by the number of argument
 the current script/function (generally 0 for an interactive shell).  This is
 part of the basic Bourne shell syntax, so *single quotes* will be needed under any
 *Bourne-like shell* (even pre-POSIX ones) on any OS.  Read the standard for more
-information: pubs.opengroup.org/onlinepubs/9699919799/utilities/.
-#+end_tip
-
-** Clone a repository
-
-Clone an existing repository including all submodules.
-
-#+begin_src conf
-    cl = clone --recursive
-#+end_src
-
-#+begin_tip
-For *passwordless Git pull* (permanently authenticating with Git repositories),
-*use SSH* when cloning, and *add* your *public key* to the remote server.
+information:
+https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
 #+end_tip
 
 * Source Files
@@ -3040,6 +2987,47 @@ them (files must have lines that match each of them):
 git grep --all-match -e <regexp> -e <regexp>
 #+end_src
 
+** Undo local changes
+
+See https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
+and http://gitimmersion.com/lab_14.html.
+
+**** Before you staged (in unstaged state)
+
+*Undo* the local changes *in the working directory*: roll a file back to its last
+committed version, removing all the changes detected by Git.
+
+#+begin_tip
+It can also recover *deleted files* -- if the deletion has not been committed.
+#+end_tip
+
+#+begin_src conf
+    unmodify = checkout --
+    undelete = checkout --
+#+end_src
+
+#+begin_note
+The two dashes there (canonically called the "bare double dashes") ensure that
+the checkout command know that we are trying to roll back a file and not /change
+branches/ (the typical usage of the checkout command).
+#+end_note
+
+When you grab a file from a previous time, it sits *in your index*, modified.
+
+**** Before you committed (in staged state)
+
+*Remove* the specified *files from the index* (proposed next commit, staging area):
+
+#+begin_src conf
+    unstage = reset HEAD --
+    unadd = reset HEAD --
+#+end_src
+
+~unstage~ is the opposite of ~git add~.  It lets you remove items from the staging
+area.  This makes it a very useful tool when you're deciding which files to
+stage for a commit.  If you've accidentally added something to the staging area,
+just use ~unstage~ to remove it.
+
 * Commits
 
 ** Create a commit
@@ -3047,6 +3035,52 @@ git grep --all-match -e <regexp> -e <regexp>
 #+begin_src conf
     # Shortcut for commit.
     ci = commit
+#+end_src
+
+A useful template for good commit messages (see
+https://medium.com/compass-true-north/writing-good-commit-messages-fc33af9d6321):
+
+Implementing a Strong Code-Review Culture
+https://www.youtube.com/watch?v=PJjmw9TRB7s
+
+#+begin_src text :tangle ~/.git_commit_template.txt
+## 50-character subject line #####################
+# If applied, this commit will...
+# [Add / Fix / Remove / Update / Refactor / Document] [issue #id] [summary]
+
+# :new: Add ...
+# :bug: Fix ...
+# :x: Remove ...
+# :hammer: Update ...
+# :recycle: Refactor ...
+# :computer: Tool ...
+
+## 72-character wrapped longer description #############################
+# This should answer:
+# - Why is this change necessary?  (goals, use cases, stories, etc.?)
+# - How does this change address the issue?  (implementations, algorithms, etc.?)
+# - What side effects does this change have?
+
+# Include a link to the ticket, if any.
+# close #ISSUE_NUMBER
+#+end_src
+
+# https://www.webfx.com/tools/emoji-cheat-sheet/
+
+# https://help.github.com/en/github/managing-your-work-on-github/closing-issues-using-keywords
+# https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html
+# https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#default-closing-pattern
+
+and you'll be guided into writing concise commit subjects in the imperative
+mood -- a good practice. See rule 5 of Chris Beam's "How to write a commit
+message" for the inspiration of this tip and more reasoning on the use of the
+imperative mood.
+
+#+begin_src conf
+[commit]
+    template = ~/.git_commit_template.txt
+
+[alias]
 #+end_src
 
 ** Get a commit detail
@@ -3151,6 +3185,7 @@ git show :/^Merge
 
 #+begin_src conf
     search-author = "log --decorate -i --all --date=short --author"
+    recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
 #+end_src
 
 *** Search on File Changes
@@ -3224,15 +3259,14 @@ git log --all -G "foo" --since="1 week ago"
 git log --all -G "foo" --full-history --since="1 week ago"
 #+end_src
 
-** Undo things
+** Push
+
+** Undo changes
 
 See https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
+and http://gitimmersion.com/lab_16.html.
 
-*** Undo local changes which were not pushed to remote repository
-
-**** Before you commit, in both unstaged and staged state
-
-**** After you committed
+*** Undo local changes which were not pushed to remote repository (after you committed)
 
 *** Undo changes after they are pushed to remote repository
 
@@ -3281,8 +3315,9 @@ Alternative: https://about.gitlab.com/blog/2014/09/29/gitlab-flow/
 
 ** Create a branch
 
+Create a new branch, and then switch to it:
+
 #+begin_src conf
-    # Create a new branch, and then switch to it.
     create-branch = checkout -b
 #+end_src
 
@@ -3326,6 +3361,10 @@ Push the ~<current-branch>~ branch to the =origin= remote and set up tracking:
     current-branch = name-rev --name-only HEAD
     # current-branch = !git branch --show-current # v2.22+
 #+end_src
+
+Then:
+1. [[id:a7039f6e-825c-484c-8739-f3e32a9c45fc][Create a pull request]].
+2. Your team lead will review the code & merge it to the main branch.
 
 ** List branches
 
@@ -3766,6 +3805,9 @@ Directed Acyclic Graph:
 XXX See https://github.com/github/hub/
 
 ** Create a pull request
+:PROPERTIES:
+:ID:       a7039f6e-825c-484c-8739-f3e32a9c45fc
+:END:
 
 Create pull request against the default branch:
 
@@ -3886,7 +3928,7 @@ There are two ways you can call it:
 
 If you are using GitHub, you can easily merge a pull request using the web
 interface, but if you want a bit more control over how you are merging the pull
-requests (for example, I’m using the ~git merge --ff-only~ option, while GitHub
+requests (for example, I'm using the ~git merge --ff-only~ option, while GitHub
 will use ~git merge --no-ff~), or you just want to merge a bunch of pull requests
 without leaving your terminal -- this function will help you.
 
@@ -4023,6 +4065,17 @@ Open an issue in the current repository.
 #+begin_src conf
     create-issue = XXX
 #+end_src
+
+Issue template:
+
+#+begin_src text :tangle ~/.issue_template.txt
+### Expected behavior
+### Actual behavior
+### Steps to reproduce the behavior
+#+end_src
+
+See https://github.com/devspace/awesome-github-templates
+and https://jwong.co.uk/blog/2018/09/01/useful-github-features/#emoji-organising
 
 ** List All Issues
 
