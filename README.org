@@ -35,8 +35,9 @@ https://github.com/gitalias/gitalias/blob/master/gitalias.txt
 XXX Today I learned
 https://til.hashrocket.com/git
 
-*Commit early, commit often*: it is a bad idea to do a lot of work without
-committing... But don't push every single commit: push when changes are tested!
+*Commit early, commit often* (and with the right message): it is a bad idea to do
+a lot of work without committing... But don't push every single commit: push
+when changes are tested!
 
 Branch out often.
 http://kentnguyen.com/development/visualized-git-practices-for-team/
@@ -305,10 +306,14 @@ Get a better date (current format is 2019-11-26 17:35:30 +0100):
 A useful template for good commit messages (see
 https://medium.com/compass-true-north/writing-good-commit-messages-fc33af9d6321):
 
+Implementing a Strong Code-Review Culture
+https://www.youtube.com/watch?v=PJjmw9TRB7s
+
 #+begin_src text :tangle ~/.git_commit_msg.txt
 ######## 50 characters ###########################
 # If applied, this commit will...
 # [Add / Fix / Remove / Update / Refactor / Document] [issue #id] [summary]
+
 # :new: Add: input_your_summary
 # :bug: Fix: input_your_summary
 # :x: Remove: input_your_summary
@@ -317,12 +322,9 @@ https://medium.com/compass-true-north/writing-good-commit-messages-fc33af9d6321)
 # :computer: Tool: input_your_summary
 
 ######## 72 characters #################################################
-# Why is this change necessary? (Bug fix, feature, improvements?)
--
-# How does the change address the problem?
--
-# What side effects does this change have?
--
+# - Why is this change necessary? (Bug fix, feature, improvements?)
+# - How does the change address the problem?
+# - What side effects does this change have?
 # Include a link to the ticket, if any.
 #+end_src
 
@@ -770,7 +772,7 @@ If unable to clone Git repository due to *self-signed certificate*...
 
 See
 - https://devhints.io/git-log-format and
-- https://git-scm.com/docs/pretty-formats.
+- https://git-scm.com/docs/pretty-formats (XXX)
 
 * Aliases
 
@@ -1028,10 +1030,10 @@ List commits *showing changed files* (prettier and more concise version of
 #+end_src
 
 #+begin_src conf
-    last = log --decorate --date=short -1 --stat
+    last1 = log --decorate --date=short -1 --stat
 
     # Show the last N commits on the current branch.
-    last = !git log --name-status -$1 ${*:2}
+    last2 = !git log --name-status -$1 ${*:2}
 #+end_src
 
 *** List all the changed files in a commit
@@ -2050,12 +2052,22 @@ jump across commits:
 
 *** If you get the error "The following untracked working tree files would be overwritten by checkout"
 
+#+begin_src text :tangle no
+error: Your local changes to the following files would be overwritten by checkout:
+        WEB-INF/config/afm-projects.xml.DEV-fni
+        WEB-INF/config/context/logging/logging.xml
+Please commit your changes or stash them before you switch branches.
+error: The following untracked working tree files would be overwritten by checkout:
+        WEB-INF/config/afm-projects.xml
+Please move or remove them before you switch branches.
+#+end_src
+
 One solution is to *move the untracked files*, instead of *deleting them*.  For
 example:
 
 #+begin_src shell :tangle no
 cd "$(git root)"
-git checkout BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv "$f" "$f.bak"; done
+git checkout $BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv -v "$f" "$f.bak"; done
 #+end_src
 
 Another is to throw away local changes using a *forced checkout*:
@@ -2289,14 +2301,18 @@ user wants to have an updated repository.
 
 *** Take named stash
 
+"WIP:"
+
 #+begin_src conf
-    snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
-    snapshot = !git stash push -m "Snapshot [$(date +\"%F %a %R\")]" && git stash apply "stash@{0}"
+    snapshot = !git stash push -m "snapshot-$(date +%Y%m%d_%H%M)" \
+                    && git stash apply "stash@{0}"
 #+end_src
 
 #+begin_src conf
-    # checkpoint and checkpoint recover
+    # checkpoint
     cp = !git stash push -m "$(date +%F--%T)" && git stash pop --index
+
+    # checkpoint recover
     cpr = "!f() { git fsck | grep commit | cut -d' ' -f3 | \
                   while read hash; do \
                       git rev-parse --verify --no-revs --quiet $hash^2 2>/dev/null && echo $hash | xargs git rev-list --since=${1:-1day} -1; \
@@ -2425,10 +2441,16 @@ XXX See doc of git help stash for workflows...
 *** From git help stash
 
        Pulling into a dirty tree
-           When you are in the middle of something, you learn that there are upstream changes that are possibly relevant to what you are doing. When your local changes do not conflict with the changes in the upstream, a simple git pull will let
-           you move forward.
 
-           However, there are cases in which your local changes do conflict with the upstream changes, and git pull refuses to overwrite your changes. In such a case, you can stash your changes away, perform a pull, and then unstash, like this:
+           When you are in the middle of something, you learn that there are
+           upstream changes that are possibly relevant to what you are
+           doing. When your local changes do not conflict with the changes in
+           the upstream, a simple git pull will let you move forward.
+
+           However, there are cases in which your local changes do conflict with
+           the upstream changes, and git pull refuses to overwrite your
+           changes. In such a case, you can stash your changes away, perform
+           a pull, and then unstash, like this:
 
                $ git pull
                 ...
@@ -2438,8 +2460,11 @@ XXX See doc of git help stash for workflows...
                $ git stash pop
 
        Interrupted workflow
-           When you are in the middle of something, your boss comes in and demands that you fix something immediately. Traditionally, you would make a commit to a temporary branch to store your changes away, and return to your original branch to
-           make the emergency fix, like this:
+
+           When you are in the middle of something, your boss comes in and
+           demands that you fix something immediately. Traditionally, you would
+           make a commit to a temporary branch to store your changes away, and
+           return to your original branch to make the emergency fix, like this:
 
                # ... hack hack hack ...
                $ git create-branch my_wip
@@ -2461,7 +2486,10 @@ XXX See doc of git help stash for workflows...
                # ... continue hacking ...
 
        Testing partial commits
-           You can use git stash push --keep-index when you want to make two or more commits out of the changes in the work tree, and you want to test each change before committing:
+
+           You can use git stash push --keep-index when you want to make two or
+           more commits out of the changes in the work tree, and you want to
+           test each change before committing:
 
                # ... hack hack hack ...
                $ git add --patch foo            # add just first part to the index
@@ -2474,8 +2502,11 @@ XXX See doc of git help stash for workflows...
                $ git commit foo -m 'Remaining parts'
 
        Recovering stashes that were cleared/dropped erroneously
-           If you mistakenly drop or clear stashes, they cannot be recovered through the normal safety mechanisms. However, you can try the following incantation to get a list of stashes that are still in your repository, but not reachable any
-           more:
+
+           If you mistakenly drop or clear stashes, they cannot be recovered
+           through the normal safety mechanisms. However, you can try the
+           following incantation to get a list of stashes that are still in your
+           repository, but not reachable any more:
 
                git fsck --unreachable |
                grep commit | cut -d\  -f3 |
@@ -2522,28 +2553,9 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 
 *** Upload your changes
 
-Use ~git push -u origin <current-branch>~ to push the ~<current-branch>~ branch to
-the =origin= remote and to set up tracking.
-
-#+begin_src conf
-    # Get the current branch name (not so useful in itself, but used in other
-    # aliases).  Works well in detached mode.
-    current-branch = name-rev --name-only HEAD
-    # current-branch = !git branch --show-current # v2.22+
-#+end_src
-
 #+begin_src conf
     # Get the upstream branch name.
     upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
-#+end_src
-
-#+begin_src conf
-    # Push current branch to remote server (create a copy of the current branch
-    # on the remote "origin", and set it to track the upstream branch).
-    publish = !git push -u origin $(git current-branch)
-
-    # Delete current branch on remote server.
-    unpublish = !git push origin :$(git current-branch)
 #+end_src
 
 ** PUBLISH - Find out if a change is part of a release
@@ -2673,17 +2685,6 @@ Save a repo as a tarball:
     mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
 #+end_src
 
-#+begin_src conf
-  # # Deploy
-  # staging = !git push heroku-staging $(git current-branch):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
-  # dev = !git push heroku-dev $(git current-branch):master -f && git track 'Deployed to dev ' # push current branch to dev
-  # deploy = !git push heroku $(git current-branch):master -f && git track 'Deployed to production ' # push current branch to production
-
-
- # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
- # stage='git push staging $(git current-branch):master'
-#+end_src
-
 *** ChangeLog
 
 Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit message since the
@@ -2733,45 +2734,6 @@ can automatically offer a tarball or zip download of the form
 =packagename-$tag.tar.gz= (and it's quite established that a tarball should be
 named =package-X.Y.Z.tar.gz=).
 
-Basically, *lightweight tags* are just pointers to specific commits. *No further
-information is saved*; on the other hand, *annotated tags* are *regular objects*,
-which have an author and a date and can be referred because they have their own
-SHA key.
-
-If knowing *who* tagged *what* and *when* is relevant for you, then use annotated
-tags. If you *just want to tag a specific point in your development*, no matter
-who and when did that, then lightweight tags are good enough.
-
-#+begin_note
-Annotated tags are meant for release while lightweight tags are meant for
-private or temporary object labels.
-#+end_note
-
-#+begin_src shell :tangle no
-git tag <tagname>
-#+end_src
-
-The tag will be a *lightweight tag* by default.
-
-Show the last tag /in the current branch/:
-
-#+begin_src conf
-    last-tag = describe --tags --abbrev=0
-#+end_src
-
-Show latest annotated tag /in all branches/:
-
-#+begin_src conf
-    last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
-#+end_src
-
-List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
-
-#+begin_src conf
-    # Show verbose output about tags.
-    tags = !git tag -l --sort=v:refname -n1
-#+end_src
-
 Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin
 de savoir ce qu’embarquera la « prochaine release » de mon projet.
 
@@ -2790,17 +2752,12 @@ You can do a lot better with:
     show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 #+end_src
 
-#+begin_src conf
-    # Rename a tag (locally and remotely).
-    rename-tag = "!f() { git tag $2 $1; git tag -d $1; git push origin $2; git push origin :refs/tags/$1; }; f"
-#+end_src
-
 ** Debugging
 
 Sometimes it's nice to see what is going on under the hood. Try this alias:
 
 #+begin_src conf
-    debug  = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
+    debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
 #+end_src
 
 Just insert ~debug~ between ~git~ and whatever would usually follow; for example:
@@ -2812,11 +2769,6 @@ git debug changed
 ** Abbreviations
 
 Basic shortcuts.
-
-#+begin_src conf
-    # Shortcut for commit.
-    ci = commit
-#+end_src
 
 #+begin_src conf
     cp = cherry-pick -x
@@ -2945,7 +2897,7 @@ have uncommitted changes that I need to take care of.
 
 * Repository
 
-** Create a repository
+** Create a repository locally
 
 #+begin_src conf
     create-repository = !git init \
@@ -2954,9 +2906,9 @@ have uncommitted changes that I need to take care of.
                              && git commit -m \"Initial commit\"
 #+end_src
 
-** Create a repository
+** Create a repository in GitHub
 
-#+begin_src shell :tangle no
+#+begin_src conf :tangle no
     # $1=username $2=repo-slug
     create-repository-gh = "!f() { username=$1; repo_slug=$2; \
         curl -u \"$1\" \
@@ -2965,8 +2917,19 @@ have uncommitted changes that I need to take care of.
 
 #+begin_src conf
     username = "XXX"
-    repo-slug = "!f() { git remote show origin -n | grep 'Fetch URL:' | sed -E 's#^.*/(.*)$#\\1#' | sed 's#.git$##'; }; f"
+    repo-slug = "!f() { git remote show origin -n \
+                            | grep 'Fetch URL:' \
+                            | sed -E 's#^.*/(.*)$#\\1#' \
+                            | sed 's#.git$##'; }; f"
 #+end_src
+
+#+begin_tip
+The ~sed~ strings contain ~$#~, which will be replaced by the number of arguments to
+the current script/function (generally 0 for an interactive shell).  This is
+part of the basic Bourne shell syntax, so *single quotes* will be needed under any
+*Bourne-like shell* (even pre-POSIX ones) on any OS.  Read the standard for more
+information: pubs.opengroup.org/onlinepubs/9699919799/utilities/.
+#+end_tip
 
 ** Clone a repository
 
@@ -3010,6 +2973,7 @@ https://confluence.atlassian.com/bitbucketserver/search-for-code-in-bitbucket-se
 
 #+begin_src conf
     search-code = "grep -i --line-number --break --heading -C 1"
+# XXX Is it really case-insensitive?
 
 # ack = '-c color.grep.linenumber="bold yellow"
 #     -c color.grep.filename="bold green"
@@ -3078,6 +3042,19 @@ git grep --all-match -e <regexp> -e <regexp>
 
 * Commits
 
+** Create a commit
+
+#+begin_src conf
+    # Shortcut for commit.
+    ci = commit
+#+end_src
+
+** Get a commit detail
+
+** Get the diff for a commit
+
+** Get the references the commit has been pushed to (branches and tags)
+
 ** Search for commits
 
 #+begin_note
@@ -3094,8 +3071,8 @@ Therefore, Git cannot determine "which branch was which" before merge commits.
 
 *** Search within Commit Messages
 
-You can find commits that contain particular words in the message. For example,
-~fix typo~ matches commits containing the words ~fix~ *and* ~typo~.
+You can find commits that contain particular words in the commit message. For
+example, ~fix typo~ matches commits containing the words ~fix~ *and* ~typo~.
 
 If you want to find all commits (*across all branches*, showing names and status
 of changed files) where *log message* matches a specified pattern (regular
@@ -3247,6 +3224,22 @@ git log --all -G "foo" --since="1 week ago"
 git log --all -G "foo" --full-history --since="1 week ago"
 #+end_src
 
+** Undo things
+
+See https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
+
+*** Undo local changes which were not pushed to remote repository
+
+**** Before you commit, in both unstaged and staged state
+
+**** After you committed
+
+*** Undo changes after they are pushed to remote repository
+
+**** Without history modification (preferred way)
+
+**** With history modification (requires coordination with team and force pushes)
+
 * Branches
 
 ** Branching model
@@ -3284,6 +3277,8 @@ Consistent *naming conventions* (from the [[https://www.atlassian.com/git/tutori
   Used to fix pressing issues that are found in production. Hotfix branches
   merge directly to master.
 
+Alternative: https://about.gitlab.com/blog/2014/09/29/gitlab-flow/
+
 ** Create a branch
 
 #+begin_src conf
@@ -3312,7 +3307,27 @@ resolved, ie. like so
  git revert sha1-of-offending-commit
 #+end_note
 
-** Show branch
+** Publish a branch
+
+Push the ~<current-branch>~ branch to the =origin= remote and set up tracking:
+
+#+begin_src conf
+    # Push current branch to remote server (create a copy of the current branch
+    # on the remote "origin", and set it to track the upstream branch).
+    publish = !git push -u origin $(git current-branch)
+
+    # Delete current branch on remote server.
+    unpublish = !git push origin :$(git current-branch)
+#+end_src
+
+#+begin_src conf
+    # Get the current branch name (not so useful in itself, but used in other
+    # aliases).  Works well in detached mode.
+    current-branch = name-rev --name-only HEAD
+    # current-branch = !git branch --show-current # v2.22+
+#+end_src
+
+** List branches
 
 *** Show all branches
 
@@ -3348,8 +3363,8 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 #+end_src
 
 #+begin_src conf
-  # Sort by date for branches; can be useful for spring cleaning
-  refs-by-date = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short)'
+    # Sort by date for branches; can be useful for spring cleaning
+    refs-by-date = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short)'
 #+end_src
 
 *** Show my branches
@@ -3371,7 +3386,7 @@ specified).
 generally indicates old, unmaintained branches for unreleased, incomplete
 features.
 
-For the Github, such period of inactivity is *3 months* (see
+For Github, such period of inactivity is *3 months* (see
 https://help.github.com/articles/viewing-branches-in-your-repository/).
 
 ** [#A] Switch
@@ -3383,9 +3398,9 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
     develop = checkout develop
 #+end_src
 
-** Delete branch
+** Delete a branch
 
-*** Delete local branch
+*** Delete a local branch
 
 Delete a *local* branch:
 
@@ -3402,7 +3417,7 @@ You could also use ~-D~, which is an alias for ~--delete --force~, which deletes
 branch "irrespective of its merged status."
 #+end_note
 
-*** Delete merged branches
+*** Delete the merged branches
 
 ~delete-merged-branches~ *removes* (in bulk) *all* the *local branches* that have been
 *merged to the current branch* that you are in.
@@ -3496,18 +3511,29 @@ While Git supports annotated and lightweight tags, you can only *create*
 - *annotated tags* in /Bitbucket/ and in /GitLab/, and
 - *lightweight tags* via /GitHub/ interface (for releases).
 
-Git stores annotated tags as full objects in the repository, which means they
-include the name, email, date, and have a message.
+*Annotated tags* are *regular objects* in the repository, which means they have an
+author, a date, a message, and can be referred because they have their own SHA
+key.
 
-Lightweight tags don't include all this additional information.
+*Lightweight tags* are just pointers to specific commits.  They *don't include any
+further information*.
 
-Create an annotated tag
+If knowing *who* tagged *what* and *when* is relevant for you, then use annotated
+tags. If you *just want to tag a specific point in your development*, no matter
+who and when did that, then lightweight tags are good enough.
+
+#+begin_note
+Annotated tags are meant for *release* while lightweight tags are meant for
+private or temporary object labels.
+#+end_note
+
+Create an annotated tag:
 
 #+begin_src shell :tangle no
 git tag -a <tag-name> -m '<tag-message>'
 #+end_src
 
-Create a lightweight tag (no message!)
+Create a lightweight tag (/no message!/):
 
 #+begin_src shell :tangle no
 git tag <tag-name>
@@ -3530,9 +3556,14 @@ git push --tags                         # Only tags.
 git push --tags origin master           # Code and tags.
 #+end_src
 
-** List the tags in a repository
+** List the repository tags
 
-git tag
+List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
+
+#+begin_src conf
+    # Show verbose output about tags.
+    tags = !git tag -l --sort=v:refname -n1
+#+end_src
 
 #+begin_src shell :tangle no
 # Show annotated and lightweight tags.
@@ -3543,6 +3574,29 @@ sed 's/\^{}//'               | # Remove ^{} markings.
 uniq -c                      | # Count identical lines.
 sed 's/2\ refs\/tags\// a /' | # 2 identicals = annotated.
 sed 's/1\ refs\/tags\//lw /'
+#+end_src
+
+Show the last tag /in the current branch/:
+
+#+begin_src conf
+    last-tag = describe --tags --abbrev=0
+#+end_src
+
+Show latest annotated tag /in all branches/:
+
+#+begin_src conf
+    last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
+#+end_src
+
+** Rename a tag
+
+#+begin_src conf
+    # Rename a tag (locally and remotely).
+    rename-tag = "!f() { git tag $2 $1; \
+                         git tag -d $1; \
+                         git push origin $2; \
+                         git push origin :refs/tags/$1; \
+                       }; f"
 #+end_src
 
 ** Remove a tag from a repository
@@ -3879,7 +3933,7 @@ changed, so you'll know who to @-mention when opening a pull request.
 Sounds like git-guilt (which I've just read about today), might be
 relevant: https://bitbucket.org/tpettersen/git-guilt
 
-** Search from which PR comes a commit
+** Find the pull request that introduced a commit
 
 #+begin_src conf
     searchprcommit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
@@ -3888,7 +3942,7 @@ relevant: https://bitbucket.org/tpettersen/git-guilt
 Example:
 
 #+begin_src shell :tangle no
-> git pr a361e276756e6585258dda4014472ca6b3888a7c
+> git searchprcommit a361e276756e6585258dda4014472ca6b3888a7c
 b965075 Merge pull request #255 from yammer/s2s_auth_p4
 #+end_src
 
@@ -3936,9 +3990,29 @@ Easy: Address the comments -> open a new PR (mention this one + short summary in
 
 * Pipelines
 
-* Deployments
+* Deployments (to different environments)
 
 (see structure of actions in BitBucket)
+
+#+begin_src conf
+# Deploy a branch to review server (https://review-feature-1.example.com).
+deploy-review =
+
+# Deploy master to staging server (https://staging.example.com).
+deploy-staging =
+
+# Deploy master to production server (https://example.com).
+deploy-prod =
+
+  # # Deploy
+  # staging = !git push heroku-staging $(git current-branch):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
+  # dev = !git push heroku-dev $(git current-branch):master -f && git track 'Deployed to dev ' # push current branch to dev
+  # deploy = !git push heroku $(git current-branch):master -f && git track 'Deployed to production ' # push current branch to production
+
+
+ # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
+ # stage='git push staging $(git current-branch):master'
+#+end_src
 
 * Issues
 
