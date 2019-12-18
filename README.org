@@ -279,6 +279,13 @@ Stop viewing ~^M~ symbols in diff:
     safecrlf = false
 #+end_src
 
+[[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ as a newline character
+in git-handled repositories.  There's an option to auto-convert:
+
+#+begin_src conf :tangle no
+    autocrlf = true
+#+end_src
+
 Performance:
 
 #+begin_src conf
