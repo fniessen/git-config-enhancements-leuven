@@ -14,7 +14,8 @@
 [core]
     editor = emacsclient
 
-    pager = "less -R"
+    # git-grep to ignore ^M.
+    pager = tr -d '\\r' | less -REX
 
     # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
     whitespace = cr-at-eol

@@ -260,7 +260,8 @@ variable/.
 #+end_note
 
 #+begin_src conf
-    pager = "less -R"
+    # git-grep to ignore ^M.
+    pager = tr -d '\\r' | less -REX
 #+end_src
 
 Stop viewing ~^M~ symbols in diff:
