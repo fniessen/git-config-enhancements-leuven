@@ -198,7 +198,10 @@
 
     df = diff
 
+    # Hide whitespace changes.
+    wdiff = diff -b
     wdiff = diff --word-diff
+
     dw = diff --word-diff
 
     # Configure git-diff to produce the absolutely most minimal diff possible.
@@ -271,6 +274,8 @@
     ls = log --decorate --date=short
     ld = log --decorate --date=relative
 
+    log = log --decorate --date=short
+
     ll = log --decorate --date=short --stat
 
     ls-modified  = "!git status --porcelain -uno | awk 'match($1, /M/) {print $2}'"
@@ -338,7 +343,7 @@
     unskip-all = "!git skipped | xargs git update-index --no-assume-unchanged"
 
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
-    # skipped = '!git ls-files -v | grep ^[a-z]'
+    skipped2 = !git ls-files -v | grep '^[a-z]'
 
     # Commit changes to current HEAD (modified and deleted files) as amended
     # commit.
@@ -435,8 +440,11 @@
     update = !git pull --rebase --prune $@ && git submodule update --init --recursive
 
   # Do a push/pull for just one branch
-  push1 = "!git push origin $(git branch-name)"
-  pull1 = "!git pull origin $(git branch-name)"
+  push1 = "!git push origin $(git current-branch)"
+  pull1 = "!git pull origin $(git current-branch)"
+
+# Pull and push from the current branch
+sync = "!f(){ pull1 && push1; }; f"
 
     pull-all = !"old=$(git current-branch); \
                  for b in $(git for-each-ref refs/heads --format='%(refname)'); do \
@@ -467,7 +475,10 @@
     # Merge remote master into the current branch.
     mm = !git fetch -p && git merge origin/master
 
-    m = "!f() { OLD=$(git current-branch); \
+    merge-to-master =  "!f(){ branch_name=\"$(git symbolic-ref HEAD 2>/dev/null)\" || branch_name=\"(unnamed branch)\"; branch_name=${branch_name##refs/heads/}; git checkout master && git merge $branch_name && git checkout $branch_name; };f"
+    fork-from-master = "!f(){ git checkout master && git branch $1 && git checkout $1; };f"
+
+    m = "!f() { local OLD=$(git current-branch); \
                 git co \"$1\" && git pu && git merge $OLD && git p && git co $OLD; }; f"
 
     # Run merge test (before merge) to check for any conflicts beforehand.
@@ -516,14 +527,6 @@
     # diff since master.
     missing-master-diff = diff master...
 
-    oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
-    branch-log  = !sh -c 'git log $(git oldest-ancestor)..'
-    branch-diff = !sh -c 'git diff $(git oldest-ancestor)..'
-
-    diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
-
-    rename-branch = branch -m
-
     where = "branch -a --contains"
 
     # Find branches containing commit.
@@ -550,6 +553,8 @@ missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git 
     spop = "!f() { git stash pop stash@{$(git stash-id $@)}; }; f" # Like sapply but pops it off
 
     stash-id = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
+
+stashall = !git add -A && git stash
 
     hide = stash push --include-untracked # Hide all files, including untracked files (faster than using --all).
 
@@ -604,11 +609,6 @@ missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git 
     # Interactive apply patch.
     ipatch = "!f() { git apply $1; git add -p; }; f"
 
-    export = archive -o latest.tar.gz -9 --prefix=latest/
-
-    # Best common ancestor (when it was branched off).
-    mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
-
     # Detailed list of changes.
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
@@ -618,7 +618,22 @@ missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git 
 
     export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
 
+    export = archive -o latest.tar.gz -9 --prefix=latest/
+
+    oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
+    branch-diff = '!sh -c "git diff $(git oldest-ancestor).."'
+    branch-log = '!sh -c "git log $(git oldest-ancestor).."'
+
+    diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
+
+    # Best common ancestor (when it was branched off).
+    mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
+# git merge-base --fork-point master
+
     export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
+
+    email-patch = XXX git format-patch $(git current-branch).patch
+    plain-diff = git branch-diff > $(git current-branch).diff
 
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
     # branche courante.
@@ -658,6 +673,8 @@ missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git 
     lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
     lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 
+zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
+
     logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
     branch-date = !"sh -c 'for branch in $(git branch --no-merged); do \
                                git logdate -1 -r $branch --; \
@@ -687,7 +704,6 @@ missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git 
                             done; }; f"
 
     search-code = "grep -i --line-number --break --heading -C 1"
-# XXX Is it really case-insensitive?
 
 # ack = '-c color.grep.linenumber="bold yellow"
 #     -c color.grep.filename="bold green"
@@ -782,6 +798,12 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     master = checkout master
     develop = checkout develop
 
+    rename-local-branch = branch -m
+
+    rename-branch = "!f() { git rename-local-branch $1 $2; \
+                            git push --set-upstream origin $2; \
+                            git push origin :$1; }; f"
+
     # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
 
@@ -868,6 +890,12 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # For GitHub.
     pr-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
                         && git checkout pr/$1; }; f"
+    # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
+
+    # For GitLab.
+    pr-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
+                        && git checkout pr/$1; }; f"
+    # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
 
     # For GitHub.
     mpr = "!f() { \
@@ -904,7 +932,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     pr-clean = delete-local-branch pr/$1
 
-    searchprcommit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
+    related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
+
+rsync-deploy =
 
 # Deploy a branch to review server (https://review-feature-1.example.com).
 deploy-review =
@@ -920,11 +950,19 @@ deploy-prod =
   # dev = !git push heroku-dev $(git current-branch):master -f && git track 'Deployed to dev ' # push current branch to dev
   # deploy = !git push heroku $(git current-branch):master -f && git track 'Deployed to production ' # push current branch to production
 
+# shipit = push heroku master
 
  # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
  # stage='git push staging $(git current-branch):master'
 
+# title
+# description
+# assignee
+# kind
+# priority
     create-issue = XXX
+
+    create-issue-pull-request = XXX
 
     issues = "!f() { username=$1; \
         curl --user $username \
@@ -946,6 +984,7 @@ deploy-prod =
     # Put everything in the current repo in a Zip archive.
     download-repository = "!f() { git archive ${1:-HEAD} --format=zip \
                                       -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
+# XXX Test it with tag or branch.
 
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
     serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"

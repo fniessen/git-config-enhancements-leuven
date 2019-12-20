@@ -834,12 +834,24 @@ Staging for commit is typically done by ~git add~.
 
 *** Changes between the working tree and the index (staged for the next commit)
 
+See also ~-b~ (~--ignore-space-change~): Ignore changes in amount of
+whitespace. This ignores whitespace at line end, and considers all other
+sequences of one or more whitespace characters to be equivalent.
+
+# permet d’ignorer les différences d’espaces et d’indentations
+git diff -b
+# permet d’ignorer les différences d’espaces et indentations au sein de la même ligne, mais indique les lignes vides ajoutées ou supprimées
+git diff -w
+
 #+begin_src conf
     df = diff
-    #+end_src
+#+end_src
 
-    #+begin_src conf
+#+begin_src conf
+    # Hide whitespace changes.
+    wdiff = diff -b
     wdiff = diff --word-diff
+
     dw = diff --word-diff
 #+end_src
 
@@ -972,6 +984,8 @@ date".
 #+begin_src conf
     ls = log --decorate --date=short
     ld = log --decorate --date=relative
+
+    log = log --decorate --date=short
 #+end_src
 
 List commits *showing changed files* (prettier and more concise version of
@@ -1191,7 +1205,7 @@ List ignored files (*marked unchanged*):
 
 #+begin_src conf
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
-    # skipped = '!git ls-files -v | grep ^[a-z]'
+    skipped2 = !git ls-files -v | grep '^[a-z]'
 #+end_src
 
 ** REVERT - Undo things
@@ -1668,8 +1682,11 @@ Pull all:
 
 #+begin_src conf
   # Do a push/pull for just one branch
-  push1 = "!git push origin $(git branch-name)"
-  pull1 = "!git pull origin $(git branch-name)"
+  push1 = "!git push origin $(git current-branch)"
+  pull1 = "!git pull origin $(git current-branch)"
+
+# Pull and push from the current branch
+sync = "!f(){ pull1 && push1; }; f"
 
     pull-all = !"old=$(git current-branch); \
                  for b in $(git for-each-ref refs/heads --format='%(refname)'); do \
@@ -1764,6 +1781,9 @@ applies all those changes together.
 #+begin_src conf
     # Merge remote master into the current branch.
     mm = !git fetch -p && git merge origin/master
+
+    merge-to-master =  "!f(){ branch_name=\"$(git symbolic-ref HEAD 2>/dev/null)\" || branch_name=\"(unnamed branch)\"; branch_name=${branch_name##refs/heads/}; git checkout master && git merge $branch_name && git checkout $branch_name; };f"
+    fork-from-master = "!f(){ git checkout master && git branch $1 && git checkout $1; };f"
 #+end_src
 
 *** Undo the merge
@@ -1778,7 +1798,7 @@ On projects where we work with a staging or test branch, I regularly merge my
 work in progress into it so others can test it.
 
 #+begin_src conf
-    m = "!f() { OLD=$(git current-branch); \
+    m = "!f() { local OLD=$(git current-branch); \
                 git co \"$1\" && git pu && git merge $OLD && git p && git co $OLD; }; f"
 #+end_src
 
@@ -2056,42 +2076,6 @@ Show all commits in a git branch since original branching point from =master=:
 
 *** Delta
 
-*** Branch point
-
-https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git:
-
-#+begin_src conf
-    oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
-    branch-log  = !sh -c 'git log $(git oldest-ancestor)..'
-    branch-diff = !sh -c 'git diff $(git oldest-ancestor)..'
-
-    diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
-#+end_src
-
-When you use three dots (...), ~git diff~ finds the merge-base between the left
-and right side commit SHAs (as obtained from the names, or defaulting to =HEAD=)
-and substitutes that in for the left-side SHA. The right-side SHA (as resolved
-from the name) remains intact.
-
-*** Rename branch
-
-Sometimes we name a branch poorly or maybe we thought the name was "good" but
-not meaningful to the work we are doing.
-
-To rename the branch locally:
-
-#+begin_src conf
-    rename-branch = branch -m
-#+end_src
-
-One thing to keep in mind is that this command works in two different ways:
-
-- If we are on the branch we want to rename, we can just
-  ~git rename-branch <new-name>~.
-
-- If we are not on the branch, we have to use
-  ~git rename-branch <target-branch> <new-name>~.
-
 *** List branches that contain a given commit ID (SHA)
 
 Filter the list of *branches* to only those which have the given *commit ID* among
@@ -2227,6 +2211,10 @@ user wants to have an updated repository.
     spop = "!f() { git stash pop stash@{$(git stash-id $@)}; }; f" # Like sapply but pops it off
 
     stash-id = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
+#+end_src
+
+#+begin_src conf
+stashall = !git add -A && git stash
 #+end_src
 
 #+begin_src conf
@@ -2608,17 +2596,6 @@ alias capv='curl $(pbpaste) | patch -p1 --dry-run'
 
 ** PUBLISH - Prepare a release
 
-Save a repo as a tarball:
-
-#+begin_src conf
-    export = archive -o latest.tar.gz -9 --prefix=latest/
-#+end_src
-
-#+begin_src conf
-    # Best common ancestor (when it was branched off).
-    mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
-#+end_src
-
 *** ChangeLog
 
 Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit message since the
@@ -2656,8 +2633,40 @@ current tag.  Useful for uploading to Elasticbeanstalk.
     export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
 #+end_src
 
+Save a repo as a tarball:
+
+#+begin_src conf
+    export = archive -o latest.tar.gz -9 --prefix=latest/
+#+end_src
+
+**** Branch point
+
+https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git:
+
+#+begin_src conf
+    oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
+    branch-diff = '!sh -c "git diff $(git oldest-ancestor).."'
+    branch-log = '!sh -c "git log $(git oldest-ancestor).."'
+
+    diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
+#+end_src
+
+When you use three dots (...), ~git diff~ finds the merge-base between the left
+and right side commit SHAs (as obtained from the names, or defaulting to =HEAD=)
+and substitutes that in for the left-side SHA. The right-side SHA (as resolved
+from the name) remains intact.
+
+#+begin_src conf
+    # Best common ancestor (when it was branched off).
+    mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
+# git merge-base --fork-point master
+#+end_src
+
 #+begin_src conf
     export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
+
+    email-patch = XXX git format-patch $(git current-branch).patch
+    plain-diff = git branch-diff > $(git current-branch).diff
 #+end_src
 
 ** PUBLISH - Tag
@@ -2792,6 +2801,8 @@ will ~reset~ the index.
 #+begin_src conf
     lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
     lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+
+zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
 ** TODO To sort out
@@ -2874,12 +2885,25 @@ Or, if you want to use RSA:
 
 *** Testing that everything is set up correctly
 
-** Create a repository in GitHub
+** Create a new repository in GitHub
+
+*Private* or *public* repository?
 
 #+begin_src conf :tangle no
     create-repository-gh = "!f() { username=$1; repo_slug=$2; \
         curl -u \"$1\" \
             https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; }; f"
+#+end_src
+
+Include a README:
+
+#+begin_src conf :tangle no
+git init
+git remote add origin git@github.com:$username/$repo_slug.git
+echo "# ${repo_slug:-Repository name}\n\nDescription" >> README.md
+git add README.md
+git commit -m "Initial commit"
+git push -u origin master
 #+end_src
 
 #+begin_src conf
@@ -2928,7 +2952,6 @@ https://confluence.atlassian.com/bitbucketserver/search-for-code-in-bitbucket-se
 
 #+begin_src conf
     search-code = "grep -i --line-number --break --heading -C 1"
-# XXX Is it really case-insensitive?
 
 # ack = '-c color.grep.linenumber="bold yellow"
 #     -c color.grep.filename="bold green"
@@ -3070,7 +3093,7 @@ https://www.youtube.com/watch?v=PJjmw9TRB7s
 # - What side effects does this change have?
 
 # Include a link to the ticket, if any.
-# close #ISSUE_NUMBER
+# Closes #ISSUE_NUMBER
 #+end_src
 
 # https://www.webfx.com/tools/emoji-cheat-sheet/
@@ -3443,6 +3466,41 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
 #+begin_src conf
     master = checkout master
     develop = checkout develop
+#+end_src
+
+** Rename a branch
+
+Sometimes we name a branch poorly or maybe we thought the name was "good" but
+not meaningful to the work we are doing.
+
+To rename a branch locally:
+
+#+begin_src conf
+    rename-local-branch = branch -m
+#+end_src
+
+XXX Try
+: git rename-local-branch "#520-application-fee-refunds" "#509-application-fee-refunds"
+(see https://gist.github.com/lttlrck/9628955)
+
+One thing to keep in mind is that this command works in two different ways:
+
+- If we are on the branch we want to rename, we can just
+  ~git rename-local-branch <new-name>~.
+
+- If we are not on the branch, we have to use
+  ~git rename-local-branch <old-name> <new-name>~.
+
+To rename a branch locally and remotely:
+
+1. Rename the branch locally,
+2. Push the new one, set local branch to track the new remote and
+3. Delete the old branch.
+
+#+begin_src conf
+    rename-branch = "!f() { git rename-local-branch $1 $2; \
+                            git push --set-upstream origin $2; \
+                            git push origin :$1; }; f"
 #+end_src
 
 ** Delete a branch
@@ -3847,28 +3905,37 @@ For GitHub
 
 ** Show
 
-** Check out pull request
+** 1. Check out a pull request locally
+
+XXX https://gitlab.com/help/user/project/merge_requests/index.md#checkout-merge-requests-locally
 
 Sometimes, just reading the code of a pull request might not be enough to verify
 if it should be merged.  Maybe you want to add something, or some tests are
 failing, and you want to run them locally on your computer.
 
-*Check out* a *pull request* locally (for [[https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally][GitHub]] project):
+*Check out* a *pull request locally*:
 
 #+begin_src conf
     # For GitHub.
     pr-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
                         && git checkout pr/$1; }; f"
+    # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
+
+    # For GitLab.
+    pr-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
+                        && git checkout pr/$1; }; f"
+    # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
 #+end_src
 
-With this Git alias, you can checkout any PR:
+Now you can check out a particular pull request.  For example:
 
-: git pr 5150
+: git pr 5
+
+will fetch the *pull request* #5 into a local ~pr/5~ *branch* and check it out.
+
+** 2. Review the changes locally
 
 ** Push changes to a pull request
-
-In case you don't want to enter the branch to push to, you can use this small
-snippet:
 
 #+begin_src shell :tangle no
 #!/bin/bash
@@ -3883,6 +3950,14 @@ git push -f git@github.com:${headSlug} HEAD:${headRef}
 #+end_src
 
 For more details on pushing changes to a PR, please see [[https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork][the official article]].
+
+** 3. Merge the branch and fix any conflicts that come up
+
+git fetch origin
+git checkout "origin/master"
+git merge --no-ff "1-change-encoding-of-read-sql-file"
+
+XXX See https://gitlab.com/help/user/project/merge_requests/squash_and_merge
 
 ** Merge pull request
 
@@ -3940,25 +4015,16 @@ requests (for example, I'm using the ~git merge --ff-only~ option, while GitHub
 will use ~git merge --no-ff~), or you just want to merge a bunch of pull requests
 without leaving your terminal -- this function will help you.
 
+** 4. Push the result of the merge to the remote
+
+: git push origin "master"
+
 ** Clean up old branch
+
+Delete source branch:
 
 #+begin_src conf
     pr-clean = delete-local-branch pr/$1
-#+end_src
-
-** How?
-
-#+begin_src shell :tangle no
-git fetch --all
-#+end_src
-
-This results in all pull requests available in the local repo in the local pull/
-namespace.
-
-To check out e.g. PR #42:
-
-#+begin_src shell :tangle no
-git create-branch foo refs/pull/upstream/42
 #+end_src
 
 ** Who?
@@ -3985,18 +4051,20 @@ relevant: https://bitbucket.org/tpettersen/git-guilt
 
 ** Find the pull request that introduced a commit
 
+Related pull request:
+
 #+begin_src conf
-    searchprcommit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
+    related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
 #+end_src
 
 Example:
 
 #+begin_src shell :tangle no
-> git searchprcommit a361e276756e6585258dda4014472ca6b3888a7c
-b965075 Merge pull request #255 from yammer/s2s_auth_p4
+> git related-pr-of-commit 22689a1
+1c6b5c4 Merge branch '5-resolve-it' into 'master'
 #+end_src
 
-In this case, the commit comes from pull request 255.
+In this case, the commit comes from pull request 5.
 
 ** Saved replies
 
@@ -4040,6 +4108,10 @@ Easy: Address the comments -> open a new PR (mention this one + short summary in
 
 * Pipelines
 
+#+begin_src conf
+rsync-deploy =
+#+end_src
+
 * Deployments (to different environments)
 
 (see structure of actions in BitBucket)
@@ -4059,6 +4131,7 @@ deploy-prod =
   # dev = !git push heroku-dev $(git current-branch):master -f && git track 'Deployed to dev ' # push current branch to dev
   # deploy = !git push heroku $(git current-branch):master -f && git track 'Deployed to production ' # push current branch to production
 
+# shipit = push heroku master
 
  # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
  # stage='git push staging $(git current-branch):master'
@@ -4071,6 +4144,11 @@ deploy-prod =
 Open an issue in the current repository.
 
 #+begin_src conf
+# title
+# description
+# assignee
+# kind
+# priority
     create-issue = XXX
 #+end_src
 
@@ -4084,6 +4162,20 @@ Issue template:
 
 See https://github.com/devspace/awesome-github-templates
 and https://jwong.co.uk/blog/2018/09/01/useful-github-features/#emoji-organising
+
+** Create Pull Requests
+
+#+begin_src conf
+    create-issue-pull-request = XXX
+#+end_src
+
+Title of pull request:
+
+: WIP: Resolve "Title of issue"
+
+Once merged:
+
+: Resolve "Title of issue"
 
 ** List All Issues
 
@@ -4145,6 +4237,7 @@ Download repository, tag or branch.
     # Put everything in the current repo in a Zip archive.
     download-repository = "!f() { git archive ${1:-HEAD} --format=zip \
                                       -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
+# XXX Test it with tag or branch.
 #+end_src
 
 * Settings
@@ -4235,7 +4328,7 @@ If your =master= branch is busted, rename it to something else so that it's out 
 the way:
 
 #+begin_src shell
-git branch -m master master-busted
+git rename-local-branch master master-busted
 #+end_src
 
 Create a new branch =master= that tracks the origin:
