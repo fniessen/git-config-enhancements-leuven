@@ -364,6 +364,7 @@
                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET^; }; f"
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
 
+    # Keep the changes from the commit you want to undo.
     undo-soft = reset --soft HEAD~1
     uncommit = reset --soft HEAD~1
 
@@ -372,17 +373,22 @@
 
     # Erase any changes since your last commit (reset every file in your working
     # directory to its committed state).
+    # Destroy the changes from the commit you want to undo.
     undo = reset --hard HEAD~1
     # Delete last commit.
 
+    clear-soft-dry-run = !git clean -d -n
+
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
     # Files and directories in .gitignore will be preserved.
-    clear-soft = !git clean -d -f && git reset --hard
+    clear-soft = !git clean -d -f \
+                      && git reset --hard
     # Discard current changes and throw out new files.
 
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
     # including those in .gitignore.
-    clear = git clean -d -f -x && git reset --hard
+    clear = !git clean -d -f -x \
+                 && git reset --hard
 
     squash = "!f() { git reset --soft HEAD~${1} && \
                      git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
@@ -633,7 +639,7 @@ stashall = !git add -A && git stash
     export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 
     email-patch = XXX git format-patch $(git current-branch).patch
-    plain-diff = git branch-diff > $(git current-branch).diff
+    plain-diff = !git branch-diff > $(git current-branch).diff
 
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
     # branche courante.
@@ -771,7 +777,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     publish = !git push -u origin $(git current-branch)
 
     # Delete current branch on remote server.
-    unpublish = !git push origin :$(git current-branch)
+    unpublish = !git delete-remote-branch $(git current-branch)
 
     # Get the current branch name (not so useful in itself, but used in other
     # aliases).  Works well in detached mode.
@@ -797,12 +803,6 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     master = checkout master
     develop = checkout develop
-
-    rename-local-branch = branch -m
-
-    rename-branch = "!f() { git rename-local-branch $1 $2; \
-                            git push --set-upstream origin $2; \
-                            git push origin :$1; }; f"
 
     # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
@@ -830,6 +830,12 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
                                    awk '{print $1}' | \
                                    xargs git delete-local-branch; }; f"
+
+    rename-local-branch = branch -m
+
+    rename-branch = "!f() { git rename-local-branch $1 $2; \
+                            git push --set-upstream origin $2; \
+                            git delete-remote-branch $1; }; f"
 
     # Show verbose output about tags.
     tags = !git tag -l --sort=v:refname -n1

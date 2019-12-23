@@ -1338,6 +1338,7 @@ See « Undo 'git add' before commit ».
 Go back before last commit, with files in uncommitted state:
 
 #+begin_src conf
+    # Keep the changes from the commit you want to undo.
     undo-soft = reset --soft HEAD~1
     uncommit = reset --soft HEAD~1
 #+end_src
@@ -1385,6 +1386,7 @@ directory*:
 #+begin_src conf
     # Erase any changes since your last commit (reset every file in your working
     # directory to its committed state).
+    # Destroy the changes from the commit you want to undo.
     undo = reset --hard HEAD~1
     # Delete last commit.
 #+end_src
@@ -1418,7 +1420,7 @@ Other scenarios:
   had been done...
 - Recover context before a stale merge.
 
-**** Soft option -- Clean branch (clean the untracked files)
+**** Soft option -- Clean branch (delete the untracked files)
 
 ~git clean~ will *remove any files* from the tracked root directory *that are not
 under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
@@ -1436,9 +1438,12 @@ Usage:
   files).
 
 #+begin_src conf
+    clear-soft-dry-run = !git clean -d -n
+
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
     # Files and directories in .gitignore will be preserved.
-    clear-soft = !git clean -d -f && git reset --hard
+    clear-soft = !git clean -d -f \
+                      && git reset --hard
     # Discard current changes and throw out new files.
 #+end_src
 
@@ -1455,7 +1460,7 @@ git commit -a -m "Saving my work, just in case"
 git branch my-saved-work
 #+end_src
 
-**** Hard option -- Clean branch (clean the ignored files in addition to the untracked files)
+**** Hard option -- Clean branch (delete the ignored files in addition to the untracked files)
 
 *NUCLEAR VERSION* which will wipe out all your changes, all the files not in Git,
 and start from the ~HEAD~.
@@ -1463,7 +1468,8 @@ and start from the ~HEAD~.
 #+begin_src conf
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
     # including those in .gitignore.
-    clear = git clean -d -f -x && git reset --hard
+    clear = !git clean -d -f -x \
+                 && git reset --hard
 #+end_src
 
 *** Revert a commit
@@ -2666,7 +2672,7 @@ from the name) remains intact.
     export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 
     email-patch = XXX git format-patch $(git current-branch).patch
-    plain-diff = git branch-diff > $(git current-branch).diff
+    plain-diff = !git branch-diff > $(git current-branch).diff
 #+end_src
 
 ** PUBLISH - Tag
@@ -3383,7 +3389,7 @@ Push the ~<current-branch>~ branch to the =origin= remote and set up tracking:
     publish = !git push -u origin $(git current-branch)
 
     # Delete current branch on remote server.
-    unpublish = !git push origin :$(git current-branch)
+    unpublish = !git delete-remote-branch $(git current-branch)
 #+end_src
 
 #+begin_src conf
@@ -3459,48 +3465,13 @@ features.
 For Github, such period of inactivity is *3 months* (see
 https://help.github.com/articles/viewing-branches-in-your-repository/).
 
-** [#A] Switch
+** Switch branches
 
 Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
 
 #+begin_src conf
     master = checkout master
     develop = checkout develop
-#+end_src
-
-** Rename a branch
-
-Sometimes we name a branch poorly or maybe we thought the name was "good" but
-not meaningful to the work we are doing.
-
-To rename a branch locally:
-
-#+begin_src conf
-    rename-local-branch = branch -m
-#+end_src
-
-XXX Try
-: git rename-local-branch "#520-application-fee-refunds" "#509-application-fee-refunds"
-(see https://gist.github.com/lttlrck/9628955)
-
-One thing to keep in mind is that this command works in two different ways:
-
-- If we are on the branch we want to rename, we can just
-  ~git rename-local-branch <new-name>~.
-
-- If we are not on the branch, we have to use
-  ~git rename-local-branch <old-name> <new-name>~.
-
-To rename a branch locally and remotely:
-
-1. Rename the branch locally,
-2. Push the new one, set local branch to track the new remote and
-3. Delete the old branch.
-
-#+begin_src conf
-    rename-branch = "!f() { git rename-local-branch $1 $2; \
-                            git push --set-upstream origin $2; \
-                            git push origin :$1; }; f"
 #+end_src
 
 ** Delete a branch
@@ -3603,6 +3574,39 @@ branch -vv~):
     prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
                                    awk '{print $1}' | \
                                    xargs git delete-local-branch; }; f"
+#+end_src
+
+** Rename a branch
+
+Sometimes we name a branch poorly or maybe we thought the name was "good" but
+not meaningful to the work we are doing.
+
+To rename a branch *locally*:
+
+- If we are on the branch we want to rename, we can just
+  ~git rename-local-branch <newbranch>~.
+
+- If we are on another branch, we have to use
+  ~git rename-local-branch <oldbranch> <newbranch>~.
+
+#+begin_src conf
+    rename-local-branch = branch -m
+#+end_src
+
+XXX Try
+: git rename-local-branch "#520-application-fee-refunds" "#509-application-fee-refunds"
+(see https://gist.github.com/lttlrck/9628955)
+
+To rename a branch *locally and remotely*:
+
+1. Rename the branch locally,
+2. Push the new branch and set local branch to track the new remote, and
+3. Delete the old branch.
+
+#+begin_src conf
+    rename-branch = "!f() { git rename-local-branch $1 $2; \
+                            git push --set-upstream origin $2; \
+                            git delete-remote-branch $1; }; f"
 #+end_src
 
 * Tags
