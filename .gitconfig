@@ -490,8 +490,11 @@ sync = "!f(){ pull1 && push1; }; f"
     # Run merge test (before merge) to check for any conflicts beforehand.
     mergetest = "!f() { git merge --no-commit --no-ff \"$1\"; git merge --abort; echo \"Merge aborted\"; }; f"
 
-    # Check how the merge of `dev' into master will go: git merge-dry-run dev.
-    merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflicts!' || echo 'No merge conflicts'; }; f"
+    # Check how the merge of `develop' into master will go:
+    # git merge-dry-run develop
+    merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) \
+                                && echo 'Merge conflicts!' \
+                                || echo 'This branch can be automatically merged.'; }; f"
 # DOESN'T work for git fetch & git merge
 
     # Extract the "changed in both" lines as well as the conflicting parts.

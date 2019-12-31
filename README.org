@@ -1853,7 +1853,7 @@ You can do ~git merge --abort~ after seeing that there are conflicts.
 #+begin_warning
 If your repository is a live Web server, then you could be serving files with
 conflicts in.  That's why you should *never* be *handling merges on a live Web
-server*!  Fix up the ~prod~ branch (on your development box) and then push it to
+server*!  Fix up the ~master~ branch (on your development box) and then push it to
 the real webserver with ~git pull --ff-only~.
 #+end_warning
 
@@ -1861,8 +1861,11 @@ See if the merge is applicable to the current working tree and/or the index file
 and *detects conflicts*:
 
 #+begin_src conf
-    # Check how the merge of `dev' into master will go: git merge-dry-run dev.
-    merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) && echo 'Merge conflicts!' || echo 'No merge conflicts'; }; f"
+    # Check how the merge of `develop' into master will go:
+    # git merge-dry-run develop
+    merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) \
+                                && echo 'Merge conflicts!' \
+                                || echo 'This branch can be automatically merged.'; }; f"
 # DOESN'T work for git fetch & git merge
 
     # Extract the "changed in both" lines as well as the conflicting parts.
@@ -3736,26 +3739,29 @@ Delete similar tags:
 
 * Compare Revisions (commits, branches or tags)
 
-*See what's changed*: easily determine which commits are on the "compare" source
-but not on the "base" destination.
+*See what's changed*.  Easily determine which changes:
+- are on the "compare" side (= merge /source/) but
+- are not on the "base" side (= merge /destination/).
+
+#+begin_note
+Diff using three-dot (~...~) notation.
+#+end_note
 
 You can see:
 - a list of commits,
 - a diff, and
 - any pull requests merged between the two versions.
 
-See + in Bitbucket (Get to work)
-
 ** Commits
 
-: git log --pretty=oneline DST...SRC
+: git log --pretty=oneline BASE...COMP
 
 ** Files changed
 
 List all the changed files *between 2 commits*:
 
-: git log --stat DST...SRC
-: git diff --stat DST...SRC
+: git log --stat BASE...COMP
+: git diff --stat BASE...COMP
 : git diff --stat v1...v2
 
 See the changed files in a branch *since it was forked from another branch*:
