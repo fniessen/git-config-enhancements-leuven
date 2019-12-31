@@ -624,7 +624,8 @@ stashall = !git add -A && git stash
 
     export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
 
-    export = archive -o latest.tar.gz -9 --prefix=latest/
+    export-zip = archive -o latest.zip
+    export-tgz = archive -o latest.tar.gz -9
 
     oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
     branch-diff = '!sh -c "git diff $(git oldest-ancestor).."'
@@ -833,9 +834,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     rename-local-branch = branch -m
 
-    rename-branch = "!f() { git rename-local-branch $1 $2; \
-                            git push --set-upstream origin $2; \
-                            git delete-remote-branch $1; }; f"
+    rename-branch = "!f() { git rename-local-branch $1 $2 \
+                                && git push --set-upstream origin $2 \
+                                && git delete-remote-branch $1; }; f"
 
     # Show verbose output about tags.
     tags = !git tag -l --sort=v:refname -n1

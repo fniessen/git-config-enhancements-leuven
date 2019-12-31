@@ -2639,11 +2639,15 @@ current tag.  Useful for uploading to Elasticbeanstalk.
     export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
 #+end_src
 
-Save a repo as a tarball:
+Save a repo (for example, ~HEAD~ or ~master~ -- or any other branch to archive, if
+you've already checked it out) as a tarball:
 
 #+begin_src conf
-    export = archive -o latest.tar.gz -9 --prefix=latest/
+    export-zip = archive -o latest.zip
+    export-tgz = archive -o latest.tar.gz -9
 #+end_src
+
+Note that the /output format/ is inferred by the extension of the output file.
 
 **** Branch point
 
@@ -3604,9 +3608,9 @@ To rename a branch *locally and remotely*:
 3. Delete the old branch.
 
 #+begin_src conf
-    rename-branch = "!f() { git rename-local-branch $1 $2; \
-                            git push --set-upstream origin $2; \
-                            git delete-remote-branch $1; }; f"
+    rename-branch = "!f() { git rename-local-branch $1 $2 \
+                                && git push --set-upstream origin $2 \
+                                && git delete-remote-branch $1; }; f"
 #+end_src
 
 * Tags
