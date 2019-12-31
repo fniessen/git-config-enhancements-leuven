@@ -55,9 +55,9 @@ http://kentnguyen.com/development/visualized-git-practices-for-team/
   copy.
 
   If that doesn't fix it, =git.txt= contains the phone number of a friend of mine
-  who understands git.  Just wait through a few minutes of 'It's really pretty
-  simple, just think of branches as...' and eventually you'll learn the commands
-  that will fix everything.
+  who understands ~git~.  Just wait through a few minutes of /'It's really pretty
+  simple, just think of branches as...'/ and eventually you'll learn the
+  commands that will fix everything.
 
 https://bitbucket.org/blog/get-git-guru-gold-with-bitbuckets-glorious-git-guides
 
@@ -2852,7 +2852,7 @@ have uncommitted changes that I need to take care of.
 
 * Repository
 
-** Create a repository locally
+** Create a Git repository locally
 
 #+begin_src conf
     create-repository = !git init \
@@ -3085,18 +3085,11 @@ Implementing a Strong Code-Review Culture
 https://www.youtube.com/watch?v=PJjmw9TRB7s
 
 #+begin_src text :tangle ~/.git_commit_template.txt
-## 50-character subject line #####################
+# |<------   50-character subject line   ------->|<------------------->|
 # If applied, this commit will...
-# [Add / Fix / Remove / Update / Refactor / Document] [issue #id] [summary]
+# [Add / Fix / Remove / Update / Refactor / Document] [summary]
 
-# :new: Add ...
-# :bug: Fix ...
-# :x: Remove ...
-# :hammer: Update ...
-# :recycle: Refactor ...
-# :computer: Tool ...
-
-## 72-character wrapped longer description #############################
+# |<-----   Optional 72-character wrapped extended description   ----->|
 # This should answer:
 # - Why is this change necessary?  (goals, use cases, stories, etc.?)
 # - How does this change address the issue?  (implementations, algorithms, etc.?)
@@ -3104,9 +3097,21 @@ https://www.youtube.com/watch?v=PJjmw9TRB7s
 
 # Include a link to the ticket, if any.
 # Closes #ISSUE_NUMBER
+
+# --- COMMIT END ---
+# Emoji can be
+#    :new:      Add new feature ...
+#    :bug:      Fix bug ...
+#    :x:        Remove ...
+#    :hammer:   Update ...
+#    :recycle:  Refactor code ...
+#    :computer: Tool ...
 #+end_src
 
+# https://dev.to/sublimegeek/semantic-commit-messages-with-emojis-3p8h
 # https://www.webfx.com/tools/emoji-cheat-sheet/
+
+# https://gist.github.com/zakkak/7e06725ebd1336bfebebe254de3de825
 
 # https://help.github.com/en/github/managing-your-work-on-github/closing-issues-using-keywords
 # https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html
