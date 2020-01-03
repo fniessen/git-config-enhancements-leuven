@@ -1,4 +1,4 @@
-#+TITLE:     Git configuration file
+#+TITLE:     Awesome Git aliases
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
 #+DESCRIPTION: Pretty format for `git log' and different helpful command aliases
@@ -10,6 +10,8 @@
 
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  header-args :tangle .gitconfig :eval no
+
+* Documentation
 
 XXX Git-extras (extra commands!)
 https://github.com/tj/git-extras/blob/master/Commands.md
@@ -28,20 +30,13 @@ https://help.github.com/en/github/searching-for-information-on-github/
 
 XXX GitLab API
 https://docs.gitlab.com/ee/api/
+https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#project-releases
 
 XXX GitAlias.com file of many git alias items, including shortcuts, helpers, workflows, etc.
 https://github.com/gitalias/gitalias/blob/master/gitalias.txt
 
 XXX Today I learned
 https://til.hashrocket.com/git
-
-*Commit early, commit often* (and with the right message): it is a bad idea to do
-a lot of work without committing... But don't push every single commit: push
-when changes are tested!
-
-Branch out often.
-http://kentnguyen.com/development/visualized-git-practices-for-team/
-(definition of git rebase)
 
 * Overview
 
@@ -59,7 +54,7 @@ http://kentnguyen.com/development/visualized-git-practices-for-team/
   simple, just think of branches as...'/ and eventually you'll learn the
   commands that will fix everything.
 
-https://bitbucket.org/blog/get-git-guru-gold-with-bitbuckets-glorious-git-guides
+From [[https://xkcd.com/1597/][xkcd]].
 
 These are common Git commands used in various situations:
 
@@ -94,6 +89,16 @@ These are common Git commands used in various situations:
   + pull ::       Fetch from and integrate with another repository or a local branch
   + push ::       Update remote refs along with associated objects
 
+* Tips
+
+*Commit early, commit often* (and with the right message): it is a bad idea to do
+a lot of work without committing... But don't push every single commit: push
+when changes are tested!
+
+Branch out often.
+http://kentnguyen.com/development/visualized-git-practices-for-team/
+(definition of git rebase)
+
 * Comments on branching (from Matthias)
 
 If you have finished your work, feel free to merge the branch into =master= (maybe
@@ -111,11 +116,6 @@ The following sequence is here very helpful:
 after this you can delete your local WIP branch and or if you pushed it the
 remote one too.
 
-* TODO See more Git configs (and aliases)
-
-- https://github.com/alikins/gitconfig/blob/master/gitconfig
-- https://github.com/GitAlias/gitalias
-
 * Overview
 
 The following configures interesting global settings for Git. These are stored
@@ -130,6 +130,15 @@ might have. So *BE EXTREMELY CAREFUL*!
 
 See https://blog.liip.ch/archive/2015/12/11/git-tips-tricks.html!!! XXX
 
+** TODO Check out other aliases
+
+- https://gist.github.com/HarshadRanganathan/eb48dd68133054fdd9db2de8b426f411
+  (branch edit-description, etc.)
+- https://gist.github.com/chrismccoy/8775224
+- https://github.com/alikins/gitconfig/blob/master/gitconfig
+- https://github.com/GitAlias/gitalias
+- https://gist.github.com/jedmao/5053440 (+ example of CSS style on GitHub)
+
 ** TODO Look at Git Power Routines [course]
 
 https://www.youtube.com/playlist?list=PLDshL1Z581YYxLsjYwM25HkIYrymXb7H_
@@ -138,6 +147,7 @@ https://www.youtube.com/playlist?list=PLDshL1Z581YYxLsjYwM25HkIYrymXb7H_
 
 http://marlacorinne.4parkers.com/2012/07/20/git-pull-vs-git-fetch-then-merge/
 https://adamcod.es/2014/12/10/git-pull-correct-workflow.html
+[[https://bitbucket.org/blog/get-git-guru-gold-with-bitbuckets-glorious-git-guides][Get git guru gold with Bitbucket's glorious git guides]]
 
 ** TODO Outsource and include private entries in .gitconfig
 
@@ -158,10 +168,6 @@ Mix professional and personal Git configurations:
 
 http://monkeypatch.me/blog/mixing-professional-and-personal-git-configurations.html
 
-** TODO git-repos
-
-http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
-
 ** TODO Git Quick Start For Emacs Devs
 
 http://www.emacswiki.org/emacs/GitQuickStartForEmacsDevs
@@ -169,13 +175,13 @@ http://www.emacswiki.org/emacs/GitQuickStartForEmacsDevs
 ** TODO Work in progress which I can't commit (from Stephen J. Turnbull)
 
 #+begin_verse
- > > With git pull, if there are changes in the working directory, the
- > > merge (i.e. merge from remote/master into master) part of the
- > > operation is aborted before it starts, giving a message describing its
- > > refusal.  It does this even when there are no conflicts to deal with.
- >
- > What are we supposed to do in that case, if we're not yet ready to
- > commit our files?
+>> With git pull, if there are changes in the working directory, the
+>> merge (i.e. merge from remote/master into master) part of the
+>> operation is aborted before it starts, giving a message describing its
+>> refusal.  It does this even when there are no conflicts to deal with.
+>
+> What are we supposed to do in that case, if we're not yet ready to
+> commit our files?
 
 If you have work-in-progress and feel unable to commit, but at the
 same time feel the need to pull into that workspace, I suggest you get
@@ -184,18 +190,17 @@ after your head cools off.
 
 If that isn't satisfactory, then
 
- > or putting our work into a new branch, like:
- >
- > --8<---------------cut here---------------start------------->8---
- > git create-branch new-branch-name
- > git commit -a -m "Edited"
- > git checkout master
- > git pull
- > ...
- > --8<---------------cut here---------------end--------------->8---
+> or putting our work into a new branch, like:
+>
+> --8<---------------cut here---------------start------------->8---
+> git create-branch new-branch-name
+> git commit -a -m "Edited"
+> git checkout master
+> git pull
+> ...
+> --8<---------------cut here---------------end--------------->8---
 
-is one way to go.  Another possibility is creating a new workspace,
-with cp -a or similar.
+is one way to go.
 
 If you need the pulled code for your work, then a quick stash is the
 better idea.
@@ -264,6 +269,9 @@ variable/.
     pager = tr -d '\\r' | less -REX
 #+end_src
 
+Stop viewing non-printable characters (for example, ISO Latin 1 accents in
+a UTF-8 terminal) in reverse video and hexadecimals: see ~LESSBINFMT~.
+
 Stop viewing ~^M~ symbols in diff:
 
 #+begin_src conf
@@ -280,9 +288,10 @@ Stop viewing ~^M~ symbols in diff:
 #+end_src
 
 [[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ as a newline character
-in git-handled repositories.  There's an option to auto-convert:
+in Git-handled repositories.  There's an option to auto-convert:
 
 #+begin_src conf :tangle no
+    # Checkout as CRLF, commit as LF.
     autocrlf = true
 #+end_src
 
@@ -759,7 +768,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 #+end_src
 
 #+begin_src conf
-    # Useful for exploring git.
+    # Useful for exploring Git.
     type = cat-file -t
     dump = cat-file -p
 #+end_src
@@ -789,9 +798,6 @@ are always executed in the top-level directory.
 
     # Pull in remote changes for the current repository and all its submodules
     p = !"git pull; git submodule foreach git pull origin master"
-
-    # Commit all changes (all local modifications/additions/deletions).
-    ca = !git add -A && git commit -av
 #+end_src
 
 Clean up your commits before publishing.  Before you push your commits to the
@@ -952,17 +958,6 @@ Show changes for a daily standup meeting:
 
   # Show the log for my own user email
   log-me = !git log --author=$(git config user.email)
-
-  # TODO
-  log-fetched = log --oneline HEAD..origin/master
-#+end_src
-
-*** Finding new commits
-
-Diverging from ~origin/master~, whatever the branch?
-
-#+begin_src conf
-    log-local = log --oneline origin..HEAD
 #+end_src
 
 *** When
@@ -972,6 +967,19 @@ Diverging from ~origin/master~, whatever the branch?
     wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
                         echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; \
                     done | sort -r | cut -f2 -d:; }; f"
+#+end_src
+
+*** Add only modified changes (and ignore untracked files)
+
+Ideally your =.gitignore= should prevent the untracked (and ignored) files from
+being shown in status, added using ~git add~ etc.  So correct your =.gitignore=.
+
+You can do ~git add -u~ so that it will *stage* the modified and deleted files.
+
+You can also do ~git commit -a~ to *commit* only the modified and deleted files.
+
+#+begin_src conf
+    stage-modified-removed-files = add -u
 #+end_src
 
 ** SHOW - View the commit history
@@ -1020,14 +1028,6 @@ List commits *showing changed files* (prettier and more concise version of
     # Show the last N commits on the current branch.
     last2 = !git log --name-status -$1 ${*:2}
 #+end_src
-
-*** List all the changed files in a commit
-
-*List all the ~changed~ files in a commit*:
-
-#+begin_src conf
-    changed = show --pretty="format:" --name-only
-    #+end_src
 
 *** Show the history of a file
 
@@ -1148,6 +1148,10 @@ git ls-ignored | xargs rm
 - Ignore all files with this extension: pattern
 - Ignore custom pattern: pattern
 
+#+begin_src conf :tangle no
+# Add any directories, files, or patterns you don't want to be tracked by version control
+#+end_src
+
 Quickly add a file or directory to =.gitignore=:
 
 #+begin_src conf
@@ -1155,8 +1159,8 @@ Quickly add a file or directory to =.gitignore=:
     # ignore=!([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore
 # XXX What is GIT_PREFIX?
 
-  # Ignore all untracked files by appending them to .gitignore:
-  ignore-untracked = "!git status | grep -P \"^\\t\" | grep -vF .gitignore | sed \"s/^\\t//\" >> .gitignore"
+    # Ignore all untracked files by appending them to .gitignore:
+    ignore-untracked = "!git status | grep -P \"^\\t\" | grep -vF .gitignore | sed \"s/^\\t//\" >> .gitignore"
 #+end_src
 
 *Note that adding the .gitignore and the file specification will have no effect
@@ -1615,6 +1619,8 @@ XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
     up= "!git fetch origin && git branch -v -a"
+
+    f = !git fetch --all && git rebase origin/master
 #+end_src
 
 See https://www.praqma.com/stories/git-autostash/.
@@ -2061,29 +2067,11 @@ git stash \
 && echo 'You can find your last changes in the stash!'
 #+end_src
 
-*** Show the history difference between a local branch and its remote
-
-#+begin_src conf
-    divergence = log --left-right --graph --cherry-pick --oneline $1...origin/$1
-#+end_src
+*** Delta
 
     # Quickly solve conflicts using an editor and then add the conflicted files
     edit-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; vim $(f)"
     add-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; git add $(f)"
-
-*** Diff all changes since branching from master
-
-Show all commits in a git branch since original branching point from =master=:
-
-#+begin_src conf
-    # log since master.
-    missing-master = log master...
-
-    # diff since master.
-    missing-master-diff = diff master...
-#+end_src
-
-*** Delta
 
 *** List branches that contain a given commit ID (SHA)
 
@@ -2224,6 +2212,7 @@ user wants to have an updated repository.
 
 #+begin_src conf
 stashall = !git add -A && git stash
+# "Add" modified files, deleted files, and new untracked files.
 #+end_src
 
 #+begin_src conf
@@ -2492,7 +2481,7 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 ** PUBLISH - Find out if a change is part of a release
 
 #+begin_src conf
-    sha1-tag = '!f() { git name-rev --name-only "$@"; }; f'
+    sha1-tag = "!f() { git name-rev --name-only \"$@\"; }; f"
 #+end_src
 
 The ~name-rev~ command indicates the *position of a commit relative to tags* in the
@@ -2605,6 +2594,8 @@ alias capv='curl $(pbpaste) | patch -p1 --dry-run'
 
 ** PUBLISH - Prepare a release
 
+See https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release
+
 *** ChangeLog
 
 Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit message since the
@@ -2624,7 +2615,9 @@ Use it like this:
 git changelog <first-tag-name> <last-tag-name>
 #+end_src
 
-See also https://github.com/github-changelog-generator/github-changelog-generator.
+See also
+- https://github.com/github-changelog-generator/github-changelog-generator
+- https://github.com/github-changelog-generator/Github-Changelog-Generator/wiki/Alternatives
 
 *** Release assets
 
@@ -2673,6 +2666,7 @@ from the name) remains intact.
     # Best common ancestor (when it was branched off).
     mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
 # git merge-base --fork-point master
+# git merge-base --all r1 r2
 #+end_src
 
 #+begin_src conf
@@ -2851,6 +2845,9 @@ have uncommitted changes that I need to take care of.
     all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
 #+end_src
 
+See also ~git-repos~:
+http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
+
 * ------------------------------------------------------------------------------
 
 * Repository
@@ -2936,6 +2933,16 @@ information:
 https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
 #+end_tip
 
+** Open a repository in a web browser
+
+#+begin_src conf
+    browse-tree = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}; }; f"
+    browse-wiki = XXX
+    browse-commits = XXX
+#+end_src
+
+XXX open = cygstart?
+
 * Source Files
 
 ** Search for files
@@ -2958,10 +2965,13 @@ Search file in all branches.
 
 ** Search for code
 
-*Code search* looks through all lines of code of all the files (by *file contents*)
-from the working directory (and its subdirectories).
+*Code search* looks through all lines of code of all the files (by the *file
+contents*) from the working directory (and its subdirectories).
 
 https://confluence.atlassian.com/bitbucketserver/search-for-code-in-bitbucket-server-814204781.html
+https://help.github.com/en/github/searching-for-information-on-github/searching-code
+
+*** Search code for exact matches
 
 #+begin_src conf
     search-code = "grep -i --line-number --break --heading -C 1"
@@ -2976,13 +2986,13 @@ Find all instances of the specified string in code files *with a certain file
 extension*.
 
 #+begin_src conf
-    search-code-extension = "XXX"
+    search-code-in-extension = "XXX"
 #+end_src
 
 Find all instances of the specified string in code *in the specified path*.
 
 #+begin_src conf
-    search-code-path = "XXX"
+    search-code-in-path = "XXX"
 #+end_src
 
 *** Pattern in working directory (and its subdirectories)
@@ -3092,14 +3102,17 @@ https://www.youtube.com/watch?v=PJjmw9TRB7s
 # If applied, this commit will...
 # [Add / Fix / Remove / Update / Refactor / Document] [summary]
 
+
 # |<-----   Optional 72-character wrapped extended description   ----->|
 # This should answer:
 # - Why is this change necessary?  (goals, use cases, stories, etc.?)
 # - How does this change address the issue?  (implementations, algorithms, etc.?)
 # - What side effects does this change have?
 
+
 # Include a link to the ticket, if any.
 # Closes #ISSUE_NUMBER
+
 
 # --- COMMIT END ---
 # Emoji can be
@@ -3360,7 +3373,10 @@ Consistent *naming conventions* (from the [[https://www.atlassian.com/git/tutori
   Used to fix pressing issues that are found in production. Hotfix branches
   merge directly to master.
 
-Alternative: https://about.gitlab.com/blog/2014/09/29/gitlab-flow/
+Alternatives:
+- https://about.gitlab.com/blog/2014/09/29/gitlab-flow/
+- https://trunkbaseddevelopment.com/ (and
+  https://dev.to/alediaferia/git-tips-for-trunk-based-development-1i1g)
 
 ** Create a branch
 
@@ -3529,6 +3545,10 @@ In the event that you accidentally delete ~master~, get it back with:
 #+end_tip
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
+
+See
+https://www.oreilly.com/library/view/git-pocket-guide/9781449327507/ch05.html
+for the distinction between "merged" and "fully merged" branches!
 
 #+begin_src conf
     delete-merged-remote-branches = "XXX"
@@ -3754,15 +3774,23 @@ You can see:
 
 ** Commits
 
-: git log --pretty=oneline BASE...COMP
+: git log --date=short <rev-base>...<rev-compare>
 
 ** Files changed
 
+*List all the ~changed~ files in a commit*:
+
+#+begin_src conf
+    changed = show --pretty="format:" --name-only
+
+    # Show changed files with stat about line additions and line deletions.
+    changed-files = XXX
+#+end_src
+
 List all the changed files *between 2 commits*:
 
-: git log --stat BASE...COMP
-: git diff --stat BASE...COMP
-: git diff --stat v1...v2
+: git log --stat <rev-base>...<rev-compare>
+: git diff --stat <rev-base>...<rev-compare>
 
 See the changed files in a branch *since it was forked from another branch*:
 
@@ -3773,11 +3801,8 @@ See the changed files in a branch since the last merge with the origin branch:
 : git diff --stat origin/master...my_forked_branch
 
 #+begin_src conf
-    # Show the names of all files changed between two commits.  Usage: "git diffn SHAv1 SHAv2".
+    # Show the names of all files changed between two commits.  Usage: "git diffn <rev1> <rev2>".
     diffn = diff --name-only
-
-    # diff status: A git diff, but with only the filenames (which reminds me of git status)
-    diffst = diff --name-only
 #+end_src
 
 (See ~git what~ as well!)
@@ -3796,14 +3821,47 @@ git changed bada55..ff0021              # List files modified between those comm
 - Inline diff (unified)
 
   #+begin_src conf
-    # git compare-revisions SOURCE TARGET = git diff TARGET...SOURCE
-    # Example: git compare-revisions master v1.0.0
-    compare-revisions = "!f() { git diff $2...$1; }; f"
+    # Example: git compare master@{1day} master
+    # (git compare <rev-base> <rev-compare> = git diff <rev-base>...<rev-compare>)
+    compare = "!f() { git diff $1...$2; }; f"
+    # https://github.com/fniessen/git-config/compare/master@%7B1day%7D...master
   #+end_src
 
 - Side-by-side diff (split)
 
 ** Merged pull requests
+
+** Example comparisons
+
+*** What did I do since I forked from the origin branch?
+
+#+begin_src conf
+    log-local = log --oneline origin..HEAD
+#+end_src
+
+*** What did the origin do since I forked from them?
+
+#+begin_src conf
+    log-fetched = log --oneline HEAD..origin
+#+end_src
+
+*** TODO Show the history difference between a local branch and its remote
+
+#+begin_src conf
+    divergence = log --left-right --graph --cherry-pick --oneline $1...origin/$1
+#+end_src
+
+*** TODO Diff all changes since branching from master
+
+Show all commits in a git branch since original branching point from =master=:
+
+#+begin_src conf
+    # log since master.
+    missing-master = log master...
+
+    # diff since master.
+    missing-master-diff = diff master...
+#+end_src
 
 * ?Releases
 
@@ -3820,6 +3878,8 @@ form ~v<major>.<minor>.<patch>~:
 - *Minor* release (from ~v0.8.1~ to ~v0.9.0~) for bug fixes and new features that
   maintain backwards compatibility, and
 - *Patch* release (from ~v0.8.1~ to ~v0.8.2~) only for bug fixes.
+
+# https://stackoverflow.com/questions/21639437/git-flow-release-branches-and-tags-with-or-without-v-prefix
 
 #+begin_note
 It's common practice to prefix your version names with the letter ~v~.
@@ -3932,7 +3992,7 @@ Sometimes, just reading the code of a pull request might not be enough to verify
 if it should be merged.  Maybe you want to add something, or some tests are
 failing, and you want to run them locally on your computer.
 
-*Check out* a *pull request locally*:
+*Check out* the head of a *pull request* as a *local branch*:
 
 #+begin_src conf
     # For GitHub.
@@ -3950,7 +4010,7 @@ Now you can check out a particular pull request.  For example:
 
 : git pr 5
 
-will fetch the *pull request* #5 into a local ~pr/5~ *branch* and check it out.
+will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out.
 
 ** 2. Review the changes locally
 
@@ -4135,6 +4195,8 @@ rsync-deploy =
 
 (see structure of actions in BitBucket)
 
+See https://bitbucket.org/blog/wordpress-continuous-deployment
+
 #+begin_src conf
 # Deploy a branch to review server (https://review-feature-1.example.com).
 deploy-review =
@@ -4245,7 +4307,7 @@ Show an existing issue specified by NUMBER.
 ** Open Issues in a web browser
 
 #+begin_src conf
-    browse-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
+    browse-issues = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f"
 #+end_src
 
 * Downloads

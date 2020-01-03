@@ -170,7 +170,7 @@
 
     alias = "!git config -l | grep alias | cut -c 7- | sort"
 
-    # Useful for exploring git.
+    # Useful for exploring Git.
     type = cat-file -t
     dump = cat-file -p
 
@@ -187,9 +187,6 @@
 
     # Pull in remote changes for the current repository and all its submodules
     p = !"git pull; git submodule foreach git pull origin master"
-
-    # Commit all changes (all local modifications/additions/deletions).
-    ca = !git add -A && git commit -av
 
     # Interactive rebase with the given number of latest commits
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
@@ -261,15 +258,12 @@
   # Show the log for my own user email
   log-me = !git log --author=$(git config user.email)
 
-  # TODO
-  log-fetched = log --oneline HEAD..origin/master
-
-    log-local = log --oneline origin..HEAD
-
     # When was this file last updated, on each local branch.
     wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
                         echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; \
                     done | sort -r | cut -f2 -d:; }; f"
+
+    stage-modified-removed-files = add -u
 
     ls = log --decorate --date=short
     ld = log --decorate --date=relative
@@ -297,8 +291,6 @@
 
     # Show the last N commits on the current branch.
     last2 = !git log --name-status -$1 ${*:2}
-
-    changed = show --pretty="format:" --name-only
 
     file-history = log --follow --date-order --date=short -C --
 
@@ -332,8 +324,8 @@
     # ignore=!([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore
 # XXX What is GIT_PREFIX?
 
-  # Ignore all untracked files by appending them to .gitignore:
-  ignore-untracked = "!git status | grep -P \"^\\t\" | grep -vF .gitignore | sed \"s/^\\t//\" >> .gitignore"
+    # Ignore all untracked files by appending them to .gitignore:
+    ignore-untracked = "!git status | grep -P \"^\\t\" | grep -vF .gitignore | sed \"s/^\\t//\" >> .gitignore"
 
     skip = update-index --assume-unchanged
     unskip = update-index --no-assume-unchanged
@@ -430,6 +422,8 @@
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
     up= "!git fetch origin && git branch -v -a"
+
+    f = !git fetch --all && git rebase origin/master
 
     up-tmpname = "!f() { git remote update -p; git merge --ff-only @{u}; }; f"
 
@@ -528,14 +522,6 @@ sync = "!f(){ pull1 && push1; }; f"
 
     next = "!f() { git checkout $(git rev-list --topo-order HEAD..master | tail -1; }; f"
 
-    divergence = log --left-right --graph --cherry-pick --oneline $1...origin/$1
-
-    # log since master.
-    missing-master = log master...
-
-    # diff since master.
-    missing-master-diff = diff master...
-
     where = "branch -a --contains"
 
     # Find branches containing commit.
@@ -564,6 +550,7 @@ missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git 
     stash-id = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
 
 stashall = !git add -A && git stash
+# "Add" modified files, deleted files, and new untracked files.
 
     hide = stash push --include-untracked # Hide all files, including untracked files (faster than using --all).
 
@@ -605,7 +592,7 @@ stashall = !git add -A && git stash
     # Get the upstream branch name.
     upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
 
-    sha1-tag = '!f() { git name-rev --name-only "$@"; }; f'
+    sha1-tag = "!f() { git name-rev --name-only \"$@\"; }; f"
 
     lll = log -u
 
@@ -639,6 +626,7 @@ stashall = !git add -A && git stash
     # Best common ancestor (when it was branched off).
     mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
 # git merge-base --fork-point master
+# git merge-base --all r1 r2
 
     export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 
@@ -705,6 +693,10 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
                             | sed -E 's#^.*/(.*)$#\\1#' \
                             | sed 's#.git$##'; }; f"
 
+    browse-tree = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}; }; f"
+    browse-wiki = XXX
+    browse-commits = XXX
+
     # BUG This is case-sensitive...
     find-file = !git ls-tree -r --name-only $(git current-branch) | grep --color=auto
 
@@ -720,9 +712,9 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 #     -c color.grep.match="reverse yellow"
 #     grep --break --heading --line-number'
 
-    search-code-extension = "XXX"
+    search-code-in-extension = "XXX"
 
-    search-code-path = "XXX"
+    search-code-in-path = "XXX"
 
 # In all commits, not in all branches!!! Lots of duplicates!!!
 grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
@@ -864,15 +856,30 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                              sh); \
                        }; f"
 
-    # Show the names of all files changed between two commits.  Usage: "git diffn SHAv1 SHAv2".
+    changed = show --pretty="format:" --name-only
+
+    # Show changed files with stat about line additions and line deletions.
+    changed-files = XXX
+
+    # Show the names of all files changed between two commits.  Usage: "git diffn <rev1> <rev2>".
     diffn = diff --name-only
 
-    # diff status: A git diff, but with only the filenames (which reminds me of git status)
-    diffst = diff --name-only
+    # Example: git compare master@{1day} master
+    # (git compare <rev-base> <rev-compare> = git diff <rev-base>...<rev-compare>)
+    compare = "!f() { git diff $1...$2; }; f"
+    # https://github.com/fniessen/git-config/compare/master@%7B1day%7D...master
 
-    # git compare-revisions SOURCE TARGET = git diff TARGET...SOURCE
-    # Example: git compare-revisions master v1.0.0
-    compare-revisions = "!f() { git diff $2...$1; }; f"
+    log-local = log --oneline origin..HEAD
+
+    log-fetched = log --oneline HEAD..origin
+
+    divergence = log --left-right --graph --cherry-pick --oneline $1...origin/$1
+
+    # log since master.
+    missing-master = log master...
+
+    # diff since master.
+    missing-master-diff = diff master...
 
     release = "!f() { git tag -a v$1 -m \"Release version $1\" \
                    && git push origin --tags \
@@ -989,7 +996,7 @@ deploy-prod =
 
     show-issue = XXX
 
-    browse-issues = '!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f'
+    browse-issues = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f"
 
     # Put everything in the current repo in a Zip archive.
     download-repository = "!f() { git archive ${1:-HEAD} --format=zip \
