@@ -680,10 +680,10 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 
     all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
 
-    create-repository = !git init \
-                             && ( [[ -n $(ls) ]] || touch .gitignore ) \
-                             && git add . \
-                             && git commit -m \"Initial commit\"
+    create-local-repository = !git init \
+                                   && ( [[ -n $(ls) ]] || touch .gitignore ) \
+                                   && git add . \
+                                   && git commit -m \"Initial commit\"
 
     cl = clone --recursive
 
@@ -738,6 +738,8 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     template = ~/.git_commit_template.txt
 
 [alias]
+
+    changed = show --pretty="format:" --name-only
 
     findc1 = "log --decorate -i --all --date=short --grep"
     findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
@@ -856,13 +858,13 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                              sh); \
                        }; f"
 
-    changed = show --pretty="format:" --name-only
+    # Usage: git compare-commits <rev-base> <rev-compare>
+    compare-commits = "!f() { git log --date=short $1...$2; }; f"
 
-    # Show changed files with stat about line additions and line deletions.
-    changed-files = XXX
-
-    # Show the names of all files changed between two commits.  Usage: "git diffn <rev1> <rev2>".
-    diffn = diff --name-only
+    # Show changed files (with stat about line additions and line deletions)
+    # between two commits.
+    # Usage: git compare-changed-files <rev-base> <rev-compare>
+    compare-changed-files = "!f() { git diff --stat $1...$2; }; f"
 
     # Example: git compare master@{1day} master
     # (git compare <rev-base> <rev-compare> = git diff <rev-base>...<rev-compare>)

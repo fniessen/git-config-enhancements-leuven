@@ -2855,10 +2855,10 @@ http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 ** Create a Git repository locally
 
 #+begin_src conf
-    create-repository = !git init \
-                             && ( [[ -n $(ls) ]] || touch .gitignore ) \
-                             && git add . \
-                             && git commit -m \"Initial commit\"
+    create-local-repository = !git init \
+                                   && ( [[ -n $(ls) ]] || touch .gitignore ) \
+                                   && git add . \
+                                   && git commit -m \"Initial commit\"
 #+end_src
 
 ** Clone a repository
@@ -2910,9 +2910,11 @@ Include a README:
 #+begin_src conf :tangle no
 git init
 git remote add origin git@github.com:$username/$repo_slug.git
+
 echo "# ${repo_slug:-Repository name}\n\nDescription" >> README.md
 git add README.md
 git commit -m "Initial commit"
+
 git push -u origin master
 #+end_src
 
@@ -3146,6 +3148,17 @@ imperative mood.
 #+end_src
 
 ** Get a commit detail
+
+List all the ~changed~ files *in a commit*:
+
+#+begin_src conf
+    changed = show --pretty="format:" --name-only
+#+end_src
+
+#+begin_src shell :tangle no
+git changed                             # List files modified in last commit.
+git changed bada55                      # List files modified in this commit.
+#+end_src
 
 ** Get the diff for a commit
 
@@ -3759,9 +3772,11 @@ Delete similar tags:
 
 * Compare Revisions (commits, branches or tags)
 
-*See what's changed*.  Easily determine which changes:
+*See what's changed* between two revisions.
+
+Easily determine which changes:
 - are on the "compare" side (= merge /source/) but
-- are not on the "base" side (= merge /destination/).
+- are /not/ on the "base" side (= merge /destination/).
 
 #+begin_note
 Diff using three-dot (~...~) notation.
@@ -3769,28 +3784,27 @@ Diff using three-dot (~...~) notation.
 
 You can see:
 - a list of commits,
+- a list of changed files,
 - a diff, and
 - any pull requests merged between the two versions.
 
 ** Commits
 
-: git log --date=short <rev-base>...<rev-compare>
+#+begin_src conf
+    # Usage: git compare-commits <rev-base> <rev-compare>
+    compare-commits = "!f() { git log --date=short $1...$2; }; f"
+#+end_src
 
 ** Files changed
 
-*List all the ~changed~ files in a commit*:
+List all the ~changed~ files *between 2 commits*:
 
 #+begin_src conf
-    changed = show --pretty="format:" --name-only
-
-    # Show changed files with stat about line additions and line deletions.
-    changed-files = XXX
+    # Show changed files (with stat about line additions and line deletions)
+    # between two commits.
+    # Usage: git compare-changed-files <rev-base> <rev-compare>
+    compare-changed-files = "!f() { git diff --stat $1...$2; }; f"
 #+end_src
-
-List all the changed files *between 2 commits*:
-
-: git log --stat <rev-base>...<rev-compare>
-: git diff --stat <rev-base>...<rev-compare>
 
 See the changed files in a branch *since it was forked from another branch*:
 
@@ -3799,22 +3813,6 @@ See the changed files in a branch *since it was forked from another branch*:
 See the changed files in a branch since the last merge with the origin branch:
 
 : git diff --stat origin/master...my_forked_branch
-
-#+begin_src conf
-    # Show the names of all files changed between two commits.  Usage: "git diffn <rev1> <rev2>".
-    diffn = diff --name-only
-#+end_src
-
-(See ~git what~ as well!)
-(Use Tig?  Use git blame?)
-
-XXX They don't show the same files (test with ~git changed HEAD~1~ and ~git diffn HEAD~1~) XXX
-
-#+begin_src shell :tangle no
-git changed                             # List files modified in last commit.
-git changed bada55                      # List files modified in this commit.
-git changed bada55..ff0021              # List files modified between those commits.
-#+end_src
 
 ** Diff
 
