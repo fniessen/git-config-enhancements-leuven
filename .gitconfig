@@ -191,11 +191,17 @@
     # Interactive rebase with the given number of latest commits
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
 
+    # Starts an interactive rebase of all the commits you haven't pushed
+    # yet. Handy for collapsing a bunch of work-in-progress snapshots into
+    # logical commits before pushing, without having to worry about accidentally
+    # squashing a commit someone else has already referred to.
+    work-in-progress = rebase -i @{u}
+
     st = status -s -b
 
     df = diff
 
-    # Hide whitespace changes.
+    # Ignore whitespace changes.
     wdiff = diff -b
     wdiff = diff --word-diff
 
@@ -232,6 +238,9 @@
     this-week = !git log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 
     today-all = !git log --since=midnight --no-merges --all
+
+    # Show the root commits.
+    roots = log --all --oneline --decorate --max-parents=0
 
 	today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
 	changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
@@ -522,14 +531,6 @@ sync = "!f(){ pull1 && push1; }; f"
 
     next = "!f() { git checkout $(git rev-list --topo-order HEAD..master | tail -1; }; f"
 
-    where = "branch -a --contains"
-
-    # Find branches containing commit.
-    findb = "!f() { git branch -a --contains $1; }; f"
-
-    # Find tags containing commit.
-    findt = "!f() { git describe --always --contains $1; }; f"
-
 missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git rev-list $1.. --oneline | sed -e '1 iOnly in HEAD:'; }; f"
 
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
@@ -584,6 +585,7 @@ stashall = !git add -A && git stash
 
     std = stash drop
 
+    # Unpushed.
     out = log --date=short @{u}..
     out-stat = log --stat --date=short @{u}..
 
@@ -628,9 +630,11 @@ stashall = !git add -A && git stash
 # git merge-base --fork-point master
 # git merge-base --all r1 r2
 
-    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
+    export-commit = "!f() { git changed-files ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 
+    # View raw commit.
     email-patch = XXX git format-patch $(git current-branch).patch
+
     plain-diff = !git branch-diff > $(git current-branch).diff
 
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
@@ -680,6 +684,11 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 
     all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
 
+    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
+
+    # run commands for each repository in the current directory
+    allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
+
     create-local-repository = !git init \
                                    && ( [[ -n $(ls) ]] || touch .gitignore ) \
                                    && git add . \
@@ -697,8 +706,7 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
     browse-wiki = XXX
     browse-commits = XXX
 
-    # BUG This is case-sensitive...
-    find-file = !git ls-tree -r --name-only $(git current-branch) | grep --color=auto
+    find-file = !git ls-tree -r --name-only $(git current-branch) | grep -i --color=auto
 
     find-file-all = "!f() { for branch in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
                             echo \"${branch}:\"; \
@@ -739,7 +747,24 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
 [alias]
 
-    changed = show --pretty="format:" --name-only
+    changed-files = show --pretty="format:" --name-only
+
+    download-email-patch = XXX git format-patch $(git current-branch).patch
+    download-plain-diff = !git branch-diff > $(git current-branch).diff
+
+    # Print only refs which contain the commit.
+    # Usage: git where <rev>
+    where1 = for-each-ref --contains
+    where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
+                         | sort -k5n -k2M -k3n -k4n ; }; f"
+    # git for-each-ref --format='%(color:blue)%(refname)%(color:reset)' --contains 4ec324ff
+
+    # Find branches containing commit.
+    branches-that-contain = "branch -a --contains"
+
+    # Find tags containing commit.
+    tags-that-contain1 = tag --contains
+    tags-that-contain2 = "!f() { git describe --always --contains $1; }; f"
 
     findc1 = "log --decorate -i --all --date=short --grep"
     findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
@@ -861,6 +886,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Usage: git compare-commits <rev-base> <rev-compare>
     compare-commits = "!f() { git log --date=short $1...$2; }; f"
 
+    # Show commits that haven't made it to master yet.
+    ahead-of-master = log --oneline origin/master..HEAD
+
     # Show changed files (with stat about line additions and line deletions)
     # between two commits.
     # Usage: git compare-changed-files <rev-base> <rev-compare>
@@ -906,14 +934,16 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
         curl --user $username \
             https://bitbucket.org/fniessen/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 
+    pr-list = XXX
+
     # For GitHub.
-    pr-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
-                        && git checkout pr/$1; }; f"
+    pr-checkout-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
+                                 && git checkout pr/$1; }; f"
     # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
 
     # For GitLab.
-    pr-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
-                        && git checkout pr/$1; }; f"
+    pr-checkout-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
+                                 && git checkout pr/$1; }; f"
     # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
 
     # For GitHub.
@@ -949,7 +979,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
         git merge --no-ff -m \"Merged pull request #$2 from $pull_author/$pull_ref\n\n$pull_title\" FETCH_HEAD; \
         ' -"
 
-    pr-clean = delete-local-branch pr/$1
+    pr-clean = "!f() { git delete-local-branch pr/$1; }; f"
+
+    pr-show = XXX <pr-number>
 
     related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
 

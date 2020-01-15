@@ -19,6 +19,9 @@ https://github.com/tj/git-extras/blob/master/Commands.md
 XXX Hub (extra commands!)
 https://github.com/github/hub/blob/master/share/man/man1/hub.1.md
 
+XXX Git extra commands (and lots of pointers!!!)
+https://github.com/unixorn/git-extra-commands
+
 XXX Bitbucket API
 https://developer.atlassian.com/bitbucket/api/2/reference/resource/
 
@@ -131,6 +134,22 @@ might have. So *BE EXTREMELY CAREFUL*!
 See https://blog.liip.ch/archive/2015/12/11/git-tips-tricks.html!!! XXX
 
 ** TODO Check out other aliases
+
+For aliases and shell/git configuration, a few pearls:
+
+github.com/zsh-users/antigen
+with oh-my-zsh/git and others according to your tastes. (love gloga)
+
+grml.org/zsh/
+
+github.com/zsh-users/zsh-autosugge...
+
+github.com/iam4x/zsh-iterm-touchbar
+
+--rebase by default on git pull is comfortable too.
+
+And obviously for those that didn't know it:
+learngitbranching.js.org/
 
 - https://gist.github.com/HarshadRanganathan/eb48dd68133054fdd9db2de8b426f411
   (branch edit-description, etc.)
@@ -810,6 +829,14 @@ clean and relevant commits, no experiments or fixing typos.
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
 #+end_src
 
+#+begin_src conf
+    # Starts an interactive rebase of all the commits you haven't pushed
+    # yet. Handy for collapsing a bunch of work-in-progress snapshots into
+    # logical commits before pushing, without having to worry about accidentally
+    # squashing a commit someone else has already referred to.
+    work-in-progress = rebase -i @{u}
+#+end_src
+
 ** SHOW - Check the status of your files
 
 Give the status in the *short-format* (preceded by a line showing the /branch name/
@@ -854,7 +881,7 @@ git diff -w
 #+end_src
 
 #+begin_src conf
-    # Hide whitespace changes.
+    # Ignore whitespace changes.
     wdiff = diff -b
     wdiff = diff --word-diff
 
@@ -925,6 +952,11 @@ branches*):
 
 #+begin_src conf
     today-all = !git log --since=midnight --no-merges --all
+#+end_src
+
+#+begin_src conf
+    # Show the root commits.
+    roots = log --all --oneline --decorate --max-parents=0
 #+end_src
 
 #+begin_src conf
@@ -1305,22 +1337,6 @@ need to be the *latest* one.
                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET^; }; f"
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
 #+end_src
-
-For aliases and shell/git configuration, a few pearls:
-
-github.com/zsh-users/antigen
-with oh-my-zsh/git and others according to your tastes. (love gloga)
-
-grml.org/zsh/
-
-github.com/zsh-users/zsh-autosugge...
-
-github.com/iam4x/zsh-iterm-touchbar
-
---rebase by default on git pull is comfortable too.
-
-And obviously for those that didn't know it:
-learngitbranching.js.org/
 
 *** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
 
@@ -2073,32 +2089,6 @@ git stash \
     edit-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; vim $(f)"
     add-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; git add $(f)"
 
-*** List branches that contain a given commit ID (SHA)
-
-Filter the list of *branches* to only those which have the given *commit ID* among
-their ancestors.
-
-#+begin_src conf
-    where = "branch -a --contains"
-
-    # Find branches containing commit.
-    findb = "!f() { git branch -a --contains $1; }; f"
-#+end_src
-
-This also includes *remote tracking branches* in the list, that is "local
-branches that have a direct relationship to a remote branch".
-
-List all *tags* that contain a commit ID:
-
-#+begin_src shell :tangle no
-git tag --contains a2c71a6
-#+end_src
-
-#+begin_src conf
-    # Find tags containing commit.
-    findt = "!f() { git describe --always --contains $1; }; f"
-#+end_src
-
 *** Comparing the commits between branches
 
 Sometimes I lose track of which branch contains which other branch. This
@@ -2456,6 +2446,7 @@ The ~out~ command returns a list of *unpushed* (outgoing) commits for the *curre
 branch*, the next time you do a push.
 
 #+begin_src conf
+    # Unpushed.
     out = log --date=short @{u}..
     out-stat = log --stat --date=short @{u}..
 #+end_src
@@ -2670,9 +2661,13 @@ from the name) remains intact.
 #+end_src
 
 #+begin_src conf
-    export-commit = "!f() { git changed ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
+    export-commit = "!f() { git changed-files ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
+#+end_src
 
+#+begin_src conf
+    # View raw commit.
     email-patch = XXX git format-patch $(git current-branch).patch
+
     plain-diff = !git branch-diff > $(git current-branch).diff
 #+end_src
 
@@ -2833,7 +2828,7 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
     cvs-full-log = log --reverse --pretty=format:'%B------------------------------------------------------------------------'
 #+end_src
 
-* All repositories
+* Run on All repositories
 
 The biggest use I get out of this alias is making sure I have everything
 committed. Sometimes I'll work on a project and then forget about it for
@@ -2843,6 +2838,11 @@ have uncommitted changes that I need to take care of.
 
 #+begin_src conf
     all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
+
+    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
+
+    # run commands for each repository in the current directory
+    allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
 #+end_src
 
 See also ~git-repos~:
@@ -2952,8 +2952,7 @@ XXX open = cygstart?
 Search file (by file path) in the current branch.
 
 #+begin_src conf
-    # BUG This is case-sensitive...
-    find-file = !git ls-tree -r --name-only $(git current-branch) | grep --color=auto
+    find-file = !git ls-tree -r --name-only $(git current-branch) | grep -i --color=auto
 #+end_src
 
 Search file in all branches.
@@ -3147,22 +3146,70 @@ imperative mood.
 [alias]
 #+end_src
 
+This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
+
+| Label    | Description                                                                                            |
+|----------+--------------------------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                                          |
+| fix      | A bug fix                                                                                              |
+| style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
+| refactor | A code change that neither fixes a bug nor adds a feature                                              |
+| perf     | A code change that improves performance                                                                |
+| test     | Adding missing or correcting existing tests                                                            |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
+| doc      | Documentation only changes                                                                             |
+
 ** Get a commit detail
 
-List all the ~changed~ files *in a commit*:
+List all the changed files *in a commit*:
 
 #+begin_src conf
-    changed = show --pretty="format:" --name-only
+    changed-files = show --pretty="format:" --name-only
 #+end_src
 
 #+begin_src shell :tangle no
-git changed                             # List files modified in last commit.
-git changed bada55                      # List files modified in this commit.
+git changed-files                       # List files modified in last commit.
+git changed-files bada55                # List files modified in this commit.
 #+end_src
 
 ** Get the diff for a commit
 
+#+begin_src conf
+    download-email-patch = XXX git format-patch $(git current-branch).patch
+    download-plain-diff = !git branch-diff > $(git current-branch).diff
+#+end_src
+
 ** Get the references the commit has been pushed to (branches and tags)
+
+List all the branches and tags that contain a specific commit.
+
+#+begin_src conf
+    # Print only refs which contain the commit.
+    # Usage: git where <rev>
+    where1 = for-each-ref --contains
+    where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
+                         | sort -k5n -k2M -k3n -k4n ; }; f"
+    # git for-each-ref --format='%(color:blue)%(refname)%(color:reset)' --contains 4ec324ff
+#+end_src
+
+Filter the list of *branches* to only those which have the given *commit ID* among
+their ancestors.
+
+#+begin_src conf
+    # Find branches containing commit.
+    branches-that-contain = "branch -a --contains"
+#+end_src
+
+This also includes *remote tracking branches* in the list, that is "local
+branches that have a direct relationship to a remote branch".
+
+List all *tags* that contain a specific commit ID:
+
+#+begin_src conf
+    # Find tags containing commit.
+    tags-that-contain1 = tag --contains
+    tags-that-contain2 = "!f() { git describe --always --contains $1; }; f"
+#+end_src
 
 ** Search for commits
 
@@ -3793,6 +3840,9 @@ You can see:
 #+begin_src conf
     # Usage: git compare-commits <rev-base> <rev-compare>
     compare-commits = "!f() { git log --date=short $1...$2; }; f"
+
+    # Show commits that haven't made it to master yet.
+    ahead-of-master = log --oneline origin/master..HEAD
 #+end_src
 
 ** Files changed
@@ -3952,7 +4002,7 @@ XXX See https://github.com/github/hub/
 :ID:       a7039f6e-825c-484c-8739-f3e32a9c45fc
 :END:
 
-Create pull request against the default branch:
+Create a pull request against the default branch:
 
 #+begin_src conf
     pull-request-bb = "!f() { username=$1; repo_slug=$2; \
@@ -3960,11 +4010,13 @@ Create pull request against the default branch:
             https://bitbucket.org/fniessen/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 #+end_src
 
-Add a comment in github pull request:
+Add a comment in Github pull request:
 
 : curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -X POST -d '{\"body\": \"${text_pr}\"}' \"https://api.github.com/repos/${repository_name}/issues/${ghprbPullId}/comments\""
 
-** List
+** List pull requests
+
+List pull requests in the current repository.
 
 - Pull Requests assigned to me
 - Pull Requests I've created
@@ -3980,7 +4032,9 @@ https://gist.github.com/metlos/9368527
 For GitHub
 : git ls-remote origin 'refs/pull/*'
 
-** Show
+#+begin_src conf
+    pr-list = XXX
+#+end_src
 
 ** 1. Check out a pull request locally
 
@@ -3994,19 +4048,19 @@ failing, and you want to run them locally on your computer.
 
 #+begin_src conf
     # For GitHub.
-    pr-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
-                        && git checkout pr/$1; }; f"
+    pr-checkout-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
+                                 && git checkout pr/$1; }; f"
     # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
 
     # For GitLab.
-    pr-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
-                        && git checkout pr/$1; }; f"
+    pr-checkout-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
+                                 && git checkout pr/$1; }; f"
     # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
 #+end_src
 
 Now you can check out a particular pull request.  For example:
 
-: git pr 5
+: git pr-checkout 5
 
 will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out.
 
@@ -4101,7 +4155,15 @@ without leaving your terminal -- this function will help you.
 Delete source branch:
 
 #+begin_src conf
-    pr-clean = delete-local-branch pr/$1
+    pr-clean = "!f() { git delete-local-branch pr/$1; }; f"
+#+end_src
+
+** Show in a web browser
+
+Open a pull request page in a web browser.
+
+#+begin_src conf
+    pr-show = XXX <pr-number>
 #+end_src
 
 ** Who?
@@ -4544,9 +4606,3 @@ working directory*:
 - http://www.netinstructions.com/git-and-svn-together/
 - https://www.belatrixsf.com/blog/a-happy-way-to-combine-svn-and-git
 
-* Run on all repositories
-
-    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
-
-    # run commands for each repository in the current directory
-    all = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
