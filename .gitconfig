@@ -264,7 +264,7 @@
     check-eol = grep --files-with-matches $'\\r' HEAD
 
     #Jira tickets (from: http://blogs.atlassian.com/2014/08/whats-new-git-2-1/)
-    issues = "!f() { : git log ; echo 'Printing issue keys'; git log --oneline $@ | egrep -o [A-Z]+-[0-9]+ | sort | uniq; }; f"
+    issues = "!f() { : git log ; echo 'Printing issue keys'; git log --oneline $@ | egrep -o [A-Z]+-[0-9]+ | sort -u; }; f"
 
     st = status -s -b
 
@@ -897,7 +897,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
 
-    # Clean up.
+    # Delete fully (?) merged branches.
     delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
                                      egrep -v \"(master|develop)\" | \
                                      xargs -n 1 git delete-local-branch; }; f"

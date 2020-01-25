@@ -909,7 +909,7 @@ clean and relevant commits, no experiments or fixing typos.
     check-eol = grep --files-with-matches $'\\r' HEAD
 
     #Jira tickets (from: http://blogs.atlassian.com/2014/08/whats-new-git-2-1/)
-    issues = "!f() { : git log ; echo 'Printing issue keys'; git log --oneline $@ | egrep -o [A-Z]+-[0-9]+ | sort | uniq; }; f"
+    issues = "!f() { : git log ; echo 'Printing issue keys'; git log --oneline $@ | egrep -o [A-Z]+-[0-9]+ | sort -u; }; f"
 #+end_src
 
 ** SHOW - Check the status of your files
@@ -2487,6 +2487,8 @@ XXX See doc of git help stash for workflows...
 
 ** PUBLISH - Push
 
+*** Show commits that are on the local branch that have not been pushed
+
 It is useful to know if you have any *local commits* that are not in the remote
 branch.
 
@@ -3662,7 +3664,7 @@ branch "irrespective of its merged status."
 *merged to the current branch* that you are in.
 
 #+begin_src conf
-    # Clean up.
+    # Delete fully (?) merged branches.
     delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
                                      egrep -v \"(master|develop)\" | \
                                      xargs -n 1 git delete-local-branch; }; f"
@@ -3701,18 +3703,18 @@ Delete a *remote* branch:
     delete-remote-branch = push origin --delete
 #+end_src
 
-*** Delete a branch locally and on the origin remote
+*** Delete a branch locally and on the ~origin~ remote
 
 #+begin_src conf
     nuke-branch = "!f() { git delete-local-branch $1 \
                               && git delete-remote-branch $1; }; f"
 #+end_src
 
-*** Delete all orphaned local branches (that no longer exist at remote)
+*** Delete all orphaned branches (that no longer exist at remote)
 
 Once you delete the branch from the remote, you can *remove all orphaned
-remote-tracking branches that you have locally*, but are *no more present in the
-remote repository* ~origin~ with:
+remote-tracking branches that you have locally*, in =.git/refs/remotes/origin=, but
+are *no more present in the remote repository* ~origin~ with:
 
 : git remote prune origin
 
