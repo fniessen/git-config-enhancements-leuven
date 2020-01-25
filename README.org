@@ -1521,7 +1521,7 @@ first, to see what it will delete.
 Usage:
 - ~git clean -n~ (dry run) to see what ~git clean -f~ will do, so you can be sure
   it's what you want.
-- ~git clean -f~ (to *remove* the *untracked files*) and
+- ~git clean -f~ (to *force removing* the *untracked files*) and
 - ~git clean -d -f~ (to also *remove untracked directories* in addition to untracked
   files).
 
@@ -1552,14 +1552,16 @@ git branch my-saved-work
 
 **** Hard option -- Clean branch (delete ignored files in addition to changes + untracked files)
 
-*NUCLEAR VERSION* which will wipe out all your changes, all the files not in Git,
-and start from the ~HEAD~.
+*NUCLEAR VERSION* which will:
+- undo all your changes to *tracked* files,
+- wipe out all the *ignored and untracked* files and directories, and
+- start from the ~HEAD~.
 
 #+begin_src conf
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
     # including those in .gitignore.
-    clear = !git clean -d -f -x \
-                 && git reset --hard
+    clear-with-fire = !git clean -d -f -x \
+                           && git reset --hard
 #+end_src
 
 *** Revert a commit
@@ -2014,21 +2016,12 @@ have many clones on your file system.
 Best answer I have seen on ~git merge~ *strategies*:
 https://stackoverflow.com/questions/366860/when-would-you-use-the-different-git-merge-strategies
 
-*** List conflicted files
+*** Show list of files in a conflict state
 
-Unmerged files after a merge failure:
-
-#+begin_src conf
-    conflicts = "!git ls-files -u | cut -f 2 | sort -u"
-#+end_src
-
-*** Review which file have conflicts
-
-This command tells you which files have conflicts after merging.
+List unmerged files (after a merge failure), having leftover conflict markers:
 
 #+begin_src conf
     conflicts = diff --name-only --diff-filter=U
-    unmerged = diff --name-only --diff-filter=U
 #+end_src
 
 ** BRANCH - Branch
@@ -3248,11 +3241,11 @@ git changed-files                       # List files modified in last commit.
 git changed-files bada55                # List files modified in this commit.
 #+end_src
 
-** Get the diff for a commit
+** Get the diff of a commit
 
 #+begin_src conf
     download-email-patch = XXX git format-patch $(git current-branch).patch
-    download-plain-diff = !git branch-diff > $(git current-branch).diff
+    download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
 #+end_src
 
 ** Get the references the commit has been pushed to (branches and tags)

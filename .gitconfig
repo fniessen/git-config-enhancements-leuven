@@ -454,8 +454,8 @@
 
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
     # including those in .gitignore.
-    clear = !git clean -d -f -x \
-                 && git reset --hard
+    clear-with-fire = !git clean -d -f -x \
+                           && git reset --hard
 
     squash = "!f() { git reset --soft HEAD~${1} && \
                      git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
@@ -573,10 +573,7 @@ sync = "!f(){ pull1 && push1; }; f"
 
     theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 
-    conflicts = "!git ls-files -u | cut -f 2 | sort -u"
-
     conflicts = diff --name-only --diff-filter=U
-    unmerged = diff --name-only --diff-filter=U
 
     # Create a feature branch.
     feature = "!f() { git create-branch feature/$1 develop; }; f"
@@ -816,7 +813,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     changed-files = show --pretty="format:" --name-only
 
     download-email-patch = XXX git format-patch $(git current-branch).patch
-    download-plain-diff = !git branch-diff > $(git current-branch).diff
+    download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
 
     # Print only refs which contain the commit.
     # Usage: git where <rev>
