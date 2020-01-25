@@ -82,7 +82,7 @@ Output filenames of files changed in each commit:
 svn log -v
 #+end_src
 
-See ~svn-changed~ in my Shell configuration.
+See ~svn-changed-files~ in my Shell configuration.
 
 ** Show the history of a file
 
@@ -106,7 +106,7 @@ See ~svn-filelog-p~ in my Shell configuration.
 copy. You can then review the changes in your working copy (with diff), but
 you'd need to commit in order to apply the revert into the repository.
 
-** "unmodify" files
+** "Unmodify" files
 
 To discard local changes in current folder (revert a whole directory of files) :
 
@@ -114,7 +114,7 @@ To discard local changes in current folder (revert a whole directory of files) :
 svn revert -R .
 #+end_src
 
-** "unadd" a file to SVN before commit
+** "Unadd" a file to SVN before commit
 
 : svn rm --keep-local folder_name
 

@@ -30,6 +30,9 @@
     # Minimize the number of files in .git/.
     auto = 256
 
+[help]
+    autocorrect = 1
+
 [log]
     date = iso
 
@@ -65,7 +68,7 @@
         }; f"
 
 [alias]
-    diffall = "!git difftool -t meld --dir-diff"
+    diffall = difftool -t meld --dir-diff
 
 [apply]
     # Detect whitespace errors when applying a patch.
@@ -197,6 +200,72 @@
     # squashing a commit someone else has already referred to.
     work-in-progress = rebase -i @{u}
 
+#BASIC HISTORY VIEWING
+
+    hist = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
+    histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
+    llog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
+    changelog = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
+    ls = log --pretty=format:'%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
+
+#BASIC REPO INFORMATION
+
+    whois = "!sh -c 'git log -i -1 --pretty=\"format::%an <%ae>\n\" --author=\"$1\"' -"
+    whatis = show -s --pretty='tformat::%h (%s, %ad)' --date=short
+
+#WHAT WAS GOING ON, WHILE YOU WERE AWAY
+
+    anychanges = !sh -c 'git fetch' && git log --oneline HEAD..origin/$1
+    anychangesonmaster = !sh -c 'git fetch' && git log --oneline HEAD..origin/master
+    whoischanging = !sh -c 'git shortlog HEAD..origin/$0'
+    whoischangingmaster = !sh -c 'git shortlog HEAD..origin/master'
+
+    #what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
+    showorigin = "!sh -c 'for branch in `git branch -r | grep -v HEAD`;do echo `git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $branch | head -n 1` \\\t$branch; done | sort -r'"
+
+    #get remote branches
+    trackallbranches = !sh -c "for branchname in `git branch -r `; do git branch --track $branchname; done"
+    updateallbranches = !sh -c "for branchname in `git branch -r `; do git checkout $branchname ; git pull; done"
+
+#TAGS
+
+    showtags = show-ref --tags
+    pushtags = push --tags
+    tagwithdate = !sh -c 'git tag "$0"_$(date "+%y-%m-%d_%H-%M-%S")'
+    # Pushes given tag to remote 'origin' repo (or the remote passed as the second parameter)
+    publishtag = "!sh -c 'git push ${2:-origin} $1' -"
+    # Removes given tag from remote 'origin' repo (or the remote passed as the second parameter)
+    unpublishtag = "!sh -c 'git push ${2:-origin} :refs/tags/$1' -"
+
+#IGNORING
+
+    # fix .gitignore
+    fixgitignore = !git rm -r --cached . && git add . && git commit -m \"Just a .gitignore fix \"
+
+    # Ignore files only locally
+    hide = update-index --assume-unchanged
+    unhide = update-index --no-assume-unchanged
+
+#OTHER
+
+    #Deletes all branches that were safely merged into the master. All other are skipped (no worries).
+    #on osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation
+    cleanup = !git branch --merged=master | grep -Ev '^\\* | master$' | xargs -r git branch -d
+
+    #Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
+    cleanuplocal = !git remote prune origin && git gc && git clean -df
+
+    # Check if any file in repo has whitespace errors
+    # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
+    check-whitespace = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
+
+    # Check if any file in repo has windows line endings
+    #Currently do not work as alias, works from comand line directly. There is a problem with \r
+    check-eol = grep --files-with-matches $'\\r' HEAD
+
+    #Jira tickets (from: http://blogs.atlassian.com/2014/08/whats-new-git-2-1/)
+    issues = "!f() { : git log ; echo 'Printing issue keys'; git log --oneline $@ | egrep -o [A-Z]+-[0-9]+ | sort | uniq; }; f"
+
     st = status -s -b
 
     df = diff
@@ -233,24 +302,21 @@
 
     precommit = diff --cached --diff-algorithm=minimal -w
 
-    today = !git log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    this-week = !git log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 
-    today-all = !git log --since=midnight --no-merges --all
+    today-all = log --since=midnight --no-merges --all
 
-    # Show the root commits.
-    roots = log --all --oneline --decorate --max-parents=0
-
-	today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-	changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
-	upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
-	local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
+    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+    changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
+    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
+    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 
     # Summarize your own changes since 24h, suitable for a daily standup meeting.
-    log-standup = !git log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
+    log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
 
-    standup = !"git log --branches \
+    standup = "!git log --branches \
                         --since=$(if [[ "$(date +%a)" == "Mon" ]]; then \
                                       echo "friday"; \
                                   else \
@@ -296,10 +362,10 @@
                      --exclude-from=.git/info/exclude \
                      -v -d -o -m -s -u
 
-    last1 = log --decorate --date=short -1 --stat
+    last = log --decorate -1 --date=short --stat
 
-    # Show the last N commits on the current branch.
-    last2 = !git log --name-status -$1 ${*:2}
+    # # Show the last N commits on the current branch.
+    # last = !git log --name-status -${1:-1}
 
     file-history = log --follow --date-order --date=short -C --
 
@@ -346,21 +412,19 @@
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
     skipped2 = !git ls-files -v | grep '^[a-z]'
 
-    # Commit changes to current HEAD (modified and deleted files) as amended
-    # commit.
-    plus = commit -a -v --amend --reuse-message HEAD
-
-    # Append staged changes to the PREVIOUS commit (changes its SHA, keeps the
+    # Append your staged changes to the LATEST commit (keeping the pre-existing
     # commit message).
-    fix = commit -v --amend --reuse-message HEAD
+    fixup = commit -v --amend --reuse-message HEAD
 
-    # Change PREVIOUS commit's message to what you type in.
+    # Change LATEST commit message to what you type in.
+    # Usage: git medit <msg>
     medit = commit --amend -m
 
-    # Credit an author on the PREVIOUS commit.
+    # Credit an author on the LATEST commit.
+    # Usage: git credit <author-name> <author-email>
     credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
 
-    fixup = "!f() { TARGET=$(git rev-parse \"$1\"); \
+    fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
                     git commit --fixup=$TARGET ${@:2} \
                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET^; }; f"
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
@@ -378,7 +442,9 @@
     undo = reset --hard HEAD~1
     # Delete last commit.
 
-    clear-soft-dry-run = !git clean -d -n
+    nuke-untracked-files = clean -f
+
+    clear-soft-dry-run = clean -d -n
 
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
     # Files and directories in .gitignore will be preserved.
@@ -408,8 +474,8 @@
   # Show the changes that were introduced by a merge, in your difftool
   merge-span-difftool = !"git difftool `git merge-span ... $1`"
 
+    remotes = remote
     r = remote -v
-    remotes = remote -v
 
     in = !(echo "Please fetch origin before." && git log --decorate ..@{u})
     inf = !(git remote update -p              && git log --decorate ..@{u})
@@ -673,7 +739,7 @@ stashall = !git add -A && git stash
     record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 
     lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
-    lost = !"git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+    lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 
 zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 
@@ -706,7 +772,7 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
     browse-wiki = XXX
     browse-commits = XXX
 
-    find-file = !git ls-tree -r --name-only $(git current-branch) | grep -i --color=auto
+    find-file = !git ls-tree -r --name-only HEAD | grep -i --color=auto
 
     find-file-all = "!f() { for branch in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
                             echo \"${branch}:\"; \
@@ -805,19 +871,23 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Get the current branch name (not so useful in itself, but used in other
     # aliases).  Works well in detached mode.
     current-branch = name-rev --name-only HEAD
-    # current-branch = !git branch --show-current # v2.22+
+    # current-branch = branch --show-current # v2.22+
 
     # Show local and remote branches.
-    br = branch -a -vv
+    branches = branch -a -vv
 
     be = branch --edit-description
 
     track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
 
     # Show info for branches which have been checked out locally...
-    branches = !git for-each-ref \
-                    --sort=-committerdate refs/heads/ \
-                    --format='%(HEAD) %(color:green bold)%(refname:short)%(color:reset) - %(color:yellow)%(objectname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
+    br = for-each-ref \
+             --sort=-committerdate refs/heads/ \
+             --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset)'
+
+    recent = for-each-ref \
+                 --sort=-committerdate refs/heads/ \
+                 --format='%(authordate:short) %(color:red)%(objectname:short) %(color:yellow)%(refname:short)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
 
     # Sort by date for branches; can be useful for spring cleaning
     refs-by-date = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short)'
@@ -845,10 +915,14 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Delete remote branch.
     delete-remote-branch = push origin --delete
 
-    # Prune all your stale remote branches: there's no way to tell git remote
-    # update to prune stale branches, and git remote prune does not
-    # understand --all.
+    nuke-branch = "!f() { git delete-local-branch $1 \
+                              && git delete-remote-branch $1; }; f"
+
+    # Prune deleted branches from all remotes.
     prune-all = !git remote | xargs -n 1 git remote prune
+    # 'git remote prune' does not understand '--all'.
+
+    # There's no way to tell git remote update to prune orphaned branches?
 
     prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
                                    awk '{print $1}' | \
@@ -861,9 +935,10 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                                 && git delete-remote-branch $1; }; f"
 
     # Show verbose output about tags.
-    tags = !git tag -l --sort=v:refname -n1
+    tags = tag -l --sort=v:refname -n1
 
     last-tag = describe --tags --abbrev=0
+    checkout-last-tag = !sh -c 'git checkout $(git last-tag)'
 
     last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
 
@@ -912,11 +987,11 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     missing-master-diff = diff master...
 
     release = "!f() { git tag -a v$1 -m \"Release version $1\" \
-                   && git push origin --tags \
-                   && git push origin; }; f"
+                          && git push origin --tags \
+                          && git push origin; }; f"
 
-    contributors = shortlog -n -s -e --no-merges --
-    whorank = shortlog --summary --numbered --no-merges
+    contributors = shortlog -n -s --no-merges --
+    contributors-email = shortlog -n -s -e --no-merges --
 
     graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
@@ -926,7 +1001,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     hist = log --date=short --graph
 
     graphviz = "!f() { echo 'digraph git {' ; \
-                           git log --pretty='format:  %h -> { %p }' \"$@\" \
+                           git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
                                | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
                        echo '}'; }; f"
 
