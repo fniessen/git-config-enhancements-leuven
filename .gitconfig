@@ -340,6 +340,8 @@
 
     stage-modified-removed-files = add -u
 
+    wip = commit -am "WIP"
+
     ls = log --decorate --date=short
     ld = log --decorate --date=relative
 
@@ -418,16 +420,22 @@
 
     # Change LATEST commit message to what you type in.
     # Usage: git medit <msg>
-    medit = commit --amend -m
+    reword = commit --amend -m
 
     # Credit an author on the LATEST commit.
     # Usage: git credit <author-name> <author-email>
     credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
 
     fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
-                    git commit --fixup=$TARGET ${@:2} \
-                        && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET^; }; f"
+                     git commit --fixup=$TARGET ${@:2} \
+                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
+
+    # Checkout the commit in question, and amend its message.
+    reword2 = "!f() { branch=$(git current-branch); \
+                      git checkout $1; \
+                      git commit --amend; \
+                      git checkout $branch; }; f"
 
     # Keep the changes from the commit you want to undo.
     undo-soft = reset --soft HEAD~1
@@ -477,8 +485,7 @@
     remotes = remote
     r = remote -v
 
-    in = !(echo "Please fetch origin before." && git log --decorate ..@{u})
-    inf = !(git remote update -p              && git log --decorate ..@{u})
+    in = !(git remote update -p && git log --decorate ..@{u})
 
     in-stat = log --stat ..@{u}
 
@@ -598,7 +605,7 @@ missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git 
 
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch
-    # pg sbt master pu -- if the last line is 'master' and not 'master^'
+    # pg sbt master pu -- if the last line is 'master' and not 'master~'
     # or 'master~N' then pu is a descendent of master
     sbt = show-branch --topics
     sbs = show-branch --sha1-name
@@ -819,7 +826,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Usage: git where <rev>
     where1 = for-each-ref --contains
     where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
-                         | sort -k5n -k2M -k3n -k4n ; }; f"
+                         | sort -k5n -k2M -k3n -k4n; }; f"
     # git for-each-ref --format='%(color:blue)%(refname)%(color:reset)' --contains 4ec324ff
 
     # Find branches containing commit.
@@ -897,7 +904,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
 
-    # Delete fully (?) merged branches.
+    # Delete fully merged branches.
     delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
                                      egrep -v \"(master|develop)\" | \
                                      xargs -n 1 git delete-local-branch; }; f"
@@ -958,9 +965,6 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Usage: git compare-commits <rev-base> <rev-compare>
     compare-commits = "!f() { git log --date=short $1...$2; }; f"
 
-    # Show commits that haven't made it to master yet.
-    ahead-of-master = log --oneline origin/master..HEAD
-
     # Show changed files (with stat about line additions and line deletions)
     # between two commits.
     # Usage: git compare-changed-files <rev-base> <rev-compare>
@@ -971,11 +975,13 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     compare = "!f() { git diff $1...$2; }; f"
     # https://github.com/fniessen/git-config/compare/master@%7B1day%7D...master
 
+    # Show commits that haven't made it to master yet.
+    ahead-of-master = log --oneline origin/master..HEAD
+
     log-local = log --oneline origin..HEAD
 
-    log-fetched = log --oneline HEAD..origin
-
-    divergence = log --left-right --graph --cherry-pick --oneline $1...origin/$1
+    show-branch-history = "!f() { git log HEAD --not master; }; f"
+# XXX We should get the name of the branch merge base
 
     # log since master.
     missing-master = log master...
@@ -983,11 +989,15 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # diff since master.
     missing-master-diff = diff master...
 
+    log-fetched = log --oneline HEAD..origin
+
+    divergence = !git log --left-right --graph --cherry-pick --oneline $1...origin/$1
+
     release = "!f() { git tag -a v$1 -m \"Release version $1\" \
                           && git push origin --tags \
                           && git push origin; }; f"
 
-    contributors = shortlog -n -s --no-merges --
+    contributors-name  = shortlog -n -s --no-merges --
     contributors-email = shortlog -n -s -e --no-merges --
 
     graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
@@ -1020,7 +1030,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     # For GitHub.
     mpr = "!f() { \
-            declare currentBranch=\"$(git symbolic-ref --short HEAD)\"; \
+            declare currentBranch=\"$(git current-branch)\"; \
             declare branch=\"${2:-$currentBranch}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
                 git fetch origin refs/pull/$1/head:pr/$1 && \
@@ -1094,9 +1104,9 @@ deploy-prod =
             | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\"; }; f"
 # --data-urlencode 'priority >= \"major\"'
 
-    issues-open = XXX
+    issues-open = !git issues | grep "open"
 
-    issues-assigned-to-me = XXX
+    issues-assigned-to-me = !git issues | grep "$(git config user.name)"
 
     issues-created-by-me = XXX
 

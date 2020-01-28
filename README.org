@@ -1062,7 +1062,7 @@ Show changes for a daily standup meeting:
   log-me = !git log --author=$(git config user.email)
 #+end_src
 
-*** When
+*** When was this file last updated
 
 #+begin_src conf
     # When was this file last updated, on each local branch.
@@ -1078,10 +1078,14 @@ being shown in status, added using ~git add~ etc.  So correct your =.gitignore=.
 
 You can do ~git add -u~ so that it will *stage* the modified and deleted files.
 
+#+begin_src conf
+    stage-modified-removed-files = add -u
+#+end_src
+
 You can also do ~git commit -a~ to *commit* only the modified and deleted files.
 
 #+begin_src conf
-    stage-modified-removed-files = add -u
+    wip = commit -am "WIP"
 #+end_src
 
 ** SHOW - View the commit history
@@ -1376,7 +1380,7 @@ prompting you for the message you've already entered!
 
     # Change LATEST commit message to what you type in.
     # Usage: git medit <msg>
-    medit = commit --amend -m
+    reword = commit --amend -m
 
     # Credit an author on the LATEST commit.
     # Usage: git credit <author-name> <author-email>
@@ -1397,9 +1401,15 @@ My new favorite alias lets you amend to a specific commit, *not* need to be the
 
 #+begin_src conf
     fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
-                    git commit --fixup=$TARGET ${@:2} \
-                        && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET^; }; f"
+                     git commit --fixup=$TARGET ${@:2} \
+                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
+
+    # Checkout the commit in question, and amend its message.
+    reword2 = "!f() { branch=$(git current-branch); \
+                      git checkout $1; \
+                      git commit --amend; \
+                      git checkout $branch; }; f"
 #+end_src
 
 *** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
@@ -1642,13 +1652,14 @@ has bad effects if one merges from another branch and then wants to push.
 About rebase (with visual aid):
 https://itnext.io/become-a-git-pro-in-just-one-blog-a-thorough-guide-to-git-architecture-and-command-line-interface-93fbe9bdb395
 
+*** Show incoming changes
+
 The ~in~ command returns a list of *incoming* commits for the *current branch* --
 after a ~git fetch~, to fetch down *all the data* it has for the *current remote* that
 you do not --, the next time you do a merge.
 
 #+begin_src conf
-    in = !(echo "Please fetch origin before." && git log --decorate ..@{u})
-    inf = !(git remote update -p              && git log --decorate ..@{u})
+    in = !(git remote update -p && git log --decorate ..@{u})
 #+end_src
 
 #+begin_src conf
@@ -2024,6 +2035,8 @@ List unmerged files (after a merge failure), having leftover conflict markers:
     conflicts = diff --name-only --diff-filter=U
 #+end_src
 
+See also ~git diff --check~.
+
 ** BRANCH - Branch
 
 *** Feature Branches
@@ -2149,8 +2162,8 @@ git stash \
 *** Delta
 
     # Quickly solve conflicts using an editor and then add the conflicted files
-    edit-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; vim $(f)"
-    add-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; git add $(f)"
+    edit-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2; }; vim $(f)"
+    add-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2; }; git add $(f)"
 
 *** Comparing the commits between branches
 
@@ -2202,7 +2215,7 @@ See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its
 #+begin_src conf
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch
-    # pg sbt master pu -- if the last line is 'master' and not 'master^'
+    # pg sbt master pu -- if the last line is 'master' and not 'master~'
     # or 'master~N' then pu is a descendent of master
     sbt = show-branch --topics
     sbs = show-branch --sha1-name
@@ -2446,7 +2459,7 @@ XXX See doc of git help stash for workflows...
                $ edit emergency fix
                $ git commit -a -m "Fix in a hurry"
                $ git checkout my_wip
-               $ git reset --soft HEAD^
+               $ git reset --soft HEAD~
                # ... continue hacking ...
 
            You can use git stash to simplify the above, like this:
@@ -2487,7 +2500,7 @@ XXX See doc of git help stash for workflows...
 
 ** PUBLISH - Push
 
-*** Show commits that are on the local branch that have not been pushed
+*** Show outgoing changes: commits that are on the local branch that have not been pushed
 
 It is useful to know if you have any *local commits* that are not in the remote
 branch.
@@ -2673,7 +2686,7 @@ git changelog <first-tag-name> <last-tag-name>
 
 See also
 - https://github.com/github-changelog-generator/github-changelog-generator
-- https://github.com/github-changelog-generator/Github-Changelog-Generator/wiki/Alternatives
+- https://github.com/github-changelog-generator/github-changelog-generator/wiki/Alternatives
 
 *** Release assets
 
@@ -3259,9 +3272,11 @@ List all the branches and tags that contain a specific commit.
     # Usage: git where <rev>
     where1 = for-each-ref --contains
     where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
-                         | sort -k5n -k2M -k3n -k4n ; }; f"
+                         | sort -k5n -k2M -k3n -k4n; }; f"
     # git for-each-ref --format='%(color:blue)%(refname)%(color:reset)' --contains 4ec324ff
 #+end_src
+
+XXX See also git-ls-object-refs
 
 Filter the list of *branches* to only those which have the given *commit ID* among
 their ancestors.
@@ -3465,6 +3480,8 @@ and http://gitimmersion.com/lab_16.html.
 
 **** Without history modification (preferred way)
 
+git revert?
+
 **** With history modification (requires coordination with team and force pushes)
 
 * Branches
@@ -3627,7 +3644,7 @@ specified).
 generally indicates old, unmaintained branches for unreleased, incomplete
 features.
 
-For Github, such period of inactivity is *3 months* (see
+For GitHub, such period of inactivity is *3 months* (see
 https://help.github.com/articles/viewing-branches-in-your-repository/).
 
 ** Switch branches
@@ -3664,7 +3681,7 @@ branch "irrespective of its merged status."
 *merged to the current branch* that you are in.
 
 #+begin_src conf
-    # Delete fully (?) merged branches.
+    # Delete fully merged branches.
     delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
                                      egrep -v \"(master|develop)\" | \
                                      xargs -n 1 git delete-local-branch; }; f"
@@ -3674,6 +3691,12 @@ branch "irrespective of its merged status."
     #           egrep -v "(^\*|^\s*(master|develop)$)" | \
     #           xargs git branch -d'
 #+end_src
+
+Not "fully merged" means the branch you are about to delete contains commits
+that are not reachable from any of:
+- its upstream branch, or
+- ~HEAD~ (current branch).
+In other words, when you might lose commits.
 
 #+begin_tip
 In the event that you accidentally delete ~master~, get it back with:
@@ -3924,9 +3947,6 @@ You can see:
 #+begin_src conf
     # Usage: git compare-commits <rev-base> <rev-compare>
     compare-commits = "!f() { git log --date=short $1...$2; }; f"
-
-    # Show commits that haven't made it to master yet.
-    ahead-of-master = log --oneline origin/master..HEAD
 #+end_src
 
 ** Files changed
@@ -3965,23 +3985,35 @@ See the changed files in a branch since the last merge with the origin branch:
 
 ** Example comparisons
 
+#+begin_src conf
+    # Show commits that haven't made it to master yet.
+    ahead-of-master = log --oneline origin/master..HEAD
+#+end_src
+
 *** What did I do since I forked from the origin branch?
 
 #+begin_src conf
     log-local = log --oneline origin..HEAD
 #+end_src
 
-*** What did the origin do since I forked from them?
-
 #+begin_src conf
-    log-fetched = log --oneline HEAD..origin
+    show-branch-history = "!f() { git log HEAD --not master; }; f"
+# XXX We should get the name of the branch merge base
 #+end_src
 
-*** TODO Show the history difference between a local branch and its remote
+Assuming that your branch was created off of master, then while in the branch
+(that is, you have the branch checked out):
 
-#+begin_src conf
-    divergence = log --left-right --graph --cherry-pick --oneline $1...origin/$1
-#+end_src
+: git cherry -v master
+
+or
+
+: git log master..
+
+If you are not in the branch, then you can add the branch name to the "git log"
+command, like this:
+
+: git log master..branchname
 
 *** TODO Diff all changes since branching from master
 
@@ -3993,6 +4025,34 @@ Show all commits in a git branch since original branching point from =master=:
 
     # diff since master.
     missing-master-diff = diff master...
+#+end_src
+
+*** What did the origin do since I forked from them?
+
+#+begin_src conf
+    log-fetched = log --oneline HEAD..origin
+#+end_src
+
+*** History of your branch: List all commits on only one side of the branches
+
+= UNION of log-local AND log-fetched?  (with prefix < or > for branch A or B)
+
+#+begin_src conf :tangle no
+    git log --graph --left-right --cherry-pick --oneline master...<branch>
+#+end_src
+
+It is really a list of commits reachable from 'branch' that are not reachable
+from master. This gives you the information you want, but if and only if you
+have never merged 'branch' back to master, and have never merged master into
+'branch' since you created it. If you have merged, then this history of
+differences will collapse.
+
+*** TODO Show the history difference between a local branch and its remote
+
+= git out?  (if I'm the only one pushing?)
+
+#+begin_src conf
+    divergence = !git log --left-right --graph --cherry-pick --oneline $1...origin/$1
 #+end_src
 
 * ?Releases
@@ -4030,7 +4090,7 @@ Tag and push changes to the repository:
 Show authors of commits in the repository, /excluding merge commits/.
 
 #+begin_src conf
-    contributors = shortlog -n -s --no-merges --
+    contributors-name  = shortlog -n -s --no-merges --
     contributors-email = shortlog -n -s -e --no-merges --
 #+end_src
 
@@ -4088,7 +4148,7 @@ Create a pull request against the default branch:
             https://bitbucket.org/fniessen/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 #+end_src
 
-Add a comment in Github pull request:
+Add a comment in GitHub pull request:
 
 : curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -X POST -d '{\"body\": \"${text_pr}\"}' \"https://api.github.com/repos/${repository_name}/issues/${ghprbPullId}/comments\""
 
@@ -4173,7 +4233,7 @@ XXX See https://gitlab.com/help/user/project/merge_requests/squash_and_merge
 #+begin_src conf
     # For GitHub.
     mpr = "!f() { \
-            declare currentBranch=\"$(git symbolic-ref --short HEAD)\"; \
+            declare currentBranch=\"$(git current-branch)\"; \
             declare branch=\"${2:-$currentBranch}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
                 git fetch origin refs/pull/$1/head:pr/$1 && \
@@ -4407,6 +4467,15 @@ Once merged:
 # --data-urlencode 'priority >= \"major\"'
 #+end_src
 
+#+begin_src conf :tangle no
+    issues = "!f() { username=$1; \
+        curl --user $username \
+            'https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues?pagelen=100' \
+            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
+            | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
+            | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; }; f"
+#+end_src
+
 Set color to red or green, depending on issue state.
 
 #+begin_src conf :tangle no
@@ -4419,13 +4488,13 @@ curl -u $username -X GET 'https://api.bitbucket.org/2.0/repositories/$username/$
 ** List Open Issues
 
 #+begin_src conf
-    issues-open = XXX
+    issues-open = !git issues | grep "open"
 #+end_src
 
 ** List My Issues (assigned to me)
 
 #+begin_src conf
-    issues-assigned-to-me = XXX
+    issues-assigned-to-me = !git issues | grep "$(git config user.name)"
 #+end_src
 
 ** List Issues I've created
@@ -4466,8 +4535,10 @@ Download repository, tag or branch.
 List the user's public SSH keys:
 
 #+begin_src shell :tangle no
+# For GitHub.
 curl -O https://github.com/fniessen.keys
 
+# For BitBucket.
 curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
 #+end_src
 
@@ -4613,7 +4684,7 @@ git commit -am Foo \
       }
   } \
   |   | { |
-    git reset --soft HEAD^
+    git reset --soft HEAD~
     echo 'Commit failed.'
   }
 #+end_src
