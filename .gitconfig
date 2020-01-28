@@ -582,6 +582,10 @@ sync = "!f(){ pull1 && push1; }; f"
 
     conflicts = diff --name-only --diff-filter=U
 
+    edit-unmerged = "!$EDITOR $(git conflicts)"
+
+    add-unmerged = "!git add $(git conflicts)"
+
     # Create a feature branch.
     feature = "!f() { git create-branch feature/$1 develop; }; f"
     # XXX or feature-start?

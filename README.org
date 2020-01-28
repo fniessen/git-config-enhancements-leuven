@@ -2037,6 +2037,18 @@ List unmerged files (after a merge failure), having leftover conflict markers:
 
 See also ~git diff --check~.
 
+Quickly solve conflicts using an editor.
+
+#+begin_src conf
+    edit-unmerged = "!$EDITOR $(git conflicts)"
+#+end_src
+
+Then, add the conflicted files.
+
+#+begin_src conf
+    add-unmerged = "!git add $(git conflicts)"
+#+end_src
+
 ** BRANCH - Branch
 
 *** Feature Branches
@@ -2158,12 +2170,6 @@ git stash \
 && echo '-------------------' \
 && echo 'You can find your last changes in the stash!'
 #+end_src
-
-*** Delta
-
-    # Quickly solve conflicts using an editor and then add the conflicted files
-    edit-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2; }; vim $(f)"
-    add-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2; }; git add $(f)"
 
 *** Comparing the commits between branches
 
