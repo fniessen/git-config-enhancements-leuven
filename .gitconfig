@@ -6,7 +6,7 @@
     user = jdoe
 
 [include]
-    path = ~/.gitconfig_local
+    path = .gitconfig_local
 
 [alias]
     workprofile = config user.email \"john@work.com\"

@@ -255,7 +255,7 @@ You should "override" the above with your personal details:
 
 #+begin_src conf
 [include]
-    path = ~/.gitconfig_local
+    path = .gitconfig_local
 #+end_src
 
 Or create a Git command to set email addresses for you:
