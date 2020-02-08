@@ -3009,7 +3009,7 @@ git push -u origin master
 #+end_src
 
 #+begin_src conf
-    username = "XXX"
+    repo-owner = "XXX"
     repo-slug = "!f() { git remote show origin -n \
                             | grep 'Fetch URL:' \
                             | sed -E 's#^.*/(.*)$#\\1#' \
@@ -3982,7 +3982,7 @@ See the changed files in a branch since the last merge with the origin branch:
     # Example: git compare master@{1day} master
     # (git compare <rev-base> <rev-compare> = git diff <rev-base>...<rev-compare>)
     compare = "!f() { git diff $1...$2; }; f"
-    # https://github.com/fniessen/git-config/compare/master@%7B1day%7D...master
+    # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
   #+end_src
 
 - Side-by-side diff (split)
@@ -4149,9 +4149,9 @@ XXX See https://github.com/github/hub/
 Create a pull request against the default branch:
 
 #+begin_src conf
-    pull-request-bb = "!f() { username=$1; repo_slug=$2; \
+    pull-request-bb = "!f() { repo_owner=$1; repo_slug=$2; \
         curl --user $username \
-            https://bitbucket.org/fniessen/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
+            https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 #+end_src
 
 Add a comment in GitHub pull request:
