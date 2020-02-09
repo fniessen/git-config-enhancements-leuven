@@ -1102,6 +1102,8 @@ date".
     log = log --decorate --date=short
 #+end_src
 
+XXX Check out http://marcgg.com/blog/2015/08/04/git-first-parent-log/
+
 List commits *showing changed files* (prettier and more concise version of
 ~whatchanged~):
 
@@ -4468,8 +4470,13 @@ Once merged:
     issues = "!f() { username=$1; \
         curl --user $username \
             https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
-            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
-            | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\"; }; f"
+            | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
+            | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
+            | sed \"s/new/NEW/\" \
+            | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
+            | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
+            | sed \"s/open/OPEN/\" \
+            | sed \"s/closed/CLOSED/\"; }; f"
 # --data-urlencode 'priority >= \"major\"'
 #+end_src
 
