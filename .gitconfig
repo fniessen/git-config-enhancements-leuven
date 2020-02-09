@@ -770,7 +770,7 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 
     cl = clone --recursive
 
-    username = "XXX"
+    repo-owner = "XXX"
     repo-slug = "!f() { git remote show origin -n \
                             | grep 'Fetch URL:' \
                             | sed -E 's#^.*/(.*)$#\\1#' \
@@ -977,7 +977,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Example: git compare master@{1day} master
     # (git compare <rev-base> <rev-compare> = git diff <rev-base>...<rev-compare>)
     compare = "!f() { git diff $1...$2; }; f"
-    # https://github.com/fniessen/git-config/compare/master@%7B1day%7D...master
+    # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
     # Show commits that haven't made it to master yet.
     ahead-of-master = log --oneline origin/master..HEAD
@@ -1016,9 +1016,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                                | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
                        echo '}'; }; f"
 
-    pull-request-bb = "!f() { username=$1; repo_slug=$2; \
+    pull-request-bb = "!f() { repo_owner=$1; repo_slug=$2; \
         curl --user $username \
-            https://bitbucket.org/fniessen/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
+            https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 
     pr-list = XXX
 

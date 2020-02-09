@@ -1,4 +1,4 @@
-#+TITLE:     Awesome Git aliases
+#+TITLE:     Awesome Git aliases and extra commands
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
 #+DESCRIPTION: Pretty format for `git log' and different helpful command aliases
