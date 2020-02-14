@@ -46,6 +46,8 @@
 
     noprefix = true
 
+    colorMoved = dimmed_zebra
+
     tool = meld
 
 [difftool]
@@ -1100,18 +1102,6 @@ deploy-prod =
     create-issue = XXX
 
     create-issue-pull-request = XXX
-
-    # issues = "!f() { username=$1; \
-    #     curl --user $username \
-    #         https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
-    #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
-    #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
-    #         | sed \"s/new/NEW/\" \
-    #         | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
-    #         | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
-    #         | sed \"s/open/OPEN/\" \
-    #         | sed \"s/closed/CLOSED/\"; }; f"
-# --data-urlencode 'priority >= \"major\"'
 
     issues-open = !git issues | grep "open"
 

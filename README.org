@@ -390,7 +390,7 @@ With ~patience~ becomes:
 
 Same end result but much easier to read.
 
-    #+begin_src conf
+#+begin_src conf
     algorithm = patience
 #+end_src
 
@@ -403,6 +403,10 @@ as prefixes for patches:
 
 #+begin_src conf
     noprefix = true
+#+end_src
+
+#+begin_src conf
+    colorMoved = dimmed_zebra
 #+end_src
 
 *** Use Meld as Git ~difftool~
@@ -4467,16 +4471,16 @@ Once merged:
 ** List All Issues
 
 #+begin_src conf
-    issues = "!f() { username=$1; \
-        curl --user $username \
-            https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
-            | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
-            | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
-            | sed \"s/new/NEW/\" \
-            | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
-            | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
-            | sed \"s/open/OPEN/\" \
-            | sed \"s/closed/CLOSED/\"; }; f"
+    # issues = "!f() { username=$1; \
+    #     curl --user $username \
+    #         https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
+    #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
+    #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
+    #         | sed \"s/new/NEW/\" \
+    #         | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
+    #         | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
+    #         | sed \"s/open/OPEN/\" \
+    #         | sed \"s/closed/CLOSED/\"; }; f"
 # --data-urlencode 'priority >= \"major\"'
 #+end_src
 
