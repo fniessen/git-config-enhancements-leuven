@@ -298,6 +298,10 @@ Stop viewing ~^M~ symbols in diff:
     whitespace = cr-at-eol
 #+end_src
 
+#+begin_src conf
+    pager = diff-so-fancy | less --tabs=4 -RFX
+#+end_src
+
 #+begin_src conf :tangle no
     autocrlf = input
     safecrlf = true
@@ -658,7 +662,7 @@ Instead of hardcoding colors, I suggest:
 
 #+begin_src conf
 [color]
-    ui = auto
+    ui = true
     branch = auto
     diff = auto
     status = auto
@@ -685,13 +689,24 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
 #+begin_src conf
 [color "diff"]
     plain = "#888888"
-    meta = yellow bold
+    meta = 11
     frag = magenta bold
     func = "#cc99cc"
     old = red bold
     new = green bold
-    commit = yellow
+    commit = yellow bold
     whitespace = red reverse
+#+end_src
+
+#+begin_src conf
+[diff-so-fancy]
+    useUnicodeRuler = true
+
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = red bold 52
+    newNormal = green bold
+    newHighlight = green bold 22
 #+end_src
 
 *** Status
@@ -3187,6 +3202,9 @@ just use ~unstage~ to remove it.
     # Shortcut for commit.
     ci = commit
 #+end_src
+
+A guide on commit messages:
+https://dev.to/yvonnickfrin/a-guide-on-commit-messages-d8n
 
 A useful template for good commit messages (see
 https://medium.com/compass-true-north/writing-good-commit-messages-fc33af9d6321):

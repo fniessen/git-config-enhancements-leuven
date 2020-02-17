@@ -20,6 +20,8 @@
     # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
     whitespace = cr-at-eol
 
+    pager = diff-so-fancy | less --tabs=4 -RFX
+
     # Do filesystem operations in parallel to hide latency (default since v2.1).
     preloadindex = true
 
@@ -113,7 +115,7 @@
     fullName = true
 
 [color]
-    ui = auto
+    ui = true
     branch = auto
     diff = auto
     status = auto
@@ -128,13 +130,22 @@
 
 [color "diff"]
     plain = "#888888"
-    meta = yellow bold
+    meta = 11
     frag = magenta bold
     func = "#cc99cc"
     old = red bold
     new = green bold
-    commit = yellow
+    commit = yellow bold
     whitespace = red reverse
+
+[diff-so-fancy]
+    useUnicodeRuler = true
+
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = red bold 52
+    newNormal = green bold
+    newHighlight = green bold 22
 
 [color "status"]
     header = normal
@@ -1102,6 +1113,18 @@ deploy-prod =
     create-issue = XXX
 
     create-issue-pull-request = XXX
+
+    # issues = "!f() { username=$1; \
+    #     curl --user $username \
+    #         https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
+    #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
+    #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
+    #         | sed \"s/new/NEW/\" \
+    #         | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
+    #         | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
+    #         | sed \"s/open/OPEN/\" \
+    #         | sed \"s/closed/CLOSED/\"; }; f"
+# --data-urlencode 'priority >= \"major\"'
 
     issues-open = !git issues | grep "open"
 
