@@ -173,7 +173,7 @@
     rmvproxy = !git config --global --unset http.proxy && git config --global --unset https.proxy
 
 [format]
-    pretty = format:%C(yellow)%h%C(reset) %C(green)%ad%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)
+    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
 
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
