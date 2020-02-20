@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+BLU=$(tput bold)$(tput setaf 4)
+reset=$(tput sgr0)
+
+if [[ $(stat -c %A ~/.ssh/config) != "-rw-------" ]]; then
+    echo "Bad permissions on ~/.ssh/config.  Fixing it..."
+    chmod 600 ~/.ssh/config
+fi
+
+# Only merges current branch, apparently.
+
+# See https://stackoverflow.com/questions/17099564/make-a-shell-script-to-update-3-git-repos
+# See https://medium.com/@codenameyau/updating-multiple-repos-with-one-command-9768c8cdfe46
+printf '%s\n\n' "Searching at most 5 levels of directories..."
+
+# Handle directories with spaces in find command.
+find . -maxdepth 5 -name ".git" -type d | rev | cut -c 6- | rev | sed "s#^\./##" |
+    while IFS=$'\n' read -r repo; do
+        printf '%s\n' "Current repository: ${BLU}$repo${reset}"
+        # git -C "$repo" pull                 # Does not do anything if unstaged changes!
+        git -C "$repo" remote update --prune  # Delete old branches. Good!
+        git -C "$repo" merge --ff-only "@{u}"
+        # XXX Already up to date (or bad authentication in the previous command!?)
+        echo
+    done
+
+
+
+# Git repositories all have HEAD, refs, objects and config entries.
+# on GNU/anything,
+#
+# find -name HEAD -execdir test -e refs -a -e objects -a -e config \; -printf %h\\n
+#
+# Just checking for .git will miss many bare repos and all submodules.
+#
+# this should be the accepted answer: only solution that also works for bare repos also

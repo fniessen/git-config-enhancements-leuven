@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+BLU=$(tput bold)$(tput setaf 4)
+reset=$(tput sgr0)
+
+# TODO Return the exit code of the underlying git invocations
+# TODO Test with branch that's not yet published (@{u} is not known...)
+
+echo "Searching at most 5 levels of directories..."
+for repo in $(find . -maxdepth 5 -name ".git" -type d | rev | cut -c 6- | rev | sed "s#^\./##"); do
+    echo "Current repository: ${BLU}$repo${reset}"
+    git -C "$repo" ls-remote >/dev/null 2>&1
+    if [[ $? -eq 0 ]]; then
+        if [[ -n "$(git -C "$repo" log @{u}..)" ]]; then
+            git -C "$repo" log --date=short @{u}..
+            git -C "$repo" push
+        else
+            echo "No changes to push"
+        fi
+    else
+        echo "No (accessible) remote -- or bad authentication?"
+    fi
+    echo
+done
+
+
+# ## Returns errlvl 0 if $1 is a reachable git remote url
+# git-remote-url-reachable() {
+#     git ls-remote "$1" CHECK_GIT_REMOTE_URL_REACHABILITY >/dev/null 2>&1
+# }
+# Usage:
+# if git-remote-url-reachable "$url"; then
+#     ## code
+# fi
