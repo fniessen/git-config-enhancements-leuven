@@ -443,8 +443,8 @@ https://github.com/wmanley/git-meld:
 
 #+begin_src conf
 [apply]
-    # Detect whitespace errors when applying a patch.
-    whitespace = fix
+    # Don't detect whitespace errors when applying a patch.
+    whitespace = nowarn
 #+end_src
 
 ** Fetch
@@ -625,18 +625,16 @@ https://git-scm.com/docs/git-grep
 
 ** Color
 
-Instead of hardcoding colors, I suggest:
+Enable colors in terminal:
 
 #+begin_src conf
 [color]
-    ui = true
+    ui = auto
     branch = auto
     diff = auto
     status = auto
     interactive = auto
 #+end_src
-
-See http://git-scm.com/docs/git-config for the ~slot~ list.
 
 *** Branch
 
@@ -889,6 +887,7 @@ clean and relevant commits, no experiments or fixing typos.
     # Check if any file in repo has whitespace errors
     # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
     check-whitespace = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
+    whitespace-violations = "!git diff --check $(git hash-object -t tree /dev/null)"
 
     # Check if any file in repo has windows line endings
     #Currently do not work as alias, works from comand line directly. There is a problem with \r
@@ -2743,6 +2742,10 @@ from the name) remains intact.
     plain-diff = !git branch-diff > $(git current-branch).diff
 #+end_src
 
+#+begin_src conf
+    patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
+#+end_src
+
 ** PUBLISH - Tag
 
 When tagging releases in a version control system, the tag for a version should
@@ -3292,6 +3295,10 @@ List all *tags* that contain a specific commit ID:
     # Find tags containing commit.
     tags-that-contain1 = tag --contains
     tags-that-contain2 = "!f() { git describe --always --contains $1; }; f"
+#+end_src
+
+#+begin_src conf
+    tag-contains = git tag -l --contains HEAD
 #+end_src
 
 ** Search for commits
