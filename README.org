@@ -265,6 +265,8 @@ Stop viewing ~^M~ symbols in diff:
     whitespace = cr-at-eol
 #+end_src
 
+Improve the ~git diff~ output: diff-so-fancy or [[https://github.com/dandavison/delta][delta]].
+
 #+begin_src conf
     pager = diff-so-fancy | less --tabs=4 -RFX
 #+end_src
@@ -3928,6 +3930,17 @@ Delete similar tags:
                        }; f"
 #+end_src
 
+** Remove all tags
+
+#+begin_src conf :tangle no
+    # Delete all local and remote tags.
+    delete-all-tags = "!f() { for t in $(git tag); do
+                                  git tag -d $t
+                                  git push origin :$t
+                              done;
+                            }; f"
+#+end_src
+
 * Compare Revisions (commits, branches or tags)
 
 *See what's changed* between two revisions.
@@ -4152,6 +4165,20 @@ Create a pull request against the default branch:
             https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 #+end_src
 
+#+begin_src conf :tangle no
+function pr () {
+  if ["$1" == ""]
+  then
+      echo "Please provide the name of the branch to create a pull request against."
+  else
+      local repo=`git remote -v | grep -m 1 "(push)" | sed -e "s/.*github.com[:/]\(.*\)\.git.*/\1/"`
+      local branch=`git name-rev --name-only HEAD`
+      echo "... creating pull request for branch \"$branch\" in \"$repo\""
+      open https://github.com/$repo/compare/$1...$branch
+  fi
+}
+#+end_src
+
 Add a comment in GitHub pull request:
 
 : curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -X POST -d '{\"body\": \"${text_pr}\"}' \"https://api.github.com/repos/${repository_name}/issues/${ghprbPullId}/comments\""
@@ -4186,7 +4213,8 @@ Sometimes, just reading the code of a pull request might not be enough to verify
 if it should be merged.  Maybe you want to add something, or some tests are
 failing, and you want to run them locally on your computer.
 
-*Check out* the head of a *pull request* as a *local branch*:
+*Check out* the head of a *pull request* (given the pull request number) as a *local
+branch*:
 
 #+begin_src conf
     # For GitHub.
