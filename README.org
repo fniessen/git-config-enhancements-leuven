@@ -1232,7 +1232,7 @@ List untracked *files ignored* by a =.gitignore= statement somewhere.
 
 Remove ignored files that are still on the repository:
 
-#+begin_src shell :tangle ~/.dotfiles/bin/git-delete-ignored :shebang #!/usr/bin/env bash
+#+begin_src shell :tangle bin/git-delete-ignored :shebang #!/usr/bin/env bash
 git ls-ignored | xargs rm
 #+end_src
 
@@ -1799,7 +1799,7 @@ sync = "!f(){ pull1 && push1; }; f"
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
 (+ interesting comments about *rebase vs merge during a pull*!)
 
-#+begin_src shell :tangle ~/.dotfiles/bin/git-up-all :shebang #!/usr/bin/env bash
+#+begin_src shell :tangle bin/git-up-all :shebang #!/usr/bin/env bash
 REMOTES="$@";
 if [ -z "$REMOTES" ]; then
     REMOTES=$(git remote);
@@ -3184,7 +3184,7 @@ https://medium.com/compass-true-north/writing-good-commit-messages-fc33af9d6321)
 Implementing a Strong Code-Review Culture
 https://www.youtube.com/watch?v=PJjmw9TRB7s
 
-#+begin_src text :tangle ~/.git_commit_template.txt
+#+begin_src text :tangle .git_commit_template.txt
 # |<------   50-character subject line   ------->|<------------------->|
 # If applied, this commit will...
 # [Add / Fix / Remove / Update / Refactor / Document] [summary]
@@ -4465,7 +4465,7 @@ Open an issue in the current repository.
 
 Issue template:
 
-#+begin_src text :tangle ~/.issue_template.txt
+#+begin_src text :tangle .issue_template.txt
 ### Expected behavior
 ### Actual behavior
 ### Steps to reproduce the behavior
