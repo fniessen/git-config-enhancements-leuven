@@ -195,6 +195,12 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/styles/readtheorg/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/styles/readtheorg/js/readtheorg.js"></script>
 </head>
 <body>
 <div id="content">
@@ -203,191 +209,191 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1e804d2">Documentation</a></li>
-<li><a href="#org4e09926">Overview</a></li>
-<li><a href="#org2e8aaaf">Tips</a></li>
-<li><a href="#org8c3942d">Comments on branching (from Matthias)</a></li>
-<li><a href="#org8cac78c">Overview</a></li>
-<li><a href="#org5ac7375">Settings</a>
+<li><a href="#orge704aeb">Documentation</a></li>
+<li><a href="#org6bc1a73">Overview</a></li>
+<li><a href="#orgb8cc110">Tips</a></li>
+<li><a href="#orgae9bdaf">Comments on branching (from Matthias)</a></li>
+<li><a href="#org62ff9e8">Overview</a></li>
+<li><a href="#orgfb1125b">Settings</a>
 <ul>
-<li><a href="#org26124cc">User</a></li>
-<li><a href="#org6d47605">Core</a></li>
-<li><a href="#orgcec6014">Help</a></li>
-<li><a href="#org546487a">Log</a></li>
-<li><a href="#org964b5a9">Diff</a></li>
-<li><a href="#orgfe6cee6">Apply</a></li>
-<li><a href="#orgf1eb3a3">Fetch</a></li>
-<li><a href="#org8a93529">Status</a></li>
-<li><a href="#org4d103e9">Pull</a></li>
-<li><a href="#org6f3f72c">Push</a></li>
-<li><a href="#orgebc2b36">Merge</a></li>
-<li><a href="#org11cb9f4">Rebase</a></li>
-<li><a href="#orgff13ecc">Grep</a></li>
-<li><a href="#org7b487fc">Color</a></li>
-<li><a href="#org9a26f74">Proxy</a></li>
-<li><a href="#orgbbf5ea2">Repository administration</a></li>
-<li><a href="#orge55e069">Format</a></li>
+<li><a href="#orgf1adf5d">User</a></li>
+<li><a href="#org2bb09c1">Core</a></li>
+<li><a href="#org6453706">Help</a></li>
+<li><a href="#org2170153">Log</a></li>
+<li><a href="#org5770908">Diff</a></li>
+<li><a href="#orgeb72bef">Apply</a></li>
+<li><a href="#orgec5a73e">Fetch</a></li>
+<li><a href="#org48a9d74">Status</a></li>
+<li><a href="#org37bb902">Pull</a></li>
+<li><a href="#org7f97e58">Push</a></li>
+<li><a href="#org28531b7">Merge</a></li>
+<li><a href="#org3fb06ee">Rebase</a></li>
+<li><a href="#org8e56352">Grep</a></li>
+<li><a href="#orgfe74d84">Color</a></li>
+<li><a href="#orgac4a203">Proxy</a></li>
+<li><a href="#org6d84d4f">Repository administration</a></li>
+<li><a href="#org848d885">Format</a></li>
 </ul>
 </li>
-<li><a href="#orgfabd16e">Aliases</a>
+<li><a href="#org976980d">Aliases</a>
 <ul>
-<li><a href="#org9977e96">SHOW - Check the status of your files</a></li>
-<li><a href="#org003309f">SHOW - View your changes</a></li>
-<li><a href="#org1f3471f">SHOW - View the commit history</a></li>
-<li><a href="#orga66633d">SHOW - Show blame information about original authors of lines changed or removed</a></li>
-<li><a href="#orgea28aef">SHOW - find all &ldquo;unpushed&rdquo; commits for all projects in a directory</a></li>
-<li><a href="#orgb808a9d">Ignoring files</a></li>
-<li><a href="#org22fa9c2">REVERT - Undo things</a></li>
-<li><a href="#orge860d50">Merge</a></li>
-<li><a href="#orgeb0ee5e">UPDATE - Pull</a></li>
-<li><a href="#org10e23c3">UPDATE - Merge</a></li>
-<li><a href="#orgd1a93d2">BRANCH - Branch</a></li>
-<li><a href="#orgf684cd8">Stash</a></li>
-<li><a href="#orgce2a16e">PUBLISH - Push</a></li>
-<li><a href="#org6578b78">PUBLISH - Find out if a change is part of a release</a></li>
-<li><a href="#org6debd69">Create patches</a></li>
-<li><a href="#orga92c02d">PUBLISH - Prepare a release</a></li>
-<li><a href="#org72adb6f">PUBLISH - Tag</a></li>
-<li><a href="#org7dd5627">Debugging</a></li>
-<li><a href="#orgd5f2894">Abbreviations</a></li>
-<li><a href="#org7eb43a7">Show the path to root directory of Git repo</a></li>
-<li><a href="#orge4450b9">Sync</a></li>
-<li><a href="#org0f82768">Cherrypick style recording</a></li>
-<li><a href="#orgc0b2251">Dangling</a></li>
-<li><a href="#orgc77cf8b"><span class="todo TODO">TODO</span> To sort out</a></li>
-<li><a href="#orgbbdbeea">Git and Subversion</a></li>
+<li><a href="#org5b0bff2">SHOW - Check the status of your files</a></li>
+<li><a href="#org0ee3529">SHOW - View your changes</a></li>
+<li><a href="#org0222a16">SHOW - View the commit history</a></li>
+<li><a href="#orgab5892d">SHOW - Show blame information about original authors of lines changed or removed</a></li>
+<li><a href="#org1b3a59a">SHOW - find all &ldquo;unpushed&rdquo; commits for all projects in a directory</a></li>
+<li><a href="#orgcec9ba6">Ignoring files</a></li>
+<li><a href="#orgbd35639">REVERT - Undo things</a></li>
+<li><a href="#org638eb08">Merge</a></li>
+<li><a href="#org54a170d">UPDATE - Pull</a></li>
+<li><a href="#org881b722">UPDATE - Merge</a></li>
+<li><a href="#orgba90c8b">BRANCH - Branch</a></li>
+<li><a href="#orgba437db">Stash</a></li>
+<li><a href="#orgd949701">PUBLISH - Push</a></li>
+<li><a href="#org0e3ff77">PUBLISH - Find out if a change is part of a release</a></li>
+<li><a href="#org5a61ddb">Create patches</a></li>
+<li><a href="#org61cea25">PUBLISH - Prepare a release</a></li>
+<li><a href="#org2f39387">PUBLISH - Tag</a></li>
+<li><a href="#org5c7705f">Debugging</a></li>
+<li><a href="#orgf9ea714">Abbreviations</a></li>
+<li><a href="#org0048530">Show the path to root directory of Git repo</a></li>
+<li><a href="#org8948e2e">Sync</a></li>
+<li><a href="#org736b8ca">Cherrypick style recording</a></li>
+<li><a href="#orgdba1483">Dangling</a></li>
+<li><a href="#org0293c9c"><span class="todo TODO">TODO</span> To sort out</a></li>
+<li><a href="#org1fe7378">Git and Subversion</a></li>
 </ul>
 </li>
-<li><a href="#orgfc8268b">Run on All repositories</a></li>
-<li><a href="#orgbf19339">------------------------------------------------------------------------------</a></li>
-<li><a href="#org550249b">Repository</a>
+<li><a href="#org8efc252">------------------------------------------------------------------------------</a></li>
+<li><a href="#org363a5d3">Repository</a>
 <ul>
-<li><a href="#orgc97953f">Create a Git repository locally</a></li>
-<li><a href="#orgc645e27">Clone a repository</a></li>
-<li><a href="#orgb378731">Create and add your SSH public key to a repository management platform</a></li>
-<li><a href="#org3b0ca58">Create a new repository in GitHub</a></li>
-<li><a href="#org342f6e2">Open a repository in a web browser</a></li>
+<li><a href="#orgb268da3">Create a Git repository locally</a></li>
+<li><a href="#orgb99e1cf">Clone a repository</a></li>
+<li><a href="#orge6c5ea4">Create and add your SSH public key to a repository management platform</a></li>
+<li><a href="#orgb846555">Create a new repository in GitHub</a></li>
+<li><a href="#org8a46e96">Open a repository in a web browser</a></li>
 </ul>
 </li>
-<li><a href="#orgc121fd0">Source Files</a>
+<li><a href="#org696df49">Source Files</a>
 <ul>
-<li><a href="#orgb6c306f">Search for files</a></li>
-<li><a href="#orgd1b0495">Search for code</a></li>
-<li><a href="#orga03096f">Undo local changes</a></li>
+<li><a href="#org10c5079">Search for files</a></li>
+<li><a href="#org87db26a">Search for code</a></li>
+<li><a href="#org334c21b">Undo local changes</a></li>
 </ul>
 </li>
-<li><a href="#org9fd63ac">Commits</a>
+<li><a href="#org0154e47">Commits</a>
 <ul>
-<li><a href="#org78aa5b7">Create a commit</a></li>
-<li><a href="#org7f455c7">Get a commit detail</a></li>
-<li><a href="#orga3a80f1">Get the diff of a commit</a></li>
-<li><a href="#orgf8a57a9">Get the references the commit has been pushed to (branches and tags)</a></li>
-<li><a href="#org7c23ce8">Search for commits</a></li>
-<li><a href="#orgbd51489">Push</a></li>
-<li><a href="#orgd178e7c">Undo changes</a></li>
+<li><a href="#orge8102a7">Create a commit</a></li>
+<li><a href="#org34e3266">Get a commit detail</a></li>
+<li><a href="#orga7e33e0">Get the diff of a commit</a></li>
+<li><a href="#orge422c43">Get the references the commit has been pushed to (branches and tags)</a></li>
+<li><a href="#orgb4a0651">Search for commits</a></li>
+<li><a href="#orge52eba5">Push</a></li>
+<li><a href="#org4a79402">Undo changes</a></li>
 </ul>
 </li>
-<li><a href="#orgb2ac67d">Branches</a>
+<li><a href="#orgb9632bf">Branches</a>
 <ul>
-<li><a href="#org1c99023">Branching model</a></li>
-<li><a href="#org9ad0077">Create a branch</a></li>
-<li><a href="#orgb19dd5b">Publish a branch</a></li>
-<li><a href="#orge037671">List branches</a></li>
-<li><a href="#org81341b7">Switch branches</a></li>
-<li><a href="#org00e8aa9">Delete a branch</a></li>
-<li><a href="#org12ce5f3">Rename a branch</a></li>
+<li><a href="#org25f9932">Branching model</a></li>
+<li><a href="#org5325f4e">Create a branch</a></li>
+<li><a href="#org2b43ae2">Publish a branch</a></li>
+<li><a href="#org78bff59">List branches</a></li>
+<li><a href="#org9fa9a83">Switch branches</a></li>
+<li><a href="#orgd025227">Delete a branch</a></li>
+<li><a href="#org2506754">Rename a branch</a></li>
 </ul>
 </li>
-<li><a href="#orgae37feb">Tags</a>
+<li><a href="#org4e0f28d">Tags</a>
 <ul>
-<li><a href="#orgd32a41f">Create a tag</a></li>
-<li><a href="#org131e1ee">See the commits for a tag</a></li>
-<li><a href="#org6d57562">Push a tag to your repository</a></li>
-<li><a href="#org4b388ea">List the repository tags</a></li>
-<li><a href="#orge1b76f1">Rename a tag</a></li>
-<li><a href="#org145f199">Remove a tag from a repository</a></li>
-<li><a href="#org582a345">Remove all tags</a></li>
+<li><a href="#org407b7e0">Create a tag</a></li>
+<li><a href="#orge5d7e13">See the commits for a tag</a></li>
+<li><a href="#orgd11ba95">Push a tag to your repository</a></li>
+<li><a href="#orgf70092b">List the repository tags</a></li>
+<li><a href="#orgadd92df">Rename a tag</a></li>
+<li><a href="#orgdd483b7">Remove a tag from a repository</a></li>
+<li><a href="#org3c7d63d">Remove all tags</a></li>
 </ul>
 </li>
-<li><a href="#org87a09c2">Compare Revisions (commits, branches or tags)</a>
+<li><a href="#orgcc9b03a">Compare Revisions (commits, branches or tags)</a>
 <ul>
-<li><a href="#org8a2c93e">Commits</a></li>
-<li><a href="#org4722ed5">Files changed</a></li>
-<li><a href="#org04e3669">Diff</a></li>
-<li><a href="#orge32fbe1">Merged pull requests</a></li>
-<li><a href="#org164df31">Example comparisons</a></li>
+<li><a href="#org6ac6512">Commits</a></li>
+<li><a href="#org2cb2871">Files changed</a></li>
+<li><a href="#org1d31425">Diff</a></li>
+<li><a href="#orga36f218">Merged pull requests</a></li>
+<li><a href="#orga9c14ed">Example comparisons</a></li>
 </ul>
 </li>
-<li><a href="#orge446e77">?Releases</a></li>
-<li><a href="#orgc550dbf">?Contributors</a></li>
-<li><a href="#org7e425ef">?Graph</a></li>
-<li><a href="#org2f8f6ea">Pull requests</a>
+<li><a href="#org8a168c7">?Releases</a></li>
+<li><a href="#org015b0f3">?Contributors</a></li>
+<li><a href="#orgd8a489a">?Graph</a></li>
+<li><a href="#orgc41b220">Pull requests</a>
 <ul>
-<li><a href="#org829a95a">Create a pull request</a></li>
-<li><a href="#org35fc42c">List pull requests</a></li>
-<li><a href="#org48ae53d">1. Check out a pull request locally</a></li>
-<li><a href="#org964bb21">2. Review the changes locally</a></li>
-<li><a href="#orgc1759a5">Push changes to a pull request</a></li>
-<li><a href="#orgabb6012">3. Merge the branch and fix any conflicts that come up</a></li>
-<li><a href="#org847149a">Merge pull request</a></li>
-<li><a href="#org1451b9a">4. Push the result of the merge to the remote</a></li>
-<li><a href="#org439f861">Clean up old branch</a></li>
-<li><a href="#org1bb2fc9">Show in a web browser</a></li>
-<li><a href="#org3c60792">Who?</a></li>
-<li><a href="#orge5e0ec4">Find the pull request that introduced a commit</a></li>
-<li><a href="#orge3fed45">Saved replies</a></li>
+<li><a href="#orgc1718c8">Create a pull request</a></li>
+<li><a href="#org4e4dfa1">List pull requests</a></li>
+<li><a href="#org31fffee">1. Check out a pull request locally</a></li>
+<li><a href="#orge1883ee">2. Review the changes locally</a></li>
+<li><a href="#orgf8250b3">Push changes to a pull request</a></li>
+<li><a href="#org9fc3c95">3. Merge the branch and fix any conflicts that come up</a></li>
+<li><a href="#orga71ad0a">Merge pull request</a></li>
+<li><a href="#org0e9ed5f">4. Push the result of the merge to the remote</a></li>
+<li><a href="#orgb52256e">Clean up old branch</a></li>
+<li><a href="#orgc4e58c0">Show in a web browser</a></li>
+<li><a href="#org578cf97">Who?</a></li>
+<li><a href="#org74e785d">Find the pull request that introduced a commit</a></li>
+<li><a href="#orgb895436">Saved replies</a></li>
 </ul>
 </li>
-<li><a href="#org679ce1e">Pipelines</a></li>
-<li><a href="#orgce694b8">Deployments (to different environments)</a></li>
-<li><a href="#org0794dc6">Issues</a>
+<li><a href="#org6df8267">Pipelines</a></li>
+<li><a href="#orgb4a0692">Deployments (to different environments)</a></li>
+<li><a href="#org6446514">Issues</a>
 <ul>
-<li><a href="#org3257c8d">Create Issue</a></li>
-<li><a href="#org00526a1">Create Pull Requests</a></li>
-<li><a href="#orgf6fed05">List All Issues</a></li>
-<li><a href="#org4a21689">List Open Issues</a></li>
-<li><a href="#org56e49cc">List My Issues (assigned to me)</a></li>
-<li><a href="#org84cab1f">List Issues I&rsquo;ve created</a></li>
-<li><a href="#org28b9df0">Show Issue</a></li>
-<li><a href="#org979538a">Open Issues in a web browser</a></li>
+<li><a href="#orge4ab367">Create Issue</a></li>
+<li><a href="#orgd3b456e">Create Pull Requests</a></li>
+<li><a href="#org21252b8">List All Issues</a></li>
+<li><a href="#org06fcff1">List Open Issues</a></li>
+<li><a href="#org7cf2798">List My Issues (assigned to me)</a></li>
+<li><a href="#org99a2169">List Issues I&rsquo;ve created</a></li>
+<li><a href="#orgfb19e0f">Show Issue</a></li>
+<li><a href="#org64b1d9b">Open Issues in a web browser</a></li>
 </ul>
 </li>
-<li><a href="#org417ca6f">Downloads</a></li>
-<li><a href="#orge5a0a66">Settings</a>
+<li><a href="#orgd4e961a">Downloads</a></li>
+<li><a href="#orgbe9b7cd">Settings</a>
 <ul>
-<li><a href="#org08f9de8">SSH keys</a></li>
+<li><a href="#orga17a576">SSH keys</a></li>
 </ul>
 </li>
-<li><a href="#orgc025074">------------------------------------------------------------------------------</a></li>
-<li><a href="#orge73b9c6">Download repository</a>
+<li><a href="#org1f18c9d">------------------------------------------------------------------------------</a></li>
+<li><a href="#orgc532ceb">Run on All repositories</a></li>
+<li><a href="#orgaa8506b">Download repository</a>
 <ul>
-<li><a href="#org177ee2a">Easily launch a temporary one-off Git server from any local repository, to enable a peer-to-peer Git workflow</a></li>
+<li><a href="#orgceea411">Easily launch a temporary one-off Git server from any local repository, to enable a peer-to-peer Git workflow</a></li>
 </ul>
 </li>
-<li><a href="#orgef3f34a">What if</a></li>
-<li><a href="#org98bbf8f">If you made a mistake</a></li>
-<li><a href="#org1640541">If you get errors&#x2026;</a>
+<li><a href="#org38dde6f">What if</a></li>
+<li><a href="#orgedfd03f">If you made a mistake</a></li>
+<li><a href="#org38f1095">If you get errors&#x2026;</a>
 <ul>
-<li><a href="#org64e7393">Method 1</a></li>
-<li><a href="#org1b0d9fd">Alternative</a></li>
-<li><a href="#org42d3796">A GitHub test repository to experiment with conflicts</a></li>
+<li><a href="#orgcb1f7f1">Method 1</a></li>
+<li><a href="#orgc2dff0f">Alternative</a></li>
+<li><a href="#orgad0cb30">A GitHub test repository to experiment with conflicts</a></li>
 </ul>
 </li>
-<li><a href="#org66ce20d">GitHub tasks</a>
+<li><a href="#org5920d5e">GitHub tasks</a>
 <ul>
-<li><a href="#org96c1e5a">Force push</a></li>
+<li><a href="#orgda6ce49">Force push</a></li>
 </ul>
 </li>
-<li><a href="#org9cda3e0">References</a></li>
-<li><a href="#orge02abb7">Free private repositories</a></li>
-<li><a href="#orge91f36d">Use Git and SVN together</a></li>
+<li><a href="#org763e266">References</a></li>
+<li><a href="#org649925a">Free private repositories</a></li>
+<li><a href="#orgb0dd71f">Use Git and SVN together</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org1e804d2" class="outline-2">
-<h2 id="org1e804d2">Documentation</h2>
-<div class="outline-text-2" id="text-org1e804d2">
+<div id="outline-container-orge704aeb" class="outline-2">
+<h2 id="orge704aeb">Documentation</h2>
+<div class="outline-text-2" id="text-orge704aeb">
 <p>
 XXX Git-extras (extra commands!)
 <a href="https://github.com/tj/git-extras/blob/master/Commands.md">https://github.com/tj/git-extras/blob/master/Commands.md</a>
@@ -436,9 +442,9 @@ XXX Today I learned
 </div>
 </div>
 
-<div id="outline-container-org4e09926" class="outline-2">
-<h2 id="org4e09926">Overview</h2>
-<div class="outline-text-2" id="text-org4e09926">
+<div id="outline-container-org6bc1a73" class="outline-2">
+<h2 id="org6bc1a73">Overview</h2>
+<div class="outline-text-2" id="text-org6bc1a73">
 <ul class="org-ul">
 <li>This is Git.  It tracks collaborative work on projects through a beautiful
 distributed graph theory model.</li>
@@ -465,9 +471,9 @@ From <a href="https://xkcd.com/1597/">xkcd</a>.
 </div>
 </div>
 
-<div id="outline-container-org2e8aaaf" class="outline-2">
-<h2 id="org2e8aaaf">Tips</h2>
-<div class="outline-text-2" id="text-org2e8aaaf">
+<div id="outline-container-orgb8cc110" class="outline-2">
+<h2 id="orgb8cc110">Tips</h2>
+<div class="outline-text-2" id="text-orgb8cc110">
 <p>
 <b>Commit early, commit often</b> (and with the right message): it is a bad idea to do
 a lot of work without committing&#x2026; But don&rsquo;t push every single commit: push
@@ -482,9 +488,9 @@ Branch out often.
 </div>
 </div>
 
-<div id="outline-container-org8c3942d" class="outline-2">
-<h2 id="org8c3942d">Comments on branching (from Matthias)</h2>
-<div class="outline-text-2" id="text-org8c3942d">
+<div id="outline-container-orgae9bdaf" class="outline-2">
+<h2 id="orgae9bdaf">Comments on branching (from Matthias)</h2>
+<div class="outline-text-2" id="text-orgae9bdaf">
 <p>
 If you have finished your work, feel free to merge the branch into <code>master</code> (maybe
 you want to rebase your WIP branch before based on <code>master</code>):
@@ -510,9 +516,9 @@ remote one too.
 </div>
 </div>
 
-<div id="outline-container-org8cac78c" class="outline-2">
-<h2 id="org8cac78c">Overview</h2>
-<div class="outline-text-2" id="text-org8cac78c">
+<div id="outline-container-org62ff9e8" class="outline-2">
+<h2 id="org62ff9e8">Overview</h2>
+<div class="outline-text-2" id="text-org62ff9e8">
 <p>
 The following configures interesting global settings for Git. These are stored
 in the <code>.gitconfig</code> file located in the user home directory.
@@ -528,13 +534,13 @@ might have. So <b>BE EXTREMELY CAREFUL</b>!
 </div>
 </div>
 
-<div id="outline-container-org5ac7375" class="outline-2">
-<h2 id="org5ac7375">Settings</h2>
-<div class="outline-text-2" id="text-org5ac7375">
+<div id="outline-container-orgfb1125b" class="outline-2">
+<h2 id="orgfb1125b">Settings</h2>
+<div class="outline-text-2" id="text-orgfb1125b">
 </div>
-<div id="outline-container-org26124cc" class="outline-3">
-<h3 id="org26124cc">User</h3>
-<div class="outline-text-3" id="text-org26124cc">
+<div id="outline-container-orgf1adf5d" class="outline-3">
+<h3 id="orgf1adf5d">User</h3>
+<div class="outline-text-3" id="text-orgf1adf5d">
 <p>
 Setting your user name and e-mail address is important because Git stores the
 committer and author of a change in every commit.
@@ -572,9 +578,9 @@ Or create a Git command to set email addresses for you:
 </div>
 </div>
 
-<div id="outline-container-org6d47605" class="outline-3">
-<h3 id="org6d47605">Core</h3>
-<div class="outline-text-3" id="text-org6d47605">
+<div id="outline-container-org2bb09c1" class="outline-3">
+<h3 id="org2bb09c1">Core</h3>
+<div class="outline-text-3" id="text-org2bb09c1">
 <div class="org-src-container">
 <pre class="src src-conf">[<span class="org-type">core</span>]
     <span class="org-variable-name">editor</span> = emacsclient
@@ -668,9 +674,9 @@ Performance:
 </div>
 </div>
 
-<div id="outline-container-orgcec6014" class="outline-3">
-<h3 id="orgcec6014">Help</h3>
-<div class="outline-text-3" id="text-orgcec6014">
+<div id="outline-container-org6453706" class="outline-3">
+<h3 id="org6453706">Help</h3>
+<div class="outline-text-3" id="text-org6453706">
 <div class="org-src-container">
 <pre class="src src-conf">[<span class="org-type">help</span>]
     <span class="org-variable-name">autocorrect</span> = 1
@@ -679,9 +685,9 @@ Performance:
 </div>
 </div>
 
-<div id="outline-container-org546487a" class="outline-3">
-<h3 id="org546487a">Log</h3>
-<div class="outline-text-3" id="text-org546487a">
+<div id="outline-container-org2170153" class="outline-3">
+<h3 id="org2170153">Log</h3>
+<div class="outline-text-3" id="text-org2170153">
 <p>
 Get a better date (current format is 2019-11-26 17:35:30 +0100):
 </p>
@@ -694,9 +700,9 @@ Get a better date (current format is 2019-11-26 17:35:30 +0100):
 </div>
 </div>
 
-<div id="outline-container-org964b5a9" class="outline-3">
-<h3 id="org964b5a9">Diff</h3>
-<div class="outline-text-3" id="text-org964b5a9">
+<div id="outline-container-org5770908" class="outline-3">
+<h3 id="org5770908">Diff</h3>
+<div class="outline-text-3" id="text-org5770908">
 <div class="org-src-container">
 <pre class="src src-conf">[<span class="org-type">diff</span>]
     <span class="org-variable-name">renames</span> = copies
@@ -778,9 +784,9 @@ as prefixes for patches:
 </div>
 </div>
 
-<div id="outline-container-org445a4b8" class="outline-4">
-<h4 id="org445a4b8">Use Meld as Git <code>difftool</code></h4>
-<div class="outline-text-4" id="text-org445a4b8">
+<div id="outline-container-orgf5d1355" class="outline-4">
+<h4 id="orgf5d1355">Use Meld as Git <code>difftool</code></h4>
+<div class="outline-text-4" id="text-orgf5d1355">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">tool</span> = meld
 
@@ -845,9 +851,9 @@ commit it was touched.
 </div>
 </div>
 
-<div id="outline-container-org88f3fed" class="outline-4">
-<h4 id="org88f3fed">Performing directory diffs (Comparing folders)</h4>
-<div class="outline-text-4" id="text-org88f3fed">
+<div id="outline-container-orge991d0c" class="outline-4">
+<h4 id="orge991d0c">Performing directory diffs (Comparing folders)</h4>
+<div class="outline-text-4" id="text-orge991d0c">
 <p>
 The following command makes it similar to the <code>git-meld.pl</code> script here:
 <a href="https://github.com/wmanley/git-meld">https://github.com/wmanley/git-meld</a>:
@@ -862,9 +868,9 @@ The following command makes it similar to the <code>git-meld.pl</code> script he
 </div>
 </div>
 
-<div id="outline-container-orgfe6cee6" class="outline-3">
-<h3 id="orgfe6cee6">Apply</h3>
-<div class="outline-text-3" id="text-orgfe6cee6">
+<div id="outline-container-orgeb72bef" class="outline-3">
+<h3 id="orgeb72bef">Apply</h3>
+<div class="outline-text-3" id="text-orgeb72bef">
 <div class="org-src-container">
 <pre class="src src-conf">[<span class="org-type">apply</span>]
     <span class="org-comment-delimiter"># </span><span class="org-comment">Don't detect whitespace errors when applying a patch.</span>
@@ -874,9 +880,9 @@ The following command makes it similar to the <code>git-meld.pl</code> script he
 </div>
 </div>
 
-<div id="outline-container-orgf1eb3a3" class="outline-3">
-<h3 id="orgf1eb3a3">Fetch</h3>
-<div class="outline-text-3" id="text-orgf1eb3a3">
+<div id="outline-container-orgec5a73e" class="outline-3">
+<h3 id="orgec5a73e">Fetch</h3>
+<div class="outline-text-3" id="text-orgec5a73e">
 <p>
 Automatically delete local branches that have been removed from remote on
 fetch/pull:
@@ -890,9 +896,9 @@ fetch/pull:
 </div>
 </div>
 
-<div id="outline-container-org8a93529" class="outline-3">
-<h3 id="org8a93529">Status</h3>
-<div class="outline-text-3" id="text-org8a93529">
+<div id="outline-container-org48a9d74" class="outline-3">
+<h3 id="org48a9d74">Status</h3>
+<div class="outline-text-3" id="text-org48a9d74">
 <p>
 If you are using submodules, it might be useful to turn on the submodule summary.
 </p>
@@ -905,9 +911,9 @@ If you are using submodules, it might be useful to turn on the submodule summary
 </div>
 </div>
 
-<div id="outline-container-org4d103e9" class="outline-3">
-<h3 id="org4d103e9">Pull</h3>
-<div class="outline-text-3" id="text-org4d103e9">
+<div id="outline-container-org37bb902" class="outline-3">
+<h3 id="org37bb902">Pull</h3>
+<div class="outline-text-3" id="text-org37bb902">
 <p>
 Configure Git to do the <code>--rebase</code> part automatically.
 </p>
@@ -924,9 +930,9 @@ Configure Git to do the <code>--rebase</code> part automatically.
 </div>
 </div>
 
-<div id="outline-container-org6f3f72c" class="outline-3">
-<h3 id="org6f3f72c">Push</h3>
-<div class="outline-text-3" id="text-org6f3f72c">
+<div id="outline-container-org7f97e58" class="outline-3">
+<h3 id="org7f97e58">Push</h3>
+<div class="outline-text-3" id="text-org7f97e58">
 <p>
 Push <b>only</b> the <b>current working branch</b> (sane pushing &#x2013; instead of pushing all
 branches), with an added safety: only if it is <i>tracking</i> a remote upstream branch
@@ -945,9 +951,9 @@ with the <i>same name</i>.
 </div>
 </div>
 
-<div id="outline-container-orgebc2b36" class="outline-3">
-<h3 id="orgebc2b36">Merge</h3>
-<div class="outline-text-3" id="text-orgebc2b36">
+<div id="outline-container-org28531b7" class="outline-3">
+<h3 id="org28531b7">Merge</h3>
+<div class="outline-text-3" id="text-org28531b7">
 <div class="org-src-container">
 <pre class="src src-conf">[<span class="org-type">merge</span>]
     <span class="org-variable-name">stat</span> = true
@@ -974,9 +980,9 @@ How to resolve merge conflicts in Git?  Try <code>git mergetool</code>.
 </p>
 </div>
 
-<div id="outline-container-org80b72ae" class="outline-4">
-<h4 id="org80b72ae">Emacs as a Git mergetool</h4>
-<div class="outline-text-4" id="text-org80b72ae">
+<div id="outline-container-orgf272308" class="outline-4">
+<h4 id="orgf272308">Emacs as a Git mergetool</h4>
+<div class="outline-text-4" id="text-orgf272308">
 <p>
 Ediff or Emerge?  Or Magit???
 </p>
@@ -993,9 +999,9 @@ Ediff or Emerge?  Or Magit???
 </div>
 </div>
 
-<div id="outline-container-org72397dd" class="outline-4">
-<h4 id="org72397dd">Meld as Git mergetool</h4>
-<div class="outline-text-4" id="text-org72397dd">
+<div id="outline-container-orgc0382a5" class="outline-4">
+<h4 id="orgc0382a5">Meld as Git mergetool</h4>
+<div class="outline-text-4" id="text-orgc0382a5">
 <p>
 <b>How do I set up and use Meld as my git mergetool?</b>
 See <a href="https://stackoverflow.com/questions/34119866/setting-up-and-using-meld-as-your-git-difftool-and-mergetool">https://stackoverflow.com/questions/34119866/setting-up-and-using-meld-as-your-git-difftool-and-mergetool</a>.
@@ -1098,9 +1104,9 @@ commenting out can be swapped over if I want to use the <code>$BASE</code> line 
 </div>
 </div>
 
-<div id="outline-container-org11cb9f4" class="outline-3">
-<h3 id="org11cb9f4">Rebase</h3>
-<div class="outline-text-3" id="text-org11cb9f4">
+<div id="outline-container-org3fb06ee" class="outline-3">
+<h3 id="org3fb06ee">Rebase</h3>
+<div class="outline-text-3" id="text-org3fb06ee">
 <p>
 Set <code>rebase.stat = true</code>, so the <code>diffstat</code> output is still shown when they pull.
 </p>
@@ -1120,9 +1126,9 @@ At this point, let us remind you of <a href="https://git-scm.com/book/en/v2/Git-
 </div>
 </div>
 
-<div id="outline-container-orgff13ecc" class="outline-3">
-<h3 id="orgff13ecc">Grep</h3>
-<div class="outline-text-3" id="text-orgff13ecc">
+<div id="outline-container-org8e56352" class="outline-3">
+<h3 id="org8e56352">Grep</h3>
+<div class="outline-text-3" id="text-org8e56352">
 <p>
 <a href="https://git-scm.com/docs/git-grep">https://git-scm.com/docs/git-grep</a>
 </p>
@@ -1140,9 +1146,9 @@ At this point, let us remind you of <a href="https://git-scm.com/book/en/v2/Git-
 </div>
 </div>
 
-<div id="outline-container-org7b487fc" class="outline-3">
-<h3 id="org7b487fc">Color</h3>
-<div class="outline-text-3" id="text-org7b487fc">
+<div id="outline-container-orgfe74d84" class="outline-3">
+<h3 id="orgfe74d84">Color</h3>
+<div class="outline-text-3" id="text-orgfe74d84">
 <p>
 Enable colors in terminal:
 </p>
@@ -1158,9 +1164,9 @@ Enable colors in terminal:
 </div>
 </div>
 
-<div id="outline-container-orgb2c0f8d" class="outline-4">
-<h4 id="orgb2c0f8d">Branch</h4>
-<div class="outline-text-4" id="text-orgb2c0f8d">
+<div id="outline-container-org50b2949" class="outline-4">
+<h4 id="org50b2949">Branch</h4>
+<div class="outline-text-4" id="text-org50b2949">
 <div class="org-src-container">
 <pre class="src src-conf">[color <span class="org-string">"branch"</span>]
     <span class="org-variable-name">current</span> = cyan bold
@@ -1173,9 +1179,9 @@ Enable colors in terminal:
 </div>
 </div>
 
-<div id="outline-container-org282142b" class="outline-4">
-<h4 id="org282142b">Diff</h4>
-<div class="outline-text-4" id="text-org282142b">
+<div id="outline-container-org4cd4e1b" class="outline-4">
+<h4 id="org4cd4e1b">Diff</h4>
+<div class="outline-text-4" id="text-org4cd4e1b">
 <p>
 See <a href="http://git-scm.com/docs/git-config">http://git-scm.com/docs/git-config</a> for the <code>slot</code> list.
 </p>
@@ -1207,9 +1213,9 @@ See <a href="http://git-scm.com/docs/git-config">http://git-scm.com/docs/git-con
 </div>
 </div>
 
-<div id="outline-container-org0ce68c8" class="outline-4">
-<h4 id="org0ce68c8">Status</h4>
-<div class="outline-text-4" id="text-org0ce68c8">
+<div id="outline-container-org2daac80" class="outline-4">
+<h4 id="org2daac80">Status</h4>
+<div class="outline-text-4" id="text-org2daac80">
 <div class="org-src-container">
 <pre class="src src-conf">[color <span class="org-string">"status"</span>]
     <span class="org-variable-name">header</span> = normal
@@ -1229,9 +1235,9 @@ See <a href="http://git-scm.com/docs/git-config">http://git-scm.com/docs/git-con
 </div>
 </div>
 
-<div id="outline-container-org805fbaf" class="outline-4">
-<h4 id="org805fbaf">Grep</h4>
-<div class="outline-text-4" id="text-org805fbaf">
+<div id="outline-container-org619d680" class="outline-4">
+<h4 id="org619d680">Grep</h4>
+<div class="outline-text-4" id="text-org619d680">
 <p>
 The first color given is the foreground; the second is the background.&ldquo;, e.g
 <code>match 10 22</code> &#x2013; see <code>man 1 git-config</code> at &rdquo;CONFIGURATION FILE&ldquo; &gt; &rdquo;Values&ldquo; &gt;
@@ -1255,9 +1261,9 @@ The first color given is the foreground; the second is the background.&ldquo;, e
 </div>
 </div>
 
-<div id="outline-container-org9a26f74" class="outline-3">
-<h3 id="org9a26f74">Proxy</h3>
-<div class="outline-text-3" id="text-org9a26f74">
+<div id="outline-container-orgac4a203" class="outline-3">
+<h3 id="orgac4a203">Proxy</h3>
+<div class="outline-text-3" id="text-orgac4a203">
 <div class="org-src-container">
 <pre class="src src-conf">[<span class="org-type">http</span>]
     <span class="org-variable-name">proxy</span> = http://proxy-guest.forem.be:8080
@@ -1274,9 +1280,9 @@ The first color given is the foreground; the second is the background.&ldquo;, e
 </div>
 </div>
 
-<div id="outline-container-orgbbf5ea2" class="outline-3">
-<h3 id="orgbbf5ea2">Repository administration</h3>
-<div class="outline-text-3" id="text-orgbbf5ea2">
+<div id="outline-container-org6d84d4f" class="outline-3">
+<h3 id="org6d84d4f">Repository administration</h3>
+<div class="outline-text-3" id="text-org6d84d4f">
 <p>
 If unable to clone Git repository due to <b>self-signed certificate</b>&#x2026;
 </p>
@@ -1311,9 +1317,9 @@ a security risk</b> and should be implemented only temporary.
 </div>
 </div>
 
-<div id="outline-container-orge55e069" class="outline-3">
-<h3 id="orge55e069">Format</h3>
-<div class="outline-text-3" id="text-orge55e069">
+<div id="outline-container-org848d885" class="outline-3">
+<h3 id="org848d885">Format</h3>
+<div class="outline-text-3" id="text-org848d885">
 <div class="org-src-container">
 <pre class="src src-conf">[<span class="org-type">format</span>]
     <span class="org-variable-name">pretty</span> = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)&lt;%an&gt;%C(reset)
@@ -1339,9 +1345,9 @@ See
 </div>
 </div>
 
-<div id="outline-container-orgfabd16e" class="outline-2">
-<h2 id="orgfabd16e">Aliases</h2>
-<div class="outline-text-2" id="text-orgfabd16e">
+<div id="outline-container-org976980d" class="outline-2">
+<h2 id="org976980d">Aliases</h2>
+<div class="outline-text-2" id="text-org976980d">
 <div class="org-src-container">
 <pre class="src src-conf">[<span class="org-type">alias</span>]
 </pre>
@@ -1493,9 +1499,9 @@ clean and relevant commits, no experiments or fixing typos.
 </div>
 </div>
 
-<div id="outline-container-org9977e96" class="outline-3">
-<h3 id="org9977e96">SHOW - Check the status of your files</h3>
-<div class="outline-text-3" id="text-org9977e96">
+<div id="outline-container-org5b0bff2" class="outline-3">
+<h3 id="org5b0bff2">SHOW - Check the status of your files</h3>
+<div class="outline-text-3" id="text-org5b0bff2">
 <p>
 Give the status in the <b>short-format</b> (preceded by a line showing the <i>branch name</i>
 and <i>tracking info</i>).
@@ -1532,13 +1538,13 @@ Staging for commit is typically done by <code>git add</code>.
 </div>
 </div>
 
-<div id="outline-container-org003309f" class="outline-3">
-<h3 id="org003309f">SHOW - View your changes</h3>
-<div class="outline-text-3" id="text-org003309f">
+<div id="outline-container-org0ee3529" class="outline-3">
+<h3 id="org0ee3529">SHOW - View your changes</h3>
+<div class="outline-text-3" id="text-org0ee3529">
 </div>
-<div id="outline-container-orgc21d140" class="outline-4">
-<h4 id="orgc21d140">Changes between the working tree and the index (staged for the next commit)</h4>
-<div class="outline-text-4" id="text-orgc21d140">
+<div id="outline-container-orgbb7576e" class="outline-4">
+<h4 id="orgbb7576e">Changes between the working tree and the index (staged for the next commit)</h4>
+<div class="outline-text-4" id="text-orgbb7576e">
 <p>
 See also <code>-b</code> (<code>--ignore-space-change</code>): Ignore changes in amount of
 whitespace. This ignores whitespace at line end, and considers all other
@@ -1587,9 +1593,9 @@ git diff -w
 </div>
 </div>
 
-<div id="outline-container-org590132e" class="outline-4">
-<h4 id="org590132e">Changes between the working tree and the latest commit (HEAD)</h4>
-<div class="outline-text-4" id="text-org590132e">
+<div id="outline-container-orgec42e42" class="outline-4">
+<h4 id="orgec42e42">Changes between the working tree and the latest commit (HEAD)</h4>
+<div class="outline-text-4" id="text-orgec42e42">
 <div class="org-src-container">
 <pre class="src src-shell">    diff-all = diff HEAD
 </pre>
@@ -1597,9 +1603,9 @@ git diff -w
 </div>
 </div>
 
-<div id="outline-container-org2489347" class="outline-4">
-<h4 id="org2489347">Changes between the index (staged for the next commit) and the latest commit (HEAD)</h4>
-<div class="outline-text-4" id="text-org2489347">
+<div id="outline-container-org34903cd" class="outline-4">
+<h4 id="org34903cd">Changes between the index (staged for the next commit) and the latest commit (HEAD)</h4>
+<div class="outline-text-4" id="text-org34903cd">
 <p>
 Just before committing the <b>staged</b> changes, check what your commit changes:
 </p>
@@ -1624,9 +1630,9 @@ Just before committing the <b>staged</b> changes, check what your commit changes
 </div>
 </div>
 
-<div id="outline-container-org80ec386" class="outline-4">
-<h4 id="org80ec386">Precommit</h4>
-<div class="outline-text-4" id="text-org80ec386">
+<div id="outline-container-orge7b3d44" class="outline-4">
+<h4 id="orge7b3d44">Precommit</h4>
+<div class="outline-text-4" id="text-orge7b3d44">
 <p>
 This is a key part of my workflow. I run this before every commit to make sure
 I don&rsquo;t need to use the undo commands.
@@ -1639,9 +1645,9 @@ I don&rsquo;t need to use the undo commands.
 </div>
 </div>
 
-<div id="outline-container-org5649a17" class="outline-4">
-<h4 id="org5649a17">Today</h4>
-<div class="outline-text-4" id="text-org5649a17">
+<div id="outline-container-org59f35b4" class="outline-4">
+<h4 id="org59f35b4">Today</h4>
+<div class="outline-text-4" id="text-org59f35b4">
 <p>
 Quickly see what you&rsquo;ve done today (list commits that aren&rsquo;t merges, on <b>all
 branches</b>):
@@ -1699,9 +1705,9 @@ Show changes for a daily standup meeting:
 </div>
 </div>
 
-<div id="outline-container-org0b18530" class="outline-4">
-<h4 id="org0b18530">When was this file last updated</h4>
-<div class="outline-text-4" id="text-org0b18530">
+<div id="outline-container-orgd336b35" class="outline-4">
+<h4 id="orgd336b35">When was this file last updated</h4>
+<div class="outline-text-4" id="text-orgd336b35">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">When was this file last updated, on each local branch.</span>
     <span class="org-variable-name">wwflu</span> = <span class="org-string">"!f() { for b in $(git rev-parse --symbolic --branches); do \</span>
@@ -1712,9 +1718,9 @@ Show changes for a daily standup meeting:
 </div>
 </div>
 
-<div id="outline-container-org66183ac" class="outline-4">
-<h4 id="org66183ac">Add only modified changes (and ignore untracked files)</h4>
-<div class="outline-text-4" id="text-org66183ac">
+<div id="outline-container-org485b513" class="outline-4">
+<h4 id="org485b513">Add only modified changes (and ignore untracked files)</h4>
+<div class="outline-text-4" id="text-org485b513">
 <p>
 Ideally your <code>.gitignore</code> should prevent the untracked (and ignored) files from
 being shown in status, added using <code>git add</code> etc.  So correct your <code>.gitignore</code>.
@@ -1741,9 +1747,9 @@ You can also do <code>git commit -a</code> to <b>commit</b> only the modified an
 </div>
 </div>
 
-<div id="outline-container-org1f3471f" class="outline-3">
-<h3 id="org1f3471f">SHOW - View the commit history</h3>
-<div class="outline-text-3" id="text-org1f3471f">
+<div id="outline-container-org0222a16" class="outline-3">
+<h3 id="org0222a16">SHOW - View the commit history</h3>
+<div class="outline-text-3" id="text-org0222a16">
 <div class="note">
 <p>
 The <code>git log</code> command shows, by default, the &ldquo;author date&rdquo; &#x2013; not the &ldquo;committer
@@ -1804,9 +1810,9 @@ List commits <b>showing changed files</b> (prettier and more concise version of
 </div>
 </div>
 
-<div id="outline-container-org9773dd1" class="outline-4">
-<h4 id="org9773dd1">Show the history of a file</h4>
-<div class="outline-text-4" id="text-org9773dd1">
+<div id="outline-container-orgff9f12c" class="outline-4">
+<h4 id="orgff9f12c">Show the history of a file</h4>
+<div class="outline-text-4" id="text-orgff9f12c">
 <p>
 <b>List of commits</b> that modified the <b>specified file</b> (will follow renames and
 copies!):
@@ -1836,9 +1842,9 @@ Put a <i>end of options</i> character (<code>--</code>) after <code>file-history
 </div>
 </div>
 
-<div id="outline-container-org5675c94" class="outline-4">
-<h4 id="org5675c94">Inspect the commits for each edit</h4>
-<div class="outline-text-4" id="text-org5675c94">
+<div id="outline-container-org603af42" class="outline-4">
+<h4 id="org603af42">Inspect the commits for each edit</h4>
+<div class="outline-text-4" id="text-org603af42">
 <pre class="example">
 git log ... | xargs -n 1 git show
 </pre>
@@ -1846,9 +1852,9 @@ git log ... | xargs -n 1 git show
 </div>
 </div>
 
-<div id="outline-container-orga66633d" class="outline-3">
-<h3 id="orga66633d">SHOW - Show blame information about original authors of lines changed or removed</h3>
-<div class="outline-text-3" id="text-orga66633d">
+<div id="outline-container-orgab5892d" class="outline-3">
+<h3 id="orgab5892d">SHOW - Show blame information about original authors of lines changed or removed</h3>
+<div class="outline-text-3" id="text-orgab5892d">
 <p>
 $ git blame -w  # ignores white space
 $ git blame -M  # ignores moving text
@@ -1885,9 +1891,9 @@ moved or copied the lines.
 </div>
 </div>
 
-<div id="outline-container-orgea28aef" class="outline-3">
-<h3 id="orgea28aef">SHOW - find all &ldquo;unpushed&rdquo; commits for all projects in a directory</h3>
-<div class="outline-text-3" id="text-orgea28aef">
+<div id="outline-container-org1b3a59a" class="outline-3">
+<h3 id="org1b3a59a">SHOW - find all &ldquo;unpushed&rdquo; commits for all projects in a directory</h3>
+<div class="outline-text-3" id="text-org1b3a59a">
 <p>
 See <a href="https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory">https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory</a>
 </p>
@@ -1902,13 +1908,13 @@ See <a href="https://stackoverflow.com/questions/12499195/git-how-to-find-all-un
 </div>
 </div>
 
-<div id="outline-container-orgb808a9d" class="outline-3">
-<h3 id="orgb808a9d">Ignoring files</h3>
-<div class="outline-text-3" id="text-orgb808a9d">
+<div id="outline-container-orgcec9ba6" class="outline-3">
+<h3 id="orgcec9ba6">Ignoring files</h3>
+<div class="outline-text-3" id="text-orgcec9ba6">
 </div>
-<div id="outline-container-orgf9a0521" class="outline-4">
-<h4 id="orgf9a0521">List untracked files</h4>
-<div class="outline-text-4" id="text-orgf9a0521">
+<div id="outline-container-org459a746" class="outline-4">
+<h4 id="org459a746">List untracked files</h4>
+<div class="outline-text-4" id="text-org459a746">
 <p>
 Tell if a file is being tracked:
 </p>
@@ -1974,9 +1980,9 @@ Remove ignored files that are still on the repository:
 </div>
 </div>
 
-<div id="outline-container-org7cc9386" class="outline-4">
-<h4 id="org7cc9386">Add ignore entry to the repository</h4>
-<div class="outline-text-4" id="text-org7cc9386">
+<div id="outline-container-orgd656d57" class="outline-4">
+<h4 id="orgd656d57">Add ignore entry to the repository</h4>
+<div class="outline-text-4" id="text-orgd656d57">
 <ul class="org-ul">
 <li>Ignore exact filename: filename</li>
 <li>Ignore everything beneath: folder</li>
@@ -2017,9 +2023,9 @@ tracked. You can only ignore a file that has a blue question mark icon.
 </div>
 </div>
 
-<div id="outline-container-org2375317" class="outline-4">
-<h4 id="org2375317"><code>assume-unchanged</code> command</h4>
-<div class="outline-text-4" id="text-org2375317">
+<div id="outline-container-org5cf4552" class="outline-4">
+<h4 id="org5cf4552"><code>assume-unchanged</code> command</h4>
+<div class="outline-text-4" id="text-org5cf4552">
 <p>
 Ignore/unignore changes to <b>tracked file(s)</b> without <code>.gitignore</code>:
 </p>
@@ -2079,9 +2085,9 @@ List ignored files (<b>marked unchanged</b>):
 </div>
 </div>
 
-<div id="outline-container-org22fa9c2" class="outline-3">
-<h3 id="org22fa9c2">REVERT - Undo things</h3>
-<div class="outline-text-3" id="text-org22fa9c2">
+<div id="outline-container-orgbd35639" class="outline-3">
+<h3 id="orgbd35639">REVERT - Undo things</h3>
+<div class="outline-text-3" id="text-orgbd35639">
 <p>
 &gt; The reason I don&rsquo;t commit a change immediately after I write it is
 &gt; that I want to test it in real (and varied) use.  Sometimes I find
@@ -2099,9 +2105,9 @@ of course. That way lies madness.)
 </p>
 </div>
 
-<div id="outline-container-orga070cbe" class="outline-4">
-<h4 id="orga070cbe">Change your last commit</h4>
-<div class="outline-text-4" id="text-orga070cbe">
+<div id="outline-container-orgc320f86" class="outline-4">
+<h4 id="orgc320f86">Change your last commit</h4>
+<div class="outline-text-4" id="text-orgc320f86">
 <p>
 This will help when we need to change the most recent commit.
 </p>
@@ -2200,18 +2206,18 @@ My new favorite alias lets you amend to a specific commit, <b>not</b> need to be
 </div>
 </div>
 
-<div id="outline-container-orgbc342f3" class="outline-4">
-<h4 id="orgbc342f3">Undo changes to one (or more) file(s) in a commit &#x2013; instead of reverting the entire commit</h4>
-<div class="outline-text-4" id="text-orgbc342f3">
+<div id="outline-container-org66b3607" class="outline-4">
+<h4 id="org66b3607">Undo changes to one (or more) file(s) in a commit &#x2013; instead of reverting the entire commit</h4>
+<div class="outline-text-4" id="text-org66b3607">
 <pre class="example">
 git show commit-hash -- path/to/file.html | git apply --reverse
 </pre>
 </div>
 </div>
 
-<div id="outline-container-orgaf4a993" class="outline-4">
-<h4 id="orgaf4a993">Throw away a commit</h4>
-<div class="outline-text-4" id="text-orgaf4a993">
+<div id="outline-container-org68268ec" class="outline-4">
+<h4 id="org68268ec">Throw away a commit</h4>
+<div class="outline-text-4" id="text-org68268ec">
 <p>
 <a href="http://www.vogella.com/tutorials/Git/article.html#resetcommits">http://www.vogella.com/tutorials/Git/article.html#resetcommits</a>
 <a href="http://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified">http://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified</a>
@@ -2228,9 +2234,9 @@ See « Undo &rsquo;git add&rsquo; before commit ».
 </p>
 </div>
 
-<div id="outline-container-org7282c1e" class="outline-5">
-<h5 id="org7282c1e">Soft option &#x2013; Do not touch the index file or the working tree at all</h5>
-<div class="outline-text-5" id="text-org7282c1e">
+<div id="outline-container-orge170d98" class="outline-5">
+<h5 id="orge170d98">Soft option &#x2013; Do not touch the index file or the working tree at all</h5>
+<div class="outline-text-5" id="text-orge170d98">
 <p>
 Go back before last commit, with files in uncommitted state:
 </p>
@@ -2267,9 +2273,9 @@ think you are smart.
 </div>
 </div>
 
-<div id="outline-container-orgfa5d3b6" class="outline-5">
-<h5 id="orgfa5d3b6">Mixed option &#x2013; Do not touch the working tree (but regenerate the index)</h5>
-<div class="outline-text-5" id="text-orgfa5d3b6">
+<div id="outline-container-org8c982cc" class="outline-5">
+<h5 id="org8c982cc">Mixed option &#x2013; Do not touch the working tree (but regenerate the index)</h5>
+<div class="outline-text-5" id="text-org8c982cc">
 <p>
 Reset the previous commit, but <b>puts</b> all <b>the changes</b> from that commit <b>in the
 working directory</b>:
@@ -2301,9 +2307,9 @@ review process.
 </div>
 </div>
 
-<div id="outline-container-org4ba94e3" class="outline-5">
-<h5 id="org4ba94e3">Hard option &#x2013; Regenerate both the index and working tree</h5>
-<div class="outline-text-5" id="text-org4ba94e3">
+<div id="outline-container-orgd6a76ba" class="outline-5">
+<h5 id="orgd6a76ba">Hard option &#x2013; Regenerate both the index and working tree</h5>
+<div class="outline-text-5" id="text-orgd6a76ba">
 <p>
 Remove the last commit, <b>delete changes in your staging area and in your working
 directory</b>:
@@ -2366,9 +2372,9 @@ had been done&#x2026;</li>
 </div>
 </div>
 
-<div id="outline-container-org564c08f" class="outline-5">
-<h5 id="org564c08f">Delete untracked files</h5>
-<div class="outline-text-5" id="text-org564c08f">
+<div id="outline-container-org59e53d9" class="outline-5">
+<h5 id="org59e53d9">Delete untracked files</h5>
+<div class="outline-text-5" id="text-org59e53d9">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">nuke-untracked-files</span> = clean -f
 </pre>
@@ -2400,9 +2406,9 @@ files).</li>
 </div>
 </div>
 
-<div id="outline-container-org13998ef" class="outline-5">
-<h5 id="org13998ef">Soft option &#x2013; Clean branch (delete changes + untracked files)</h5>
-<div class="outline-text-5" id="text-org13998ef">
+<div id="outline-container-orge5274d1" class="outline-5">
+<h5 id="orge5274d1">Soft option &#x2013; Clean branch (delete changes + untracked files)</h5>
+<div class="outline-text-5" id="text-orge5274d1">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">clear-soft-dry-run</span> = clean -d -n
 
@@ -2436,9 +2442,9 @@ git branch my-saved-work
 </div>
 </div>
 
-<div id="outline-container-orgbea4860" class="outline-5">
-<h5 id="orgbea4860">Hard option &#x2013; Clean branch (delete ignored files in addition to changes + untracked files)</h5>
-<div class="outline-text-5" id="text-orgbea4860">
+<div id="outline-container-orga4538ee" class="outline-5">
+<h5 id="orga4538ee">Hard option &#x2013; Clean branch (delete ignored files in addition to changes + untracked files)</h5>
+<div class="outline-text-5" id="text-orga4538ee">
 <p>
 <b>NUCLEAR VERSION</b> which will:
 </p>
@@ -2459,9 +2465,9 @@ git branch my-saved-work
 </div>
 </div>
 
-<div id="outline-container-org51e1a34" class="outline-4">
-<h4 id="org51e1a34">Revert a commit</h4>
-<div class="outline-text-4" id="text-org51e1a34">
+<div id="outline-container-org849e9d9" class="outline-4">
+<h4 id="org849e9d9">Revert a commit</h4>
+<div class="outline-text-4" id="text-org849e9d9">
 <p>
 Once you&rsquo;ve pushed changes to a remote repository, it is considered dangerous to
 modify the history because someone else may have already pulled it.
@@ -2495,9 +2501,9 @@ into your index), use:
 </div>
 </div>
 
-<div id="outline-container-org873b91e" class="outline-4">
-<h4 id="org873b91e">Squash</h4>
-<div class="outline-text-4" id="text-org873b91e">
+<div id="outline-container-org6ee1963" class="outline-4">
+<h4 id="org6ee1963">Squash</h4>
+<div class="outline-text-4" id="text-org6ee1963">
 <p>
 Squash commits:
 <a href="https://bitbucket.org/blog/git-squash-commits-merging-bitbucket">https://bitbucket.org/blog/git-squash-commits-merging-bitbucket</a>
@@ -2521,9 +2527,9 @@ git squash N
 </div>
 </div>
 
-<div id="outline-container-orge860d50" class="outline-3">
-<h3 id="orge860d50">Merge</h3>
-<div class="outline-text-3" id="text-orge860d50">
+<div id="outline-container-org638eb08" class="outline-3">
+<h3 id="org638eb08">Merge</h3>
+<div class="outline-text-3" id="text-org638eb08">
 <div class="org-src-container">
 <pre class="src src-conf">  <span class="org-comment-delimiter"># </span><span class="org-comment">Given a merge commit, find the span of commits that exist(ed).</span>
   <span class="org-comment-delimiter"># </span><span class="org-comment">Not so useful in itself, but used by other aliases.</span>
@@ -2543,9 +2549,9 @@ git squash N
 </div>
 </div>
 
-<div id="outline-container-orgeb0ee5e" class="outline-3">
-<h3 id="orgeb0ee5e">UPDATE - Pull</h3>
-<div class="outline-text-3" id="text-orgeb0ee5e">
+<div id="outline-container-org54a170d" class="outline-3">
+<h3 id="org54a170d">UPDATE - Pull</h3>
+<div class="outline-text-3" id="text-org54a170d">
 <p>
 Starting with Git 1.7.0, <code>@{u}</code> is shorthand for the <b>current</b> branch&rsquo;s <b>upstream</b>
 branch; e.g., <code>origin/foo</code> (or <code>github/foo</code>, etc., since the remote doesn&rsquo;t have to
@@ -2577,9 +2583,9 @@ About rebase (with visual aid):
 </p>
 </div>
 
-<div id="outline-container-org5ba896e" class="outline-4">
-<h4 id="org5ba896e">Show incoming changes</h4>
-<div class="outline-text-4" id="text-org5ba896e">
+<div id="outline-container-org79223d2" class="outline-4">
+<h4 id="org79223d2">Show incoming changes</h4>
+<div class="outline-text-4" id="text-org79223d2">
 <p>
 The <code>in</code> command returns a list of <b>incoming</b> commits for the <b>current branch</b> &#x2013;
 after a <code>git fetch</code>, to fetch down <b>all the data</b> it has for the <b>current remote</b> that
@@ -2623,9 +2629,9 @@ if any, with the <code>..</code> notation &#x2014; not with the <code>...</code>
 </div>
 </div>
 
-<div id="outline-container-orga31920e" class="outline-4">
-<h4 id="orga31920e">Update with local modifications</h4>
-<div class="outline-text-4" id="text-orga31920e">
+<div id="outline-container-org37bcf36" class="outline-4">
+<h4 id="org37bcf36">Update with local modifications</h4>
+<div class="outline-text-4" id="text-org37bcf36">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">pull</span> = pull -v
 </pre>
@@ -2775,9 +2781,9 @@ Before doing work (in a new branch), <b>ensure that the working directory is</b>
 </div>
 </div>
 
-<div id="outline-container-orgb7f3fa1" class="outline-4">
-<h4 id="orgb7f3fa1">Update all local branches</h4>
-<div class="outline-text-4" id="text-orgb7f3fa1">
+<div id="outline-container-org7d62a8d" class="outline-4">
+<h4 id="org7d62a8d">Update all local branches</h4>
+<div class="outline-text-4" id="text-org7d62a8d">
 <p>
 Pull all:
 </p>
@@ -2852,9 +2858,9 @@ XXX Is this <code>sync</code>?
 </div>
 </div>
 
-<div id="outline-container-orgb600c22" class="outline-4">
-<h4 id="orgb600c22">Get timestamp of last pull</h4>
-<div class="outline-text-4" id="text-orgb600c22">
+<div id="outline-container-org0d959c3" class="outline-4">
+<h4 id="org0d959c3">Get timestamp of last pull</h4>
+<div class="outline-text-4" id="text-org0d959c3">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">For the latest pull (even if there's nothing new).</span>
     <span class="org-variable-name">last-pulled</span> = !stat -c %y $(git root)/.git/FETCH_HEAD | cut -d<span class="org-string">'.'</span> -f1
@@ -2869,9 +2875,9 @@ XXX Is this <code>sync</code>?
 </div>
 </div>
 
-<div id="outline-container-org10e23c3" class="outline-3">
-<h3 id="org10e23c3">UPDATE - Merge</h3>
-<div class="outline-text-3" id="text-org10e23c3">
+<div id="outline-container-org881b722" class="outline-3">
+<h3 id="org881b722">UPDATE - Merge</h3>
+<div class="outline-text-3" id="text-org881b722">
 <p>
 Merging means to <b>bring the contents of another branch</b> (possibly from an external
 repository) <b>into the current branch</b>. [&#x2026;]  Merging is performed by an automatic
@@ -2899,9 +2905,9 @@ Merge branch 'branch_name' into master
 </div>
 </div>
 
-<div id="outline-container-org8183917" class="outline-4">
-<h4 id="org8183917">Merge master</h4>
-<div class="outline-text-4" id="text-org8183917">
+<div id="outline-container-org7f2e4e1" class="outline-4">
+<h4 id="org7f2e4e1">Merge master</h4>
+<div class="outline-text-4" id="text-org7f2e4e1">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Merge remote master into the current branch.</span>
     <span class="org-variable-name">mm</span> = !git fetch -p &amp;&amp; git merge origin/master
@@ -2913,9 +2919,9 @@ Merge branch 'branch_name' into master
 </div>
 </div>
 
-<div id="outline-container-orgdf8b0a8" class="outline-4">
-<h4 id="orgdf8b0a8">Undo the merge</h4>
-<div class="outline-text-4" id="text-orgdf8b0a8">
+<div id="outline-container-org2585409" class="outline-4">
+<h4 id="org2585409">Undo the merge</h4>
+<div class="outline-text-4" id="text-org2585409">
 <p>
 If you tried a merge which resulted in complex conflicts and want to start over,
 you can recover with <code>git merge --abort</code>.  It will allow you to <b>undo the merge</b>,
@@ -2924,9 +2930,9 @@ even if it is a fast-forward merge.
 </div>
 </div>
 
-<div id="outline-container-orgbfff830" class="outline-4">
-<h4 id="orgbfff830">Merge current branch into another one</h4>
-<div class="outline-text-4" id="text-orgbfff830">
+<div id="outline-container-org55f693b" class="outline-4">
+<h4 id="org55f693b">Merge current branch into another one</h4>
+<div class="outline-text-4" id="text-org55f693b">
 <p>
 On projects where we work with a staging or test branch, I regularly merge my
 work in progress into it so others can test it.
@@ -2956,9 +2962,9 @@ Such a timesaver!
 </div>
 </div>
 
-<div id="outline-container-orgec6df52" class="outline-4">
-<h4 id="orgec6df52">Dry run (do not make changes)</h4>
-<div class="outline-text-4" id="text-orgec6df52">
+<div id="outline-container-orgda1d563" class="outline-4">
+<h4 id="orgda1d563">Dry run (do not make changes)</h4>
+<div class="outline-text-4" id="text-orgda1d563">
 <p>
 Naive (but slow) way:
 </p>
@@ -3031,9 +3037,9 @@ and <b>detects conflicts</b>:
 </div>
 </div>
 
-<div id="outline-container-orgef06218" class="outline-4">
-<h4 id="orgef06218">Branch/Integration manager</h4>
-<div class="outline-text-4" id="text-orgef06218">
+<div id="outline-container-orgd8d561e" class="outline-4">
+<h4 id="orgd8d561e">Branch/Integration manager</h4>
+<div class="outline-text-4" id="text-orgd8d561e">
 <p>
 Often, during a <b>merge</b>, you know you want to take a file from one side wholesale;
 that is, to select the entirety of either our or their file.
@@ -3108,9 +3114,9 @@ Best answer I have seen on <code>git merge</code> <b>strategies</b>:
 </div>
 </div>
 
-<div id="outline-container-org67e16d6" class="outline-4">
-<h4 id="org67e16d6">Show list of files in a conflict state</h4>
-<div class="outline-text-4" id="text-org67e16d6">
+<div id="outline-container-org0c5670a" class="outline-4">
+<h4 id="org0c5670a">Show list of files in a conflict state</h4>
+<div class="outline-text-4" id="text-org0c5670a">
 <p>
 List unmerged files (after a merge failure), having leftover conflict markers:
 </p>
@@ -3145,13 +3151,13 @@ Then, add the conflicted files.
 </div>
 </div>
 
-<div id="outline-container-orgd1a93d2" class="outline-3">
-<h3 id="orgd1a93d2">BRANCH - Branch</h3>
-<div class="outline-text-3" id="text-orgd1a93d2">
+<div id="outline-container-orgba90c8b" class="outline-3">
+<h3 id="orgba90c8b">BRANCH - Branch</h3>
+<div class="outline-text-3" id="text-orgba90c8b">
 </div>
-<div id="outline-container-org7955a35" class="outline-4">
-<h4 id="org7955a35">Feature Branches</h4>
-<div class="outline-text-4" id="text-org7955a35">
+<div id="outline-container-org018dd33" class="outline-4">
+<h4 id="org018dd33">Feature Branches</h4>
+<div class="outline-text-4" id="text-org018dd33">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Create a feature branch.</span>
     <span class="org-variable-name">feature</span> = <span class="org-string">"!f() { git create-branch feature/$1 develop; }; f"</span>
@@ -3212,9 +3218,9 @@ aliases, or you may want to edit these aliases to match your team&rsquo;s featur
 </div>
 </div>
 
-<div id="outline-container-org7c2bfa3" class="outline-4">
-<h4 id="org7c2bfa3">Git workflows</h4>
-<div class="outline-text-4" id="text-org7c2bfa3">
+<div id="outline-container-org2bb9c45" class="outline-4">
+<h4 id="org2bb9c45">Git workflows</h4>
+<div class="outline-text-4" id="text-org2bb9c45">
 <p>
 It may be helpful to do a some background reading on workflows with Git.  Here
 is the gitworkflows man page:
@@ -3232,9 +3238,9 @@ Other doc on branching models:
 </div>
 </div>
 
-<div id="outline-container-orgf182490" class="outline-4">
-<h4 id="orgf182490">General</h4>
-<div class="outline-text-4" id="text-orgf182490">
+<div id="outline-container-org5db935f" class="outline-4">
+<h4 id="org5db935f">General</h4>
+<div class="outline-text-4" id="text-org5db935f">
 <p>
 See <a href="http://nuclearsquid.com/writings/git-tricks-tips-workflows/">http://nuclearsquid.com/writings/git-tricks-tips-workflows/</a> for more
 interesting stuff, such as:
@@ -3266,9 +3272,9 @@ jump across commits:
 </div>
 </div>
 
-<div id="outline-container-orged2b883" class="outline-4">
-<h4 id="orged2b883">If you get the error &ldquo;The following untracked working tree files would be overwritten by checkout&rdquo;</h4>
-<div class="outline-text-4" id="text-orged2b883">
+<div id="outline-container-org05811d8" class="outline-4">
+<h4 id="org05811d8">If you get the error &ldquo;The following untracked working tree files would be overwritten by checkout&rdquo;</h4>
+<div class="outline-text-4" id="text-org05811d8">
 <div class="org-src-container">
 <pre class="src src-text">error: Your local changes to the following files would be overwritten by checkout:
         WEB-INF/config/afm-projects.xml.DEV-fni
@@ -3301,9 +3307,9 @@ git checkout -f some-branch
 </div>
 </div>
 
-<div id="outline-container-org6f2ce32" class="outline-4">
-<h4 id="org6f2ce32">GitHub Pages</h4>
-<div class="outline-text-4" id="text-org6f2ce32">
+<div id="outline-container-orgddab780" class="outline-4">
+<h4 id="orgddab780">GitHub Pages</h4>
+<div class="outline-text-4" id="text-orgddab780">
 <div class="org-src-container">
 <pre class="src src-conf">echo <span class="org-string">'setting up gh-pages'</span>
 echo <span class="org-string">'-------------------'</span>
@@ -3329,9 +3335,9 @@ git stash \
 </div>
 </div>
 
-<div id="outline-container-org07fee89" class="outline-4">
-<h4 id="org07fee89">Comparing the commits between branches</h4>
-<div class="outline-text-4" id="text-org07fee89">
+<div id="outline-container-orgb9f1cd4" class="outline-4">
+<h4 id="orgb9f1cd4">Comparing the commits between branches</h4>
+<div class="outline-text-4" id="text-orgb9f1cd4">
 <p>
 Sometimes I lose track of which branch contains which other branch. This
 shortcut (an idea borrowed from Bazaar) shows the unique revisions in the
@@ -3345,9 +3351,9 @@ current branch and the specified branch.
 </div>
 </div>
 
-<div id="outline-container-org6c6030a" class="outline-4">
-<h4 id="org6c6030a">See which changes from a branch are already present upstream</h4>
-<div class="outline-text-4" id="text-org6c6030a">
+<div id="outline-container-orgcaf0f54" class="outline-4">
+<h4 id="orgcaf0f54">See which changes from a branch are already present upstream</h4>
+<div class="outline-text-4" id="text-orgcaf0f54">
 <p>
 While on <code>feature</code> branch:
 </p>
@@ -3373,9 +3379,9 @@ marked with <code>+</code>.
 </div>
 </div>
 
-<div id="outline-container-org0179ad8" class="outline-4">
-<h4 id="org0179ad8">Recover a branch after its deletion in Git</h4>
-<div class="outline-text-4" id="text-org0179ad8">
+<div id="outline-container-org4d021eb" class="outline-4">
+<h4 id="org4d021eb">Recover a branch after its deletion in Git</h4>
+<div class="outline-text-4" id="text-org4d021eb">
 <p>
 Most of the time unreachable commits are in the reflog. So, the <b>first thing to
 try is to look at the reflog</b> using the command <code>git reflog</code> (which display the
@@ -3397,9 +3403,9 @@ See <a href="https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-
 </div>
 </div>
 
-<div id="outline-container-orga8dd28b" class="outline-4">
-<h4 id="orga8dd28b">Show branches and their commits</h4>
-<div class="outline-text-4" id="text-orga8dd28b">
+<div id="outline-container-org8bee65a" class="outline-4">
+<h4 id="org8bee65a">Show branches and their commits</h4>
+<div class="outline-text-4" id="text-org8bee65a">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">"show-branch -g=N" can't be aliased for N easily, so we stop here:</span>
     <span class="org-variable-name">sb</span>  = show-branch
@@ -3413,9 +3419,9 @@ See <a href="https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-
 </div>
 </div>
 
-<div id="outline-container-orgf684cd8" class="outline-3">
-<h3 id="orgf684cd8">Stash</h3>
-<div class="outline-text-3" id="text-orgf684cd8">
+<div id="outline-container-orgba437db" class="outline-3">
+<h3 id="orgba437db">Stash</h3>
+<div class="outline-text-3" id="text-orgba437db">
 <p>
 A <b>stash</b> is nothing but a <b>(temporary) branch</b>.
 </p>
@@ -3453,9 +3459,9 @@ You can operate on the &ldquo;stash&rdquo; ref as if it were any other ref.
 </p>
 </div>
 
-<div id="outline-container-org5c77706" class="outline-4">
-<h4 id="org5c77706">Stash push</h4>
-<div class="outline-text-4" id="text-org5c77706">
+<div id="outline-container-org6516ec4" class="outline-4">
+<h4 id="org6516ec4">Stash push</h4>
+<div class="outline-text-4" id="text-org6516ec4">
 <p>
 <code>git stash push</code> also optionally takes a message describing the contents of the
 stash (much, much more useful):
@@ -3504,9 +3510,9 @@ user wants to have an updated repository.
 </div>
 </div>
 
-<div id="outline-container-orgb91a54e" class="outline-4">
-<h4 id="orgb91a54e">Take named stash</h4>
-<div class="outline-text-4" id="text-orgb91a54e">
+<div id="outline-container-org0f18610" class="outline-4">
+<h4 id="org0f18610">Take named stash</h4>
+<div class="outline-text-4" id="text-org0f18610">
 <p>
 &ldquo;WIP:&rdquo;
 </p>
@@ -3531,9 +3537,9 @@ user wants to have an updated repository.
 </div>
 </div>
 
-<div id="outline-container-org2db1dac" class="outline-4">
-<h4 id="org2db1dac">Show a list of all stashes</h4>
-<div class="outline-text-4" id="text-org2db1dac">
+<div id="outline-container-org3a57e71" class="outline-4">
+<h4 id="org3a57e71">Show a list of all stashes</h4>
+<div class="outline-text-4" id="text-org3a57e71">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">stashes</span> = stash list --date=local
 </pre>
@@ -3541,9 +3547,9 @@ user wants to have an updated repository.
 </div>
 </div>
 
-<div id="outline-container-orga9b5d40" class="outline-4">
-<h4 id="orga9b5d40">Show the stash</h4>
-<div class="outline-text-4" id="text-orga9b5d40">
+<div id="outline-container-org926b8ec" class="outline-4">
+<h4 id="org926b8ec">Show the stash</h4>
+<div class="outline-text-4" id="text-org926b8ec">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">stash-diff</span> = stash show -p
 </pre>
@@ -3578,9 +3584,9 @@ It helped me a lot in the past (cleaning stashes stack).
 </div>
 </div>
 
-<div id="outline-container-org5c9e0d5" class="outline-4">
-<h4 id="org5c9e0d5">Show name-only</h4>
-<div class="outline-text-4" id="text-org5c9e0d5">
+<div id="outline-container-org1c247c7" class="outline-4">
+<h4 id="org1c247c7">Show name-only</h4>
+<div class="outline-text-4" id="text-org1c247c7">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">sshno</span> = stash show --name-only
 </pre>
@@ -3588,9 +3594,9 @@ It helped me a lot in the past (cleaning stashes stack).
 </div>
 </div>
 
-<div id="outline-container-orgab92a35" class="outline-4">
-<h4 id="orgab92a35">Apply the stash only, don&rsquo;t delete it from the stash list</h4>
-<div class="outline-text-4" id="text-orgab92a35">
+<div id="outline-container-orgb1d7a8c" class="outline-4">
+<h4 id="orgb1d7a8c">Apply the stash only, don&rsquo;t delete it from the stash list</h4>
+<div class="outline-text-4" id="text-orgb1d7a8c">
 <p>
 When you&rsquo;re done, with <code>git stash apply</code> (top stash by default), you&rsquo;re back where
 you were.  But if that doesn&rsquo;t work, for whatever reason, you can use any of
@@ -3618,9 +3624,9 @@ Git&rsquo;s other branch merging tools to put things back they way you want them
 </div>
 </div>
 
-<div id="outline-container-orgde38e08" class="outline-4">
-<h4 id="orgde38e08">Stash pop</h4>
-<div class="outline-text-4" id="text-orgde38e08">
+<div id="outline-container-org9871e24" class="outline-4">
+<h4 id="org9871e24">Stash pop</h4>
+<div class="outline-text-4" id="text-org9871e24">
 <p>
 <code>git stash pop</code> removes the most recent stash or any stash specified and applies
 changes as a merge.  If merge fails, the stash is not removed from the list and
@@ -3643,9 +3649,9 @@ conflicts, Git will not remove it (but it will still apply it)!
 </div>
 </div>
 
-<div id="outline-container-org4cfbc6e" class="outline-4">
-<h4 id="org4cfbc6e">Drop the stash</h4>
-<div class="outline-text-4" id="text-org4cfbc6e">
+<div id="outline-container-org3cd93c2" class="outline-4">
+<h4 id="org3cd93c2">Drop the stash</h4>
+<div class="outline-text-4" id="text-org3cd93c2">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">std</span> = stash drop
 </pre>
@@ -3653,9 +3659,9 @@ conflicts, Git will not remove it (but it will still apply it)!
 </div>
 </div>
 
-<div id="outline-container-orga288719" class="outline-4">
-<h4 id="orga288719">Clear</h4>
-<div class="outline-text-4" id="text-orga288719">
+<div id="outline-container-org11e4233" class="outline-4">
+<h4 id="org11e4233">Clear</h4>
+<div class="outline-text-4" id="text-org11e4233">
 <div class="org-src-container">
 <pre class="src src-shell">git stash clear
 </pre>
@@ -3663,9 +3669,9 @@ conflicts, Git will not remove it (but it will still apply it)!
 </div>
 </div>
 
-<div id="outline-container-org52b4030" class="outline-4">
-<h4 id="org52b4030">Workflows</h4>
-<div class="outline-text-4" id="text-org52b4030">
+<div id="outline-container-orgda91ebe" class="outline-4">
+<h4 id="orgda91ebe">Workflows</h4>
+<div class="outline-text-4" id="text-orgda91ebe">
 <p>
 Alternative to <code>stash</code> (writing a commit with a default message):
 </p>
@@ -3721,9 +3727,9 @@ commit message of the <b>most recent</b> commit.
 </div>
 </div>
 
-<div id="outline-container-orgd1bb21c" class="outline-4">
-<h4 id="orgd1bb21c">From git help stash</h4>
-<div class="outline-text-4" id="text-orgd1bb21c">
+<div id="outline-container-orgbf33cfb" class="outline-4">
+<h4 id="orgbf33cfb">From git help stash</h4>
+<div class="outline-text-4" id="text-orgbf33cfb">
 <p>
 Pulling into a dirty tree
 </p>
@@ -3826,13 +3832,13 @@ xargs git log &#x2013;merges &#x2013;no-walk &#x2013;grep=WIP
 </div>
 </div>
 
-<div id="outline-container-orgce2a16e" class="outline-3">
-<h3 id="orgce2a16e">PUBLISH - Push</h3>
-<div class="outline-text-3" id="text-orgce2a16e">
+<div id="outline-container-orgd949701" class="outline-3">
+<h3 id="orgd949701">PUBLISH - Push</h3>
+<div class="outline-text-3" id="text-orgd949701">
 </div>
-<div id="outline-container-org55411aa" class="outline-4">
-<h4 id="org55411aa">Show outgoing changes: commits that are on the local branch that have not been pushed</h4>
-<div class="outline-text-4" id="text-org55411aa">
+<div id="outline-container-orgd662723" class="outline-4">
+<h4 id="orgd662723">Show outgoing changes: commits that are on the local branch that have not been pushed</h4>
+<div class="outline-text-4" id="text-orgd662723">
 <p>
 It is useful to know if you have any <b>local commits</b> that are not in the remote
 branch.
@@ -3890,9 +3896,9 @@ If you want to see all <b>unpushed</b> commits from <b>all branches</b>, do this
 </div>
 </div>
 
-<div id="outline-container-orgb4ec667" class="outline-4">
-<h4 id="orgb4ec667">Upload your changes</h4>
-<div class="outline-text-4" id="text-orgb4ec667">
+<div id="outline-container-org690c77e" class="outline-4">
+<h4 id="org690c77e">Upload your changes</h4>
+<div class="outline-text-4" id="text-org690c77e">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Get the upstream branch name.</span>
     <span class="org-variable-name">upstream-name</span> = !git for-each-ref --format=<span class="org-string">'%(upstream:short)'</span> $(git symbolic-ref -q HEAD)
@@ -3902,9 +3908,9 @@ If you want to see all <b>unpushed</b> commits from <b>all branches</b>, do this
 </div>
 </div>
 
-<div id="outline-container-org6578b78" class="outline-3">
-<h3 id="org6578b78">PUBLISH - Find out if a change is part of a release</h3>
-<div class="outline-text-3" id="text-org6578b78">
+<div id="outline-container-org0e3ff77" class="outline-3">
+<h3 id="org0e3ff77">PUBLISH - Find out if a change is part of a release</h3>
+<div class="outline-text-3" id="text-org0e3ff77">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">sha1-tag</span> = <span class="org-string">"!f() { git name-rev --name-only \"$@\"; }; f"</span>
 </pre>
@@ -3918,18 +3924,18 @@ the v2.3 tag &#x2013; we can be certain that this change is part of v2.3, then.
 </div>
 </div>
 
-<div id="outline-container-org6debd69" class="outline-3">
-<h3 id="org6debd69">Create patches</h3>
-<div class="outline-text-3" id="text-org6debd69">
+<div id="outline-container-org5a61ddb" class="outline-3">
+<h3 id="org5a61ddb">Create patches</h3>
+<div class="outline-text-3" id="text-org5a61ddb">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">lll</span> = log -u
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org3edd31a" class="outline-4">
-<h4 id="org3edd31a">Creating a patch</h4>
-<div class="outline-text-4" id="text-org3edd31a">
+<div id="outline-container-org90d97f9" class="outline-4">
+<h4 id="org90d97f9">Creating a patch</h4>
+<div class="outline-text-4" id="text-org90d97f9">
 <ol class="org-ol">
 <li>Make your changes and commit them.</li>
 
@@ -3958,9 +3964,9 @@ git format-patch HEAD~
 </div>
 </div>
 
-<div id="outline-container-org211209d" class="outline-4">
-<h4 id="org211209d">Using the patch</h4>
-<div class="outline-text-4" id="text-org211209d">
+<div id="outline-container-orgbe6cb42" class="outline-4">
+<h4 id="orgbe6cb42">Using the patch</h4>
+<div class="outline-text-4" id="text-orgbe6cb42">
 <pre class="example">
 git am *.patch
 </pre>
@@ -4017,9 +4023,9 @@ patch -t -N -r - -p1 -i 0001-my-awesome-change.patch
 </div>
 </div>
 
-<div id="outline-container-orgf5c142d" class="outline-4">
-<h4 id="orgf5c142d">Apply patches from URL</h4>
-<div class="outline-text-4" id="text-orgf5c142d">
+<div id="outline-container-orga03de30" class="outline-4">
+<h4 id="orga03de30">Apply patches from URL</h4>
+<div class="outline-text-4" id="text-orga03de30">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Apply a patch to files and/or to the index from URL.</span>
     <span class="org-variable-name">apply-url</span> = <span class="org-string">"!f() { curl -s $1 2&gt;nul | git apply ${@:2}; }; f"</span>
@@ -4043,9 +4049,9 @@ git am-url http://example.org/sample.patch args
 </div>
 </div>
 
-<div id="outline-container-org6c87eee" class="outline-4">
-<h4 id="org6c87eee">Apply a patch interactively</h4>
-<div class="outline-text-4" id="text-org6c87eee">
+<div id="outline-container-org2b20dfc" class="outline-4">
+<h4 id="org2b20dfc">Apply a patch interactively</h4>
+<div class="outline-text-4" id="text-org2b20dfc">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Interactive apply patch.</span>
     <span class="org-variable-name">ipatch</span> = <span class="org-string">"!f() { git apply $1; git add -p; }; f"</span>
@@ -4058,9 +4064,9 @@ git ipatch mypatchfile
 </div>
 </div>
 
-<div id="outline-container-orgf5e63e9" class="outline-4">
-<h4 id="orgf5e63e9">Patch shortcuts</h4>
-<div class="outline-text-4" id="text-orgf5e63e9">
+<div id="outline-container-org942415f" class="outline-4">
+<h4 id="org942415f">Patch shortcuts</h4>
+<div class="outline-text-4" id="text-org942415f">
 <div class="org-src-container">
 <pre class="src src-conf"><span class="org-comment-delimiter"># </span><span class="org-comment">Copy a patch URL to the clipboard, then run one of these commands to download</span>
 <span class="org-comment-delimiter"># </span><span class="org-comment">the patch and apply it. Hat tip to @chrisjlee for making me reconsider curl.</span>
@@ -4091,17 +4097,17 @@ git ipatch mypatchfile
 </div>
 </div>
 
-<div id="outline-container-orga92c02d" class="outline-3">
-<h3 id="orga92c02d">PUBLISH - Prepare a release</h3>
-<div class="outline-text-3" id="text-orga92c02d">
+<div id="outline-container-org61cea25" class="outline-3">
+<h3 id="org61cea25">PUBLISH - Prepare a release</h3>
+<div class="outline-text-3" id="text-org61cea25">
 <p>
 See <a href="https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release">https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release</a>
 </p>
 </div>
 
-<div id="outline-container-org30e02e0" class="outline-4">
-<h4 id="org30e02e0">ChangeLog</h4>
-<div class="outline-text-4" id="text-org30e02e0">
+<div id="outline-container-org8130735" class="outline-4">
+<h4 id="org8130735">ChangeLog</h4>
+<div class="outline-text-4" id="text-org8130735">
 <p>
 Generate the ChangeLog (for your <a href="https://keepachangelog.com/">CHANGELOG.md</a>) with all commit message since the
 last tag.
@@ -4137,9 +4143,9 @@ See also
 </div>
 </div>
 
-<div id="outline-container-orgb5acddd" class="outline-4">
-<h4 id="orgb5acddd">Release assets</h4>
-<div class="outline-text-4" id="text-orgb5acddd">
+<div id="outline-container-orgc843cca" class="outline-4">
+<h4 id="orgc843cca">Release assets</h4>
+<div class="outline-text-4" id="text-orgc843cca">
 <p>
 Generate <code>zip</code> archived source code from the given Git tag.
 </p>
@@ -4176,9 +4182,9 @@ Note that the <i>output format</i> is inferred by the extension of the output fi
 </p>
 </div>
 
-<div id="outline-container-org770266e" class="outline-5">
-<h5 id="org770266e">Branch point</h5>
-<div class="outline-text-5" id="text-org770266e">
+<div id="outline-container-orged0fae0" class="outline-5">
+<h5 id="orged0fae0">Branch point</h5>
+<div class="outline-text-5" id="text-orged0fae0">
 <p>
 <a href="https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git">https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git</a>:
 </p>
@@ -4229,9 +4235,9 @@ from the name) remains intact.
 </div>
 </div>
 
-<div id="outline-container-org72adb6f" class="outline-3">
-<h3 id="org72adb6f">PUBLISH - Tag</h3>
-<div class="outline-text-3" id="text-org72adb6f">
+<div id="outline-container-org2f39387" class="outline-3">
+<h3 id="org2f39387">PUBLISH - Tag</h3>
+<div class="outline-text-3" id="text-org2f39387">
 <p>
 When tagging releases in a version control system, the tag for a version should
 be <code>X.Y.Z</code> (<b>without</b> prefix <code>v</code>).  The advantages of <code>X.Y.Z</code> are that gitweb or GitHub
@@ -4266,9 +4272,9 @@ You can do a lot better with:
 </div>
 </div>
 
-<div id="outline-container-org7dd5627" class="outline-3">
-<h3 id="org7dd5627">Debugging</h3>
-<div class="outline-text-3" id="text-org7dd5627">
+<div id="outline-container-org5c7705f" class="outline-3">
+<h3 id="org5c7705f">Debugging</h3>
+<div class="outline-text-3" id="text-org5c7705f">
 <p>
 Sometimes it&rsquo;s nice to see what is going on under the hood. Try this alias:
 </p>
@@ -4289,9 +4295,9 @@ Just insert <code>debug</code> between <code>git</code> and whatever would usual
 </div>
 </div>
 
-<div id="outline-container-orgd5f2894" class="outline-3">
-<h3 id="orgd5f2894">Abbreviations</h3>
-<div class="outline-text-3" id="text-orgd5f2894">
+<div id="outline-container-orgf9ea714" class="outline-3">
+<h3 id="orgf9ea714">Abbreviations</h3>
+<div class="outline-text-3" id="text-orgf9ea714">
 <p>
 Basic shortcuts.
 </p>
@@ -4325,9 +4331,9 @@ creating a commit in the branch)</li>
 </div>
 </div>
 
-<div id="outline-container-org7eb43a7" class="outline-3">
-<h3 id="org7eb43a7">Show the path to root directory of Git repo</h3>
-<div class="outline-text-3" id="text-org7eb43a7">
+<div id="outline-container-org0048530" class="outline-3">
+<h3 id="org0048530">Show the path to root directory of Git repo</h3>
+<div class="outline-text-3" id="text-org0048530">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Get the path cleaned up.</span>
     <span class="org-variable-name">root</span> = !pwd -P
@@ -4349,9 +4355,9 @@ This works because Shell aliases are always executed in the top-level directory.
 </div>
 </div>
 
-<div id="outline-container-orge4450b9" class="outline-3">
-<h3 id="orge4450b9">Sync</h3>
-<div class="outline-text-3" id="text-orge4450b9">
+<div id="outline-container-org8948e2e" class="outline-3">
+<h3 id="org8948e2e">Sync</h3>
+<div class="outline-text-3" id="text-org8948e2e">
 <p>
 Fetch Git objects from upstream and update local branches.
 </p>
@@ -4389,9 +4395,9 @@ Let&rsquo;s do a slightly different command: <code>resync</code>
 </div>
 </div>
 
-<div id="outline-container-org0f82768" class="outline-3">
-<h3 id="org0f82768">Cherrypick style recording</h3>
-<div class="outline-text-3" id="text-org0f82768">
+<div id="outline-container-org736b8ca" class="outline-3">
+<h3 id="org736b8ca">Cherrypick style recording</h3>
+<div class="outline-text-3" id="text-org736b8ca">
 <p>
 Ask interactively which patch hunk to commit, and then do the commit:
 </p>
@@ -4409,9 +4415,9 @@ will <code>reset</code> the index.
 </div>
 </div>
 
-<div id="outline-container-orgc0b2251" class="outline-3">
-<h3 id="orgc0b2251">Dangling</h3>
-<div class="outline-text-3" id="text-orgc0b2251">
+<div id="outline-container-orgdba1483" class="outline-3">
+<h3 id="orgdba1483">Dangling</h3>
+<div class="outline-text-3" id="text-orgdba1483">
 <ul class="org-ul">
 <li>Dangling blob = Change(s) that made it to the staging area/index but never got
 committed. One thing that is amazing with Git is that once it gets added to
@@ -4432,9 +4438,9 @@ directly or by any of its ancestors. You can get these back too!</li>
 </div>
 </div>
 
-<div id="outline-container-orgc77cf8b" class="outline-3">
-<h3 id="orgc77cf8b"><span class="todo TODO">TODO</span> To sort out</h3>
-<div class="outline-text-3" id="text-orgc77cf8b">
+<div id="outline-container-org0293c9c" class="outline-3">
+<h3 id="org0293c9c"><span class="todo TODO">TODO</span> To sort out</h3>
+<div class="outline-text-3" id="text-org0293c9c">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">logdate</span> = log --format=format:<span class="org-string">'%ad %d %h %s %an%n'</span> --date=short
     <span class="org-variable-name">branch-date</span> = !<span class="org-string">"sh -c 'for branch in $(git branch --no-merged); do \</span>
@@ -4445,9 +4451,9 @@ directly or by any of its ancestors. You can get these back too!</li>
 </div>
 </div>
 
-<div id="outline-container-orgbbdbeea" class="outline-3">
-<h3 id="orgbbdbeea">Git and Subversion</h3>
-<div class="outline-text-3" id="text-orgbbdbeea">
+<div id="outline-container-org1fe7378" class="outline-3">
+<h3 id="org1fe7378">Git and Subversion</h3>
+<div class="outline-text-3" id="text-org1fe7378">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">spull</span> = svn rebase
     <span class="org-variable-name">spush</span> = svn dcommit
@@ -4463,51 +4469,33 @@ directly or by any of its ancestors. You can get these back too!</li>
 </div>
 </div>
 
-<div id="outline-container-orgfc8268b" class="outline-2">
-<h2 id="orgfc8268b">Run on All repositories</h2>
-<div class="outline-text-2" id="text-orgfc8268b">
-<p>
-The biggest use I get out of this alias is making sure I have everything
-committed. Sometimes I&rsquo;ll work on a project and then forget about it for
-a little while without committing. When I want to double-check that I&rsquo;m not
-forgetting anything, I run <code>git all status --short</code> to quickly scan which repos
-have uncommitted changes that I need to take care of.
-</p>
-
-<div class="org-src-container">
-<pre class="src src-conf">    <span class="org-variable-name">all</span> = <span class="org-string">"!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"</span>
-
-    <span class="org-variable-name">print-reponame-then-run</span> = <span class="org-string">"!f() { echo "</span>======<span class="org-string">"; basename `git rev-parse --show-toplevel`; echo "</span>======<span class="org-string">"; git "</span>$@<span class="org-string">";}; f"</span>
-
-    <span class="org-comment-delimiter"># </span><span class="org-comment">run commands for each repository in the current directory</span>
-    <span class="org-variable-name">allr</span> = <span class="org-string">"!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "</span>$@<span class="org-string">"; }; f"</span>
-</pre>
+<div id="outline-container-org8efc252" class="outline-2">
+<h2 id="org8efc252">------------------------------------------------------------------------------</h2>
 </div>
 
-<p>
-See also <code>git-repos</code>:
-<a href="http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html">http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html</a>
-</p>
+<div id="outline-container-org363a5d3" class="outline-2">
+<h2 id="org363a5d3">Repository</h2>
+<div class="outline-text-2" id="text-org363a5d3">
 </div>
-</div>
-
-<div id="outline-container-orgbf19339" class="outline-2">
-<h2 id="orgbf19339">------------------------------------------------------------------------------</h2>
-</div>
-
-<div id="outline-container-org550249b" class="outline-2">
-<h2 id="org550249b">Repository</h2>
-<div class="outline-text-2" id="text-org550249b">
-</div>
-<div id="outline-container-orgc97953f" class="outline-3">
-<h3 id="orgc97953f">Create a Git repository locally</h3>
-<div class="outline-text-3" id="text-orgc97953f">
+<div id="outline-container-orgb268da3" class="outline-3">
+<h3 id="orgb268da3">Create a Git repository locally</h3>
+<div class="outline-text-3" id="text-orgb268da3">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">create-local-repository</span> = !git init \
                                    &amp;&amp; ( [[ -n $(ls) ]] || touch .gitignore ) \
                                    &amp;&amp; git add . \
                                    &amp;&amp; git commit -m \"Initial commit\"
 </pre>
+</div>
+
+<div class="tip">
+<p>
+Since Git doesn&rsquo;t add <b>empty directories</b>, if you want to keep them in the
+repository, a sort of conventional hack is to create a file called <code>.gitkeep</code> in
+these directories.  (The file could be called anything; Git assigns no special
+significance to this name.)
+</p>
+
 </div>
 
 <p>
@@ -4521,9 +4509,9 @@ Remove Git from current project:
 </div>
 </div>
 
-<div id="outline-container-orgc645e27" class="outline-3">
-<h3 id="orgc645e27">Clone a repository</h3>
-<div class="outline-text-3" id="text-orgc645e27">
+<div id="outline-container-orgb99e1cf" class="outline-3">
+<h3 id="orgb99e1cf">Clone a repository</h3>
+<div class="outline-text-3" id="text-orgb99e1cf">
 <p>
 Clone an existing repository including all submodules.
 </p>
@@ -4543,9 +4531,9 @@ For <b>passwordless Git pull</b> (permanently authenticating with Git repositori
 </div>
 </div>
 
-<div id="outline-container-orgb378731" class="outline-3">
-<h3 id="orgb378731">Create and add your SSH public key to a repository management platform</h3>
-<div class="outline-text-3" id="text-orgb378731">
+<div id="outline-container-orge6c5ea4" class="outline-3">
+<h3 id="orge6c5ea4">Create and add your SSH public key to a repository management platform</h3>
+<div class="outline-text-3" id="text-orge6c5ea4">
 <p>
 <a href="https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html">https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html</a>
 </p>
@@ -4556,9 +4544,9 @@ use SSH, you will need to:
 </p>
 </div>
 
-<div id="outline-container-org0b70c5c" class="outline-4">
-<h4 id="org0b70c5c">Create an SSH key pair on your local computer</h4>
-<div class="outline-text-4" id="text-org0b70c5c">
+<div id="outline-container-org5bab3ec" class="outline-4">
+<h4 id="org5bab3ec">Create an SSH key pair on your local computer</h4>
+<div class="outline-text-4" id="text-org5bab3ec">
 <p>
 Generate a new ED25519 (should always be favored) SSH key pair:
 </p>
@@ -4578,18 +4566,18 @@ ssh-keygen -t rsa -b 4096 -C "email@example.com"
 </div>
 </div>
 
-<div id="outline-container-orgfee859c" class="outline-4">
-<h4 id="orgfee859c">Add the key to the repository management platform</h4>
+<div id="outline-container-orgfdb6d95" class="outline-4">
+<h4 id="orgfdb6d95">Add the key to the repository management platform</h4>
 </div>
 
-<div id="outline-container-org66cb54b" class="outline-4">
-<h4 id="org66cb54b">Testing that everything is set up correctly</h4>
+<div id="outline-container-org47d82ef" class="outline-4">
+<h4 id="org47d82ef">Testing that everything is set up correctly</h4>
 </div>
 </div>
 
-<div id="outline-container-org3b0ca58" class="outline-3">
-<h3 id="org3b0ca58">Create a new repository in GitHub</h3>
-<div class="outline-text-3" id="text-org3b0ca58">
+<div id="outline-container-orgb846555" class="outline-3">
+<h3 id="orgb846555">Create a new repository in GitHub</h3>
+<div class="outline-text-3" id="text-orgb846555">
 <p>
 <b>Private</b> or <b>public</b> repository?
 </p>
@@ -4640,9 +4628,9 @@ information:
 </div>
 </div>
 
-<div id="outline-container-org342f6e2" class="outline-3">
-<h3 id="org342f6e2">Open a repository in a web browser</h3>
-<div class="outline-text-3" id="text-org342f6e2">
+<div id="outline-container-org8a46e96" class="outline-3">
+<h3 id="org8a46e96">Open a repository in a web browser</h3>
+<div class="outline-text-3" id="text-org8a46e96">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">browse-tree</span> = <span class="org-string">"!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}; }; f"</span>
     <span class="org-variable-name">browse-wiki</span> = XXX
@@ -4657,13 +4645,13 @@ XXX open = cygstart?
 </div>
 </div>
 
-<div id="outline-container-orgc121fd0" class="outline-2">
-<h2 id="orgc121fd0">Source Files</h2>
-<div class="outline-text-2" id="text-orgc121fd0">
+<div id="outline-container-org696df49" class="outline-2">
+<h2 id="org696df49">Source Files</h2>
+<div class="outline-text-2" id="text-org696df49">
 </div>
-<div id="outline-container-orgb6c306f" class="outline-3">
-<h3 id="orgb6c306f">Search for files</h3>
-<div class="outline-text-3" id="text-orgb6c306f">
+<div id="outline-container-org10c5079" class="outline-3">
+<h3 id="org10c5079">Search for files</h3>
+<div class="outline-text-3" id="text-org10c5079">
 <p>
 Search file (by file path) in the current branch.
 </p>
@@ -4687,9 +4675,9 @@ Search file in all branches.
 </div>
 </div>
 
-<div id="outline-container-orgd1b0495" class="outline-3">
-<h3 id="orgd1b0495">Search for code</h3>
-<div class="outline-text-3" id="text-orgd1b0495">
+<div id="outline-container-org87db26a" class="outline-3">
+<h3 id="org87db26a">Search for code</h3>
+<div class="outline-text-3" id="text-org87db26a">
 <p>
 <b>Code search</b> looks through all lines of code of all the files (by the <b>file
 contents</b>) from the working directory (and its subdirectories).
@@ -4701,9 +4689,9 @@ contents</b>) from the working directory (and its subdirectories).
 </p>
 </div>
 
-<div id="outline-container-org4a40861" class="outline-4">
-<h4 id="org4a40861">Search code for exact matches</h4>
-<div class="outline-text-4" id="text-org4a40861">
+<div id="outline-container-org4eca5e5" class="outline-4">
+<h4 id="org4eca5e5">Search code for exact matches</h4>
+<div class="outline-text-4" id="text-org4eca5e5">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">search-code</span> = <span class="org-string">"grep -i --line-number --break --heading -C 1"</span>
 
@@ -4735,9 +4723,9 @@ Find all instances of the specified string in code <b>in the specified path</b>.
 </div>
 </div>
 
-<div id="outline-container-orgd4735ce" class="outline-4">
-<h4 id="orgd4735ce">Pattern in working directory (and its subdirectories)</h4>
-<div class="outline-text-4" id="text-orgd4735ce">
+<div id="outline-container-org22e3315" class="outline-4">
+<h4 id="org22e3315">Pattern in working directory (and its subdirectories)</h4>
+<div class="outline-text-4" id="text-org22e3315">
 <p>
 The advantages of <code>git grep</code> are not only its <b>speed</b>, and the fact it only searches
 your project files (i.e. no files in <code>.git</code>), but also that is allows you to
@@ -4791,9 +4779,9 @@ Broader search (<b>case-sensitive</b>), output <b>without grouping</b>:
 </div>
 </div>
 
-<div id="outline-container-orgb908faa" class="outline-4">
-<h4 id="orgb908faa">Find files that contain some terms, not necessarily on the same line</h4>
-<div class="outline-text-4" id="text-orgb908faa">
+<div id="outline-container-orgffff6e3" class="outline-4">
+<h4 id="orgffff6e3">Find files that contain some terms, not necessarily on the same line</h4>
+<div class="outline-text-4" id="text-orgffff6e3">
 <p>
 Match any of these patterns, but print matches only from files that have <i>all</i> of
 them (files must have lines that match each of them):
@@ -4807,18 +4795,18 @@ them (files must have lines that match each of them):
 </div>
 </div>
 
-<div id="outline-container-orga03096f" class="outline-3">
-<h3 id="orga03096f">Undo local changes</h3>
-<div class="outline-text-3" id="text-orga03096f">
+<div id="outline-container-org334c21b" class="outline-3">
+<h3 id="org334c21b">Undo local changes</h3>
+<div class="outline-text-3" id="text-org334c21b">
 <p>
 See <a href="https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/">https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/</a>
 and <a href="http://gitimmersion.com/lab_14.html">http://gitimmersion.com/lab_14.html</a>.
 </p>
 </div>
 
-<div id="outline-container-org10d4f39" class="outline-5">
-<h5 id="org10d4f39">Before you staged (in unstaged state)</h5>
-<div class="outline-text-5" id="text-org10d4f39">
+<div id="outline-container-orgc4c4152" class="outline-5">
+<h5 id="orgc4c4152">Before you staged (in unstaged state)</h5>
+<div class="outline-text-5" id="text-orgc4c4152">
 <p>
 <b>Undo</b> the local changes <b>in the working directory</b>: roll a file back to its last
 committed version, removing all the changes detected by Git.
@@ -4852,9 +4840,9 @@ When you grab a file from a previous time, it sits <b>in your index</b>, modifie
 </div>
 </div>
 
-<div id="outline-container-org1077dc0" class="outline-5">
-<h5 id="org1077dc0">Before you committed (in staged state)</h5>
-<div class="outline-text-5" id="text-org1077dc0">
+<div id="outline-container-org371b854" class="outline-5">
+<h5 id="org371b854">Before you committed (in staged state)</h5>
+<div class="outline-text-5" id="text-org371b854">
 <p>
 <b>Remove</b> the specified <b>files from the index</b> (proposed next commit, staging area):
 </p>
@@ -4876,13 +4864,13 @@ just use <code>unstage</code> to remove it.
 </div>
 </div>
 
-<div id="outline-container-org9fd63ac" class="outline-2">
-<h2 id="org9fd63ac">Commits</h2>
-<div class="outline-text-2" id="text-org9fd63ac">
+<div id="outline-container-org0154e47" class="outline-2">
+<h2 id="org0154e47">Commits</h2>
+<div class="outline-text-2" id="text-org0154e47">
 </div>
-<div id="outline-container-org78aa5b7" class="outline-3">
-<h3 id="org78aa5b7">Create a commit</h3>
-<div class="outline-text-3" id="text-org78aa5b7">
+<div id="outline-container-orge8102a7" class="outline-3">
+<h3 id="orge8102a7">Create a commit</h3>
+<div class="outline-text-3" id="text-orge8102a7">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Shortcut for commit.</span>
     <span class="org-variable-name">ci</span> = commit
@@ -5009,9 +4997,9 @@ This is a handy table for labels <a href="https://github.com/angular/angular/blo
 </div>
 </div>
 
-<div id="outline-container-org7f455c7" class="outline-3">
-<h3 id="org7f455c7">Get a commit detail</h3>
-<div class="outline-text-3" id="text-org7f455c7">
+<div id="outline-container-org34e3266" class="outline-3">
+<h3 id="org34e3266">Get a commit detail</h3>
+<div class="outline-text-3" id="text-org34e3266">
 <p>
 List all the changed files <b>in a commit</b>:
 </p>
@@ -5029,9 +5017,9 @@ git changed-files bada55                <span class="org-comment-delimiter"># </
 </div>
 </div>
 
-<div id="outline-container-orga3a80f1" class="outline-3">
-<h3 id="orga3a80f1">Get the diff of a commit</h3>
-<div class="outline-text-3" id="text-orga3a80f1">
+<div id="outline-container-orga7e33e0" class="outline-3">
+<h3 id="orga7e33e0">Get the diff of a commit</h3>
+<div class="outline-text-3" id="text-orga7e33e0">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">download-email-patch</span> = XXX git format-patch $(git current-branch).patch
     <span class="org-variable-name">download-plain-diff</span> = !git diff ${1:-HEAD}~ ${1:-HEAD} &gt; ${1:-HEAD}.diff
@@ -5040,9 +5028,9 @@ git changed-files bada55                <span class="org-comment-delimiter"># </
 </div>
 </div>
 
-<div id="outline-container-orgf8a57a9" class="outline-3">
-<h3 id="orgf8a57a9">Get the references the commit has been pushed to (branches and tags)</h3>
-<div class="outline-text-3" id="text-orgf8a57a9">
+<div id="outline-container-orge422c43" class="outline-3">
+<h3 id="orge422c43">Get the references the commit has been pushed to (branches and tags)</h3>
+<div class="outline-text-3" id="text-orge422c43">
 <p>
 List all the branches and tags that contain a specific commit.
 </p>
@@ -5095,9 +5083,9 @@ List all <b>tags</b> that contain a specific commit ID:
 </div>
 </div>
 
-<div id="outline-container-org7c23ce8" class="outline-3">
-<h3 id="org7c23ce8">Search for commits</h3>
-<div class="outline-text-3" id="text-org7c23ce8">
+<div id="outline-container-orgb4a0651" class="outline-3">
+<h3 id="orgb4a0651">Search for commits</h3>
+<div class="outline-text-3" id="text-orgb4a0651">
 <div class="note">
 <p>
 Just for the record &#x2013; searching anything &ldquo;in a branch&rdquo; is not possible due to
@@ -5118,9 +5106,9 @@ curl --request GET --header "PRIVATE-TOKEN: &lt;your_access_token&gt;" https://g
 </pre>
 </div>
 
-<div id="outline-container-orgab0579f" class="outline-4">
-<h4 id="orgab0579f">Search within Commit Messages</h4>
-<div class="outline-text-4" id="text-orgab0579f">
+<div id="outline-container-org34c7509" class="outline-4">
+<h4 id="org34c7509">Search within Commit Messages</h4>
+<div class="outline-text-4" id="text-org34c7509">
 <p>
 You can find commits that contain particular words in the commit message. For
 example, <code>fix typo</code> matches commits containing the words <code>fix</code> <b>and</b> <code>typo</code>.
@@ -5226,9 +5214,9 @@ git show :/^Merge
 </div>
 </div>
 
-<div id="outline-container-org853d8ab" class="outline-4">
-<h4 id="org853d8ab">Search by Author</h4>
-<div class="outline-text-4" id="text-org853d8ab">
+<div id="outline-container-org2bfda51" class="outline-4">
+<h4 id="org2bfda51">Search by Author</h4>
+<div class="outline-text-4" id="text-org2bfda51">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">search-author</span> = <span class="org-string">"log --decorate -i --all --date=short --author"</span>
     <span class="org-variable-name">recap</span> = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
@@ -5237,13 +5225,13 @@ git show :/^Merge
 </div>
 </div>
 
-<div id="outline-container-org59a2d0b" class="outline-4">
-<h4 id="org59a2d0b">Search on File Changes</h4>
-<div class="outline-text-4" id="text-org59a2d0b">
+<div id="outline-container-org3ff921e" class="outline-4">
+<h4 id="org3ff921e">Search on File Changes</h4>
+<div class="outline-text-4" id="text-org3ff921e">
 </div>
-<div id="outline-container-org99ff270" class="outline-5">
-<h5 id="org99ff270">Search string (added/removed) in code</h5>
-<div class="outline-text-5" id="text-org99ff270">
+<div id="outline-container-orgcb1c323" class="outline-5">
+<h5 id="orgcb1c323">Search string (added/removed) in code</h5>
+<div class="outline-text-5" id="text-orgcb1c323">
 <p>
 If you want to find all commits where a <b>string</b> was <b>added or removed</b> in the <i>file
 contents</i> (to be more exact: where its <b>number of occurrences changed</b> in the
@@ -5323,9 +5311,9 @@ By default, <code>-S</code> accepts a string, but can be modified to accept a <b
 </div>
 </div>
 
-<div id="outline-container-org8549369" class="outline-5">
-<h5 id="org8549369">Search regexp (added/removed/changed?) in code</h5>
-<div class="outline-text-5" id="text-org8549369">
+<div id="outline-container-org83667ac" class="outline-5">
+<h5 id="org83667ac">Search regexp (added/removed/changed?) in code</h5>
+<div class="outline-text-5" id="text-org83667ac">
 <p>
 String contained in added/removed lines from Commit contents (Diff)
 </p>
@@ -5345,50 +5333,50 @@ git log --all -G <span class="org-string">"foo"</span> --full-history --since=<s
 </div>
 </div>
 
-<div id="outline-container-orgbd51489" class="outline-3">
-<h3 id="orgbd51489">Push</h3>
+<div id="outline-container-orge52eba5" class="outline-3">
+<h3 id="orge52eba5">Push</h3>
 </div>
 
-<div id="outline-container-orgd178e7c" class="outline-3">
-<h3 id="orgd178e7c">Undo changes</h3>
-<div class="outline-text-3" id="text-orgd178e7c">
+<div id="outline-container-org4a79402" class="outline-3">
+<h3 id="org4a79402">Undo changes</h3>
+<div class="outline-text-3" id="text-org4a79402">
 <p>
 See <a href="https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/">https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/</a>
 and <a href="http://gitimmersion.com/lab_16.html">http://gitimmersion.com/lab_16.html</a>.
 </p>
 </div>
 
-<div id="outline-container-org5388ec1" class="outline-4">
-<h4 id="org5388ec1">Undo local changes which were not pushed to remote repository (after you committed)</h4>
+<div id="outline-container-org8ef8b8b" class="outline-4">
+<h4 id="org8ef8b8b">Undo local changes which were not pushed to remote repository (after you committed)</h4>
 </div>
 
-<div id="outline-container-org0c23252" class="outline-4">
-<h4 id="org0c23252">Undo changes after they are pushed to remote repository</h4>
-<div class="outline-text-4" id="text-org0c23252">
+<div id="outline-container-org560a6cf" class="outline-4">
+<h4 id="org560a6cf">Undo changes after they are pushed to remote repository</h4>
+<div class="outline-text-4" id="text-org560a6cf">
 </div>
-<div id="outline-container-org2c89050" class="outline-5">
-<h5 id="org2c89050">Without history modification (preferred way)</h5>
-<div class="outline-text-5" id="text-org2c89050">
+<div id="outline-container-org7dc5238" class="outline-5">
+<h5 id="org7dc5238">Without history modification (preferred way)</h5>
+<div class="outline-text-5" id="text-org7dc5238">
 <p>
 git revert?
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgcd96b81" class="outline-5">
-<h5 id="orgcd96b81">With history modification (requires coordination with team and force pushes)</h5>
+<div id="outline-container-orge8c2f26" class="outline-5">
+<h5 id="orge8c2f26">With history modification (requires coordination with team and force pushes)</h5>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgb2ac67d" class="outline-2">
-<h2 id="orgb2ac67d">Branches</h2>
-<div class="outline-text-2" id="text-orgb2ac67d">
+<div id="outline-container-orgb9632bf" class="outline-2">
+<h2 id="orgb9632bf">Branches</h2>
+<div class="outline-text-2" id="text-orgb9632bf">
 </div>
-<div id="outline-container-org1c99023" class="outline-3">
-<h3 id="org1c99023">Branching model</h3>
-<div class="outline-text-3" id="text-org1c99023">
+<div id="outline-container-org25f9932" class="outline-3">
+<h3 id="org25f9932">Branching model</h3>
+<div class="outline-text-3" id="text-org25f9932">
 <p>
 Consistent <b>naming conventions</b> (from the <a href="https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow">Gitflow</a> Git workflow):
 </p>
@@ -5457,9 +5445,9 @@ Alternatives:
 </div>
 </div>
 
-<div id="outline-container-org9ad0077" class="outline-3">
-<h3 id="org9ad0077">Create a branch</h3>
-<div class="outline-text-3" id="text-org9ad0077">
+<div id="outline-container-org5325f4e" class="outline-3">
+<h3 id="org5325f4e">Create a branch</h3>
+<div class="outline-text-3" id="text-org5325f4e">
 <p>
 Create a new branch, and then switch to it:
 </p>
@@ -5505,9 +5493,9 @@ resolved, ie. like so
 </div>
 </div>
 
-<div id="outline-container-orgb19dd5b" class="outline-3">
-<h3 id="orgb19dd5b">Publish a branch</h3>
-<div class="outline-text-3" id="text-orgb19dd5b">
+<div id="outline-container-org2b43ae2" class="outline-3">
+<h3 id="org2b43ae2">Publish a branch</h3>
+<div class="outline-text-3" id="text-org2b43ae2">
 <p>
 Push the <code>&lt;current-branch&gt;</code> branch to the <code>origin</code> remote and set up tracking:
 </p>
@@ -5534,19 +5522,19 @@ Push the <code>&lt;current-branch&gt;</code> branch to the <code>origin</code> r
 Then:
 </p>
 <ol class="org-ol">
-<li><a href="#org829a95a">Create a pull request</a>.</li>
+<li><a href="#orgc1718c8">Create a pull request</a>.</li>
 <li>Your team lead will review the code &amp; merge it to the main branch.</li>
 </ol>
 </div>
 </div>
 
-<div id="outline-container-orge037671" class="outline-3">
-<h3 id="orge037671">List branches</h3>
-<div class="outline-text-3" id="text-orge037671">
+<div id="outline-container-org78bff59" class="outline-3">
+<h3 id="org78bff59">List branches</h3>
+<div class="outline-text-3" id="text-org78bff59">
 </div>
-<div id="outline-container-org3c75c7f" class="outline-4">
-<h4 id="org3c75c7f">Show all branches</h4>
-<div class="outline-text-4" id="text-org3c75c7f">
+<div id="outline-container-org46321f4" class="outline-4">
+<h4 id="org46321f4">Show all branches</h4>
+<div class="outline-text-4" id="text-org46321f4">
 <p>
 <b>List all branches</b> (both local remote-tracking and local branches), showing SHA
 and commit subject line for each head, along with the name of the upstream
@@ -5606,17 +5594,17 @@ fco=&ldquo;!f() { git branch -a -vv &#x2013;color=always &#x2013;format=&rsquo;%
 </div>
 </div>
 
-<div id="outline-container-org0a5ee73" class="outline-4">
-<h4 id="org0a5ee73">Show my branches</h4>
+<div id="outline-container-org1a2e2c5" class="outline-4">
+<h4 id="org1a2e2c5">Show my branches</h4>
 </div>
 
-<div id="outline-container-orgeaa0b9e" class="outline-4">
-<h4 id="orgeaa0b9e">Show active branches</h4>
+<div id="outline-container-orgfcb2826" class="outline-4">
+<h4 id="orgfcb2826">Show active branches</h4>
 </div>
 
-<div id="outline-container-orgeda61d5" class="outline-4">
-<h4 id="orgeda61d5">Show merged branches</h4>
-<div class="outline-text-4" id="text-orgeda61d5">
+<div id="outline-container-org9e60570" class="outline-4">
+<h4 id="org9e60570">Show merged branches</h4>
+<div class="outline-text-4" id="text-org9e60570">
 <p>
 List branches whose tips are reachable from the specified commit (HEAD if not
 specified).
@@ -5629,9 +5617,9 @@ specified).
 </div>
 </div>
 
-<div id="outline-container-org403e206" class="outline-4">
-<h4 id="org403e206">Show stale branches</h4>
-<div class="outline-text-4" id="text-org403e206">
+<div id="outline-container-org260ec0f" class="outline-4">
+<h4 id="org260ec0f">Show stale branches</h4>
+<div class="outline-text-4" id="text-org260ec0f">
 <p>
 &ldquo;Stale branches&rdquo; are Git branches <b>without commits</b> for the last few months.  This
 generally indicates old, unmaintained branches for unreleased, incomplete
@@ -5646,9 +5634,9 @@ For GitHub, such period of inactivity is <b>3 months</b> (see
 </div>
 </div>
 
-<div id="outline-container-org81341b7" class="outline-3">
-<h3 id="org81341b7">Switch branches</h3>
-<div class="outline-text-3" id="text-org81341b7">
+<div id="outline-container-org9fa9a83" class="outline-3">
+<h3 id="org9fa9a83">Switch branches</h3>
+<div class="outline-text-3" id="text-org9fa9a83">
 <p>
 Checkout <a href="http://nvie.com/posts/a-successful-git-branching-model/"><b>common branches</b></a> (useful if you have feature branches):
 </p>
@@ -5661,13 +5649,13 @@ Checkout <a href="http://nvie.com/posts/a-successful-git-branching-model/"><b>co
 </div>
 </div>
 
-<div id="outline-container-org00e8aa9" class="outline-3">
-<h3 id="org00e8aa9">Delete a branch</h3>
-<div class="outline-text-3" id="text-org00e8aa9">
+<div id="outline-container-orgd025227" class="outline-3">
+<h3 id="orgd025227">Delete a branch</h3>
+<div class="outline-text-3" id="text-orgd025227">
 </div>
-<div id="outline-container-orgf29e6a1" class="outline-4">
-<h4 id="orgf29e6a1">Delete a local branch</h4>
-<div class="outline-text-4" id="text-orgf29e6a1">
+<div id="outline-container-org2de07f1" class="outline-4">
+<h4 id="org2de07f1">Delete a local branch</h4>
+<div class="outline-text-4" id="text-org2de07f1">
 <p>
 Delete a <b>local</b> branch:
 </p>
@@ -5693,9 +5681,9 @@ branch &ldquo;irrespective of its merged status.&rdquo;
 </div>
 </div>
 
-<div id="outline-container-orgd7944df" class="outline-4">
-<h4 id="orgd7944df">Delete the merged branches</h4>
-<div class="outline-text-4" id="text-orgd7944df">
+<div id="outline-container-org07a2a8f" class="outline-4">
+<h4 id="org07a2a8f">Delete the merged branches</h4>
+<div class="outline-text-4" id="text-org07a2a8f">
 <p>
 <code>delete-merged-branches</code> <b>removes</b> (in bulk) <b>all</b> the <b>local branches</b> that have been
 <b>merged to the current branch</b> that you are in.
@@ -5759,9 +5747,9 @@ for the distinction between &ldquo;merged&rdquo; and &ldquo;fully merged&rdquo; 
 </div>
 </div>
 
-<div id="outline-container-orgb90d4c6" class="outline-4">
-<h4 id="orgb90d4c6">Delete remote branch</h4>
-<div class="outline-text-4" id="text-orgb90d4c6">
+<div id="outline-container-org75ab518" class="outline-4">
+<h4 id="org75ab518">Delete remote branch</h4>
+<div class="outline-text-4" id="text-org75ab518">
 <p>
 Delete a <b>remote</b> branch:
 </p>
@@ -5774,9 +5762,9 @@ Delete a <b>remote</b> branch:
 </div>
 </div>
 
-<div id="outline-container-orge2d9bf7" class="outline-4">
-<h4 id="orge2d9bf7">Delete a branch locally and on the <code>origin</code> remote</h4>
-<div class="outline-text-4" id="text-orge2d9bf7">
+<div id="outline-container-org94d511c" class="outline-4">
+<h4 id="org94d511c">Delete a branch locally and on the <code>origin</code> remote</h4>
+<div class="outline-text-4" id="text-org94d511c">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">nuke-branch</span> = <span class="org-string">"!f() { git delete-local-branch $1 \</span>
 <span class="org-string">                              &amp;&amp; git delete-remote-branch $1; }; f"</span>
@@ -5785,9 +5773,9 @@ Delete a <b>remote</b> branch:
 </div>
 </div>
 
-<div id="outline-container-orge02d27c" class="outline-4">
-<h4 id="orge02d27c">Delete all orphaned branches (that no longer exist at remote)</h4>
-<div class="outline-text-4" id="text-orge02d27c">
+<div id="outline-container-orgbe16377" class="outline-4">
+<h4 id="orgbe16377">Delete all orphaned branches (that no longer exist at remote)</h4>
+<div class="outline-text-4" id="text-orgbe16377">
 <p>
 Once you delete the branch from the remote, you can <b>remove all orphaned
 remote-tracking branches that you have locally</b>, in <code>.git/refs/remotes/origin</code>, but
@@ -5854,9 +5842,9 @@ branch -vv</code>):
 </div>
 </div>
 
-<div id="outline-container-org12ce5f3" class="outline-3">
-<h3 id="org12ce5f3">Rename a branch</h3>
-<div class="outline-text-3" id="text-org12ce5f3">
+<div id="outline-container-org2506754" class="outline-3">
+<h3 id="org2506754">Rename a branch</h3>
+<div class="outline-text-3" id="text-org2506754">
 <p>
 Sometimes we name a branch poorly or maybe we thought the name was &ldquo;good&rdquo; but
 not meaningful to the work we are doing.
@@ -5910,18 +5898,18 @@ To rename a branch <b>locally and remotely</b>:
 </div>
 </div>
 
-<div id="outline-container-orgae37feb" class="outline-2">
-<h2 id="orgae37feb">Tags</h2>
-<div class="outline-text-2" id="text-orgae37feb">
+<div id="outline-container-org4e0f28d" class="outline-2">
+<h2 id="org4e0f28d">Tags</h2>
+<div class="outline-text-2" id="text-org4e0f28d">
 <p>
 Tags give the ability to <b>mark a specific commit</b> in your repository history as
 being important.
 </p>
 </div>
 
-<div id="outline-container-orgd32a41f" class="outline-3">
-<h3 id="orgd32a41f">Create a tag</h3>
-<div class="outline-text-3" id="text-orgd32a41f">
+<div id="outline-container-org407b7e0" class="outline-3">
+<h3 id="org407b7e0">Create a tag</h3>
+<div class="outline-text-3" id="text-org407b7e0">
 <p>
 While Git supports annotated and lightweight tags, you can only <b>create</b>
 </p>
@@ -5975,9 +5963,9 @@ Create a lightweight tag (<i>no message!</i>):
 </div>
 </div>
 
-<div id="outline-container-org131e1ee" class="outline-3">
-<h3 id="org131e1ee">See the commits for a tag</h3>
-<div class="outline-text-3" id="text-org131e1ee">
+<div id="outline-container-orge5d7e13" class="outline-3">
+<h3 id="orge5d7e13">See the commits for a tag</h3>
+<div class="outline-text-3" id="text-orge5d7e13">
 <p>
 See the list of all the commits for that tag.
 </p>
@@ -5989,9 +5977,9 @@ See the list of all the commits for that tag.
 </div>
 </div>
 
-<div id="outline-container-org6d57562" class="outline-3">
-<h3 id="org6d57562">Push a tag to your repository</h3>
-<div class="outline-text-3" id="text-org6d57562">
+<div id="outline-container-orgd11ba95" class="outline-3">
+<h3 id="orgd11ba95">Push a tag to your repository</h3>
+<div class="outline-text-3" id="text-orgd11ba95">
 <p>
 Push all your tags (a regular push won&rsquo;t push a tag):
 </p>
@@ -6004,9 +5992,9 @@ git push --tags origin master           <span class="org-comment-delimiter"># </
 </div>
 </div>
 
-<div id="outline-container-org4b388ea" class="outline-3">
-<h3 id="org4b388ea">List the repository tags</h3>
-<div class="outline-text-3" id="text-org4b388ea">
+<div id="outline-container-orgf70092b" class="outline-3">
+<h3 id="orgf70092b">List the repository tags</h3>
+<div class="outline-text-3" id="text-orgf70092b">
 <p>
 List tags using (better) version sorting (not going from <code>v0.1</code> to <code>v0.10</code>):
 </p>
@@ -6050,9 +6038,9 @@ Show latest annotated tag <i>in all branches</i>:
 </div>
 </div>
 
-<div id="outline-container-orge1b76f1" class="outline-3">
-<h3 id="orge1b76f1">Rename a tag</h3>
-<div class="outline-text-3" id="text-orge1b76f1">
+<div id="outline-container-orgadd92df" class="outline-3">
+<h3 id="orgadd92df">Rename a tag</h3>
+<div class="outline-text-3" id="text-orgadd92df">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Rename a tag (locally and remotely).</span>
     <span class="org-variable-name">rename-tag</span> = <span class="org-string">"!f() { git tag $2 $1; \</span>
@@ -6065,9 +6053,9 @@ Show latest annotated tag <i>in all branches</i>:
 </div>
 </div>
 
-<div id="outline-container-org145f199" class="outline-3">
-<h3 id="org145f199">Remove a tag from a repository</h3>
-<div class="outline-text-3" id="text-org145f199">
+<div id="outline-container-orgdd483b7" class="outline-3">
+<h3 id="orgdd483b7">Remove a tag from a repository</h3>
+<div class="outline-text-3" id="text-orgdd483b7">
 <p>
 Delete similar tags:
 </p>
@@ -6091,9 +6079,9 @@ git delete-tag 'v0.8.*'
 </div>
 </div>
 
-<div id="outline-container-org582a345" class="outline-3">
-<h3 id="org582a345">Remove all tags</h3>
-<div class="outline-text-3" id="text-org582a345">
+<div id="outline-container-org3c7d63d" class="outline-3">
+<h3 id="org3c7d63d">Remove all tags</h3>
+<div class="outline-text-3" id="text-org3c7d63d">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Delete all local and remote tags.</span>
     <span class="org-variable-name">delete-all-tags</span> = <span class="org-string">"!f() { for t in $(git tag); do</span>
@@ -6107,9 +6095,9 @@ git delete-tag 'v0.8.*'
 </div>
 </div>
 
-<div id="outline-container-org87a09c2" class="outline-2">
-<h2 id="org87a09c2">Compare Revisions (commits, branches or tags)</h2>
-<div class="outline-text-2" id="text-org87a09c2">
+<div id="outline-container-orgcc9b03a" class="outline-2">
+<h2 id="orgcc9b03a">Compare Revisions (commits, branches or tags)</h2>
+<div class="outline-text-2" id="text-orgcc9b03a">
 <p>
 <b>See what&rsquo;s changed</b> between two revisions.
 </p>
@@ -6140,9 +6128,9 @@ You can see:
 </ul>
 </div>
 
-<div id="outline-container-org8a2c93e" class="outline-3">
-<h3 id="org8a2c93e">Commits</h3>
-<div class="outline-text-3" id="text-org8a2c93e">
+<div id="outline-container-org6ac6512" class="outline-3">
+<h3 id="org6ac6512">Commits</h3>
+<div class="outline-text-3" id="text-org6ac6512">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Usage: git compare-commits &lt;rev-base&gt; &lt;rev-compare&gt;</span>
     <span class="org-variable-name">compare-commits</span> = <span class="org-string">"!f() { git log --date=short $1...$2; }; f"</span>
@@ -6151,9 +6139,9 @@ You can see:
 </div>
 </div>
 
-<div id="outline-container-org4722ed5" class="outline-3">
-<h3 id="org4722ed5">Files changed</h3>
-<div class="outline-text-3" id="text-org4722ed5">
+<div id="outline-container-org2cb2871" class="outline-3">
+<h3 id="org2cb2871">Files changed</h3>
+<div class="outline-text-3" id="text-org2cb2871">
 <p>
 List all the <code>changed</code> files <b>between 2 commits</b>:
 </p>
@@ -6185,9 +6173,9 @@ git diff --stat origin/master...my_forked_branch
 </div>
 </div>
 
-<div id="outline-container-org04e3669" class="outline-3">
-<h3 id="org04e3669">Diff</h3>
-<div class="outline-text-3" id="text-org04e3669">
+<div id="outline-container-org1d31425" class="outline-3">
+<h3 id="org1d31425">Diff</h3>
+<div class="outline-text-3" id="text-org1d31425">
 <ul class="org-ul">
 <li><p>
 Inline diff (unified)
@@ -6206,13 +6194,13 @@ Inline diff (unified)
 </div>
 </div>
 
-<div id="outline-container-orge32fbe1" class="outline-3">
-<h3 id="orge32fbe1">Merged pull requests</h3>
+<div id="outline-container-orga36f218" class="outline-3">
+<h3 id="orga36f218">Merged pull requests</h3>
 </div>
 
-<div id="outline-container-org164df31" class="outline-3">
-<h3 id="org164df31">Example comparisons</h3>
-<div class="outline-text-3" id="text-org164df31">
+<div id="outline-container-orga9c14ed" class="outline-3">
+<h3 id="orga9c14ed">Example comparisons</h3>
+<div class="outline-text-3" id="text-orga9c14ed">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">Show commits that haven't made it to master yet.</span>
     <span class="org-variable-name">ahead-of-master</span> = log --oneline origin/master..HEAD
@@ -6220,9 +6208,9 @@ Inline diff (unified)
 </div>
 </div>
 
-<div id="outline-container-org87ff25d" class="outline-4">
-<h4 id="org87ff25d">What did I do since I forked from the origin branch?</h4>
-<div class="outline-text-4" id="text-org87ff25d">
+<div id="outline-container-org17468b8" class="outline-4">
+<h4 id="org17468b8">What did I do since I forked from the origin branch?</h4>
+<div class="outline-text-4" id="text-org17468b8">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">log-local</span> = log --oneline origin..HEAD
 </pre>
@@ -6264,9 +6252,9 @@ git log master..branchname
 </div>
 </div>
 
-<div id="outline-container-org90ed00a" class="outline-4">
-<h4 id="org90ed00a"><span class="todo TODO">TODO</span> Diff all changes since branching from master</h4>
-<div class="outline-text-4" id="text-org90ed00a">
+<div id="outline-container-org02262d2" class="outline-4">
+<h4 id="org02262d2"><span class="todo TODO">TODO</span> Diff all changes since branching from master</h4>
+<div class="outline-text-4" id="text-org02262d2">
 <p>
 Show all commits in a git branch since original branching point from <code>master</code>:
 </p>
@@ -6282,9 +6270,9 @@ Show all commits in a git branch since original branching point from <code>maste
 </div>
 </div>
 
-<div id="outline-container-org2d3092c" class="outline-4">
-<h4 id="org2d3092c">What did the origin do since I forked from them?</h4>
-<div class="outline-text-4" id="text-org2d3092c">
+<div id="outline-container-orge259779" class="outline-4">
+<h4 id="orge259779">What did the origin do since I forked from them?</h4>
+<div class="outline-text-4" id="text-orge259779">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">log-fetched</span> = log --oneline HEAD..origin
 </pre>
@@ -6292,9 +6280,9 @@ Show all commits in a git branch since original branching point from <code>maste
 </div>
 </div>
 
-<div id="outline-container-orgd4c9bf2" class="outline-4">
-<h4 id="orgd4c9bf2">History of your branch: List all commits on only one side of the branches</h4>
-<div class="outline-text-4" id="text-orgd4c9bf2">
+<div id="outline-container-org9d16a71" class="outline-4">
+<h4 id="org9d16a71">History of your branch: List all commits on only one side of the branches</h4>
+<div class="outline-text-4" id="text-org9d16a71">
 <p>
 = UNION of log-local AND log-fetched?  (with prefix &lt; or &gt; for branch A or B)
 </p>
@@ -6314,9 +6302,9 @@ differences will collapse.
 </div>
 </div>
 
-<div id="outline-container-orgc8023ab" class="outline-4">
-<h4 id="orgc8023ab"><span class="todo TODO">TODO</span> Show the history difference between a local branch and its remote</h4>
-<div class="outline-text-4" id="text-orgc8023ab">
+<div id="outline-container-org661a594" class="outline-4">
+<h4 id="org661a594"><span class="todo TODO">TODO</span> Show the history difference between a local branch and its remote</h4>
+<div class="outline-text-4" id="text-org661a594">
 <p>
 = git out?  (if I&rsquo;m the only one pushing?)
 </p>
@@ -6330,9 +6318,9 @@ differences will collapse.
 </div>
 </div>
 
-<div id="outline-container-orge446e77" class="outline-2">
-<h2 id="orge446e77">?Releases</h2>
-<div class="outline-text-2" id="text-orge446e77">
+<div id="outline-container-org8a168c7" class="outline-2">
+<h2 id="org8a168c7">?Releases</h2>
+<div class="outline-text-2" id="text-org8a168c7">
 <p>
 You can create a release to package software, along with release notes and links
 to binary files, for other people to use.
@@ -6375,9 +6363,9 @@ Tag and push changes to the repository:
 </div>
 </div>
 
-<div id="outline-container-orgc550dbf" class="outline-2">
-<h2 id="orgc550dbf">?Contributors</h2>
-<div class="outline-text-2" id="text-orgc550dbf">
+<div id="outline-container-org015b0f3" class="outline-2">
+<h2 id="org015b0f3">?Contributors</h2>
+<div class="outline-text-2" id="text-org015b0f3">
 <p>
 Show authors of commits in the repository, <i>excluding merge commits</i>.
 </p>
@@ -6397,9 +6385,9 @@ The <code>--</code> signals the <i>end of options</i>, that the rest of the para
 </div>
 </div>
 
-<div id="outline-container-org7e425ef" class="outline-2">
-<h2 id="org7e425ef">?Graph</h2>
-<div class="outline-text-2" id="text-org7e425ef">
+<div id="outline-container-orgd8a489a" class="outline-2">
+<h2 id="orgd8a489a">?Graph</h2>
+<div class="outline-text-2" id="text-orgd8a489a">
 <p>
 See example at <a href="https://gitlab.com/procps-ng/procps/-/network/master">https://gitlab.com/procps-ng/procps/-/network/master</a>
 </p>
@@ -6439,17 +6427,17 @@ See <a href="https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html">ht
 </div>
 </div>
 
-<div id="outline-container-org2f8f6ea" class="outline-2">
-<h2 id="org2f8f6ea">Pull requests</h2>
-<div class="outline-text-2" id="text-org2f8f6ea">
+<div id="outline-container-orgc41b220" class="outline-2">
+<h2 id="orgc41b220">Pull requests</h2>
+<div class="outline-text-2" id="text-orgc41b220">
 <p>
 XXX See <a href="https://github.com/github/hub/">https://github.com/github/hub/</a>
 </p>
 </div>
 
-<div id="outline-container-org829a95a" class="outline-3">
-<h3 id="org829a95a">Create a pull request</h3>
-<div class="outline-text-3" id="text-org829a95a">
+<div id="outline-container-orgc1718c8" class="outline-3">
+<h3 id="orgc1718c8">Create a pull request</h3>
+<div class="outline-text-3" id="text-orgc1718c8">
 <p>
 Create a pull request against the default branch:
 </p>
@@ -6486,9 +6474,9 @@ curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -X POST -d '{\"body\": \"${t
 </div>
 </div>
 
-<div id="outline-container-org35fc42c" class="outline-3">
-<h3 id="org35fc42c">List pull requests</h3>
-<div class="outline-text-3" id="text-org35fc42c">
+<div id="outline-container-org4e4dfa1" class="outline-3">
+<h3 id="org4e4dfa1">List pull requests</h3>
+<div class="outline-text-3" id="text-org4e4dfa1">
 <p>
 List pull requests in the current repository.
 </p>
@@ -6523,9 +6511,9 @@ git ls-remote origin 'refs/pull/*'
 </div>
 </div>
 
-<div id="outline-container-org48ae53d" class="outline-3">
-<h3 id="org48ae53d">1. Check out a pull request locally</h3>
-<div class="outline-text-3" id="text-org48ae53d">
+<div id="outline-container-org31fffee" class="outline-3">
+<h3 id="org31fffee">1. Check out a pull request locally</h3>
+<div class="outline-text-3" id="text-org31fffee">
 <p>
 XXX <a href="https://gitlab.com/help/user/project/merge_requests/index.md#checkout-merge-requests-locally">https://gitlab.com/help/user/project/merge_requests/index.md#checkout-merge-requests-locally</a>
 </p>
@@ -6569,13 +6557,13 @@ will fetch the <b>pull request</b> #5 into a <b>local</b> <code>pr/5</code> <b>b
 </div>
 </div>
 
-<div id="outline-container-org964bb21" class="outline-3">
-<h3 id="org964bb21">2. Review the changes locally</h3>
+<div id="outline-container-orge1883ee" class="outline-3">
+<h3 id="orge1883ee">2. Review the changes locally</h3>
 </div>
 
-<div id="outline-container-orgc1759a5" class="outline-3">
-<h3 id="orgc1759a5">Push changes to a pull request</h3>
-<div class="outline-text-3" id="text-orgc1759a5">
+<div id="outline-container-orgf8250b3" class="outline-3">
+<h3 id="orgf8250b3">Push changes to a pull request</h3>
+<div class="outline-text-3" id="text-orgf8250b3">
 <div class="org-src-container">
 <pre class="src src-shell"><span class="org-comment-delimiter">#</span><span class="org-comment">!/bin/</span><span class="org-keyword">bash</span>
 <span class="org-variable-name">tmpfile</span>=$(<span class="org-sh-quoted-exec">mktemp</span>)
@@ -6595,9 +6583,9 @@ For more details on pushing changes to a PR, please see <a href="https://help.gi
 </div>
 </div>
 
-<div id="outline-container-orgabb6012" class="outline-3">
-<h3 id="orgabb6012">3. Merge the branch and fix any conflicts that come up</h3>
-<div class="outline-text-3" id="text-orgabb6012">
+<div id="outline-container-org9fc3c95" class="outline-3">
+<h3 id="org9fc3c95">3. Merge the branch and fix any conflicts that come up</h3>
+<div class="outline-text-3" id="text-org9fc3c95">
 <p>
 git fetch origin
 git checkout &ldquo;origin/master&rdquo;
@@ -6610,9 +6598,9 @@ XXX See <a href="https://gitlab.com/help/user/project/merge_requests/squash_and_
 </div>
 </div>
 
-<div id="outline-container-org847149a" class="outline-3">
-<h3 id="org847149a">Merge pull request</h3>
-<div class="outline-text-3" id="text-org847149a">
+<div id="outline-container-orga71ad0a" class="outline-3">
+<h3 id="orga71ad0a">Merge pull request</h3>
+<div class="outline-text-3" id="text-orga71ad0a">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">For GitHub.</span>
     <span class="org-variable-name">mpr</span> = <span class="org-string">"!f() { \</span>
@@ -6686,18 +6674,18 @@ without leaving your terminal &#x2013; this function will help you.
 </div>
 </div>
 
-<div id="outline-container-org1451b9a" class="outline-3">
-<h3 id="org1451b9a">4. Push the result of the merge to the remote</h3>
-<div class="outline-text-3" id="text-org1451b9a">
+<div id="outline-container-org0e9ed5f" class="outline-3">
+<h3 id="org0e9ed5f">4. Push the result of the merge to the remote</h3>
+<div class="outline-text-3" id="text-org0e9ed5f">
 <pre class="example">
 git push origin "master"
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org439f861" class="outline-3">
-<h3 id="org439f861">Clean up old branch</h3>
-<div class="outline-text-3" id="text-org439f861">
+<div id="outline-container-orgb52256e" class="outline-3">
+<h3 id="orgb52256e">Clean up old branch</h3>
+<div class="outline-text-3" id="text-orgb52256e">
 <p>
 Delete source branch:
 </p>
@@ -6709,9 +6697,9 @@ Delete source branch:
 </div>
 </div>
 
-<div id="outline-container-org1bb2fc9" class="outline-3">
-<h3 id="org1bb2fc9">Show in a web browser</h3>
-<div class="outline-text-3" id="text-org1bb2fc9">
+<div id="outline-container-orgc4e58c0" class="outline-3">
+<h3 id="orgc4e58c0">Show in a web browser</h3>
+<div class="outline-text-3" id="text-orgc4e58c0">
 <p>
 Open a pull request page in a web browser.
 </p>
@@ -6723,9 +6711,9 @@ Open a pull request page in a web browser.
 </div>
 </div>
 
-<div id="outline-container-org3c60792" class="outline-3">
-<h3 id="org3c60792">Who?</h3>
-<div class="outline-text-3" id="text-org3c60792">
+<div id="outline-container-org578cf97" class="outline-3">
+<h3 id="org578cf97">Who?</h3>
+<div class="outline-text-3" id="text-org578cf97">
 <p>
 Extra script (called <a href="https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten">git-overwritten</a>) which shows blame information about
 original authors of lines changed or removed in a given branch:
@@ -6757,9 +6745,9 @@ relevant: <a href="https://bitbucket.org/tpettersen/git-guilt">https://bitbucket
 </div>
 </div>
 
-<div id="outline-container-orge5e0ec4" class="outline-3">
-<h3 id="orge5e0ec4">Find the pull request that introduced a commit</h3>
-<div class="outline-text-3" id="text-orge5e0ec4">
+<div id="outline-container-org74e785d" class="outline-3">
+<h3 id="org74e785d">Find the pull request that introduced a commit</h3>
+<div class="outline-text-3" id="text-org74e785d">
 <p>
 Related pull request:
 </p>
@@ -6785,9 +6773,9 @@ In this case, the commit comes from pull request 5.
 </div>
 </div>
 
-<div id="outline-container-orge3fed45" class="outline-3">
-<h3 id="orge3fed45">Saved replies</h3>
-<div class="outline-text-3" id="text-orge3fed45">
+<div id="outline-container-orgb895436" class="outline-3">
+<h3 id="orgb895436">Saved replies</h3>
+<div class="outline-text-3" id="text-orgb895436">
 <p>
 GitHub allows to <a href="https://github.blog/2016-03-29-saved-replies/">save replies</a>. You can set them in <a href="https://github.com/settings/replies">your GitHub settings</a>.  Here
 are a couple of commonly used replies:
@@ -6840,9 +6828,9 @@ Easy: Address the comments -&gt; open a new PR (mention this one + short summary
 </div>
 </div>
 
-<div id="outline-container-org679ce1e" class="outline-2">
-<h2 id="org679ce1e">Pipelines</h2>
-<div class="outline-text-2" id="text-org679ce1e">
+<div id="outline-container-org6df8267" class="outline-2">
+<h2 id="org6df8267">Pipelines</h2>
+<div class="outline-text-2" id="text-org6df8267">
 <div class="org-src-container">
 <pre class="src src-conf"><span class="org-variable-name">rsync-deploy</span> =
 </pre>
@@ -6850,9 +6838,9 @@ Easy: Address the comments -&gt; open a new PR (mention this one + short summary
 </div>
 </div>
 
-<div id="outline-container-orgce694b8" class="outline-2">
-<h2 id="orgce694b8">Deployments (to different environments)</h2>
-<div class="outline-text-2" id="text-orgce694b8">
+<div id="outline-container-orgb4a0692" class="outline-2">
+<h2 id="orgb4a0692">Deployments (to different environments)</h2>
+<div class="outline-text-2" id="text-orgb4a0692">
 <p>
 (see structure of actions in BitBucket)
 </p>
@@ -6885,13 +6873,13 @@ See <a href="https://bitbucket.org/blog/wordpress-continuous-deployment">https:/
 </div>
 </div>
 
-<div id="outline-container-org0794dc6" class="outline-2">
-<h2 id="org0794dc6">Issues</h2>
-<div class="outline-text-2" id="text-org0794dc6">
+<div id="outline-container-org6446514" class="outline-2">
+<h2 id="org6446514">Issues</h2>
+<div class="outline-text-2" id="text-org6446514">
 </div>
-<div id="outline-container-org3257c8d" class="outline-3">
-<h3 id="org3257c8d">Create Issue</h3>
-<div class="outline-text-3" id="text-org3257c8d">
+<div id="outline-container-orge4ab367" class="outline-3">
+<h3 id="orge4ab367">Create Issue</h3>
+<div class="outline-text-3" id="text-orge4ab367">
 <p>
 Open an issue in the current repository.
 </p>
@@ -6924,9 +6912,9 @@ and <a href="https://jwong.co.uk/blog/2018/09/01/useful-github-features/#emoji-o
 </div>
 </div>
 
-<div id="outline-container-org00526a1" class="outline-3">
-<h3 id="org00526a1">Create Pull Requests</h3>
-<div class="outline-text-3" id="text-org00526a1">
+<div id="outline-container-orgd3b456e" class="outline-3">
+<h3 id="orgd3b456e">Create Pull Requests</h3>
+<div class="outline-text-3" id="text-orgd3b456e">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">create-issue-pull-request</span> = XXX
 </pre>
@@ -6951,9 +6939,9 @@ Resolve "Title of issue"
 </div>
 </div>
 
-<div id="outline-container-orgf6fed05" class="outline-3">
-<h3 id="orgf6fed05">List All Issues</h3>
-<div class="outline-text-3" id="text-orgf6fed05">
+<div id="outline-container-org21252b8" class="outline-3">
+<h3 id="org21252b8">List All Issues</h3>
+<div class="outline-text-3" id="text-org21252b8">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-comment-delimiter"># </span><span class="org-comment">issues = "!f() { username=$1; \</span>
     <span class="org-comment-delimiter">#     </span><span class="org-comment">curl --user $username \</span>
@@ -6993,9 +6981,9 @@ curl -u $username -X GET <span class="org-string">'https://api.bitbucket.org/2.0
 </div>
 </div>
 
-<div id="outline-container-org4a21689" class="outline-3">
-<h3 id="org4a21689">List Open Issues</h3>
-<div class="outline-text-3" id="text-org4a21689">
+<div id="outline-container-org06fcff1" class="outline-3">
+<h3 id="org06fcff1">List Open Issues</h3>
+<div class="outline-text-3" id="text-org06fcff1">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">issues-open</span> = !git issues | grep <span class="org-string">"open"</span>
 </pre>
@@ -7003,9 +6991,9 @@ curl -u $username -X GET <span class="org-string">'https://api.bitbucket.org/2.0
 </div>
 </div>
 
-<div id="outline-container-org56e49cc" class="outline-3">
-<h3 id="org56e49cc">List My Issues (assigned to me)</h3>
-<div class="outline-text-3" id="text-org56e49cc">
+<div id="outline-container-org7cf2798" class="outline-3">
+<h3 id="org7cf2798">List My Issues (assigned to me)</h3>
+<div class="outline-text-3" id="text-org7cf2798">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">issues-assigned-to-me</span> = !git issues | grep <span class="org-string">"$(git config user.name)"</span>
 </pre>
@@ -7013,9 +7001,9 @@ curl -u $username -X GET <span class="org-string">'https://api.bitbucket.org/2.0
 </div>
 </div>
 
-<div id="outline-container-org84cab1f" class="outline-3">
-<h3 id="org84cab1f">List Issues I&rsquo;ve created</h3>
-<div class="outline-text-3" id="text-org84cab1f">
+<div id="outline-container-org99a2169" class="outline-3">
+<h3 id="org99a2169">List Issues I&rsquo;ve created</h3>
+<div class="outline-text-3" id="text-org99a2169">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">issues-created-by-me</span> = XXX
 </pre>
@@ -7023,9 +7011,9 @@ curl -u $username -X GET <span class="org-string">'https://api.bitbucket.org/2.0
 </div>
 </div>
 
-<div id="outline-container-org28b9df0" class="outline-3">
-<h3 id="org28b9df0">Show Issue</h3>
-<div class="outline-text-3" id="text-org28b9df0">
+<div id="outline-container-orgfb19e0f" class="outline-3">
+<h3 id="orgfb19e0f">Show Issue</h3>
+<div class="outline-text-3" id="text-orgfb19e0f">
 <p>
 Show an existing issue specified by NUMBER.
 </p>
@@ -7037,9 +7025,9 @@ Show an existing issue specified by NUMBER.
 </div>
 </div>
 
-<div id="outline-container-org979538a" class="outline-3">
-<h3 id="org979538a">Open Issues in a web browser</h3>
-<div class="outline-text-3" id="text-org979538a">
+<div id="outline-container-org64b1d9b" class="outline-3">
+<h3 id="org64b1d9b">Open Issues in a web browser</h3>
+<div class="outline-text-3" id="text-org64b1d9b">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">browse-issues</span> = <span class="org-string">"!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f"</span>
 </pre>
@@ -7048,9 +7036,9 @@ Show an existing issue specified by NUMBER.
 </div>
 </div>
 
-<div id="outline-container-org417ca6f" class="outline-2">
-<h2 id="org417ca6f">Downloads</h2>
-<div class="outline-text-2" id="text-org417ca6f">
+<div id="outline-container-orgd4e961a" class="outline-2">
+<h2 id="orgd4e961a">Downloads</h2>
+<div class="outline-text-2" id="text-orgd4e961a">
 <p>
 Download repository, tag or branch.
 </p>
@@ -7065,13 +7053,13 @@ Download repository, tag or branch.
 </div>
 </div>
 
-<div id="outline-container-orge5a0a66" class="outline-2">
-<h2 id="orge5a0a66">Settings</h2>
-<div class="outline-text-2" id="text-orge5a0a66">
+<div id="outline-container-orgbe9b7cd" class="outline-2">
+<h2 id="orgbe9b7cd">Settings</h2>
+<div class="outline-text-2" id="text-orgbe9b7cd">
 </div>
-<div id="outline-container-org08f9de8" class="outline-3">
-<h3 id="org08f9de8">SSH keys</h3>
-<div class="outline-text-3" id="text-org08f9de8">
+<div id="outline-container-orga17a576" class="outline-3">
+<h3 id="orga17a576">SSH keys</h3>
+<div class="outline-text-3" id="text-orga17a576">
 <p>
 List the user&rsquo;s public SSH keys:
 </p>
@@ -7088,17 +7076,45 @@ curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq <span class="org
 </div>
 </div>
 
-<div id="outline-container-orgc025074" class="outline-2">
-<h2 id="orgc025074">------------------------------------------------------------------------------</h2>
+<div id="outline-container-org1f18c9d" class="outline-2">
+<h2 id="org1f18c9d">------------------------------------------------------------------------------</h2>
 </div>
 
-<div id="outline-container-orge73b9c6" class="outline-2">
-<h2 id="orge73b9c6">Download repository</h2>
-<div class="outline-text-2" id="text-orge73b9c6">
+<div id="outline-container-orgc532ceb" class="outline-2">
+<h2 id="orgc532ceb">Run on All repositories</h2>
+<div class="outline-text-2" id="text-orgc532ceb">
+<p>
+The biggest use I get out of this alias is making sure I have everything
+committed. Sometimes I&rsquo;ll work on a project and then forget about it for
+a little while without committing. When I want to double-check that I&rsquo;m not
+forgetting anything, I run <code>git all status --short</code> to quickly scan which repos
+have uncommitted changes that I need to take care of.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-conf">    <span class="org-variable-name">all</span> = <span class="org-string">"!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"</span>
+
+    <span class="org-variable-name">print-reponame-then-run</span> = <span class="org-string">"!f() { echo "</span>======<span class="org-string">"; basename `git rev-parse --show-toplevel`; echo "</span>======<span class="org-string">"; git "</span>$@<span class="org-string">";}; f"</span>
+
+    <span class="org-comment-delimiter"># </span><span class="org-comment">run commands for each repository in the current directory</span>
+    <span class="org-variable-name">allr</span> = <span class="org-string">"!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "</span>$@<span class="org-string">"; }; f"</span>
+</pre>
 </div>
-<div id="outline-container-org177ee2a" class="outline-3">
-<h3 id="org177ee2a">Easily launch a temporary one-off Git server from any local repository, to enable a peer-to-peer Git workflow</h3>
-<div class="outline-text-3" id="text-org177ee2a">
+
+<p>
+See also <code>git-repos</code>:
+<a href="http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html">http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgaa8506b" class="outline-2">
+<h2 id="orgaa8506b">Download repository</h2>
+<div class="outline-text-2" id="text-orgaa8506b">
+</div>
+<div id="outline-container-orgceea411" class="outline-3">
+<h3 id="orgceea411">Easily launch a temporary one-off Git server from any local repository, to enable a peer-to-peer Git workflow</h3>
+<div class="outline-text-3" id="text-orgceea411">
 <div class="org-src-container">
 <pre class="src src-conf">    <span class="org-variable-name">serve</span> = <span class="org-string">"daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"</span>
     <span class="org-variable-name">serve</span> = <span class="org-string">"-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"</span>
@@ -7117,9 +7133,9 @@ git://192.168.1.123/&rdquo;</li>
 </div>
 </div>
 
-<div id="outline-container-orgef3f34a" class="outline-2">
-<h2 id="orgef3f34a">What if</h2>
-<div class="outline-text-2" id="text-orgef3f34a">
+<div id="outline-container-org38dde6f" class="outline-2">
+<h2 id="org38dde6f">What if</h2>
+<div class="outline-text-2" id="text-org38dde6f">
 <p>
 &#x2026; I&rsquo;m working on <code>master</code> adding a simple feature. After a few minutes I realize
 it was not so simple and it should have been better to work into a new branch.
@@ -7131,18 +7147,18 @@ it was not so simple and it should have been better to work into a new branch.
 </div>
 </div>
 
-<div id="outline-container-org98bbf8f" class="outline-2">
-<h2 id="org98bbf8f">If you made a mistake</h2>
-<div class="outline-text-2" id="text-org98bbf8f">
+<div id="outline-container-orgedfd03f" class="outline-2">
+<h2 id="orgedfd03f">If you made a mistake</h2>
+<div class="outline-text-2" id="text-orgedfd03f">
 <p>
 Absolutely read <a href="https://github.com/blog/2019-how-to-undo-almost-anything-with-git">https://github.com/blog/2019-how-to-undo-almost-anything-with-git</a>!
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1640541" class="outline-2">
-<h2 id="org1640541">If you get errors&#x2026;</h2>
-<div class="outline-text-2" id="text-org1640541">
+<div id="outline-container-org38f1095" class="outline-2">
+<h2 id="org38f1095">If you get errors&#x2026;</h2>
+<div class="outline-text-2" id="text-org38f1095">
 <p>
 Many situations may cause &ldquo;errors&rdquo;:
 </p>
@@ -7162,9 +7178,9 @@ the situation worse.</li>
 </p>
 </div>
 
-<div id="outline-container-org64e7393" class="outline-3">
-<h3 id="org64e7393">Method 1</h3>
-<div class="outline-text-3" id="text-org64e7393">
+<div id="outline-container-orgcb1f7f1" class="outline-3">
+<h3 id="orgcb1f7f1">Method 1</h3>
+<div class="outline-text-3" id="text-orgcb1f7f1">
 <p>
 It is POSSIBLE that a safe way to recover from your problems is as follows:
 </p>
@@ -7197,9 +7213,9 @@ you can clean up with:
 </div>
 </div>
 
-<div id="outline-container-org1b0d9fd" class="outline-3">
-<h3 id="org1b0d9fd">Alternative</h3>
-<div class="outline-text-3" id="text-org1b0d9fd">
+<div id="outline-container-orgc2dff0f" class="outline-3">
+<h3 id="orgc2dff0f">Alternative</h3>
+<div class="outline-text-3" id="text-orgc2dff0f">
 <p>
 If your <code>master</code> branch is busted, rename it to something else so that it&rsquo;s out of
 the way:
@@ -7239,9 +7255,9 @@ Make sure the <code>master</code> is up-to-date:
 </div>
 </div>
 
-<div id="outline-container-org42d3796" class="outline-3">
-<h3 id="org42d3796">A GitHub test repository to experiment with conflicts</h3>
-<div class="outline-text-3" id="text-org42d3796">
+<div id="outline-container-orgad0cb30" class="outline-3">
+<h3 id="orgad0cb30">A GitHub test repository to experiment with conflicts</h3>
+<div class="outline-text-3" id="text-orgad0cb30">
 <p>
 You can experiment with resolving a Git conflict with this repository:
 <a href="https://github.com/brianleetest/testGit/blob/master/README.md">https://github.com/brianleetest/testGit/blob/master/README.md</a>
@@ -7250,23 +7266,23 @@ You can experiment with resolving a Git conflict with this repository:
 </div>
 </div>
 
-<div id="outline-container-org66ce20d" class="outline-2">
-<h2 id="org66ce20d">GitHub tasks</h2>
-<div class="outline-text-2" id="text-org66ce20d">
+<div id="outline-container-org5920d5e" class="outline-2">
+<h2 id="org5920d5e">GitHub tasks</h2>
+<div class="outline-text-2" id="text-org5920d5e">
 </div>
 
-<div id="outline-container-org96c1e5a" class="outline-3">
-<h3 id="org96c1e5a">Force push</h3>
-<div class="outline-text-3" id="text-org96c1e5a">
+<div id="outline-container-orgda6ce49" class="outline-3">
+<h3 id="orgda6ce49">Force push</h3>
+<div class="outline-text-3" id="text-orgda6ce49">
 <div class="org-src-container">
 <pre class="src src-shell">git push --force origin master
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org1cb07ac" class="outline-4">
-<h4 id="org1cb07ac">Doc about push failure</h4>
-<div class="outline-text-4" id="text-org1cb07ac">
+<div id="outline-container-org26cd56f" class="outline-4">
+<h4 id="org26cd56f">Doc about push failure</h4>
+<div class="outline-text-4" id="text-org26cd56f">
 <p>
 If a push fails, that does not necessarily indicate a &ldquo;bad state&rdquo; &#x2013; it simply
 represents that your history is different than what the remote server has, and
@@ -7368,9 +7384,9 @@ branch (using <code>git push --force</code>) and someone needs a talkin&rsquo; t
 </div>
 </div>
 
-<div id="outline-container-org9cda3e0" class="outline-2">
-<h2 id="org9cda3e0">References</h2>
-<div class="outline-text-2" id="text-org9cda3e0">
+<div id="outline-container-org763e266" class="outline-2">
+<h2 id="org763e266">References</h2>
+<div class="outline-text-2" id="text-org763e266">
 <ul class="org-ul">
 <li><a href="https://github.com/tj/git-extras">https://github.com/tj/git-extras</a></li>
 <li><a href="https://hub.github.com/hub.1.html">https://hub.github.com/hub.1.html</a></li>
@@ -7382,18 +7398,18 @@ branch (using <code>git push --force</code>) and someone needs a talkin&rsquo; t
 </div>
 </div>
 
-<div id="outline-container-orge02abb7" class="outline-2">
-<h2 id="orge02abb7">Free private repositories</h2>
-<div class="outline-text-2" id="text-orge02abb7">
+<div id="outline-container-org649925a" class="outline-2">
+<h2 id="org649925a">Free private repositories</h2>
+<div class="outline-text-2" id="text-org649925a">
 <p>
 I use the <b>free private repos</b> from <a href="https://bitbucket.org/">https://bitbucket.org/</a>.
 </p>
 </div>
 </div>
 
-<div id="outline-container-orge91f36d" class="outline-2">
-<h2 id="orge91f36d">Use Git and SVN together</h2>
-<div class="outline-text-2" id="text-orge91f36d">
+<div id="outline-container-orgb0dd71f" class="outline-2">
+<h2 id="orgb0dd71f">Use Git and SVN together</h2>
+<div class="outline-text-2" id="text-orgb0dd71f">
 <p>
 You can combine both Git and SVN on the same project codebase, <b>in the same
 working directory</b>:

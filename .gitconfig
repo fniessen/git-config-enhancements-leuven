@@ -772,13 +772,6 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
                                git logdate -1 -r $branch --; \
                            done'"
 
-    all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
-
-    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
-
-    # run commands for each repository in the current directory
-    allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
-
     create-local-repository = !git init \
                                    && ( [[ -n $(ls) ]] || touch .gitignore ) \
                                    && git add . \
@@ -1145,6 +1138,13 @@ deploy-prod =
     download-repository = "!f() { git archive ${1:-HEAD} --format=zip \
                                       -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
 # XXX Test it with tag or branch.
+
+    all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
+
+    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
+
+    # run commands for each repository in the current directory
+    allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
 
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
     serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"

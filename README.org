@@ -2905,26 +2905,6 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
     cvs-full-log = log --reverse --pretty=format:'%B------------------------------------------------------------------------'
 #+end_src
 
-* Run on All repositories
-
-The biggest use I get out of this alias is making sure I have everything
-committed. Sometimes I'll work on a project and then forget about it for
-a little while without committing. When I want to double-check that I'm not
-forgetting anything, I run ~git all status --short~ to quickly scan which repos
-have uncommitted changes that I need to take care of.
-
-#+begin_src conf
-    all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
-
-    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
-
-    # run commands for each repository in the current directory
-    allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
-#+end_src
-
-See also ~git-repos~:
-http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
-
 * ------------------------------------------------------------------------------
 
 * Repository
@@ -2937,6 +2917,13 @@ http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
                                    && git add . \
                                    && git commit -m \"Initial commit\"
 #+end_src
+
+#+begin_tip
+Since Git doesn't add *empty directories*, if you want to keep them in the
+repository, a sort of conventional hack is to create a file called =.gitkeep= in
+these directories.  (The file could be called anything; Git assigns no special
+significance to this name.)
+#+end_tip
 
 Remove Git from current project:
 
@@ -4580,6 +4567,26 @@ curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
 #+end_src
 
 * ------------------------------------------------------------------------------
+
+* Run on All repositories
+
+The biggest use I get out of this alias is making sure I have everything
+committed. Sometimes I'll work on a project and then forget about it for
+a little while without committing. When I want to double-check that I'm not
+forgetting anything, I run ~git all status --short~ to quickly scan which repos
+have uncommitted changes that I need to take care of.
+
+#+begin_src conf
+    all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
+
+    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
+
+    # run commands for each repository in the current directory
+    allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
+#+end_src
+
+See also ~git-repos~:
+http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 
 * Download repository
 
