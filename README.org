@@ -939,10 +939,6 @@ git diff -b
 git diff -w
 
 #+begin_src conf
-    df = diff
-#+end_src
-
-#+begin_src conf
     # Ignore whitespace changes.
     wdiff = diff -b
     wdiff = diff --word-diff
@@ -956,13 +952,13 @@ git diff -w
 #+end_src
 
 #+begin_src conf
-    # Diff line-wise
-    d = diff
+    # Diff line-wise.
+    df = diff
 
-    # Diff word-wise
+    # Diff word-wise.
     dw = diff --color-words
 
-    # Diff character-wise
+    # Diff character-wise.
     dt = diff --word-diff-regex=.
 #+end_src
 

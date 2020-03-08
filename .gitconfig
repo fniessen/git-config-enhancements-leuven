@@ -282,8 +282,6 @@
 
     st = status -s -b
 
-    df = diff
-
     # Ignore whitespace changes.
     wdiff = diff -b
     wdiff = diff --word-diff
@@ -293,13 +291,13 @@
     # Configure git-diff to produce the absolutely most minimal diff possible.
     wdiff = diff -w --word-diff-regex=. --color-words -U0
 
-    # Diff line-wise
-    d = diff
+    # Diff line-wise.
+    df = diff
 
-    # Diff word-wise
+    # Diff word-wise.
     dw = diff --color-words
 
-    # Diff character-wise
+    # Diff character-wise.
     dt = diff --word-diff-regex=.
 
     # Review staged changes (about to be committed).
