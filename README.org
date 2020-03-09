@@ -271,6 +271,9 @@ Improve the ~git diff~ output: diff-so-fancy or [[https://github.com/dandavison/
     pager = diff-so-fancy | less --tabs=4 -RFX
 #+end_src
 
+(~less~ options -- ~-R~ for colors to persist, ~-F~ to exit immediately if the output
+is less than one screen, and ~-X~ for not clearing the screen).
+
 #+begin_src conf :tangle no
     autocrlf = input
     safecrlf = true
