@@ -2664,6 +2664,9 @@ See https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release
 Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit message since the
 last tag.
 
+How to Write a Good Commit Message + A changelog generation:
+https://dev.to/gaelthomas/a-beginner-s-guide-to-git-how-to-write-a-good-commit-message-2j49
+
 #+begin_src conf
     # Detailed list of changes.
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
@@ -3984,6 +3987,15 @@ See the changed files in a branch since the last merge with the origin branch:
 
 - Side-by-side diff (split)
 
+*** Compare files from two different branches
+
+#+begin_src shell :tangle no
+git diff branch1..branch2 -- path/to/file
+#+end_src
+
+If either side is ~HEAD~, it may be omitted (e.g. ~master..~ compares ~master~ to
+~HEAD~).
+
 ** Merged pull requests
 
 ** Example comparisons
@@ -4507,6 +4519,8 @@ curl -u $username -X GET 'https://api.bitbucket.org/2.0/repositories/$username/$
     | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
 # curl -s -S
 #+end_src
+
+See also [[https://cran.r-project.org/web/packages/jsonlite/vignettes/json-apis.html][Fetching JSON data from Github REST API]].
 
 ** List Open Issues
 
