@@ -41,6 +41,9 @@ https://github.com/gitalias/gitalias/blob/master/gitalias.txt
 XXX Today I learned
 https://til.hashrocket.com/git
 
+XXX Visualized Git commands
+https://dev.to/lydiahallie/cs-visualized-useful-git-commands-37p1
+
 * Overview
 
 - This is Git.  It tracks collaborative work on projects through a beautiful
@@ -3461,6 +3464,13 @@ any *line* that was added, removed, or changed.
 git log --all -G "foo" --since="1 week ago"
 git log --all -G "foo" --full-history --since="1 week ago"
 #+end_src
+
+*** How to find all the commits made only on a specific branch
+
+Assuming that your branch was created off of ~develop~, then /while in the branch/
+(that is, you have the branch checked out):
+
+: git log --no-merges --graph develop..
 
 ** Push
 
