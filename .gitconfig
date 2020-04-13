@@ -233,10 +233,10 @@
     whoischanging = !sh -c 'git shortlog HEAD..origin/$0'
     whoischangingmaster = !sh -c 'git shortlog HEAD..origin/master'
 
-    #what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
+    # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
     showorigin = "!sh -c 'for branch in `git branch -r | grep -v HEAD`;do echo `git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $branch | head -n 1` \\\t$branch; done | sort -r'"
 
-    #get remote branches
+    # get remote branches
     trackallbranches = !sh -c "for branchname in `git branch -r `; do git branch --track $branchname; done"
     updateallbranches = !sh -c "for branchname in `git branch -r `; do git checkout $branchname ; git pull; done"
 
@@ -261,11 +261,11 @@
 
 #OTHER
 
-    #Deletes all branches that were safely merged into the master. All other are skipped (no worries).
-    #on osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation
+    # Deletes all branches that were safely merged into the master. All other are skipped (no worries).
+    # on osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation
     cleanup = !git branch --merged=master | grep -Ev '^\\* | master$' | xargs -r git branch -d
 
-    #Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
+    # Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
     cleanuplocal = !git remote prune origin && git gc && git clean -df
 
     # Check if any file in repo has whitespace errors
@@ -274,10 +274,10 @@
     whitespace-violations = "!git diff --check $(git hash-object -t tree /dev/null)"
 
     # Check if any file in repo has windows line endings
-    #Currently do not work as alias, works from comand line directly. There is a problem with \r
+    # Currently do not work as alias, works from comand line directly. There is a problem with \r
     check-eol = grep --files-with-matches $'\\r' HEAD
 
-    #Jira tickets (from: http://blogs.atlassian.com/2014/08/whats-new-git-2-1/)
+    # Jira tickets (from: http://blogs.atlassian.com/2014/08/whats-new-git-2-1/)
     issues = "!f() { : git log ; echo 'Printing issue keys'; git log --oneline $@ | egrep -o [A-Z]+-[0-9]+ | sort -u; }; f"
 
     st = status -s -b
@@ -1025,7 +1025,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                                | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
                        echo '}'; }; f"
 
-    pull-request-bb = "!f() { repo_owner=$1; repo_slug=$2; \
+    pull-request-bb = "!f() { username=$1; \
         curl --user $username \
             https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 

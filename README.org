@@ -857,10 +857,10 @@ clean and relevant commits, no experiments or fixing typos.
     whoischanging = !sh -c 'git shortlog HEAD..origin/$0'
     whoischangingmaster = !sh -c 'git shortlog HEAD..origin/master'
 
-    #what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
+    # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
     showorigin = "!sh -c 'for branch in `git branch -r | grep -v HEAD`;do echo `git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $branch | head -n 1` \\\t$branch; done | sort -r'"
 
-    #get remote branches
+    # get remote branches
     trackallbranches = !sh -c "for branchname in `git branch -r `; do git branch --track $branchname; done"
     updateallbranches = !sh -c "for branchname in `git branch -r `; do git checkout $branchname ; git pull; done"
 
@@ -885,11 +885,11 @@ clean and relevant commits, no experiments or fixing typos.
 
 #OTHER
 
-    #Deletes all branches that were safely merged into the master. All other are skipped (no worries).
-    #on osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation
+    # Deletes all branches that were safely merged into the master. All other are skipped (no worries).
+    # on osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation
     cleanup = !git branch --merged=master | grep -Ev '^\\* | master$' | xargs -r git branch -d
 
-    #Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
+    # Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
     cleanuplocal = !git remote prune origin && git gc && git clean -df
 
     # Check if any file in repo has whitespace errors
@@ -898,10 +898,10 @@ clean and relevant commits, no experiments or fixing typos.
     whitespace-violations = "!git diff --check $(git hash-object -t tree /dev/null)"
 
     # Check if any file in repo has windows line endings
-    #Currently do not work as alias, works from comand line directly. There is a problem with \r
+    # Currently do not work as alias, works from comand line directly. There is a problem with \r
     check-eol = grep --files-with-matches $'\\r' HEAD
 
-    #Jira tickets (from: http://blogs.atlassian.com/2014/08/whats-new-git-2-1/)
+    # Jira tickets (from: http://blogs.atlassian.com/2014/08/whats-new-git-2-1/)
     issues = "!f() { : git log ; echo 'Printing issue keys'; git log --oneline $@ | egrep -o [A-Z]+-[0-9]+ | sort -u; }; f"
 #+end_src
 
@@ -939,9 +939,9 @@ See also ~-b~ (~--ignore-space-change~): Ignore changes in amount of
 whitespace. This ignores whitespace at line end, and considers all other
 sequences of one or more whitespace characters to be equivalent.
 
-# permet d’ignorer les différences d’espaces et d’indentations
+# permet d'ignorer les différences d'espaces et d'indentations
 git diff -b
-# permet d’ignorer les différences d’espaces et indentations au sein de la même ligne, mais indique les lignes vides ajoutées ou supprimées
+# permet d'ignorer les différences d'espaces et indentations au sein de la même ligne, mais indique les lignes vides ajoutées ou supprimées
 git diff -w
 
 #+begin_src conf
@@ -2975,22 +2975,9 @@ Or, if you want to use RSA:
 *Private* or *public* repository?
 
 #+begin_src conf :tangle no
-    create-repository-gh = "!f() { username=$1; repo_slug=$2; \
+    create-repository-gh = "!f() { repo_owner=$1; repo_slug=$2; \
         curl -u \"$1\" \
             https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; }; f"
-#+end_src
-
-Include a README:
-
-#+begin_src conf :tangle no
-git init
-git remote add origin git@github.com:$username/$repo_slug.git
-
-echo "# ${repo_slug:-Repository name}\n\nDescription" >> README.md
-git add README.md
-git commit -m "Initial commit"
-
-git push -u origin master
 #+end_src
 
 #+begin_src conf
@@ -3019,6 +3006,26 @@ https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
 #+end_src
 
 XXX open = cygstart?
+
+* Instructions
+
+Start working with your repository.
+
+** Create a README
+
+Create a =README= file into your repository.
+
+#+begin_src conf :tangle no
+echo "# ${$(git repo-slug):-Repository name}\n\nDescription" >> README.md
+git add README.md
+git commit -m "Add README.md"
+
+git push -u origin master
+#+end_src
+
+** Create a .gitignore
+
+You can also create a =.gitignore= file into your repository.
 
 * Source Files
 
@@ -3967,7 +3974,7 @@ You can see:
 
 ** Files changed
 
-List all the ~changed~ files *between 2 commits*:
+List all the changed *files between 2 commits*:
 
 #+begin_src conf
     # Show changed files (with stat about line additions and line deletions)
@@ -3986,7 +3993,9 @@ See the changed files in a branch since the last merge with the origin branch:
 
 ** Diff
 
-- Inline diff (unified)
+View all diffs.
+
+- Inline diff (unified, single view)
 
   #+begin_src conf
     # Example: git compare master@{1day} master
@@ -3995,7 +4004,7 @@ See the changed files in a branch since the last merge with the origin branch:
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
   #+end_src
 
-- Side-by-side diff (split)
+- Side-by-side diff (split view)
 
 *** Compare files from two different branches
 
@@ -4158,6 +4167,9 @@ See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
 
 * Pull requests
 
+A pull request (PR) is a request from someone to merge in code from one branch
+to another.
+
 XXX See https://github.com/github/hub/
 
 ** Create a pull request
@@ -4165,10 +4177,14 @@ XXX See https://github.com/github/hub/
 :ID:       a7039f6e-825c-484c-8739-f3e32a9c45fc
 :END:
 
+You'll be asked to select a "From" branch and a "To" branch.
+
+You need to enter a PR summary.  The description is optional.
+
 Create a pull request against the default branch:
 
 #+begin_src conf
-    pull-request-bb = "!f() { repo_owner=$1; repo_slug=$2; \
+    pull-request-bb = "!f() { username=$1; \
         curl --user $username \
             https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 #+end_src
@@ -4198,8 +4214,8 @@ List pull requests in the current repository.
 - Pull Requests assigned to me
 - Pull Requests I've created
 
-- Open
-- Merged
+- *Open*
+- *Merged*
 - Closed
 - All
 
@@ -4270,6 +4286,8 @@ XXX See https://gitlab.com/help/user/project/merge_requests/squash_and_merge
 
 ** Merge pull request
 
+If everything is OK, you can merge the pull request.
+
 #+begin_src conf
     # For GitHub.
     mpr = "!f() { \
@@ -4330,7 +4348,8 @@ without leaving your terminal -- this function will help you.
 
 ** Clean up old branch
 
-Delete source branch:
+Delete the *from* branch after PR is merged (or ignored -- if it was created
+b accident or if it's irrelevant):
 
 #+begin_src conf
     pr-clean = "!f() { git delete-local-branch pr/$1; }; f"
@@ -4458,9 +4477,22 @@ deploy-prod =
 
 * Issues
 
+Status (and status values that are allowed on a ticket).
+
+- Open
+  + New
+  + Accepted
+  + Test
+
+- Closed
+  + Invalid
+  + Closed
+
 ** Create Issue
 
-Open an issue in the current repository.
+Open an issue in the current repository:
+- Enter a summary
+- Write an optional description
 
 #+begin_src conf
 # title
