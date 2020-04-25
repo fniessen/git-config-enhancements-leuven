@@ -2575,7 +2575,7 @@ the v2.3 tag -- we can be certain that this change is part of v2.3, then.
 
    : git format-patch HEAD~
 
-*** Using the patch
+*** Applying the patch
 
 : git am *.patch
 
@@ -3623,7 +3623,7 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
     # Show info for branches which have been checked out locally...
     br = for-each-ref \
              --sort=-committerdate refs/heads/ \
-             --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset)'
+             --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
 #+end_src
 
 #+begin_src conf
