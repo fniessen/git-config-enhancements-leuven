@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+for repo in $(find . -name ".git" -type d | rev | cut -c 6- | rev); do
+    echo "$repo:"
+    git -C "$repo" config --get remote.origin.url
+    echo
+done
