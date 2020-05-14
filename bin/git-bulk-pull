@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-BLU=$(tput bold)$(tput setaf 4)
+bold=$(tput bold)
 reset=$(tput sgr0)
 
 if [[ $(stat -c %A ~/.ssh/config) != "-rw-------" ]]; then
@@ -17,7 +17,7 @@ printf '%s\n\n' "Searching at most 5 levels of directories..."
 # Handle directories with spaces in find command.
 find . -maxdepth 5 -name ".git" -type d | rev | cut -c 6- | rev | sed "s#^\./##" |
     while IFS=$'\n' read -r repo; do
-        printf '%s\n' "Current repository: ${BLU}$repo${reset}"
+        printf '%s\n' "Current repository: ${bold}$repo${reset}"
         # git -C "$repo" pull                 # Does not do anything if unstaged changes!
         git -C "$repo" remote update --prune  # Delete old branches. Good!
         git -C "$repo" merge --ff-only "@{u}"

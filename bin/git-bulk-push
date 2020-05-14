@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-BLU=$(tput bold)$(tput setaf 4)
+bold=$(tput bold)
 reset=$(tput sgr0)
 
 # TODO Return the exit code of the underlying git invocations
@@ -8,7 +8,7 @@ reset=$(tput sgr0)
 
 echo "Searching at most 5 levels of directories..."
 for repo in $(find . -maxdepth 5 -name ".git" -type d | rev | cut -c 6- | rev | sed "s#^\./##"); do
-    echo "Current repository: ${BLU}$repo${reset}"
+    echo "Current repository: ${bold}$repo${reset}"
     git -C "$repo" ls-remote >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
         if [[ -n "$(git -C "$repo" log @{u}..)" ]]; then
