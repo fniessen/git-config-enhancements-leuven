@@ -1032,7 +1032,7 @@ Show changes for a daily standup meeting:
     log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
 
     standup = "!git log --branches \
-                        --since=$(if [[ "$(date +%a)" == "Mon" ]]; then \
+                        --since=$(if [ "$(date +%a)" = "Mon" ]; then \
                                       echo "friday"; \
                                   else \
                                       echo "yesterday"; \
@@ -1199,24 +1199,30 @@ Tell if a file is being tracked:
     # List all tracked files.
     ls-tracked = ls-files -t
 
-    tracked1 = "!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
+    tracked1 = "!f() { tracked=$(git ls-files ${1}); if [ -z \"${tracked}\" ]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
 
-    tracked2 = "!f() { echo -n ${1}': '; if [[ -f ${1} ]]; then tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
+    tracked2 = "!f() { echo -n ${1}': '; if [ -f \"${1}\" ]; then tracked=$(git ls-files ${1}); if [ -z \"${tracked}\" ]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
 # does not work!?
 #+end_src
 
 #+begin_note
 ~[[~ has fewer surprises and is generally safer to use. But it is not portable --
-POSIX doesn't specify what it does and only some shells support it (beside bash,
-I heard ksh supports it too). For example, you can do
+it's a *Bashism*, POSIX doesn't specify what it does.
+
+For example, you can do
 
 : [[ -e $b ]]
 
-to test whether a file exists. But with ~[~, you have to quote ~$b~, because it
-splits the argument and expands things like ~"a*"~ (where ~[[~ takes it
-literally). That has also to do with how ~[~ can be an external program and
-receives its argument just normally like every other program (although it can
-also be a builtin, but then it still has not this special handling).
+to test whether a file exists.
+
+But with ~[~, you have to quote ~$b~, because it splits the argument and expands
+things like ~"a*"~ (where ~[[~ takes it literally).
+
+: [ -e "$b" ]
+
+That has also to do with how ~[~ can be an external program and receives its
+argument just normally like every other program (although it can also be
+a builtin, but then it still has not this special handling).
 #+end_note
 
 List untracked *files ignored* by a =.gitignore= statement somewhere.
@@ -1699,8 +1705,7 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
 #+end_warning
 
 #+begin_src conf
-    pull-autostash = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash push -m "autostash" && git pull && git stash pop
-# XXX Does not work in WSL (unexpected operator [[)
+    pull-autostash = ![ -z "$(git status --porcelain -uno)" ] && git pull || git stash push -m "autostash" && git pull && git stash pop
 #+end_src
 
 XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
@@ -2918,7 +2923,7 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 
 #+begin_src conf
     create-local-repository = !git init \
-                                   && ( [[ -n $(ls) ]] || touch .gitignore ) \
+                                   && ( [ -n "$(ls)" ] || touch .gitignore ) \
                                    && git add . \
                                    && git commit -m \"Initial commit\"
 #+end_src
@@ -3699,7 +3704,7 @@ branch "irrespective of its merged status."
                                      xargs -n 1 git delete-local-branch; }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
-    # sweep = '!git branch --merged $([[ $1 != "-f" ]] && git rev-parse master) | \
+    # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
     #           egrep -v "(^\*|^\s*(master|develop)$)" | \
     #           xargs git branch -d'
 #+end_src

@@ -329,7 +329,7 @@
     log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
 
     standup = "!git log --branches \
-                        --since=$(if [[ "$(date +%a)" == "Mon" ]]; then \
+                        --since=$(if [ "$(date +%a)" = "Mon" ]; then \
                                       echo "friday"; \
                                   else \
                                       echo "yesterday"; \
@@ -397,9 +397,9 @@
     # List all tracked files.
     ls-tracked = ls-files -t
 
-    tracked1 = "!f() { tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
+    tracked1 = "!f() { tracked=$(git ls-files ${1}); if [ -z \"${tracked}\" ]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
 
-    tracked2 = "!f() { echo -n ${1}': '; if [[ -f ${1} ]]; then tracked=$(git ls-files ${1}); if [[ -z ${tracked} ]]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
+    tracked2 = "!f() { echo -n ${1}': '; if [ -f \"${1}\" ]; then tracked=$(git ls-files ${1}); if [ -z \"${tracked}\" ]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
 # does not work!?
 
     # List all untracked files.
@@ -510,8 +510,7 @@
 
     # up = "!git stash && git pull && git stash pop"
 
-    pull-autostash = ![[ -z $(git status --porcelain -uno) ]] && git pull || git stash push -m "autostash" && git pull && git stash pop
-# XXX Does not work in WSL (unexpected operator [[)
+    pull-autostash = ![ -z "$(git status --porcelain -uno)" ] && git pull || git stash push -m "autostash" && git pull && git stash pop
 
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
@@ -771,7 +770,7 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
                            done'"
 
     create-local-repository = !git init \
-                                   && ( [[ -n $(ls) ]] || touch .gitignore ) \
+                                   && ( [ -n "$(ls)" ] || touch .gitignore ) \
                                    && git add . \
                                    && git commit -m \"Initial commit\"
 
@@ -923,7 +922,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                                      xargs -n 1 git delete-local-branch; }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
-    # sweep = '!git branch --merged $([[ $1 != "-f" ]] && git rev-parse master) | \
+    # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
     #           egrep -v "(^\*|^\s*(master|develop)$)" | \
     #           xargs git branch -d'
 
