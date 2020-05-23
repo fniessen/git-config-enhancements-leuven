@@ -383,7 +383,7 @@
 
     file-history = log --follow --date-order --date=short -C --
 
-    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
+    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 
     praise = blame -w
     archeology = blame -w -C -n

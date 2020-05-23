@@ -1144,7 +1144,7 @@ curl 'https://api.bitbucket.org/2.0/repositories/mcpflow/pflow/filehistory/maste
 #+end_src
 
 #+begin_src conf
-    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
+    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 #+end_src
 
 *** Inspect the commits for each edit
