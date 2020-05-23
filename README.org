@@ -1705,7 +1705,7 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
 #+end_warning
 
 #+begin_src conf
-    pull-autostash = ![ -z "$(git status --porcelain -uno)" ] && git pull || git stash push -m "autostash" && git pull && git stash pop
+    pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] && git pull || git stash push -m "autostash" && git pull && git stash pop
 #+end_src
 
 XXX What about ~git stash push --include-untracked~ and ~git stash pop~?

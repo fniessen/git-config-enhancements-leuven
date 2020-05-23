@@ -510,7 +510,7 @@
 
     # up = "!git stash && git pull && git stash pop"
 
-    pull-autostash = ![ -z "$(git status --porcelain -uno)" ] && git pull || git stash push -m "autostash" && git pull && git stash pop
+    pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] && git pull || git stash push -m "autostash" && git pull && git stash pop
 
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
