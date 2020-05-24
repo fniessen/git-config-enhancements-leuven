@@ -277,20 +277,47 @@ Improve the ~git diff~ output: diff-so-fancy or [[https://github.com/dandavison/
 (~less~ options -- ~-R~ for colors to persist, ~-F~ to exit immediately if the output
 is less than one screen, and ~-X~ for not clearing the screen).
 
-#+begin_src conf :tangle no
-    autocrlf = input
-    safecrlf = true
-
-    autocrlf = false
-    safecrlf = false
-#+end_src
-
 [[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ as a newline character
 in Git-handled repositories.  There's an option to auto-convert:
 
-#+begin_src conf :tangle no
+#+begin_src conf
     # Checkout as CRLF, commit as LF.
     autocrlf = true
+#+end_src
+
+- core.autocrlf = false
+
+  This is the default, but most people are encouraged to change
+  thisimmediately. The result of using false is that Git doesn’t ever messwith
+  line endings on your file. You can check in files with LF or CRLFor CR or some
+  random mix of those three and Git does not care. Thiscan make diffs harder to
+  read and merges more difficult. Most peopleworking in a Unix/Linux world use
+  this value because they don’t haveCRLF problems and they don’t need Git to be
+  doing extra work wheneverfiles are written to the object database or written
+  out into theworking directory.
+
+- core.autocrlf = true
+
+  This means that Git will process all text files and make sure thatCRLF is
+  replaced with LF when writing that file to the object databaseand turn all LF
+  back into CRLF when writing out into the workingdirectory. This is the
+  recommended setting on Windows because itensures that your repository can be
+  used on other platforms whileretaining CRLF in your working directory.
+
+- core.autocrlf = input
+
+  This means that Git will process all text files and make sure thatCRLF is
+  replaced with LF when writing that file to the objectdatabase. It will not,
+  however, do the reverse. When you read filesback out of the object database
+  and write them into the workingdirectory they will still have LFs to denote
+  the end of line. Thissetting is generally used on Unix/Linux/OS X to prevent
+  CRLFs fromgetting written into the repository. The idea being that if you
+  pastedcode from a web browser and accidentally got CRLFs into one of
+  yourfiles, Git would make sure they were replaced with LFs when you wroteto
+  the object database.
+
+#+begin_src conf :tangle no
+    safecrlf = true
 #+end_src
 
 Performance:
