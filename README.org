@@ -44,64 +44,7 @@ https://til.hashrocket.com/git
 XXX Visualized Git commands
 https://dev.to/lydiahallie/cs-visualized-useful-git-commands-37p1
 
-* Overview
-
-- This is Git.  It tracks collaborative work on projects through a beautiful
-  distributed graph theory model.
-
-- Cool.  How do we use it?
-
-- No idea.  Just memorize these Shell commands and type them to sync up.  If you
-  get errors, save your work elsewhere, delete the project, and download a fresh
-  copy.
-
-  If that doesn't fix it, =git.txt= contains the phone number of a friend of mine
-  who understands ~git~.  Just wait through a few minutes of /'It's really pretty
-  simple, just think of branches as...'/ and eventually you'll learn the
-  commands that will fix everything.
-
-From [[https://xkcd.com/1597/][xkcd]].
-
-* Tips
-
-*Commit early, commit often* (and with the right message): it is a bad idea to do
-a lot of work without committing... But don't push every single commit: push
-when changes are tested!
-
-Branch out often.
-http://kentnguyen.com/development/visualized-git-practices-for-team/
-(definition of git rebase)
-
-* Comments on branching (from Matthias)
-
-If you have finished your work, feel free to merge the branch into =master= (maybe
-you want to rebase your WIP branch before based on =master=):
-
-The following sequence is here very helpful:
-
-1. git checkout master
-2. git pull (this makes sure that your local =master= branch matches the remote one)
-3. git checkout WIP
-4. git rebase master
-5. git checkout master
-6. git merge WIP
-
-after this you can delete your local WIP branch and or if you pushed it the
-remote one too.
-
-* Overview
-
-The following configures interesting global settings for Git. These are stored
-in the =.gitconfig= file located in the user home directory.
-
-#+begin_warning
-Note that tangling this file will override whichever =~/.gitconfig= file you
-might have. So *BE EXTREMELY CAREFUL*!
-#+end_warning
-
-* COMMENT Tasks
-
-See https://blog.liip.ch/archive/2015/12/11/git-tips-tricks.html!!! XXX
+XXX See https://blog.liip.ch/archive/2015/12/11/git-tips-tricks.html!!!
 
 ** TODO Check out other aliases
 
@@ -204,6 +147,54 @@ http://rogerdudler.github.io/git-guide/
 #+begin_src shell :tangle no
 git pull --rebase -r origin master
 #+end_src
+
+** Comments on branching (from Matthias)
+
+If you have finished your work, feel free to merge the branch into =master= (maybe
+you want to rebase your WIP branch before based on =master=):
+
+The following sequence is here very helpful:
+
+1. git checkout master
+2. git pull (this makes sure that your local =master= branch matches the remote one)
+3. git checkout WIP
+4. git rebase master
+5. git checkout master
+6. git merge WIP
+
+After this, you can delete your local WIP branch and or if you pushed it the
+remote one too.
+
+* Overview
+
+- This is Git.  It tracks collaborative work on projects through a beautiful
+  distributed graph theory model.
+
+- Cool.  How do we use it?
+
+- No idea.  Just memorize these Shell commands and type them to sync up.  If you
+  get errors, save your work elsewhere, delete the project, and download a fresh
+  copy.
+
+  If that doesn't fix it, =git.txt= contains the phone number of a friend of mine
+  who understands ~git~.  Just wait through a few minutes of /'It's really pretty
+  simple, just think of branches as...'/ and eventually you'll learn the
+  commands that will fix everything.
+
+From [[https://xkcd.com/1597/][xkcd]].
+
+The following configures interesting global settings for Git. These are stored
+in the =.gitconfig= file located in the user home directory.
+
+#+begin_tip
+*Commit early, commit often* (and with the right message): it is a bad idea to do
+a lot of work without committing... But don't push every single commit: push
+when changes are tested!
+#+end_tip
+
+Branch out often.
+http://kentnguyen.com/development/visualized-git-practices-for-team/
+(definition of git rebase)
 
 * Settings
 
@@ -1172,6 +1163,13 @@ curl 'https://api.bitbucket.org/2.0/repositories/mcpflow/pflow/filehistory/maste
 
 #+begin_src conf
     related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
+#+end_src
+
+Find the *most recent commit* (chronologically) that modified a file -- looking in
+all known commits:
+
+#+begin_src conf
+    file-last-modified = log -n 1 --follow --all --date-order --date=short -C --
 #+end_src
 
 *** Inspect the commits for each edit
@@ -2234,6 +2232,7 @@ reflog for =HEAD=).
    existing is to use the command ~git reflog name-of-my-branch~ to *find the SHA*
    for the commit at the tip of your deleted branch -- It works also with
    a remote, for example if you forced push.  Otherwise, use ~git reflog~.
+
 2. Then, you can just ~git create-branch <branch> <sha1>~ to recreate the branch
    from there.
 
@@ -2946,6 +2945,8 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 
 * Repository
 
+For *free private repositories*, see https://bitbucket.org/.
+
 ** Create a Git repository locally
 
 #+begin_src conf
@@ -2978,7 +2979,8 @@ Clone an existing repository including all submodules.
 
 #+begin_tip
 For *passwordless Git pull* (permanently authenticating with Git repositories),
-*use SSH* when cloning, and *add* your *public key* to the remote server.
+1. *use SSH* when cloning, and
+2. *add* your *public key* to the remote server.
 #+end_tip
 
 ** Create and add your SSH public key to a repository management platform
@@ -3666,6 +3668,8 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
              --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
 #+end_src
 
+git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
+
 #+begin_src conf
     recent = for-each-ref \
                  --sort=-committerdate refs/heads/ \
@@ -3674,7 +3678,9 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 
 #+begin_src conf
     # Sort by date for branches; can be useful for spring cleaning
-    refs-by-date = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short)'
+    refs-by-date = for-each-ref \
+                       --sort=-committerdate \
+                       --format='%(committerdate:short) %(refname:short)'
 #+end_src
 
 *** Show my branches
@@ -3921,7 +3927,7 @@ List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
 
 #+begin_src conf
     # Show verbose output about tags.
-    tags = tag -l --sort=v:refname -n1
+    tags = tag -l --sort=v:refname -n 1
 #+end_src
 
 #+begin_src shell :tangle no
@@ -4305,7 +4311,7 @@ will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out
 #+begin_src shell :tangle no
 #!/bin/bash
 tmpfile=$(mktemp)
-repoSlug=$(git remote -v | grep '^upstream' | head -n1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
+repoSlug=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
 prNumber=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
 curl -s https://api.github.com/repos/${repoSlug}/pulls/${prNumber} > $tmpfile
 trap "{ rm -f $tmpfile; }" EXIT
@@ -4430,7 +4436,7 @@ relevant: https://bitbucket.org/tpettersen/git-guilt
 Related pull request:
 
 #+begin_src conf
-    related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n1 ' -"
+    related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n 1 ' -"
 #+end_src
 
 Example:
@@ -4881,10 +4887,6 @@ branch (using ~git push --force~) and someone needs a talkin' to.
 - [[https://git.wiki.kernel.org/index.php/Aliases][Git SCM Wiki - Aliases]]
 - [[https://ochronus.com/git-tips-from-the-trenches/][Git tips from the trenches]]
 # - [[file:~/Public/Repositories/emacs/admin/notes/git-workflow][Emacs Git workflow]]
-
-* Free private repositories
-
-I use the *free private repos* from https://bitbucket.org/.
 
 * Use Git and SVN together
 
