@@ -720,6 +720,7 @@ stashall = !git add -A && git stash
 # git merge-base --fork-point master
 # git merge-base --all r1 r2
 
+    # Usage: git export-commit [COMMIT]
     export-commit = "!f() { git changed-files ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 
     # View raw commit.

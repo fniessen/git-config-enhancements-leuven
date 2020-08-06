@@ -2698,8 +2698,9 @@ See https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release
 Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit message since the
 last tag.
 
-How to Write a Good Commit Message + A changelog generation:
+How to write a good commit message + A changelog generation:
 https://dev.to/gaelthomas/a-beginner-s-guide-to-git-how-to-write-a-good-commit-message-2j49
+https://dev.to/chrissiemhrk/git-commit-message-5e21
 
 #+begin_src conf
     # Detailed list of changes.
@@ -2770,6 +2771,7 @@ from the name) remains intact.
 #+end_src
 
 #+begin_src conf
+    # Usage: git export-commit [COMMIT]
     export-commit = "!f() { git changed-files ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 #+end_src
 
