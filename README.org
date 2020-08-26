@@ -757,7 +757,7 @@ If unable to clone Git repository due to *self-signed certificate*...
   variable of ~GIT_SSL_NO_VERIFY=TRUE~:
 
   #+begin_src shell :tangle no
-  env GIT_SSL_NO_VERIFY=TRUE git <command> <arguments>
+  env GIT_SSL_NO_VERIFY=TRUE git COMMAND ARGUMENTS
   #+end_src
 
 - If you don't want to do this all the time, you can disable Git SSL
@@ -1337,7 +1337,7 @@ List ignored files (*marked unchanged*):
 
 #+begin_src conf
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
-    skipped2 = !git ls-files -v | grep '^[a-z]'
+    skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
 #+end_src
 
 ** REVERT - Undo things
@@ -1399,13 +1399,15 @@ prompting you for the message you've already entered!
     # Append your staged changes to the LATEST commit (keeping the pre-existing
     # commit message).
     fixup = commit -v --amend --reuse-message HEAD
+#+end_src
 
+#+begin_src conf
+    # Usage: git reword MSG
     # Change LATEST commit message to what you type in.
-    # Usage: git medit <msg>
     reword = commit --amend -m
 
+    # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
     # Credit an author on the LATEST commit.
-    # Usage: git credit <author-name> <author-email>
     credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
 #+end_src
 
@@ -1418,7 +1420,7 @@ Solution for *amending older commits*:
 https://stackoverflow.com/questions/3042437/change-commit-author-at-one-specific-commit
 (see 1st and 2nd answers!)
 
-My new favorite alias lets you amend to a specific commit, *not* need to be the
+My new favorite alias lets you amend to a specific commit, *no* need to be the
 *latest* one.
 
 #+begin_src conf
@@ -2233,8 +2235,8 @@ reflog for =HEAD=).
    for the commit at the tip of your deleted branch -- It works also with
    a remote, for example if you forced push.  Otherwise, use ~git reflog~.
 
-2. Then, you can just ~git create-branch <branch> <sha1>~ to recreate the branch
-   from there.
+2. Then, you can just ~git create-branch BRANCH SHA1~ to recreate the branch from
+   there.
 
 See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its-deletion-in-git
 
@@ -2264,12 +2266,12 @@ Use ~git stash~ if Git refused to merge because it foresees conflicts.
 
 If you anticipate that you might have trouble merging the work you want to stash
 with the work you're about to do on the clean tree, you can create a new branch
-with ~git stash branch <new branchname>~.
+with ~git stash branch NEW_BRANCHNAME~.
 
 Information that is used by default if you don't provide a message:
 
 #+begin_example
-stash@{0}: WIP on <branch>: <sha1 of head> <title line of head>
+stash@{0}: WIP on BRANCH: SHA1_OF_HEAD TITLE_LINE_OF_HEAD
 #+end_example
 
 You can operate on the "stash" ref as if it were any other ref.
@@ -2280,11 +2282,11 @@ You can operate on the "stash" ref as if it were any other ref.
 stash (much, much more useful):
 
 #+begin_src conf :tangle no
-git stash push -m "DESCRIBE WHAT YOU DID HERE"
+git stash push -m "Describe what you did here"
 #+end_src
 
 #+begin_example
-stash@{0}: On <branch>: DESCRIBE WHAT YOU DID HERE
+stash@{0}: On BRANCH: Describe what you did here
 #+end_example
 
 This command is useful in saving all changes not ready to be committed and the
@@ -2713,7 +2715,7 @@ XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries o
 Use it like this:
 
 #+begin_src shell :tangle no
-git changelog <first-tag-name> <last-tag-name>
+git changelog FIRST_TAG_NAME LAST_TAG_NAME
 #+end_src
 
 See also
@@ -3157,7 +3159,7 @@ Match any of these patterns, but print matches only from files that have /all/ o
 them (files must have lines that match each of them):
 
 #+begin_src shell :tangle no
-git grep --all-match -e <regexp> -e <regexp>
+git grep --all-match -e REGEXP -e REGEXP
 #+end_src
 
 ** Undo local changes
@@ -3285,6 +3287,7 @@ This is a handy table for labels [[https://github.com/angular/angular/blob/maste
 List all the changed files *in a commit*:
 
 #+begin_src conf
+    # Usage: git changed-files [COMMIT]
     changed-files = show --pretty="format:" --name-only
 #+end_src
 
@@ -3305,8 +3308,8 @@ git changed-files bada55                # List files modified in this commit.
 List all the branches and tags that contain a specific commit.
 
 #+begin_src conf
+    # Usage: git where REV
     # Print only refs which contain the commit.
-    # Usage: git where <rev>
     where1 = for-each-ref --contains
     where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
                          | sort -k5n -k2M -k3n -k4n; }; f"
@@ -3349,8 +3352,8 @@ is considered to be "the last commit of the branch", and commits itself do not
 Therefore, Git cannot determine "which branch was which" before merge commits.
 #+end_note
 
-: curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/search?scope=commits&search=bye
-: curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file
+: curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/search?scope=commits&search=bye
+: curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file
 
 *** Search within Commit Messages
 
@@ -3387,7 +3390,7 @@ curl -H "Accept: application/vnd.github.cloak-preview" \
 #+end_src
 
 Here's the alias which simply loops over each argument and calls ~git
-log --grep~. Equivalent of calling ~git log --grep <a> --grep <b> --grep <c> ...~:
+log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
 
 #+begin_src conf
     search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
@@ -3409,14 +3412,14 @@ To find commits that match *either* of patterns (implicit *OR* semantic), you ca
 use:
 
 #+begin_src shell :tangle no
-git log --grep=<foo> --grep=<bar>
+git log --grep=FOO --grep=BAR
 #+end_src
 
 To find /commit/ that has *both* line matching first and line matching second
 somewhere, use the *AND* semantic:
 
 #+begin_src shell :tangle no
-git log --all-match --grep=<foo> --grep=<bar>
+git log --all-match --grep=FOO --grep=BAR
 #+end_src
 
 Show the *last commit* whose *message matches a regexp*:
@@ -3613,7 +3616,7 @@ resolved, ie. like so
 
 ** Publish a branch
 
-Push the ~<current-branch>~ branch to the =origin= remote and set up tracking:
+Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
 
 #+begin_src conf
     # Push current branch to remote server (create a copy of the current branch
@@ -3842,10 +3845,10 @@ not meaningful to the work we are doing.
 To rename a branch *locally*:
 
 - If we are on the branch we want to rename, we can just
-  ~git rename-local-branch <newbranch>~.
+  ~git rename-local-branch NEWBRANCH~.
 
 - If we are on another branch, we have to use
-  ~git rename-local-branch <oldbranch> <newbranch>~.
+  ~git rename-local-branch OLDBRANCH NEWBRANCH~.
 
 #+begin_src conf
     rename-local-branch = branch -m
@@ -3897,13 +3900,13 @@ private or temporary object labels.
 Create an annotated tag:
 
 #+begin_src shell :tangle no
-git tag -a <tag-name> -m '<tag-message>'
+git tag -a TAG_NAME -m 'TAG_MESSAGE'
 #+end_src
 
 Create a lightweight tag (/no message!/):
 
 #+begin_src shell :tangle no
-git tag <tag-name>
+git tag TAG_NAME
 #+end_src
 
 ** See the commits for a tag
@@ -4025,9 +4028,9 @@ You can see:
 List all the changed *files between 2 commits*:
 
 #+begin_src conf
+    # Usage: git compare-changed-files REV_BASE REV_COMPARE
     # Show changed files (with stat about line additions and line deletions)
     # between two commits.
-    # Usage: git compare-changed-files <rev-base> <rev-compare>
     compare-changed-files = "!f() { git diff --stat $1...$2; }; f"
 #+end_src
 
@@ -4046,8 +4049,9 @@ View all diffs.
 - Inline diff (unified, single view)
 
   #+begin_src conf
+    # Usage: git compare REV_BASE REV_COMPARE
+    #      = git diff REV_BASE...REV_COMPARE
     # Example: git compare master@{1day} master
-    # (git compare <rev-base> <rev-compare> = git diff <rev-base>...<rev-compare>)
     compare = "!f() { git diff $1...$2; }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
   #+end_src

@@ -429,18 +429,18 @@
     unskip-all = "!git skipped | xargs git update-index --no-assume-unchanged"
 
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
-    skipped2 = !git ls-files -v | grep '^[a-z]'
+    skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
 
     # Append your staged changes to the LATEST commit (keeping the pre-existing
     # commit message).
     fixup = commit -v --amend --reuse-message HEAD
 
+    # Usage: git reword MSG
     # Change LATEST commit message to what you type in.
-    # Usage: git medit <msg>
     reword = commit --amend -m
 
+    # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
     # Credit an author on the LATEST commit.
-    # Usage: git credit <author-name> <author-email>
     credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
 
     fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
@@ -833,13 +833,14 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
 [alias]
 
+    # Usage: git changed-files [COMMIT]
     changed-files = show --pretty="format:" --name-only
 
     download-email-patch = XXX git format-patch $(git current-branch).patch
     download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
 
+    # Usage: git where REV
     # Print only refs which contain the commit.
-    # Usage: git where <rev>
     where1 = for-each-ref --contains
     where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
                          | sort -k5n -k2M -k3n -k4n; }; f"
@@ -985,13 +986,14 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Usage: git compare-commits <rev-base> <rev-compare>
     compare-commits = "!f() { git log --date=short $1...$2; }; f"
 
+    # Usage: git compare-changed-files REV_BASE REV_COMPARE
     # Show changed files (with stat about line additions and line deletions)
     # between two commits.
-    # Usage: git compare-changed-files <rev-base> <rev-compare>
     compare-changed-files = "!f() { git diff --stat $1...$2; }; f"
 
+    # Usage: git compare REV_BASE REV_COMPARE
+    #      = git diff REV_BASE...REV_COMPARE
     # Example: git compare master@{1day} master
-    # (git compare <rev-base> <rev-compare> = git diff <rev-base>...<rev-compare>)
     compare = "!f() { git diff $1...$2; }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
