@@ -2777,6 +2777,8 @@ from the name) remains intact.
     export-commit = "!f() { git changed-files ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 #+end_src
 
+To see the contents of the zipped file (without extraction), use ~unzip -l FILE~.
+
 #+begin_src conf
     # View raw commit.
     email-patch = XXX git format-patch $(git current-branch).patch
