@@ -3633,9 +3633,13 @@ Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
 
 #+begin_src conf
     # Get the current branch name (not so useful in itself, but used in other
-    # aliases).  Works well in detached mode.
+    # aliases).
     current-branch = name-rev --name-only HEAD
-    # current-branch = branch --show-current # v2.22+
+    # XXX Does not work correctly with tags (returns 'tags/2019.04.25~3')
+
+    # v2.22+
+    current-branch = branch --show-current
+    # Does work correctly with tags, but not in detached state.
 #+end_src
 
 Then:

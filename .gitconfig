@@ -892,9 +892,13 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     unpublish = !git delete-remote-branch $(git current-branch)
 
     # Get the current branch name (not so useful in itself, but used in other
-    # aliases).  Works well in detached mode.
+    # aliases).
     current-branch = name-rev --name-only HEAD
-    # current-branch = branch --show-current # v2.22+
+    # XXX Does not work correctly with tags (returns 'tags/2019.04.25~3')
+
+    # v2.22+
+    current-branch = branch --show-current
+    # Does work correctly with tags, but not in detached state.
 
     # Show local and remote branches.
     branches = branch -a -vv
