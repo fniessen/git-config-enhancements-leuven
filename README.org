@@ -2700,9 +2700,15 @@ See https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release
 Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit message since the
 last tag.
 
+A properly formed Git commit subject line should always be able to complete the
+following sentence:
+
+: If applied, this commit will <YOUR SUBJECT LINE HERE>
+
 How to write a good commit message + A changelog generation:
 https://dev.to/gaelthomas/a-beginner-s-guide-to-git-how-to-write-a-good-commit-message-2j49
 https://dev.to/chrissiemhrk/git-commit-message-5e21
+https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
 
 #+begin_src conf
     # Detailed list of changes.
