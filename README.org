@@ -3736,19 +3736,23 @@ git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yell
 
 *** Show my branches
 
-*** Show active branches (= not merged)
+*** Show active branches
+
+List branches that are *not merged*.
 
 #+begin_src conf
     br-active = "!f() { git branch --no-merged | grep -v '\\*'; }; f"
+    branches-active = "!f() { git branch -a -vv --no-merged | grep -v '\\*'; }; f"
 #+end_src
 
 *** Show merged branches
 
-List local branches whose tips are reachable from the specified commit (~HEAD~ if
-not specified).
+List branches whose tips are reachable from the specified commit (~HEAD~ if not
+specified).
 
 #+begin_src conf
     br-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
+    branches-merged = "!f() { git branch -a -vv --merged | grep -v '\\*'; }; f"
 #+end_src
 
 *** Show stale branches
