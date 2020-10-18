@@ -921,7 +921,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                        --sort=-committerdate \
                        --format='%(committerdate:short) %(refname:short)'
 
-    branches-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
+    br-active = "!f() { git branch --no-merged | grep -v '\\*'; }; f"
+
+    br-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
 
     master = checkout master
     develop = checkout develop

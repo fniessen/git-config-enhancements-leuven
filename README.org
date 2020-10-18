@@ -2794,6 +2794,38 @@ To see the contents of the zipped file (without extraction), use ~unzip -l FILE~
     plain-diff = !git branch-diff > $(git current-branch).diff
 #+end_src
 
+Patch = this
+
+: From 69936b7cc23c9ae78cec84baa30c599c1ad5990a Mon Sep 17 00:00:00 2001
+: From: Brett Viren <brett.viren@gmail.com>
+: Date: Fri, 2 Oct 2020 10:30:17 -0400
+: Subject: [PATCH] Move doc to index.org and generate index.html, README.org
+:  holds short links.
+:
+: This is meant to demo serving the refcard via GH pages.  The
+: README.org probably deserves more attention!
+:
+: Content modified:
+:
+: - Switched to online SETUPFILE.  Maybe better to carry a copy of readtheorg?
+:
+: - I had problems related to id:<hash> and so switch a reference to use
+:   the headline text.
+:
+: - Pointed UP and HOME to links related to the refcard.
+: ---
+:  README.html | 4118 ---------------------------------------------------
+:  README.org  | 1673 +--------------------
+:  index.html  | 3308 +++++++++++++++++++++++++++++++++++++++++
+:  index.org   | 1672 +++++++++++++++++++++
+:  4 files changed, 4984 insertions(+), 5787 deletions(-)
+:  delete mode 100755 README.html
+:  mode change 100755 => 100644 README.org
+:  create mode 100644 index.html
+:  create mode 100755 index.org
+
++ diff.
+
 #+begin_src conf
     patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
 #+end_src
@@ -3704,15 +3736,19 @@ git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yell
 
 *** Show my branches
 
-*** Show active branches
+*** Show active branches (= not merged)
+
+#+begin_src conf
+    br-active = "!f() { git branch --no-merged | grep -v '\\*'; }; f"
+#+end_src
 
 *** Show merged branches
 
-List branches whose tips are reachable from the specified commit (HEAD if not
-specified).
+List local branches whose tips are reachable from the specified commit (~HEAD~ if
+not specified).
 
 #+begin_src conf
-    branches-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
+    br-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
 #+end_src
 
 *** Show stale branches
