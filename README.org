@@ -11,8 +11,6 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  header-args :tangle .gitconfig :eval no
 
-* Overview
-
 - This is Git.  It tracks collaborative work on projects through a beautiful
   distributed graph theory model.
 
@@ -28,6 +26,8 @@
   commands that will fix everything.
 
 From [[https://xkcd.com/1597/][xkcd]].
+
+* Overview
 
 The following configures interesting global settings for Git. These are stored
 in the =.gitconfig= file located in the user home directory.
