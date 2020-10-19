@@ -834,6 +834,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 [alias]
 
     # Usage: git changed-files [COMMIT]
+    # Examples:
+    #   git changed-files             list files modified in last commit
+    #   git changed-files bada55      list files modified in this commit
     changed-files = show --pretty="format:" --name-only
 
     download-email-patch = XXX git format-patch $(git current-branch).patch

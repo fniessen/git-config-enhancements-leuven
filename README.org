@@ -288,7 +288,7 @@ Usage (no matter where you are in the repo):
 git diff-file-last-commit File.cpp
 #+end_src
 
-This opens your configured ~difftool~ with the changes to File.cpp in the last
+This opens your configured ~difftool~ with the changes to =File.cpp= in the last
 commit it was touched.
 
 *** Performing directory diffs (Comparing folders)
@@ -1444,17 +1444,17 @@ effectively reverses the patch in question. The simplest usage is to revert an
 entire commit:
 
 #+begin_src shell :tangle no
-git revert [hash]
+git revert [HASH]
 #+end_src
 
-This creates a patch that is the opposite of commit ~[hash]~ and commits it to
+This creates a patch that is the opposite of commit ~[HASH]~ and commits it to
 your repository.
 
 If you want to revert that commit without committing it (putting the reversion
 into your index), use:
 
 #+begin_src shell :tangle no
-git revert -n [hash]
+git revert -n [HASH]
 #+end_src
 
 *** Squash
@@ -2008,8 +2008,8 @@ Another is to throw away local changes using a *forced checkout*:
 
 *** Website and page hosting
 
-You can easily host websites directly in your cloud repository management
-system.  And open HTML files directly from the file browser.
+You can easily host websites directly in your repository management platform.
+And open HTML files directly from the file browser.
 
 For GitHub pages:
 
@@ -3174,12 +3174,10 @@ List all the changed files *in a commit*:
 
 #+begin_src conf
     # Usage: git changed-files [COMMIT]
+    # Examples:
+    #   git changed-files             list files modified in last commit
+    #   git changed-files bada55      list files modified in this commit
     changed-files = show --pretty="format:" --name-only
-#+end_src
-
-#+begin_src shell :tangle no
-git changed-files                       # List files modified in last commit.
-git changed-files bada55                # List files modified in this commit.
 #+end_src
 
 ** Get the diff of a commit
