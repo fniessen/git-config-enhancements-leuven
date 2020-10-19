@@ -747,7 +747,7 @@ Start working with your repository.
 
 ** Create a README
 
-Create a =README= file into your repository.
+Create a =README.md= file into your repository.
 
 #+begin_src conf :tangle no
 echo "# ${$(git repo-slug):-Repository name}\n\nDescription" >> README.md
