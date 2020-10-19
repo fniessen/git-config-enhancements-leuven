@@ -187,6 +187,8 @@
 
 [alias]
 
+    # Usage: git alias
+    # Print the current list of Git aliases.
     alias = "!git config -l | grep alias | cut -c 7- | sort"
 
     create-local-repository = !git init \

@@ -626,6 +626,8 @@ See
 - https://devhints.io/git-log-format and
 - https://git-scm.com/docs/pretty-formats (XXX)
 
+* ------------------------------------------------------------------------------
+
 * Aliases
 
 #+begin_src conf
@@ -633,13 +635,13 @@ See
 #+end_src
 
 If you forget your aliases and don't want to open =.gitconfig= just to check, type
-~git alias~ to *print the current list of Git aliases*:
+~git alias~.
 
 #+begin_src conf
+    # Usage: git alias
+    # Print the current list of Git aliases.
     alias = "!git config -l | grep alias | cut -c 7- | sort"
 #+end_src
-
-* ------------------------------------------------------------------------------
 
 * Repository
 
