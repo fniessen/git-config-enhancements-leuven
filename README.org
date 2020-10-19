@@ -639,6 +639,1768 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     alias = "!git config -l | grep alias | cut -c 7- | sort"
 #+end_src
 
+* ------------------------------------------------------------------------------
+
+* Repository
+
+For *free private repositories*, see https://bitbucket.org/.
+
+** Create a Git repository locally
+
+#+begin_src conf
+    create-local-repository = !git init \
+                                   && ( [ -n "$(ls)" ] || touch .gitignore ) \
+                                   && git add . \
+                                   && git commit -m \"Initial commit\"
+#+end_src
+
+#+begin_tip
+Since Git doesn't add *empty directories*, if you want to keep them in the
+repository, a sort of conventional hack is to create a file called =.gitkeep= in
+these directories.  (The file could be called anything; Git assigns no special
+significance to this name.)
+#+end_tip
+
+Remove Git from current project:
+
+#+begin_src conf :tangle no
+find . -name '.git' -exec rm -rf {} \;
+#+end_src
+
+** Clone a repository
+
+Clone an existing repository including all submodules.
+
+#+begin_src conf
+    cl = clone --recursive
+#+end_src
+
+#+begin_tip
+For *passwordless Git pull* (permanently authenticating with Git repositories),
+1. *use SSH* when cloning, and
+2. *add* your *public key* to the remote server.
+#+end_tip
+
+** Create and add your SSH public key to a repository management platform
+
+https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html
+
+It is best practice to use Git over SSH (instead of Git over HTTP).  In order to
+use SSH, you will need to:
+
+*** Create an SSH key pair on your local computer
+
+Generate a new ED25519 (should always be favored) SSH key pair:
+
+: ssh-keygen -t ed25519 -C "email@example.com"
+
+Or, if you want to use RSA:
+
+: ssh-keygen -t rsa -b 4096 -C "email@example.com"
+
+*** Add the key to the repository management platform
+
+*** Testing that everything is set up correctly
+
+** Create a new repository in GitHub
+
+*Private* or *public* repository?
+
+#+begin_src conf :tangle no
+    create-repository-gh = "!f() { repo_owner=$1; repo_slug=$2; \
+        curl -u \"$1\" \
+            https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; }; f"
+#+end_src
+
+#+begin_src conf
+    repo-owner = "XXX"
+    repo-slug = "!f() { git remote show origin -n \
+                            | grep 'Fetch URL:' \
+                            | sed -E 's#^.*/(.*)$#\\1#' \
+                            | sed 's#.git$##'; }; f"
+#+end_src
+
+#+begin_tip
+The ~sed~ strings contain ~$#~, which will be replaced by the number of arguments to
+the current script/function (generally 0 for an interactive shell).  This is
+part of the basic Bourne shell syntax, so *single quotes* will be needed under any
+*Bourne-like shell* (even pre-POSIX ones) on any OS.  Read the standard for more
+information:
+https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
+#+end_tip
+
+** Open a repository in a web browser
+
+#+begin_src conf
+    browse-tree = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}; }; f"
+    browse-wiki = XXX
+    browse-commits = XXX
+#+end_src
+
+XXX open = cygstart?
+
+* Instructions
+
+Start working with your repository.
+
+** Create a README
+
+Create a =README= file into your repository.
+
+#+begin_src conf :tangle no
+echo "# ${$(git repo-slug):-Repository name}\n\nDescription" >> README.md
+git add README.md
+git commit -m "Add README.md"
+
+git push -u origin master
+#+end_src
+
+** Create a .gitignore
+
+You can also create a =.gitignore= file into your repository.
+
+* Source Files
+
+** Search for files
+
+Search file (by file path) in the current branch.
+
+#+begin_src conf
+    find-file = !git ls-tree -r --name-only HEAD | grep -i --color=auto
+#+end_src
+
+Search file in all branches.
+
+#+begin_src conf
+    find-file-all = "!f() { for branch in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
+                            echo \"${branch}:\"; \
+                                git ls-tree -r --name-only $branch | nl -bn -w3 | grep --color=auto \"$1\"; \
+                            done; }; f"
+#+end_src
+
+** Search for code
+
+*Code search* looks through all lines of code of all the files (by the *file
+contents*) from the working directory (and its subdirectories).
+
+https://confluence.atlassian.com/bitbucketserver/search-for-code-in-bitbucket-server-814204781.html
+https://help.github.com/en/github/searching-for-information-on-github/searching-code
+
+*** Search code for exact matches
+
+#+begin_src conf
+    search-code = "grep -i --line-number --break --heading -C 1"
+
+# ack = '-c color.grep.linenumber="bold yellow"
+#     -c color.grep.filename="bold green"
+#     -c color.grep.match="reverse yellow"
+#     grep --break --heading --line-number'
+#+end_src
+
+Find all instances of the specified string in code files *with a certain file
+extension*.
+
+#+begin_src conf
+    search-code-in-extension = "XXX"
+#+end_src
+
+Find all instances of the specified string in code *in the specified path*.
+
+#+begin_src conf
+    search-code-in-path = "XXX"
+#+end_src
+
+*** Pattern in working directory (and its subdirectories)
+
+The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
+your project files (i.e. no files in =.git=), but also that is allows you to
+interface with your repository's Git database; for example, for searching:
+
+- files registered in the index, rather than the working tree,
+- for your regexp in some files from another branch (XXX does not work? XXX).
+
+#+begin_note
+It doesn't search files that are not revisioned (untracked, excluded/ignored,
+etc.).
+#+end_note
+
+Example:
+
+#+begin_src shell :tangle no
+git grep "foo" -- '*.java'
+#+end_src
+
+More readable output, *with grouping* (like Ripgrep, ~rg~, or ~ack~):
+
+#+begin_src conf
+# In all commits, not in all branches!!! Lots of duplicates!!!
+grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
+#+end_src
+
+Broader search (*case-sensitive*), output *without grouping*:
+
+#+begin_src conf
+    # `-I' = Don't match the pattern in binary files.
+    g = "grep -I"
+
+    # Name only.
+    gno = "grep -I --files-with-matches"
+#+end_src
+
+*** Find files that contain some terms, not necessarily on the same line
+
+Match any of these patterns, but print matches only from files that have /all/ of
+them (files must have lines that match each of them):
+
+#+begin_src shell :tangle no
+git grep --all-match -e REGEXP -e REGEXP
+#+end_src
+
+** Undo local changes
+
+See https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
+and http://gitimmersion.com/lab_14.html.
+
+**** Before you staged (in unstaged state)
+
+*Undo* the local changes *in the working directory*: roll a file back to its last
+committed version, removing all the changes detected by Git.
+
+#+begin_tip
+It can also recover *deleted files* -- if the deletion has not been committed.
+#+end_tip
+
+#+begin_src conf
+    unmodify = checkout --
+    undelete = checkout --
+#+end_src
+
+#+begin_note
+The two dashes there (canonically called the "bare double dashes") ensure that
+the checkout command know that we are trying to roll back a file and not /change
+branches/ (the typical usage of the checkout command).
+#+end_note
+
+When you grab a file from a previous time, it sits *in your index*, modified.
+
+**** Before you committed (in staged state)
+
+*Remove* the specified *files from the index* (proposed next commit, staging area):
+
+#+begin_src conf
+    unstage = reset HEAD --
+    unadd = reset HEAD --
+#+end_src
+
+~unstage~ is the opposite of ~git add~.  It lets you remove items from the staging
+area.  This makes it a very useful tool when you're deciding which files to
+stage for a commit.  If you've accidentally added something to the staging area,
+just use ~unstage~ to remove it.
+
+* Commits
+
+** Create a commit
+
+#+begin_src conf
+    # Shortcut for commit.
+    ci = commit
+#+end_src
+
+A guide on commit messages:
+https://dev.to/yvonnickfrin/a-guide-on-commit-messages-d8n
+
+A useful template for good commit messages (see
+https://medium.com/compass-true-north/writing-good-commit-messages-fc33af9d6321):
+
+Implementing a Strong Code-Review Culture
+https://www.youtube.com/watch?v=PJjmw9TRB7s
+
+#+begin_src text :tangle .git_commit_template.txt
+# |<------   50-character subject line   ------->|<------------------->|
+# If applied, this commit will...
+# [Add / Fix / Remove / Update / Refactor / Document] [summary]
+
+
+# |<-----   Optional 72-character wrapped extended description   ----->|
+# This should answer:
+# - Why is this change necessary?  (goals, use cases, stories, etc.?)
+# - How does this change address the issue?  (implementations, algorithms, etc.?)
+# - What side effects does this change have?
+
+
+# Include a link to the ticket, if any.
+# Closes #ISSUE_NUMBER
+
+
+# --- COMMIT END ---
+# Emoji can be
+#    :star:              Add new feature ...
+#    :bug:               Fix bug ...
+#    :x:                 Remove ...
+#    :hammer_and_wrench: Update ...
+#    :recycle:           Refactor code ...
+#+end_src
+
+# https://dev.to/sublimegeek/semantic-commit-messages-with-emojis-3p8h
+# https://gist.github.com/rxaviers/7360908
+# https://www.webfx.com/tools/emoji-cheat-sheet/
+
+# https://gist.github.com/zakkak/7e06725ebd1336bfebebe254de3de825
+
+# https://help.github.com/en/github/managing-your-work-on-github/closing-issues-using-keywords
+# https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html
+# https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#default-closing-pattern
+
+and you'll be guided into writing concise commit subjects in the imperative
+mood -- a good practice. See rule 5 of Chris Beam's "How to write a commit
+message" for the inspiration of this tip and more reasoning on the use of the
+imperative mood.
+
+#+begin_src conf
+[commit]
+    template = ~/.git_commit_template.txt
+
+[alias]
+#+end_src
+
+This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
+
+| Label    | Description                                                                                            |
+|----------+--------------------------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                                          |
+| fix      | A bug fix                                                                                              |
+| style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
+| refactor | A code change that neither fixes a bug nor adds a feature                                              |
+| perf     | A code change that improves performance                                                                |
+| test     | Adding missing or correcting existing tests                                                            |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
+| doc      | Documentation only changes                                                                             |
+
+** Get a commit detail
+
+List all the changed files *in a commit*:
+
+#+begin_src conf
+    # Usage: git changed-files [COMMIT]
+    # Examples:
+    #   git changed-files             list files modified in last commit
+    #   git changed-files bada55      list files modified in this commit
+    changed-files = show --pretty="format:" --name-only
+#+end_src
+
+** Get the diff of a commit
+
+#+begin_src conf
+    download-email-patch = XXX git format-patch $(git current-branch).patch
+    download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
+#+end_src
+
+** Get the references the commit has been pushed to (branches and tags)
+
+List all the branches and tags that contain a specific commit.
+
+#+begin_src conf
+    # Usage: git where REV
+    # Print only refs which contain the commit.
+    where1 = for-each-ref --contains
+    where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
+                         | sort -k5n -k2M -k3n -k4n; }; f"
+    # git for-each-ref --format='%(color:blue)%(refname)%(color:reset)' --contains 4ec324ff
+#+end_src
+
+XXX See also git-ls-object-refs
+
+Filter the list of *branches* to only those which have the given *commit ID* among
+their ancestors.
+
+#+begin_src conf
+    # Find branches containing commit.
+    branches-that-contain = "branch -a --contains"
+#+end_src
+
+This also includes *remote tracking branches* in the list, that is "local
+branches that have a direct relationship to a remote branch".
+
+List all *tags* that contain a specific commit ID:
+
+#+begin_src conf
+    # Find tags containing commit.
+    tags-that-contain1 = tag --contains
+    tags-that-contain2 = "!f() { git describe --always --contains $1; }; f"
+#+end_src
+
+#+begin_src conf
+    tag-contains = git tag -l --contains HEAD
+#+end_src
+
+** Search for commits
+
+#+begin_note
+Just for the record -- searching anything "in a branch" is not possible due to
+the principle of branches.  Branch is only a pointer to a single commit, which
+is considered to be "the last commit of the branch", and commits itself do not
+"belong to a branch" anyhow else.
+
+Therefore, Git cannot determine "which branch was which" before merge commits.
+#+end_note
+
+: curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/search?scope=commits&search=bye
+: curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file
+
+*** Search within Commit Messages
+
+You can find commits that contain particular words in the commit message. For
+example, ~fix typo~ matches commits containing the words ~fix~ *and* ~typo~.
+
+If you want to find all commits (*across all branches*, showing names and status
+of changed files) where *log message* matches a specified pattern (regular
+expression), use ~find~.
+
+#+begin_src conf
+    findc1 = "log --decorate -i --all --date=short --grep"
+    findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
+#+end_src
+
+#+begin_tip
+If you only add options to one single ~git~ command, there is no benefit to the
+function wrapper.  On the contrary, you can't add other options.
+#+end_tip
+
+#+begin_src conf
+    # Search for commits (Filter by commit message).
+    search-commits = "!f() { str=\"git log --all-match\"; \
+                             for var in \"$@\"; do \
+                                 str=\"$str --grep '$var'\"; \
+                             done; \
+                             eval $str; }; f"
+#+end_src
+
+#+begin_src conf :tangle no
+curl -H "Accept: application/vnd.github.cloak-preview" \
+    https://api.github.com/search/commits\?q\=repo:fniessen/org-html-themes+local+css \
+    | jq '.items[] | {commit}'
+#+end_src
+
+Here's the alias which simply loops over each argument and calls ~git
+log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
+
+#+begin_src conf
+    search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
+# XXX Add i, all, date short...
+#+end_src
+
+
+
+You may want to add history to search through the whole repository, by adding
+rev-list to your git log:
+
+#+begin_src conf
+    search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
+#+end_src
+
+Add ~--name-status~ to show only names and status of *changed files*.
+
+To find commits that match *either* of patterns (implicit *OR* semantic), you can
+use:
+
+#+begin_src shell :tangle no
+git log --grep=FOO --grep=BAR
+#+end_src
+
+To find /commit/ that has *both* line matching first and line matching second
+somewhere, use the *AND* semantic:
+
+#+begin_src shell :tangle no
+git log --all-match --grep=FOO --grep=BAR
+#+end_src
+
+Show the *last commit* whose *message matches a regexp*:
+
+#+begin_src shell :tangle no
+# Show the LATEST commit which has the text "fix: font" in its message.
+git log :/"fix: font"
+git show :/"fix: font"
+
+# Show the LATEST merge commit.
+git show :/^Merge
+#+end_src
+
+*** Search by Author
+
+#+begin_src conf
+    search-author = "log --decorate -i --all --date=short --author"
+    recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
+#+end_src
+
+*** Search on File Changes
+
+**** Search string (added/removed) in code
+
+If you want to find all commits where a *string* was *added or removed* in the /file
+contents/ (to be more exact: where its *number of occurrences changed* in the
+source file), i.e. search the /commit contents/, use ~-S~.
+
+You can dig up commits that have, for example,
+- removed calls to a specific function, or
+- added a certain CSS classname.
+
+#+begin_warning
+If the number of times "foo" appears in the file is the same before and after
+a commit, it will not match using ~-S "foo"~.
+#+end_warning
+
+In other words, to find the following commit:
+
+#+begin_src diff :tangle no
+@@ -4211,9 +4211,10 @@ public class MovesHandler extends EventHandlerBase {
+      */
+
+     private boolean actionsNotCompleted(final EventHandlerContext context, final String mo_id) {
+         final Object found_mo_id =
+                 selectDbValue(context, "activity_log", "activity_log_id", "mo_id=" + mo_id
+-                    + " AND status NOT IN ('COMPLETED-V','REJECTED','CANCELLED')");
++                    + " AND status NOT IN ('COMPLETED-V','CLOSED','REJECTED','CANCELLED')");
+         return (found_mo_id != null);
+     }
+#+end_src
+
+you *need to search on 'CLOSED'*.  Searching on 'COMPLETED-V' would not bring back
+that commit!
+
+#+begin_src shell :tangle no
+git log --all -S "foo" --since="1 week ago"
+#+end_src
+
+#+begin_src conf
+    whatwhen = log --decorate --date=short -p -S
+#+end_src
+
+Prettier ~whatchanged~ with full diffs based on text search:
+
+#+begin_src conf
+    # Find commits by source code.
+    search-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
+# XXX Does not work for strings with spaces in them...
+#+end_src
+
+#+begin_src conf
+    grep4d = !sh -c 'git log -p -S'$1' $2' -
+# Not the best example, but: git grep4d CLOSED '*.java'
+#+end_src
+
+By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
+~--pickaxe-regex~.
+
+**** Search regexp (added/removed/changed?) in code
+
+String contained in added/removed lines from Commit contents (Diff)
+
+With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
+any *line* that was added, removed, or changed.
+
+#+begin_src shell :tangle no
+git log --all -G "foo" --since="1 week ago"
+git log --all -G "foo" --full-history --since="1 week ago"
+#+end_src
+
+*** How to find all the commits made only on a specific branch
+
+Assuming that your branch was created off of ~develop~, then /while in the branch/
+(that is, you have the branch checked out):
+
+: git log --no-merges --graph develop..
+
+** Push
+
+** Undo changes
+
+See https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
+and http://gitimmersion.com/lab_16.html.
+
+*** Undo local changes which were not pushed to remote repository (after you committed)
+
+*** Undo changes after they are pushed to remote repository
+
+**** Without history modification (preferred way)
+
+git revert?
+
+**** With history modification (requires coordination with team and force pushes)
+
+*** Remove sensitive data from a repository
+
+If you commit sensitive data, such as a password or SSH key into a Git
+repository, you can remove it from the history. To entirely remove unwanted
+files from a repository's history you can use:
+- either the ~git filter-branch~ command
+- or the BFG Repo-Cleaner open source tool.
+
+* Branches
+
+** Branching model
+
+Consistent *naming conventions* (from the [[https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow][Gitflow]] Git workflow):
+
+- =master= (used for *production releases*)
+
+  It should be the most stable branch. Merges commits from develop, release and
+  hotfix branches.
+
+- =develop= (used as integration branch for *"next release" development*)
+
+  It has the newest features and fixes. Merges commits from feature and bugfix
+  branches.
+
+- prefix =feature/MSW-709-add-support-for-webm= (for new *features*, such as Jira
+  *stories*)
+
+  These branches are short lived as they only exist while a specific feature is
+  being developed. Usually does not merge any commits unto it, unless there is
+  another feature derived from it.
+
+- prefix =bugfix/= (typically used to fix Release branches, such as Jira *bugs*)
+
+  Used to fix bugs found that either exist in develop but have not made it into
+  production, or that do exist in production but can wait until the next
+  release. These branches merge into develop.
+
+- prefix =release/2018-12-24= (used for preparing and testing *release* tasks)
+
+- prefix =hotfix/fix-123-for-production= (used to *urgently fix* bugs on *production*,
+  that have high impact)
+
+  Used to fix pressing issues that are found in production. Hotfix branches
+  merge directly to master.
+
+Alternatives:
+- https://about.gitlab.com/blog/2014/09/29/gitlab-flow/
+- https://trunkbaseddevelopment.com/ (and
+  https://dev.to/alediaferia/git-tips-for-trunk-based-development-1i1g)
+
+** Create a branch
+
+Create a new branch, and then switch to it:
+
+#+begin_src conf
+    create-branch = checkout -b
+#+end_src
+
+#+begin_note
+To create a branch from a specific commit:
+
+: git create-branch test_branch 7e09ef09
+
+Otherwise you're in a "detached head" state, which can have odd results.
+The branch method is at least a little more stable.
+#+end_note
+
+#+begin_note
+I usually branch off from the commit before the offending
+commit and stay there until things are resolved (unless I'm able to
+resolve it myself).
+
+Or I branch off =master= and revert the offending commit until things are
+resolved, ie. like so
+ git checkout master
+ git create-branch sb-master
+ git revert sha1-of-offending-commit
+#+end_note
+
+** Publish a branch
+
+Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
+
+#+begin_src conf
+    # Push current branch to remote server (create a copy of the current branch
+    # on the remote "origin", and set it to track the upstream branch).
+    publish = !git push -u origin $(git current-branch)
+
+    # Delete current branch on remote server.
+    unpublish = !git delete-remote-branch $(git current-branch)
+#+end_src
+
+#+begin_src conf
+    # Get the current branch name (not so useful in itself, but used in other
+    # aliases).
+    current-branch = name-rev --name-only HEAD
+    # XXX Does not work correctly with tags (returns 'tags/2019.04.25~3')
+
+    # v2.22+
+    current-branch = branch --show-current
+    # Does work correctly with tags, but not in detached state.
+#+end_src
+
+Then:
+1. [[id:a7039f6e-825c-484c-8739-f3e32a9c45fc][Create a pull request]].
+2. Your team lead will review the code & merge it to the main branch.
+
+** List branches
+
+*** Show all branches
+
+*List all branches* (both local remote-tracking and local branches), showing SHA
+and commit subject line for each head, along with the name of the upstream
+branch (if any).
+
+(Sort by Last updated)
+
+: git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads
+
+fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs/heads/__" | sed "s_refs/remotes/__" | fzf --query="$@" --height=40% --ansi --tac --color=16 --border | awk '{print $1}' | xargs git co; }; f"
+(fuzzy checkout a git branch)
+
+#+begin_src conf
+    # Show local and remote branches.
+    branches = branch -a -vv
+#+end_src
+
+#+begin_src conf
+    be = branch --edit-description
+#+end_src
+
+#+begin_src conf
+    track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
+#+end_src
+
+#+begin_src conf
+    # Show info for branches which have been checked out locally...
+    br = for-each-ref \
+             --sort=-committerdate refs/heads/ \
+             --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
+#+end_src
+
+git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
+
+#+begin_src conf
+    recent = for-each-ref \
+                 --sort=-committerdate refs/heads/ \
+                 --format='%(authordate:short) %(color:red)%(objectname:short) %(color:yellow)%(refname:short)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
+#+end_src
+
+#+begin_src conf
+    # Sort by date for branches; can be useful for spring cleaning
+    refs-by-date = for-each-ref \
+                       --sort=-committerdate \
+                       --format='%(committerdate:short) %(refname:short)'
+#+end_src
+
+*** Show my branches
+
+*** Show active branches
+
+List branches that are *not merged*.
+
+#+begin_src conf
+    br-active = "!f() { git branch --no-merged | grep -v '\\*'; }; f"
+    branches-active = "!f() { git branch -a -vv --no-merged | grep -v '\\*'; }; f"
+#+end_src
+
+*** Show merged branches
+
+List branches whose tips are reachable from the specified commit (~HEAD~ if not
+specified).
+
+#+begin_src conf
+    br-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
+    branches-merged = "!f() { git branch -a -vv --merged | grep -v '\\*'; }; f"
+#+end_src
+
+*** Show stale branches
+
+"Stale branches" are Git branches *without commits* for the last few months.  This
+generally indicates old, unmaintained branches for unreleased, incomplete
+features.
+
+For GitHub, such period of inactivity is *3 months* (see
+https://help.github.com/articles/viewing-branches-in-your-repository/).
+
+** Switch branches
+
+Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
+
+#+begin_src conf
+    master = checkout master
+    develop = checkout develop
+#+end_src
+
+** Delete a branch
+
+*** Delete a local branch
+
+Delete a *local* branch:
+
+#+begin_src conf
+    # Politely ask Git to delete a local branch.
+    delete-local-branch = branch -d
+#+end_src
+
+#+begin_note
+The ~-d~ (~--delete~) option only deletes the branch if it has already been fully
+merged in its upstream branch.
+
+You could also use ~-D~, which is an alias for ~--delete --force~, which deletes the
+branch "irrespective of its merged status."
+#+end_note
+
+*** Delete the merged branches
+
+~delete-merged-branches~ *removes* (in bulk) *all* the *local branches* that have been
+*merged to the current branch* that you are in.
+
+#+begin_src conf
+    # Delete fully merged branches.
+    delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
+                                     egrep -v \"(master|develop)\" | \
+                                     xargs -n 1 git delete-local-branch; }; f"
+
+    # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
+    # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
+    #           egrep -v "(^\*|^\s*(master|develop)$)" | \
+    #           xargs git branch -d'
+#+end_src
+
+Not "fully merged" means the branch you are about to delete contains commits
+that are not reachable from any of:
+- its upstream branch, or
+- ~HEAD~ (current branch).
+In other words, when you might lose commits.
+
+#+begin_tip
+In the event that you accidentally delete ~master~, get it back with:
+
+: git create-branch master origin/master
+#+end_tip
+
+See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
+
+See
+https://www.oreilly.com/library/view/git-pocket-guide/9781449327507/ch05.html
+for the distinction between "merged" and "fully merged" branches!
+
+#+begin_src conf
+    delete-merged-remote-branches = "XXX"
+#+end_src
+
+- https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
+- https://github.com/arc90/git-sweep
+
+*** Delete remote branch
+
+Delete a *remote* branch:
+
+#+begin_src conf
+    # Delete remote branch.
+    delete-remote-branch = push origin --delete
+#+end_src
+
+*** Delete a branch locally and on the ~origin~ remote
+
+#+begin_src conf
+    nuke-branch = "!f() { git delete-local-branch $1 \
+                              && git delete-remote-branch $1; }; f"
+#+end_src
+
+*** Delete all orphaned branches (that no longer exist at remote)
+
+Once you delete the branch from the remote, you can *remove all orphaned
+remote-tracking branches that you have locally*, in =.git/refs/remotes/origin=, but
+are *no more present in the remote repository* ~origin~ with:
+
+: git remote prune origin
+
+Use the ~--dry-run~ flag to only see what branches will be pruned, but not
+actually prune them:
+
+: git remote prune origin --dry-run
+
+#+begin_src conf
+    # Prune deleted branches from all remotes.
+    prune-all = !git remote | xargs -n 1 git remote prune
+    # 'git remote prune' does not understand '--all'.
+
+    # There's no way to tell git remote update to prune orphaned branches?
+#+end_src
+
+#+begin_tip
+If you want this to be run automatically every time you fetch/pull:
+
+: git config --global fetch.prune true
+#+end_tip
+
+or prune individual remote tracking branches with:
+
+: git branch -dr branchname
+
+*Remove orphaned branches in your local repository* that *no longer exist in the
+remote* one (by deleting the local ones that show they are "gone" in ~git
+branch -vv~):
+
+#+begin_src conf
+    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
+                                   awk '{print $1}' | \
+                                   xargs git delete-local-branch; }; f"
+#+end_src
+
+** Rename a branch
+
+Sometimes we name a branch poorly or maybe we thought the name was "good" but
+not meaningful to the work we are doing.
+
+To rename a branch *locally*:
+
+- If we are on the branch we want to rename, we can just
+  ~git rename-local-branch NEWBRANCH~.
+
+- If we are on another branch, we have to use
+  ~git rename-local-branch OLDBRANCH NEWBRANCH~.
+
+#+begin_src conf
+    rename-local-branch = branch -m
+#+end_src
+
+XXX Try
+: git rename-local-branch "#520-application-fee-refunds" "#509-application-fee-refunds"
+(see https://gist.github.com/lttlrck/9628955)
+
+To rename a branch *locally and remotely*:
+
+1. Rename the branch locally,
+2. Push the new branch and set local branch to track the new remote, and
+3. Delete the old branch.
+
+#+begin_src conf
+    rename-branch = "!f() { git rename-local-branch $1 $2 \
+                                && git push --set-upstream origin $2 \
+                                && git delete-remote-branch $1; }; f"
+#+end_src
+
+* Tags
+
+Tags give the ability to *mark a specific commit* in your repository history as
+being important.
+
+** Create a tag
+
+While Git supports annotated and lightweight tags, you can only *create*
+- *annotated tags* in /Bitbucket/ and in /GitLab/, and
+- *lightweight tags* via /GitHub/ interface (for releases).
+
+*Annotated tags* are *regular objects* in the repository, which means they have an
+author, a date, a message, and can be referred because they have their own SHA
+key.
+
+*Lightweight tags* are just pointers to specific commits.  They *don't include any
+further information*.
+
+If knowing *who* tagged *what* and *when* is relevant for you, then use annotated
+tags. If you *just want to tag a specific point in your development*, no matter
+who and when did that, then lightweight tags are good enough.
+
+#+begin_note
+Annotated tags are meant for *release* while lightweight tags are meant for
+private or temporary object labels.
+#+end_note
+
+Create an annotated tag:
+
+#+begin_src shell :tangle no
+git tag -a TAG_NAME -m 'TAG_MESSAGE'
+#+end_src
+
+Create a lightweight tag (/no message!/):
+
+#+begin_src shell :tangle no
+git tag TAG_NAME
+#+end_src
+
+** See the commits for a tag
+
+See the list of all the commits for that tag.
+
+#+begin_src shell :tangle no
+git ls <tag>
+#+end_src
+
+** Push a tag to your repository
+
+Push all your tags (a regular push won't push a tag):
+
+#+begin_src shell :tangle no
+git push --tags                         # Only tags.
+git push --tags origin master           # Code and tags.
+#+end_src
+
+** List the repository tags
+
+List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
+
+#+begin_src conf
+    # Show verbose output about tags.
+    tags = tag -l --sort=v:refname -n 1
+#+end_src
+
+#+begin_src shell :tangle no
+# Show annotated and lightweight tags.
+git show-ref -d --tags       |
+cut -b 42-                   | # Remove the commit-id.
+sort                         |
+sed 's/\^{}//'               | # Remove ^{} markings.
+uniq -c                      | # Count identical lines.
+sed 's/2\ refs\/tags\// a /' | # 2 identicals = annotated.
+sed 's/1\ refs\/tags\//lw /'
+#+end_src
+
+Show the last tag /in the current branch/:
+
+#+begin_src conf
+    last-tag = describe --tags --abbrev=0
+    checkout-last-tag = !sh -c 'git checkout $(git last-tag)'
+#+end_src
+
+Show latest annotated tag /in all branches/:
+
+#+begin_src conf
+    last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
+#+end_src
+
+** Rename a tag
+
+#+begin_src conf
+    # Rename a tag (locally and remotely).
+    rename-tag = "!f() { git tag $2 $1; \
+                         git tag -d $1; \
+                         git push origin $2; \
+                         git push origin :refs/tags/$1; \
+                       }; f"
+#+end_src
+
+** Remove a tag from a repository
+
+Delete similar tags:
+
+: git delete-tag 'v0.8.*'
+
+#+begin_src conf
+    # Delete local and remote tags.
+    delete-tag = "!f() { [ -z ${1} ] \
+                         && echo \"No tags given as an argument!\" \
+                         || (git tag -l ${1} | \
+                             xargs -I % echo \"git tag -d % \
+                                            && git push --delete origin %\" | \
+                             sh); \
+                       }; f"
+#+end_src
+
+** Remove all tags
+
+#+begin_src conf :tangle no
+    # Delete all local and remote tags.
+    delete-all-tags = "!f() { for t in $(git tag); do
+                                  git tag -d $t
+                                  git push origin :$t
+                              done;
+                            }; f"
+#+end_src
+
+* Compare Revisions (commits, branches or tags)
+
+*See what's changed* between two revisions.
+
+Easily determine which changes:
+- are on the "compare" side (= merge /source/) but
+- are /not/ on the "base" side (= merge /destination/).
+
+#+begin_note
+Diff using three-dot (~...~) notation.
+#+end_note
+
+You can see:
+- a list of commits,
+- a list of changed files,
+- a diff, and
+- any pull requests merged between the two versions.
+
+** Commits
+
+#+begin_src conf
+    # Usage: git compare-commits <rev-base> <rev-compare>
+    compare-commits = "!f() { git log --date=short $1...$2; }; f"
+#+end_src
+
+** Files changed
+
+List all the changed *files between 2 commits*:
+
+#+begin_src conf
+    # Usage: git compare-changed-files REV_BASE REV_COMPARE
+    # Show changed files (with stat about line additions and line deletions)
+    # between two commits.
+    compare-changed-files = "!f() { git diff --stat $1...$2; }; f"
+#+end_src
+
+See the changed files in a branch *since it was forked from another branch*:
+
+: git diff --stat forked_from_branch...my_forked_branch
+
+See the changed files in a branch since the last merge with the origin branch:
+
+: git diff --stat origin/master...my_forked_branch
+
+** Diff
+
+View all diffs.
+
+- Inline diff (unified, single view)
+
+  #+begin_src conf
+    # Usage: git compare REV_BASE REV_COMPARE
+    #      = git diff REV_BASE...REV_COMPARE
+    # Example: git compare master@{1day} master
+    compare = "!f() { git diff $1...$2; }; f"
+    # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
+  #+end_src
+
+- Side-by-side diff (split view)
+
+*** Compare files from two different branches
+
+#+begin_src shell :tangle no
+git diff branch1..branch2 -- path/to/file
+#+end_src
+
+If either side is ~HEAD~, it may be omitted (e.g. ~master..~ compares ~master~ to
+~HEAD~).
+
+** Merged pull requests
+
+** Example comparisons
+
+#+begin_src conf
+    # Show commits that haven't made it to master yet.
+    ahead-of-master = log --oneline origin/master..HEAD
+#+end_src
+
+*** What did I do since I forked from the origin branch?
+
+#+begin_src conf
+    log-local = log --oneline origin..HEAD
+#+end_src
+
+#+begin_src conf
+    show-branch-history = "!f() { git log HEAD --not master; }; f"
+# XXX We should get the name of the branch merge base
+#+end_src
+
+Assuming that your branch was created off of master, then while in the branch
+(that is, you have the branch checked out):
+
+: git cherry -v master
+
+or
+
+: git log master..
+
+If you are not in the branch, then you can add the branch name to the "git log"
+command, like this:
+
+: git log master..branchname
+
+*** TODO Diff all changes since branching from master
+
+Show all commits in a git branch since original branching point from =master=:
+
+#+begin_src conf
+    # log since master.
+    missing-master = log master...
+
+    # diff since master.
+    missing-master-diff = diff master...
+#+end_src
+
+*** What did the origin do since I forked from them?
+
+#+begin_src conf
+    log-fetched = log --oneline HEAD..origin
+#+end_src
+
+*** History of your branch: List all commits on only one side of the branches
+
+= UNION of log-local AND log-fetched?  (with prefix < or > for branch A or B)
+
+#+begin_src conf :tangle no
+    git log --graph --left-right --cherry-pick --oneline master...<branch>
+#+end_src
+
+It is really a list of commits reachable from 'branch' that are not reachable
+from master. This gives you the information you want, but if and only if you
+have never merged 'branch' back to master, and have never merged master into
+'branch' since you created it. If you have merged, then this history of
+differences will collapse.
+
+*** TODO Show the history difference between a local branch and its remote
+
+= git out?  (if I'm the only one pushing?)
+
+#+begin_src conf
+    divergence = !git log --left-right --graph --cherry-pick --oneline $1...origin/$1
+#+end_src
+
+* ?Releases
+
+You can create a release to package software, along with release notes and links
+to binary files, for other people to use.
+
+Releases are based on *Git tags*: tags are used to mark *release* versions, with the
+*version number* as the *tag name*.
+
+We recommend naming tags that fit within [[https://semver.org/][semantic versioning]], i.e. having the
+form ~v<major>.<minor>.<patch>~:
+- *Major* release (from ~v0.8.1~ to ~v1.0.0~) for bug fixes and new features that
+  break backwards compatibility,
+- *Minor* release (from ~v0.8.1~ to ~v0.9.0~) for bug fixes and new features that
+  maintain backwards compatibility, and
+- *Patch* release (from ~v0.8.1~ to ~v0.8.2~) only for bug fixes.
+
+# https://stackoverflow.com/questions/21639437/git-flow-release-branches-and-tags-with-or-without-v-prefix
+
+#+begin_note
+It's common practice to prefix your version names with the letter ~v~.
+#+end_note
+
+Tag and push changes to the repository:
+
+#+begin_src conf
+    release = "!f() { git tag -a v$1 -m \"Release version $1\" \
+                          && git push origin --tags \
+                          && git push origin; }; f"
+#+end_src
+
+* ?Contributors
+
+Show authors of commits in the repository, /excluding merge commits/.
+
+#+begin_src conf
+    contributors-name  = shortlog -n -s --no-merges --
+    contributors-email = shortlog -n -s -e --no-merges --
+#+end_src
+
+#+begin_note
+The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
+#+end_note
+
+* ?Graph
+
+See example at https://gitlab.com/procps-ng/procps/-/network/master
+
+To see real *timeline* of who is working on what and when:
+
+#+begin_src conf
+    graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+
+    # Show log as a graph
+    log-graph = log --graph --all --oneline --decorate
+#+end_src
+
+#+begin_src conf
+    hist = log --date=short --graph
+#+end_src
+
+Directed Acyclic Graph:
+
+  # Use graphviz for display.
+  # This produces output that can be displayed using dotty, for example:
+  #   $ git graphviz HEAD~100..HEAD~60 | dotty /dev/stdin
+  #   $ git graphviz --first-parent master | dotty /dev/stdin
+
+See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
+
+#+begin_src conf
+    graphviz = "!f() { echo 'digraph git {' ; \
+                           git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
+                               | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
+                       echo '}'; }; f"
+#+end_src
+
+* Pull requests
+
+A pull request (PR) is a request from someone to merge in code from one branch
+to another.
+
+XXX See https://github.com/github/hub/
+
+** Create a pull request
+:PROPERTIES:
+:ID:       a7039f6e-825c-484c-8739-f3e32a9c45fc
+:END:
+
+You'll be asked to select a "From" branch and a "To" branch.
+
+You need to enter a PR summary.  The description is optional.
+
+Create a pull request against the default branch:
+
+#+begin_src conf
+    pull-request-bb = "!f() { username=$1; \
+        curl --user $username \
+            https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
+#+end_src
+
+#+begin_src conf :tangle no
+function pr () {
+  if ["$1" == ""]
+  then
+      echo "Please provide the name of the branch to create a pull request against."
+  else
+      local repo=`git remote -v | grep -m 1 "(push)" | sed -e "s/.*github.com[:/]\(.*\)\.git.*/\1/"`
+      local branch=`git name-rev --name-only HEAD`
+      echo "... creating pull request for branch \"$branch\" in \"$repo\""
+      open https://github.com/$repo/compare/$1...$branch
+  fi
+}
+#+end_src
+
+Add a comment in GitHub pull request:
+
+: curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -X POST -d '{\"body\": \"${text_pr}\"}' \"https://api.github.com/repos/${repository_name}/issues/${ghprbPullId}/comments\""
+
+** List pull requests
+
+List pull requests in the current repository.
+
+- Pull Requests assigned to me
+- Pull Requests I've created
+
+- *Open*
+- *Merged*
+- Closed
+- All
+
+Git aliases for pull requests and other useful stuff
+https://gist.github.com/metlos/9368527
+
+For GitHub
+: git ls-remote origin 'refs/pull/*'
+
+#+begin_src conf
+    pr-list = XXX
+#+end_src
+
+** 1. Check out a pull request locally
+
+XXX https://gitlab.com/help/user/project/merge_requests/index.md#checkout-merge-requests-locally
+
+Sometimes, just reading the code of a pull request might not be enough to verify
+if it should be merged.  Maybe you want to add something, or some tests are
+failing, and you want to run them locally on your computer.
+
+*Check out* the head of a *pull request* (given the pull request number) as a *local
+branch*:
+
+#+begin_src conf
+    # For GitHub.
+    pr-checkout-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
+                                 && git checkout pr/$1; }; f"
+    # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
+
+    # For GitLab.
+    pr-checkout-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
+                                 && git checkout pr/$1; }; f"
+    # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
+#+end_src
+
+Now you can check out a particular pull request.  For example:
+
+: git pr-checkout 5
+
+will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out.
+
+** 2. Review the changes locally
+
+** Push changes to a pull request
+
+#+begin_src shell :tangle no
+#!/bin/bash
+tmpfile=$(mktemp)
+repoSlug=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
+prNumber=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
+curl -s https://api.github.com/repos/${repoSlug}/pulls/${prNumber} > $tmpfile
+trap "{ rm -f $tmpfile; }" EXIT
+headRef=$(cat $tmpfile | jq -r '.head.ref')
+headSlug=$(cat $tmpfile | jq -r '.head.repo.full_name')
+git push -f git@github.com:${headSlug} HEAD:${headRef}
+#+end_src
+
+For more details on pushing changes to a PR, please see [[https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork][the official article]].
+
+** 3. Merge the branch and fix any conflicts that come up
+
+git fetch origin
+git checkout "origin/master"
+git merge --no-ff "1-change-encoding-of-read-sql-file"
+
+XXX See https://gitlab.com/help/user/project/merge_requests/squash_and_merge
+
+** Merge pull request
+
+If everything is OK, you can merge the pull request.
+
+#+begin_src conf
+    # For GitHub.
+    mpr = "!f() { \
+            declare currentBranch=\"$(git current-branch)\"; \
+            declare branch=\"${2:-$currentBranch}\"; \
+            if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
+                git fetch origin refs/pull/$1/head:pr/$1 && \
+                git checkout -B $branch && \
+                git rebase $branch pr/$1 && \
+                git checkout -B $branch && \
+                git merge --ff-only pr/$1 && \
+                git delete-local-branch pr/$1; \
+            fi \
+        }; f"
+
+    # merges given pull request into the current branch
+    # the commit message will have the same for as if done using the
+    # merge button on github.com
+    #
+    # git merge-pr origin 5
+    merge-pr = "!sh -c '\
+        user_and_repo=`git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"`; \
+        user=`echo $user_and_repo | cut -d\" \" -f1`; \
+        repo=`echo $user_and_repo | cut -d\" \" -f2`; \
+        tmpfile=`mktemp`; \
+        curl -si https://api.github.com/repos/$user/$repo/pulls/$2 > $tmpfile; \
+        pull_author=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
+        pull_ref=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
+        pull_title=`cat $tmpfile | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"`; \
+        rm $tmpfile; \
+        git fetch $1 pull/$2/head; \
+        git merge --no-ff -m \"Merged pull request #$2 from $pull_author/$pull_ref\n\n$pull_title\" FETCH_HEAD; \
+        ' -"
+#+end_src
+
+This is actually quite useful if you are a maintainer of a project on
+GitHub.
+
+There are two ways you can call it:
+
+- ~git mpr 123~
+
+  This will merge pull request number 123 on top of the current branch.
+
+- ~git mpr 123 master~.
+
+  This will merge pull request number 123 on top of the branch called master.
+
+If you are using GitHub, you can easily merge a pull request using the web
+interface, but if you want a bit more control over how you are merging the pull
+requests (for example, I'm using the ~git merge --ff-only~ option, while GitHub
+will use ~git merge --no-ff~), or you just want to merge a bunch of pull requests
+without leaving your terminal -- this function will help you.
+
+** 4. Push the result of the merge to the remote
+
+: git push origin "master"
+
+** Clean up old branch
+
+Delete the *from* branch after PR is merged (or ignored -- if it was created
+b accident or if it's irrelevant):
+
+#+begin_src conf
+    pr-clean = "!f() { git delete-local-branch pr/$1; }; f"
+#+end_src
+
+** Show in a web browser
+
+Open a pull request page in a web browser.
+
+#+begin_src conf
+    pr-show = XXX <pr-number>
+#+end_src
+
+** Who?
+
+Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
+original authors of lines changed or removed in a given branch:
+
+#+begin_src shell :tangle no
+git overwritten feature origin/master
+#+end_src
+
+This is useful when opening pull requests per GitHub Flow; you'll want your pull
+request reviewed by colleagues but you might not be sure who to ping. With
+git-overwritten you'll get the names of people who wrote the lines you just
+changed, so you'll know who to @-mention when opening a pull request.
+
+> So, given a patch (or a branch) together with a "base revision", you'd get
+> a list of code chunks modified by that patch, then run "annotate" on the
+> base revision, and look for those code chunks, collecting the names of
+> corresponding authors.
+
+Sounds like git-guilt (which I've just read about today), might be
+relevant: https://bitbucket.org/tpettersen/git-guilt
+
+** Find the pull request that introduced a commit
+
+Related pull request:
+
+#+begin_src conf
+    related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n 1 ' -"
+#+end_src
+
+Example:
+
+#+begin_src shell :tangle no
+> git related-pr-of-commit 22689a1
+1c6b5c4 Merge branch '5-resolve-it' into 'master'
+#+end_src
+
+In this case, the commit comes from pull request 5.
+
+** Saved replies
+
+GitHub allows to [[https://github.blog/2016-03-29-saved-replies/][save replies]]. You can set them in [[https://github.com/settings/replies][your GitHub settings]].  Here
+are a couple of commonly used replies:
+
+Missing changelog
+
+#+begin_src text :tangle no
+This still lacks a changelog entry. Please see [the changelog folder](../tree/master/changelog) for instructions.
+Hence, I added the "pending changelog" label.
+#+end_src
+
+Missing spec PR
+
+#+begin_src text :tangle no
+This still needs a PR to the [specification](https://github.com/dlang/dlang.org/tree/master/spec) at [dlang.org](https://github.com/dlang/dlang.org). Hence, I added the label "missing spec PR".
+
+Please refer to the [dlang.org CONTRIBUTING guide](https://github.com/dlang/dlang.org/blob/master/CONTRIBUTING.md) for instructions to build dlang.org locally. If you use Windows, don't worry, you can do your changes "blindly" and preview them at DAutoTest.
+#+end_src
+
+Phantom Zone
+
+#+begin_src text :tangle no
+This PR entered the Phantom Zone
+-----------------------------------------------
+
+
+This PR has entered the [Phantom Zone](http://forum.dlang.org/post/ouuutodvhmnghzbeoqen@forum.dlang.org) as it still needs to have the reviewers' concerns addressed and rebased.
+
+Reason for entering the Phantom Zone
+----------------------------------------------------
+
+This PR is nice, and normally I would revive such a PR if the author was no longer active. I would also revive it if it were an important bug fix or something of higher priority.  This PR, however, is just a refactoring, so I'm going to put it in the [Phantom Zone](http://forum.dlang.org/post/ouuutodvhmnghzbeoqen@forum.dlang.org) and close it for now.
+
+How do I get this PR out of the Phantom Zone
+-------------------------------------------------------------
+
+Easy: Address the comments -> open a new PR (mention this one + short summary in the description).
+#+end_src
+
+* Pipelines
+
+#+begin_src conf
+rsync-deploy =
+#+end_src
+
+* Deployments (to different environments)
+
+(see structure of actions in BitBucket)
+
+See https://bitbucket.org/blog/wordpress-continuous-deployment
+
+#+begin_src conf
+# Deploy a branch to review server (https://review-feature-1.example.com).
+deploy-review =
+
+# Deploy master to staging server (https://staging.example.com).
+deploy-staging =
+
+# Deploy master to production server (https://example.com).
+deploy-prod =
+
+  # # Deploy
+  # staging = !git push heroku-staging $(git current-branch):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
+  # dev = !git push heroku-dev $(git current-branch):master -f && git track 'Deployed to dev ' # push current branch to dev
+  # deploy = !git push heroku $(git current-branch):master -f && git track 'Deployed to production ' # push current branch to production
+
+# shipit = push heroku master
+
+ # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
+ # stage='git push staging $(git current-branch):master'
+#+end_src
+
+* Issues
+
+Status (and status values that are allowed on a ticket).
+
+- Open
+  + New
+  + Accepted
+  + Test
+
+- Closed
+  + Invalid
+  + Closed
+
+** Create Issue
+
+Open an issue in the current repository:
+- Enter a summary
+- Write an optional description
+
+#+begin_src conf
+# title
+# description
+# assignee
+# kind
+# priority
+    create-issue = XXX
+#+end_src
+
+Issue template:
+
+#+begin_src text :tangle .issue_template.txt
+### Expected behavior
+### Actual behavior
+### Steps to reproduce the behavior
+#+end_src
+
+See https://github.com/devspace/awesome-github-templates
+and https://jwong.co.uk/blog/2018/09/01/useful-github-features/#emoji-organising
+
+** Create Pull Requests
+
+#+begin_src conf
+    create-issue-pull-request = XXX
+#+end_src
+
+Title of pull request:
+
+: WIP: Resolve "Title of issue"
+
+Once merged:
+
+: Resolve "Title of issue"
+
+** List All Issues
+
+#+begin_src conf
+    # issues = "!f() { username=$1; \
+    #     curl --user $username \
+    #         https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
+    #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
+    #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
+    #         | sed \"s/new/NEW/\" \
+    #         | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
+    #         | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
+    #         | sed \"s/open/OPEN/\" \
+    #         | sed \"s/closed/CLOSED/\"; }; f"
+# --data-urlencode 'priority >= \"major\"'
+#+end_src
+
+#+begin_src conf :tangle no
+    issues = "!f() { username=$1; \
+        curl --user $username \
+            'https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues?pagelen=100' \
+            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
+            | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
+            | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; }; f"
+#+end_src
+
+Set color to red or green, depending on issue state.
+
+#+begin_src conf :tangle no
+# Works!  Need to put quotes around the URL!
+curl -u $username -X GET 'https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues?pagelen=100' \
+    | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
+# curl -s -S
+#+end_src
+
+See also [[https://cran.r-project.org/web/packages/jsonlite/vignettes/json-apis.html][Fetching JSON data from Github REST API]].
+
+** List Open Issues
+
+#+begin_src conf
+    issues-open = !git issues | grep "open"
+#+end_src
+
+** List My Issues (assigned to me)
+
+#+begin_src conf
+    issues-assigned-to-me = !git issues | grep "$(git config user.name)"
+#+end_src
+
+** List Issues I've created
+
+#+begin_src conf
+    issues-created-by-me = XXX
+#+end_src
+
+** Show Issue
+
+Show an existing issue specified by NUMBER.
+
+#+begin_src conf
+    show-issue = XXX
+#+end_src
+
+** Open Issues in a web browser
+
+#+begin_src conf
+    browse-issues = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f"
+#+end_src
+
+* Downloads
+
+Download repository, tag or branch.
+
+#+begin_src conf
+    # Put everything in the current repo in a Zip archive.
+    download-repository = "!f() { git archive ${1:-HEAD} --format=zip \
+                                      -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
+# XXX Test it with tag or branch.
+#+end_src
+
+* Settings
+
+** SSH keys
+
+List the user's public SSH keys:
+
+#+begin_src shell :tangle no
+# For GitHub.
+curl -O https://github.com/fniessen.keys
+
+# For BitBucket.
+curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
+#+end_src
+
+* ------------------------------------------------------------------------------
+
+* Run on All repositories
+
+The biggest use I get out of this alias is making sure I have everything
+committed. Sometimes I'll work on a project and then forget about it for
+a little while without committing. When I want to double-check that I'm not
+forgetting anything, I run ~git all status --short~ to quickly scan which repos
+have uncommitted changes that I need to take care of.
+
+#+begin_src conf
+    all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
+
+    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
+
+    # run commands for each repository in the current directory
+    allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
+#+end_src
+
+See also ~git-repos~:
+http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
+
+* Sort out
+
 #+begin_src conf
     # Useful for exploring Git.
     type = cat-file -t
@@ -2830,1766 +4592,6 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 #+begin_src conf :tangle no
     cvs-full-log = log --reverse --pretty=format:'%B------------------------------------------------------------------------'
 #+end_src
-
-* ------------------------------------------------------------------------------
-
-* Repository
-
-For *free private repositories*, see https://bitbucket.org/.
-
-** Create a Git repository locally
-
-#+begin_src conf
-    create-local-repository = !git init \
-                                   && ( [ -n "$(ls)" ] || touch .gitignore ) \
-                                   && git add . \
-                                   && git commit -m \"Initial commit\"
-#+end_src
-
-#+begin_tip
-Since Git doesn't add *empty directories*, if you want to keep them in the
-repository, a sort of conventional hack is to create a file called =.gitkeep= in
-these directories.  (The file could be called anything; Git assigns no special
-significance to this name.)
-#+end_tip
-
-Remove Git from current project:
-
-#+begin_src conf :tangle no
-find . -name '.git' -exec rm -rf {} \;
-#+end_src
-
-** Clone a repository
-
-Clone an existing repository including all submodules.
-
-#+begin_src conf
-    cl = clone --recursive
-#+end_src
-
-#+begin_tip
-For *passwordless Git pull* (permanently authenticating with Git repositories),
-1. *use SSH* when cloning, and
-2. *add* your *public key* to the remote server.
-#+end_tip
-
-** Create and add your SSH public key to a repository management platform
-
-https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html
-
-It is best practice to use Git over SSH (instead of Git over HTTP).  In order to
-use SSH, you will need to:
-
-*** Create an SSH key pair on your local computer
-
-Generate a new ED25519 (should always be favored) SSH key pair:
-
-: ssh-keygen -t ed25519 -C "email@example.com"
-
-Or, if you want to use RSA:
-
-: ssh-keygen -t rsa -b 4096 -C "email@example.com"
-
-*** Add the key to the repository management platform
-
-*** Testing that everything is set up correctly
-
-** Create a new repository in GitHub
-
-*Private* or *public* repository?
-
-#+begin_src conf :tangle no
-    create-repository-gh = "!f() { repo_owner=$1; repo_slug=$2; \
-        curl -u \"$1\" \
-            https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; }; f"
-#+end_src
-
-#+begin_src conf
-    repo-owner = "XXX"
-    repo-slug = "!f() { git remote show origin -n \
-                            | grep 'Fetch URL:' \
-                            | sed -E 's#^.*/(.*)$#\\1#' \
-                            | sed 's#.git$##'; }; f"
-#+end_src
-
-#+begin_tip
-The ~sed~ strings contain ~$#~, which will be replaced by the number of arguments to
-the current script/function (generally 0 for an interactive shell).  This is
-part of the basic Bourne shell syntax, so *single quotes* will be needed under any
-*Bourne-like shell* (even pre-POSIX ones) on any OS.  Read the standard for more
-information:
-https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
-#+end_tip
-
-** Open a repository in a web browser
-
-#+begin_src conf
-    browse-tree = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}; }; f"
-    browse-wiki = XXX
-    browse-commits = XXX
-#+end_src
-
-XXX open = cygstart?
-
-* Instructions
-
-Start working with your repository.
-
-** Create a README
-
-Create a =README= file into your repository.
-
-#+begin_src conf :tangle no
-echo "# ${$(git repo-slug):-Repository name}\n\nDescription" >> README.md
-git add README.md
-git commit -m "Add README.md"
-
-git push -u origin master
-#+end_src
-
-** Create a .gitignore
-
-You can also create a =.gitignore= file into your repository.
-
-* Source Files
-
-** Search for files
-
-Search file (by file path) in the current branch.
-
-#+begin_src conf
-    find-file = !git ls-tree -r --name-only HEAD | grep -i --color=auto
-#+end_src
-
-Search file in all branches.
-
-#+begin_src conf
-    find-file-all = "!f() { for branch in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
-                            echo \"${branch}:\"; \
-                                git ls-tree -r --name-only $branch | nl -bn -w3 | grep --color=auto \"$1\"; \
-                            done; }; f"
-#+end_src
-
-** Search for code
-
-*Code search* looks through all lines of code of all the files (by the *file
-contents*) from the working directory (and its subdirectories).
-
-https://confluence.atlassian.com/bitbucketserver/search-for-code-in-bitbucket-server-814204781.html
-https://help.github.com/en/github/searching-for-information-on-github/searching-code
-
-*** Search code for exact matches
-
-#+begin_src conf
-    search-code = "grep -i --line-number --break --heading -C 1"
-
-# ack = '-c color.grep.linenumber="bold yellow"
-#     -c color.grep.filename="bold green"
-#     -c color.grep.match="reverse yellow"
-#     grep --break --heading --line-number'
-#+end_src
-
-Find all instances of the specified string in code files *with a certain file
-extension*.
-
-#+begin_src conf
-    search-code-in-extension = "XXX"
-#+end_src
-
-Find all instances of the specified string in code *in the specified path*.
-
-#+begin_src conf
-    search-code-in-path = "XXX"
-#+end_src
-
-*** Pattern in working directory (and its subdirectories)
-
-The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
-your project files (i.e. no files in =.git=), but also that is allows you to
-interface with your repository's Git database; for example, for searching:
-
-- files registered in the index, rather than the working tree,
-- for your regexp in some files from another branch (XXX does not work? XXX).
-
-#+begin_note
-It doesn't search files that are not revisioned (untracked, excluded/ignored,
-etc.).
-#+end_note
-
-Example:
-
-#+begin_src shell :tangle no
-git grep "foo" -- '*.java'
-#+end_src
-
-More readable output, *with grouping* (like Ripgrep, ~rg~, or ~ack~):
-
-#+begin_src conf
-# In all commits, not in all branches!!! Lots of duplicates!!!
-grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
-#+end_src
-
-Broader search (*case-sensitive*), output *without grouping*:
-
-#+begin_src conf
-    # `-I' = Don't match the pattern in binary files.
-    g = "grep -I"
-
-    # Name only.
-    gno = "grep -I --files-with-matches"
-#+end_src
-
-*** Find files that contain some terms, not necessarily on the same line
-
-Match any of these patterns, but print matches only from files that have /all/ of
-them (files must have lines that match each of them):
-
-#+begin_src shell :tangle no
-git grep --all-match -e REGEXP -e REGEXP
-#+end_src
-
-** Undo local changes
-
-See https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
-and http://gitimmersion.com/lab_14.html.
-
-**** Before you staged (in unstaged state)
-
-*Undo* the local changes *in the working directory*: roll a file back to its last
-committed version, removing all the changes detected by Git.
-
-#+begin_tip
-It can also recover *deleted files* -- if the deletion has not been committed.
-#+end_tip
-
-#+begin_src conf
-    unmodify = checkout --
-    undelete = checkout --
-#+end_src
-
-#+begin_note
-The two dashes there (canonically called the "bare double dashes") ensure that
-the checkout command know that we are trying to roll back a file and not /change
-branches/ (the typical usage of the checkout command).
-#+end_note
-
-When you grab a file from a previous time, it sits *in your index*, modified.
-
-**** Before you committed (in staged state)
-
-*Remove* the specified *files from the index* (proposed next commit, staging area):
-
-#+begin_src conf
-    unstage = reset HEAD --
-    unadd = reset HEAD --
-#+end_src
-
-~unstage~ is the opposite of ~git add~.  It lets you remove items from the staging
-area.  This makes it a very useful tool when you're deciding which files to
-stage for a commit.  If you've accidentally added something to the staging area,
-just use ~unstage~ to remove it.
-
-* Commits
-
-** Create a commit
-
-#+begin_src conf
-    # Shortcut for commit.
-    ci = commit
-#+end_src
-
-A guide on commit messages:
-https://dev.to/yvonnickfrin/a-guide-on-commit-messages-d8n
-
-A useful template for good commit messages (see
-https://medium.com/compass-true-north/writing-good-commit-messages-fc33af9d6321):
-
-Implementing a Strong Code-Review Culture
-https://www.youtube.com/watch?v=PJjmw9TRB7s
-
-#+begin_src text :tangle .git_commit_template.txt
-# |<------   50-character subject line   ------->|<------------------->|
-# If applied, this commit will...
-# [Add / Fix / Remove / Update / Refactor / Document] [summary]
-
-
-# |<-----   Optional 72-character wrapped extended description   ----->|
-# This should answer:
-# - Why is this change necessary?  (goals, use cases, stories, etc.?)
-# - How does this change address the issue?  (implementations, algorithms, etc.?)
-# - What side effects does this change have?
-
-
-# Include a link to the ticket, if any.
-# Closes #ISSUE_NUMBER
-
-
-# --- COMMIT END ---
-# Emoji can be
-#    :star:              Add new feature ...
-#    :bug:               Fix bug ...
-#    :x:                 Remove ...
-#    :hammer_and_wrench: Update ...
-#    :recycle:           Refactor code ...
-#+end_src
-
-# https://dev.to/sublimegeek/semantic-commit-messages-with-emojis-3p8h
-# https://gist.github.com/rxaviers/7360908
-# https://www.webfx.com/tools/emoji-cheat-sheet/
-
-# https://gist.github.com/zakkak/7e06725ebd1336bfebebe254de3de825
-
-# https://help.github.com/en/github/managing-your-work-on-github/closing-issues-using-keywords
-# https://confluence.atlassian.com/bitbucket/resolve-issues-automatically-when-users-push-code-221451126.html
-# https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#default-closing-pattern
-
-and you'll be guided into writing concise commit subjects in the imperative
-mood -- a good practice. See rule 5 of Chris Beam's "How to write a commit
-message" for the inspiration of this tip and more reasoning on the use of the
-imperative mood.
-
-#+begin_src conf
-[commit]
-    template = ~/.git_commit_template.txt
-
-[alias]
-#+end_src
-
-This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
-
-| Label    | Description                                                                                            |
-|----------+--------------------------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                                          |
-| fix      | A bug fix                                                                                              |
-| style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                                              |
-| perf     | A code change that improves performance                                                                |
-| test     | Adding missing or correcting existing tests                                                            |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
-| doc      | Documentation only changes                                                                             |
-
-** Get a commit detail
-
-List all the changed files *in a commit*:
-
-#+begin_src conf
-    # Usage: git changed-files [COMMIT]
-    # Examples:
-    #   git changed-files             list files modified in last commit
-    #   git changed-files bada55      list files modified in this commit
-    changed-files = show --pretty="format:" --name-only
-#+end_src
-
-** Get the diff of a commit
-
-#+begin_src conf
-    download-email-patch = XXX git format-patch $(git current-branch).patch
-    download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
-#+end_src
-
-** Get the references the commit has been pushed to (branches and tags)
-
-List all the branches and tags that contain a specific commit.
-
-#+begin_src conf
-    # Usage: git where REV
-    # Print only refs which contain the commit.
-    where1 = for-each-ref --contains
-    where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
-                         | sort -k5n -k2M -k3n -k4n; }; f"
-    # git for-each-ref --format='%(color:blue)%(refname)%(color:reset)' --contains 4ec324ff
-#+end_src
-
-XXX See also git-ls-object-refs
-
-Filter the list of *branches* to only those which have the given *commit ID* among
-their ancestors.
-
-#+begin_src conf
-    # Find branches containing commit.
-    branches-that-contain = "branch -a --contains"
-#+end_src
-
-This also includes *remote tracking branches* in the list, that is "local
-branches that have a direct relationship to a remote branch".
-
-List all *tags* that contain a specific commit ID:
-
-#+begin_src conf
-    # Find tags containing commit.
-    tags-that-contain1 = tag --contains
-    tags-that-contain2 = "!f() { git describe --always --contains $1; }; f"
-#+end_src
-
-#+begin_src conf
-    tag-contains = git tag -l --contains HEAD
-#+end_src
-
-** Search for commits
-
-#+begin_note
-Just for the record -- searching anything "in a branch" is not possible due to
-the principle of branches.  Branch is only a pointer to a single commit, which
-is considered to be "the last commit of the branch", and commits itself do not
-"belong to a branch" anyhow else.
-
-Therefore, Git cannot determine "which branch was which" before merge commits.
-#+end_note
-
-: curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/search?scope=commits&search=bye
-: curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file
-
-*** Search within Commit Messages
-
-You can find commits that contain particular words in the commit message. For
-example, ~fix typo~ matches commits containing the words ~fix~ *and* ~typo~.
-
-If you want to find all commits (*across all branches*, showing names and status
-of changed files) where *log message* matches a specified pattern (regular
-expression), use ~find~.
-
-#+begin_src conf
-    findc1 = "log --decorate -i --all --date=short --grep"
-    findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
-#+end_src
-
-#+begin_tip
-If you only add options to one single ~git~ command, there is no benefit to the
-function wrapper.  On the contrary, you can't add other options.
-#+end_tip
-
-#+begin_src conf
-    # Search for commits (Filter by commit message).
-    search-commits = "!f() { str=\"git log --all-match\"; \
-                             for var in \"$@\"; do \
-                                 str=\"$str --grep '$var'\"; \
-                             done; \
-                             eval $str; }; f"
-#+end_src
-
-#+begin_src conf :tangle no
-curl -H "Accept: application/vnd.github.cloak-preview" \
-    https://api.github.com/search/commits\?q\=repo:fniessen/org-html-themes+local+css \
-    | jq '.items[] | {commit}'
-#+end_src
-
-Here's the alias which simply loops over each argument and calls ~git
-log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
-
-#+begin_src conf
-    search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
-# XXX Add i, all, date short...
-#+end_src
-
-
-
-You may want to add history to search through the whole repository, by adding
-rev-list to your git log:
-
-#+begin_src conf
-    search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
-#+end_src
-
-Add ~--name-status~ to show only names and status of *changed files*.
-
-To find commits that match *either* of patterns (implicit *OR* semantic), you can
-use:
-
-#+begin_src shell :tangle no
-git log --grep=FOO --grep=BAR
-#+end_src
-
-To find /commit/ that has *both* line matching first and line matching second
-somewhere, use the *AND* semantic:
-
-#+begin_src shell :tangle no
-git log --all-match --grep=FOO --grep=BAR
-#+end_src
-
-Show the *last commit* whose *message matches a regexp*:
-
-#+begin_src shell :tangle no
-# Show the LATEST commit which has the text "fix: font" in its message.
-git log :/"fix: font"
-git show :/"fix: font"
-
-# Show the LATEST merge commit.
-git show :/^Merge
-#+end_src
-
-*** Search by Author
-
-#+begin_src conf
-    search-author = "log --decorate -i --all --date=short --author"
-    recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
-#+end_src
-
-*** Search on File Changes
-
-**** Search string (added/removed) in code
-
-If you want to find all commits where a *string* was *added or removed* in the /file
-contents/ (to be more exact: where its *number of occurrences changed* in the
-source file), i.e. search the /commit contents/, use ~-S~.
-
-You can dig up commits that have, for example,
-- removed calls to a specific function, or
-- added a certain CSS classname.
-
-#+begin_warning
-If the number of times "foo" appears in the file is the same before and after
-a commit, it will not match using ~-S "foo"~.
-#+end_warning
-
-In other words, to find the following commit:
-
-#+begin_src diff :tangle no
-@@ -4211,9 +4211,10 @@ public class MovesHandler extends EventHandlerBase {
-      */
-
-     private boolean actionsNotCompleted(final EventHandlerContext context, final String mo_id) {
-         final Object found_mo_id =
-                 selectDbValue(context, "activity_log", "activity_log_id", "mo_id=" + mo_id
--                    + " AND status NOT IN ('COMPLETED-V','REJECTED','CANCELLED')");
-+                    + " AND status NOT IN ('COMPLETED-V','CLOSED','REJECTED','CANCELLED')");
-         return (found_mo_id != null);
-     }
-#+end_src
-
-you *need to search on 'CLOSED'*.  Searching on 'COMPLETED-V' would not bring back
-that commit!
-
-#+begin_src shell :tangle no
-git log --all -S "foo" --since="1 week ago"
-#+end_src
-
-#+begin_src conf
-    whatwhen = log --decorate --date=short -p -S
-#+end_src
-
-Prettier ~whatchanged~ with full diffs based on text search:
-
-#+begin_src conf
-    # Find commits by source code.
-    search-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
-# XXX Does not work for strings with spaces in them...
-#+end_src
-
-#+begin_src conf
-    grep4d = !sh -c 'git log -p -S'$1' $2' -
-# Not the best example, but: git grep4d CLOSED '*.java'
-#+end_src
-
-By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
-~--pickaxe-regex~.
-
-**** Search regexp (added/removed/changed?) in code
-
-String contained in added/removed lines from Commit contents (Diff)
-
-With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
-any *line* that was added, removed, or changed.
-
-#+begin_src shell :tangle no
-git log --all -G "foo" --since="1 week ago"
-git log --all -G "foo" --full-history --since="1 week ago"
-#+end_src
-
-*** How to find all the commits made only on a specific branch
-
-Assuming that your branch was created off of ~develop~, then /while in the branch/
-(that is, you have the branch checked out):
-
-: git log --no-merges --graph develop..
-
-** Push
-
-** Undo changes
-
-See https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
-and http://gitimmersion.com/lab_16.html.
-
-*** Undo local changes which were not pushed to remote repository (after you committed)
-
-*** Undo changes after they are pushed to remote repository
-
-**** Without history modification (preferred way)
-
-git revert?
-
-**** With history modification (requires coordination with team and force pushes)
-
-*** Remove sensitive data from a repository
-
-If you commit sensitive data, such as a password or SSH key into a Git
-repository, you can remove it from the history. To entirely remove unwanted
-files from a repository's history you can use:
-- either the ~git filter-branch~ command
-- or the BFG Repo-Cleaner open source tool.
-
-* Branches
-
-** Branching model
-
-Consistent *naming conventions* (from the [[https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow][Gitflow]] Git workflow):
-
-- =master= (used for *production releases*)
-
-  It should be the most stable branch. Merges commits from develop, release and
-  hotfix branches.
-
-- =develop= (used as integration branch for *"next release" development*)
-
-  It has the newest features and fixes. Merges commits from feature and bugfix
-  branches.
-
-- prefix =feature/MSW-709-add-support-for-webm= (for new *features*, such as Jira
-  *stories*)
-
-  These branches are short lived as they only exist while a specific feature is
-  being developed. Usually does not merge any commits unto it, unless there is
-  another feature derived from it.
-
-- prefix =bugfix/= (typically used to fix Release branches, such as Jira *bugs*)
-
-  Used to fix bugs found that either exist in develop but have not made it into
-  production, or that do exist in production but can wait until the next
-  release. These branches merge into develop.
-
-- prefix =release/2018-12-24= (used for preparing and testing *release* tasks)
-
-- prefix =hotfix/fix-123-for-production= (used to *urgently fix* bugs on *production*,
-  that have high impact)
-
-  Used to fix pressing issues that are found in production. Hotfix branches
-  merge directly to master.
-
-Alternatives:
-- https://about.gitlab.com/blog/2014/09/29/gitlab-flow/
-- https://trunkbaseddevelopment.com/ (and
-  https://dev.to/alediaferia/git-tips-for-trunk-based-development-1i1g)
-
-** Create a branch
-
-Create a new branch, and then switch to it:
-
-#+begin_src conf
-    create-branch = checkout -b
-#+end_src
-
-#+begin_note
-To create a branch from a specific commit:
-
-: git create-branch test_branch 7e09ef09
-
-Otherwise you're in a "detached head" state, which can have odd results.
-The branch method is at least a little more stable.
-#+end_note
-
-#+begin_note
-I usually branch off from the commit before the offending
-commit and stay there until things are resolved (unless I'm able to
-resolve it myself).
-
-Or I branch off =master= and revert the offending commit until things are
-resolved, ie. like so
- git checkout master
- git create-branch sb-master
- git revert sha1-of-offending-commit
-#+end_note
-
-** Publish a branch
-
-Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
-
-#+begin_src conf
-    # Push current branch to remote server (create a copy of the current branch
-    # on the remote "origin", and set it to track the upstream branch).
-    publish = !git push -u origin $(git current-branch)
-
-    # Delete current branch on remote server.
-    unpublish = !git delete-remote-branch $(git current-branch)
-#+end_src
-
-#+begin_src conf
-    # Get the current branch name (not so useful in itself, but used in other
-    # aliases).
-    current-branch = name-rev --name-only HEAD
-    # XXX Does not work correctly with tags (returns 'tags/2019.04.25~3')
-
-    # v2.22+
-    current-branch = branch --show-current
-    # Does work correctly with tags, but not in detached state.
-#+end_src
-
-Then:
-1. [[id:a7039f6e-825c-484c-8739-f3e32a9c45fc][Create a pull request]].
-2. Your team lead will review the code & merge it to the main branch.
-
-** List branches
-
-*** Show all branches
-
-*List all branches* (both local remote-tracking and local branches), showing SHA
-and commit subject line for each head, along with the name of the upstream
-branch (if any).
-
-(Sort by Last updated)
-
-: git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads
-
-fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs/heads/__" | sed "s_refs/remotes/__" | fzf --query="$@" --height=40% --ansi --tac --color=16 --border | awk '{print $1}' | xargs git co; }; f"
-(fuzzy checkout a git branch)
-
-#+begin_src conf
-    # Show local and remote branches.
-    branches = branch -a -vv
-#+end_src
-
-#+begin_src conf
-    be = branch --edit-description
-#+end_src
-
-#+begin_src conf
-    track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
-#+end_src
-
-#+begin_src conf
-    # Show info for branches which have been checked out locally...
-    br = for-each-ref \
-             --sort=-committerdate refs/heads/ \
-             --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
-#+end_src
-
-git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
-
-#+begin_src conf
-    recent = for-each-ref \
-                 --sort=-committerdate refs/heads/ \
-                 --format='%(authordate:short) %(color:red)%(objectname:short) %(color:yellow)%(refname:short)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
-#+end_src
-
-#+begin_src conf
-    # Sort by date for branches; can be useful for spring cleaning
-    refs-by-date = for-each-ref \
-                       --sort=-committerdate \
-                       --format='%(committerdate:short) %(refname:short)'
-#+end_src
-
-*** Show my branches
-
-*** Show active branches
-
-List branches that are *not merged*.
-
-#+begin_src conf
-    br-active = "!f() { git branch --no-merged | grep -v '\\*'; }; f"
-    branches-active = "!f() { git branch -a -vv --no-merged | grep -v '\\*'; }; f"
-#+end_src
-
-*** Show merged branches
-
-List branches whose tips are reachable from the specified commit (~HEAD~ if not
-specified).
-
-#+begin_src conf
-    br-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
-    branches-merged = "!f() { git branch -a -vv --merged | grep -v '\\*'; }; f"
-#+end_src
-
-*** Show stale branches
-
-"Stale branches" are Git branches *without commits* for the last few months.  This
-generally indicates old, unmaintained branches for unreleased, incomplete
-features.
-
-For GitHub, such period of inactivity is *3 months* (see
-https://help.github.com/articles/viewing-branches-in-your-repository/).
-
-** Switch branches
-
-Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
-
-#+begin_src conf
-    master = checkout master
-    develop = checkout develop
-#+end_src
-
-** Delete a branch
-
-*** Delete a local branch
-
-Delete a *local* branch:
-
-#+begin_src conf
-    # Politely ask Git to delete a local branch.
-    delete-local-branch = branch -d
-#+end_src
-
-#+begin_note
-The ~-d~ (~--delete~) option only deletes the branch if it has already been fully
-merged in its upstream branch.
-
-You could also use ~-D~, which is an alias for ~--delete --force~, which deletes the
-branch "irrespective of its merged status."
-#+end_note
-
-*** Delete the merged branches
-
-~delete-merged-branches~ *removes* (in bulk) *all* the *local branches* that have been
-*merged to the current branch* that you are in.
-
-#+begin_src conf
-    # Delete fully merged branches.
-    delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
-                                     egrep -v \"(master|develop)\" | \
-                                     xargs -n 1 git delete-local-branch; }; f"
-
-    # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
-    # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
-    #           egrep -v "(^\*|^\s*(master|develop)$)" | \
-    #           xargs git branch -d'
-#+end_src
-
-Not "fully merged" means the branch you are about to delete contains commits
-that are not reachable from any of:
-- its upstream branch, or
-- ~HEAD~ (current branch).
-In other words, when you might lose commits.
-
-#+begin_tip
-In the event that you accidentally delete ~master~, get it back with:
-
-: git create-branch master origin/master
-#+end_tip
-
-See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
-
-See
-https://www.oreilly.com/library/view/git-pocket-guide/9781449327507/ch05.html
-for the distinction between "merged" and "fully merged" branches!
-
-#+begin_src conf
-    delete-merged-remote-branches = "XXX"
-#+end_src
-
-- https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
-- https://github.com/arc90/git-sweep
-
-*** Delete remote branch
-
-Delete a *remote* branch:
-
-#+begin_src conf
-    # Delete remote branch.
-    delete-remote-branch = push origin --delete
-#+end_src
-
-*** Delete a branch locally and on the ~origin~ remote
-
-#+begin_src conf
-    nuke-branch = "!f() { git delete-local-branch $1 \
-                              && git delete-remote-branch $1; }; f"
-#+end_src
-
-*** Delete all orphaned branches (that no longer exist at remote)
-
-Once you delete the branch from the remote, you can *remove all orphaned
-remote-tracking branches that you have locally*, in =.git/refs/remotes/origin=, but
-are *no more present in the remote repository* ~origin~ with:
-
-: git remote prune origin
-
-Use the ~--dry-run~ flag to only see what branches will be pruned, but not
-actually prune them:
-
-: git remote prune origin --dry-run
-
-#+begin_src conf
-    # Prune deleted branches from all remotes.
-    prune-all = !git remote | xargs -n 1 git remote prune
-    # 'git remote prune' does not understand '--all'.
-
-    # There's no way to tell git remote update to prune orphaned branches?
-#+end_src
-
-#+begin_tip
-If you want this to be run automatically every time you fetch/pull:
-
-: git config --global fetch.prune true
-#+end_tip
-
-or prune individual remote tracking branches with:
-
-: git branch -dr branchname
-
-*Remove orphaned branches in your local repository* that *no longer exist in the
-remote* one (by deleting the local ones that show they are "gone" in ~git
-branch -vv~):
-
-#+begin_src conf
-    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
-                                   awk '{print $1}' | \
-                                   xargs git delete-local-branch; }; f"
-#+end_src
-
-** Rename a branch
-
-Sometimes we name a branch poorly or maybe we thought the name was "good" but
-not meaningful to the work we are doing.
-
-To rename a branch *locally*:
-
-- If we are on the branch we want to rename, we can just
-  ~git rename-local-branch NEWBRANCH~.
-
-- If we are on another branch, we have to use
-  ~git rename-local-branch OLDBRANCH NEWBRANCH~.
-
-#+begin_src conf
-    rename-local-branch = branch -m
-#+end_src
-
-XXX Try
-: git rename-local-branch "#520-application-fee-refunds" "#509-application-fee-refunds"
-(see https://gist.github.com/lttlrck/9628955)
-
-To rename a branch *locally and remotely*:
-
-1. Rename the branch locally,
-2. Push the new branch and set local branch to track the new remote, and
-3. Delete the old branch.
-
-#+begin_src conf
-    rename-branch = "!f() { git rename-local-branch $1 $2 \
-                                && git push --set-upstream origin $2 \
-                                && git delete-remote-branch $1; }; f"
-#+end_src
-
-* Tags
-
-Tags give the ability to *mark a specific commit* in your repository history as
-being important.
-
-** Create a tag
-
-While Git supports annotated and lightweight tags, you can only *create*
-- *annotated tags* in /Bitbucket/ and in /GitLab/, and
-- *lightweight tags* via /GitHub/ interface (for releases).
-
-*Annotated tags* are *regular objects* in the repository, which means they have an
-author, a date, a message, and can be referred because they have their own SHA
-key.
-
-*Lightweight tags* are just pointers to specific commits.  They *don't include any
-further information*.
-
-If knowing *who* tagged *what* and *when* is relevant for you, then use annotated
-tags. If you *just want to tag a specific point in your development*, no matter
-who and when did that, then lightweight tags are good enough.
-
-#+begin_note
-Annotated tags are meant for *release* while lightweight tags are meant for
-private or temporary object labels.
-#+end_note
-
-Create an annotated tag:
-
-#+begin_src shell :tangle no
-git tag -a TAG_NAME -m 'TAG_MESSAGE'
-#+end_src
-
-Create a lightweight tag (/no message!/):
-
-#+begin_src shell :tangle no
-git tag TAG_NAME
-#+end_src
-
-** See the commits for a tag
-
-See the list of all the commits for that tag.
-
-#+begin_src shell :tangle no
-git ls <tag>
-#+end_src
-
-** Push a tag to your repository
-
-Push all your tags (a regular push won't push a tag):
-
-#+begin_src shell :tangle no
-git push --tags                         # Only tags.
-git push --tags origin master           # Code and tags.
-#+end_src
-
-** List the repository tags
-
-List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
-
-#+begin_src conf
-    # Show verbose output about tags.
-    tags = tag -l --sort=v:refname -n 1
-#+end_src
-
-#+begin_src shell :tangle no
-# Show annotated and lightweight tags.
-git show-ref -d --tags       |
-cut -b 42-                   | # Remove the commit-id.
-sort                         |
-sed 's/\^{}//'               | # Remove ^{} markings.
-uniq -c                      | # Count identical lines.
-sed 's/2\ refs\/tags\// a /' | # 2 identicals = annotated.
-sed 's/1\ refs\/tags\//lw /'
-#+end_src
-
-Show the last tag /in the current branch/:
-
-#+begin_src conf
-    last-tag = describe --tags --abbrev=0
-    checkout-last-tag = !sh -c 'git checkout $(git last-tag)'
-#+end_src
-
-Show latest annotated tag /in all branches/:
-
-#+begin_src conf
-    last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
-#+end_src
-
-** Rename a tag
-
-#+begin_src conf
-    # Rename a tag (locally and remotely).
-    rename-tag = "!f() { git tag $2 $1; \
-                         git tag -d $1; \
-                         git push origin $2; \
-                         git push origin :refs/tags/$1; \
-                       }; f"
-#+end_src
-
-** Remove a tag from a repository
-
-Delete similar tags:
-
-: git delete-tag 'v0.8.*'
-
-#+begin_src conf
-    # Delete local and remote tags.
-    delete-tag = "!f() { [ -z ${1} ] \
-                         && echo \"No tags given as an argument!\" \
-                         || (git tag -l ${1} | \
-                             xargs -I % echo \"git tag -d % \
-                                            && git push --delete origin %\" | \
-                             sh); \
-                       }; f"
-#+end_src
-
-** Remove all tags
-
-#+begin_src conf :tangle no
-    # Delete all local and remote tags.
-    delete-all-tags = "!f() { for t in $(git tag); do
-                                  git tag -d $t
-                                  git push origin :$t
-                              done;
-                            }; f"
-#+end_src
-
-* Compare Revisions (commits, branches or tags)
-
-*See what's changed* between two revisions.
-
-Easily determine which changes:
-- are on the "compare" side (= merge /source/) but
-- are /not/ on the "base" side (= merge /destination/).
-
-#+begin_note
-Diff using three-dot (~...~) notation.
-#+end_note
-
-You can see:
-- a list of commits,
-- a list of changed files,
-- a diff, and
-- any pull requests merged between the two versions.
-
-** Commits
-
-#+begin_src conf
-    # Usage: git compare-commits <rev-base> <rev-compare>
-    compare-commits = "!f() { git log --date=short $1...$2; }; f"
-#+end_src
-
-** Files changed
-
-List all the changed *files between 2 commits*:
-
-#+begin_src conf
-    # Usage: git compare-changed-files REV_BASE REV_COMPARE
-    # Show changed files (with stat about line additions and line deletions)
-    # between two commits.
-    compare-changed-files = "!f() { git diff --stat $1...$2; }; f"
-#+end_src
-
-See the changed files in a branch *since it was forked from another branch*:
-
-: git diff --stat forked_from_branch...my_forked_branch
-
-See the changed files in a branch since the last merge with the origin branch:
-
-: git diff --stat origin/master...my_forked_branch
-
-** Diff
-
-View all diffs.
-
-- Inline diff (unified, single view)
-
-  #+begin_src conf
-    # Usage: git compare REV_BASE REV_COMPARE
-    #      = git diff REV_BASE...REV_COMPARE
-    # Example: git compare master@{1day} master
-    compare = "!f() { git diff $1...$2; }; f"
-    # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
-  #+end_src
-
-- Side-by-side diff (split view)
-
-*** Compare files from two different branches
-
-#+begin_src shell :tangle no
-git diff branch1..branch2 -- path/to/file
-#+end_src
-
-If either side is ~HEAD~, it may be omitted (e.g. ~master..~ compares ~master~ to
-~HEAD~).
-
-** Merged pull requests
-
-** Example comparisons
-
-#+begin_src conf
-    # Show commits that haven't made it to master yet.
-    ahead-of-master = log --oneline origin/master..HEAD
-#+end_src
-
-*** What did I do since I forked from the origin branch?
-
-#+begin_src conf
-    log-local = log --oneline origin..HEAD
-#+end_src
-
-#+begin_src conf
-    show-branch-history = "!f() { git log HEAD --not master; }; f"
-# XXX We should get the name of the branch merge base
-#+end_src
-
-Assuming that your branch was created off of master, then while in the branch
-(that is, you have the branch checked out):
-
-: git cherry -v master
-
-or
-
-: git log master..
-
-If you are not in the branch, then you can add the branch name to the "git log"
-command, like this:
-
-: git log master..branchname
-
-*** TODO Diff all changes since branching from master
-
-Show all commits in a git branch since original branching point from =master=:
-
-#+begin_src conf
-    # log since master.
-    missing-master = log master...
-
-    # diff since master.
-    missing-master-diff = diff master...
-#+end_src
-
-*** What did the origin do since I forked from them?
-
-#+begin_src conf
-    log-fetched = log --oneline HEAD..origin
-#+end_src
-
-*** History of your branch: List all commits on only one side of the branches
-
-= UNION of log-local AND log-fetched?  (with prefix < or > for branch A or B)
-
-#+begin_src conf :tangle no
-    git log --graph --left-right --cherry-pick --oneline master...<branch>
-#+end_src
-
-It is really a list of commits reachable from 'branch' that are not reachable
-from master. This gives you the information you want, but if and only if you
-have never merged 'branch' back to master, and have never merged master into
-'branch' since you created it. If you have merged, then this history of
-differences will collapse.
-
-*** TODO Show the history difference between a local branch and its remote
-
-= git out?  (if I'm the only one pushing?)
-
-#+begin_src conf
-    divergence = !git log --left-right --graph --cherry-pick --oneline $1...origin/$1
-#+end_src
-
-* ?Releases
-
-You can create a release to package software, along with release notes and links
-to binary files, for other people to use.
-
-Releases are based on *Git tags*: tags are used to mark *release* versions, with the
-*version number* as the *tag name*.
-
-We recommend naming tags that fit within [[https://semver.org/][semantic versioning]], i.e. having the
-form ~v<major>.<minor>.<patch>~:
-- *Major* release (from ~v0.8.1~ to ~v1.0.0~) for bug fixes and new features that
-  break backwards compatibility,
-- *Minor* release (from ~v0.8.1~ to ~v0.9.0~) for bug fixes and new features that
-  maintain backwards compatibility, and
-- *Patch* release (from ~v0.8.1~ to ~v0.8.2~) only for bug fixes.
-
-# https://stackoverflow.com/questions/21639437/git-flow-release-branches-and-tags-with-or-without-v-prefix
-
-#+begin_note
-It's common practice to prefix your version names with the letter ~v~.
-#+end_note
-
-Tag and push changes to the repository:
-
-#+begin_src conf
-    release = "!f() { git tag -a v$1 -m \"Release version $1\" \
-                          && git push origin --tags \
-                          && git push origin; }; f"
-#+end_src
-
-* ?Contributors
-
-Show authors of commits in the repository, /excluding merge commits/.
-
-#+begin_src conf
-    contributors-name  = shortlog -n -s --no-merges --
-    contributors-email = shortlog -n -s -e --no-merges --
-#+end_src
-
-#+begin_note
-The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
-#+end_note
-
-* ?Graph
-
-See example at https://gitlab.com/procps-ng/procps/-/network/master
-
-To see real *timeline* of who is working on what and when:
-
-#+begin_src conf
-    graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
-
-    # Show log as a graph
-    log-graph = log --graph --all --oneline --decorate
-#+end_src
-
-#+begin_src conf
-    hist = log --date=short --graph
-#+end_src
-
-Directed Acyclic Graph:
-
-  # Use graphviz for display.
-  # This produces output that can be displayed using dotty, for example:
-  #   $ git graphviz HEAD~100..HEAD~60 | dotty /dev/stdin
-  #   $ git graphviz --first-parent master | dotty /dev/stdin
-
-See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
-
-#+begin_src conf
-    graphviz = "!f() { echo 'digraph git {' ; \
-                           git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
-                               | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
-                       echo '}'; }; f"
-#+end_src
-
-* Pull requests
-
-A pull request (PR) is a request from someone to merge in code from one branch
-to another.
-
-XXX See https://github.com/github/hub/
-
-** Create a pull request
-:PROPERTIES:
-:ID:       a7039f6e-825c-484c-8739-f3e32a9c45fc
-:END:
-
-You'll be asked to select a "From" branch and a "To" branch.
-
-You need to enter a PR summary.  The description is optional.
-
-Create a pull request against the default branch:
-
-#+begin_src conf
-    pull-request-bb = "!f() { username=$1; \
-        curl --user $username \
-            https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
-#+end_src
-
-#+begin_src conf :tangle no
-function pr () {
-  if ["$1" == ""]
-  then
-      echo "Please provide the name of the branch to create a pull request against."
-  else
-      local repo=`git remote -v | grep -m 1 "(push)" | sed -e "s/.*github.com[:/]\(.*\)\.git.*/\1/"`
-      local branch=`git name-rev --name-only HEAD`
-      echo "... creating pull request for branch \"$branch\" in \"$repo\""
-      open https://github.com/$repo/compare/$1...$branch
-  fi
-}
-#+end_src
-
-Add a comment in GitHub pull request:
-
-: curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -X POST -d '{\"body\": \"${text_pr}\"}' \"https://api.github.com/repos/${repository_name}/issues/${ghprbPullId}/comments\""
-
-** List pull requests
-
-List pull requests in the current repository.
-
-- Pull Requests assigned to me
-- Pull Requests I've created
-
-- *Open*
-- *Merged*
-- Closed
-- All
-
-Git aliases for pull requests and other useful stuff
-https://gist.github.com/metlos/9368527
-
-For GitHub
-: git ls-remote origin 'refs/pull/*'
-
-#+begin_src conf
-    pr-list = XXX
-#+end_src
-
-** 1. Check out a pull request locally
-
-XXX https://gitlab.com/help/user/project/merge_requests/index.md#checkout-merge-requests-locally
-
-Sometimes, just reading the code of a pull request might not be enough to verify
-if it should be merged.  Maybe you want to add something, or some tests are
-failing, and you want to run them locally on your computer.
-
-*Check out* the head of a *pull request* (given the pull request number) as a *local
-branch*:
-
-#+begin_src conf
-    # For GitHub.
-    pr-checkout-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
-                                 && git checkout pr/$1; }; f"
-    # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
-
-    # For GitLab.
-    pr-checkout-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
-                                 && git checkout pr/$1; }; f"
-    # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
-#+end_src
-
-Now you can check out a particular pull request.  For example:
-
-: git pr-checkout 5
-
-will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out.
-
-** 2. Review the changes locally
-
-** Push changes to a pull request
-
-#+begin_src shell :tangle no
-#!/bin/bash
-tmpfile=$(mktemp)
-repoSlug=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
-prNumber=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
-curl -s https://api.github.com/repos/${repoSlug}/pulls/${prNumber} > $tmpfile
-trap "{ rm -f $tmpfile; }" EXIT
-headRef=$(cat $tmpfile | jq -r '.head.ref')
-headSlug=$(cat $tmpfile | jq -r '.head.repo.full_name')
-git push -f git@github.com:${headSlug} HEAD:${headRef}
-#+end_src
-
-For more details on pushing changes to a PR, please see [[https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork][the official article]].
-
-** 3. Merge the branch and fix any conflicts that come up
-
-git fetch origin
-git checkout "origin/master"
-git merge --no-ff "1-change-encoding-of-read-sql-file"
-
-XXX See https://gitlab.com/help/user/project/merge_requests/squash_and_merge
-
-** Merge pull request
-
-If everything is OK, you can merge the pull request.
-
-#+begin_src conf
-    # For GitHub.
-    mpr = "!f() { \
-            declare currentBranch=\"$(git current-branch)\"; \
-            declare branch=\"${2:-$currentBranch}\"; \
-            if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
-                git fetch origin refs/pull/$1/head:pr/$1 && \
-                git checkout -B $branch && \
-                git rebase $branch pr/$1 && \
-                git checkout -B $branch && \
-                git merge --ff-only pr/$1 && \
-                git delete-local-branch pr/$1; \
-            fi \
-        }; f"
-
-    # merges given pull request into the current branch
-    # the commit message will have the same for as if done using the
-    # merge button on github.com
-    #
-    # git merge-pr origin 5
-    merge-pr = "!sh -c '\
-        user_and_repo=`git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"`; \
-        user=`echo $user_and_repo | cut -d\" \" -f1`; \
-        repo=`echo $user_and_repo | cut -d\" \" -f2`; \
-        tmpfile=`mktemp`; \
-        curl -si https://api.github.com/repos/$user/$repo/pulls/$2 > $tmpfile; \
-        pull_author=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
-        pull_ref=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
-        pull_title=`cat $tmpfile | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"`; \
-        rm $tmpfile; \
-        git fetch $1 pull/$2/head; \
-        git merge --no-ff -m \"Merged pull request #$2 from $pull_author/$pull_ref\n\n$pull_title\" FETCH_HEAD; \
-        ' -"
-#+end_src
-
-This is actually quite useful if you are a maintainer of a project on
-GitHub.
-
-There are two ways you can call it:
-
-- ~git mpr 123~
-
-  This will merge pull request number 123 on top of the current branch.
-
-- ~git mpr 123 master~.
-
-  This will merge pull request number 123 on top of the branch called master.
-
-If you are using GitHub, you can easily merge a pull request using the web
-interface, but if you want a bit more control over how you are merging the pull
-requests (for example, I'm using the ~git merge --ff-only~ option, while GitHub
-will use ~git merge --no-ff~), or you just want to merge a bunch of pull requests
-without leaving your terminal -- this function will help you.
-
-** 4. Push the result of the merge to the remote
-
-: git push origin "master"
-
-** Clean up old branch
-
-Delete the *from* branch after PR is merged (or ignored -- if it was created
-b accident or if it's irrelevant):
-
-#+begin_src conf
-    pr-clean = "!f() { git delete-local-branch pr/$1; }; f"
-#+end_src
-
-** Show in a web browser
-
-Open a pull request page in a web browser.
-
-#+begin_src conf
-    pr-show = XXX <pr-number>
-#+end_src
-
-** Who?
-
-Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-overwritten][git-overwritten]]) which shows blame information about
-original authors of lines changed or removed in a given branch:
-
-#+begin_src shell :tangle no
-git overwritten feature origin/master
-#+end_src
-
-This is useful when opening pull requests per GitHub Flow; you'll want your pull
-request reviewed by colleagues but you might not be sure who to ping. With
-git-overwritten you'll get the names of people who wrote the lines you just
-changed, so you'll know who to @-mention when opening a pull request.
-
-> So, given a patch (or a branch) together with a "base revision", you'd get
-> a list of code chunks modified by that patch, then run "annotate" on the
-> base revision, and look for those code chunks, collecting the names of
-> corresponding authors.
-
-Sounds like git-guilt (which I've just read about today), might be
-relevant: https://bitbucket.org/tpettersen/git-guilt
-
-** Find the pull request that introduced a commit
-
-Related pull request:
-
-#+begin_src conf
-    related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n 1 ' -"
-#+end_src
-
-Example:
-
-#+begin_src shell :tangle no
-> git related-pr-of-commit 22689a1
-1c6b5c4 Merge branch '5-resolve-it' into 'master'
-#+end_src
-
-In this case, the commit comes from pull request 5.
-
-** Saved replies
-
-GitHub allows to [[https://github.blog/2016-03-29-saved-replies/][save replies]]. You can set them in [[https://github.com/settings/replies][your GitHub settings]].  Here
-are a couple of commonly used replies:
-
-Missing changelog
-
-#+begin_src text :tangle no
-This still lacks a changelog entry. Please see [the changelog folder](../tree/master/changelog) for instructions.
-Hence, I added the "pending changelog" label.
-#+end_src
-
-Missing spec PR
-
-#+begin_src text :tangle no
-This still needs a PR to the [specification](https://github.com/dlang/dlang.org/tree/master/spec) at [dlang.org](https://github.com/dlang/dlang.org). Hence, I added the label "missing spec PR".
-
-Please refer to the [dlang.org CONTRIBUTING guide](https://github.com/dlang/dlang.org/blob/master/CONTRIBUTING.md) for instructions to build dlang.org locally. If you use Windows, don't worry, you can do your changes "blindly" and preview them at DAutoTest.
-#+end_src
-
-Phantom Zone
-
-#+begin_src text :tangle no
-This PR entered the Phantom Zone
------------------------------------------------
-
-
-This PR has entered the [Phantom Zone](http://forum.dlang.org/post/ouuutodvhmnghzbeoqen@forum.dlang.org) as it still needs to have the reviewers' concerns addressed and rebased.
-
-Reason for entering the Phantom Zone
-----------------------------------------------------
-
-This PR is nice, and normally I would revive such a PR if the author was no longer active. I would also revive it if it were an important bug fix or something of higher priority.  This PR, however, is just a refactoring, so I'm going to put it in the [Phantom Zone](http://forum.dlang.org/post/ouuutodvhmnghzbeoqen@forum.dlang.org) and close it for now.
-
-How do I get this PR out of the Phantom Zone
--------------------------------------------------------------
-
-Easy: Address the comments -> open a new PR (mention this one + short summary in the description).
-#+end_src
-
-* Pipelines
-
-#+begin_src conf
-rsync-deploy =
-#+end_src
-
-* Deployments (to different environments)
-
-(see structure of actions in BitBucket)
-
-See https://bitbucket.org/blog/wordpress-continuous-deployment
-
-#+begin_src conf
-# Deploy a branch to review server (https://review-feature-1.example.com).
-deploy-review =
-
-# Deploy master to staging server (https://staging.example.com).
-deploy-staging =
-
-# Deploy master to production server (https://example.com).
-deploy-prod =
-
-  # # Deploy
-  # staging = !git push heroku-staging $(git current-branch):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
-  # dev = !git push heroku-dev $(git current-branch):master -f && git track 'Deployed to dev ' # push current branch to dev
-  # deploy = !git push heroku $(git current-branch):master -f && git track 'Deployed to production ' # push current branch to production
-
-# shipit = push heroku master
-
- # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
- # stage='git push staging $(git current-branch):master'
-#+end_src
-
-* Issues
-
-Status (and status values that are allowed on a ticket).
-
-- Open
-  + New
-  + Accepted
-  + Test
-
-- Closed
-  + Invalid
-  + Closed
-
-** Create Issue
-
-Open an issue in the current repository:
-- Enter a summary
-- Write an optional description
-
-#+begin_src conf
-# title
-# description
-# assignee
-# kind
-# priority
-    create-issue = XXX
-#+end_src
-
-Issue template:
-
-#+begin_src text :tangle .issue_template.txt
-### Expected behavior
-### Actual behavior
-### Steps to reproduce the behavior
-#+end_src
-
-See https://github.com/devspace/awesome-github-templates
-and https://jwong.co.uk/blog/2018/09/01/useful-github-features/#emoji-organising
-
-** Create Pull Requests
-
-#+begin_src conf
-    create-issue-pull-request = XXX
-#+end_src
-
-Title of pull request:
-
-: WIP: Resolve "Title of issue"
-
-Once merged:
-
-: Resolve "Title of issue"
-
-** List All Issues
-
-#+begin_src conf
-    # issues = "!f() { username=$1; \
-    #     curl --user $username \
-    #         https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
-    #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
-    #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
-    #         | sed \"s/new/NEW/\" \
-    #         | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
-    #         | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
-    #         | sed \"s/open/OPEN/\" \
-    #         | sed \"s/closed/CLOSED/\"; }; f"
-# --data-urlencode 'priority >= \"major\"'
-#+end_src
-
-#+begin_src conf :tangle no
-    issues = "!f() { username=$1; \
-        curl --user $username \
-            'https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues?pagelen=100' \
-            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
-            | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
-            | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; }; f"
-#+end_src
-
-Set color to red or green, depending on issue state.
-
-#+begin_src conf :tangle no
-# Works!  Need to put quotes around the URL!
-curl -u $username -X GET 'https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues?pagelen=100' \
-    | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
-# curl -s -S
-#+end_src
-
-See also [[https://cran.r-project.org/web/packages/jsonlite/vignettes/json-apis.html][Fetching JSON data from Github REST API]].
-
-** List Open Issues
-
-#+begin_src conf
-    issues-open = !git issues | grep "open"
-#+end_src
-
-** List My Issues (assigned to me)
-
-#+begin_src conf
-    issues-assigned-to-me = !git issues | grep "$(git config user.name)"
-#+end_src
-
-** List Issues I've created
-
-#+begin_src conf
-    issues-created-by-me = XXX
-#+end_src
-
-** Show Issue
-
-Show an existing issue specified by NUMBER.
-
-#+begin_src conf
-    show-issue = XXX
-#+end_src
-
-** Open Issues in a web browser
-
-#+begin_src conf
-    browse-issues = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f"
-#+end_src
-
-* Downloads
-
-Download repository, tag or branch.
-
-#+begin_src conf
-    # Put everything in the current repo in a Zip archive.
-    download-repository = "!f() { git archive ${1:-HEAD} --format=zip \
-                                      -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
-# XXX Test it with tag or branch.
-#+end_src
-
-* Settings
-
-** SSH keys
-
-List the user's public SSH keys:
-
-#+begin_src shell :tangle no
-# For GitHub.
-curl -O https://github.com/fniessen.keys
-
-# For BitBucket.
-curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
-#+end_src
-
-* ------------------------------------------------------------------------------
-
-* Run on All repositories
-
-The biggest use I get out of this alias is making sure I have everything
-committed. Sometimes I'll work on a project and then forget about it for
-a little while without committing. When I want to double-check that I'm not
-forgetting anything, I run ~git all status --short~ to quickly scan which repos
-have uncommitted changes that I need to take care of.
-
-#+begin_src conf
-    all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
-
-    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
-
-    # run commands for each repository in the current directory
-    allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
-#+end_src
-
-See also ~git-repos~:
-http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 
 * Download repository
 
