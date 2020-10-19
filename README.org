@@ -55,13 +55,6 @@ You should "override" the above with your personal details:
     path = .gitconfig_local
 #+end_src
 
-Or create a Git command to set email addresses for you:
-
-#+begin_src conf
-[alias]
-    workprofile = config user.email \"john@work.com\"
-#+end_src
-
 ** Core
 
 #+begin_src conf
@@ -252,53 +245,6 @@ as prefixes for patches:
 
 [difftool "meld"]
     cmd = meld "$LOCAL" "$REMOTE"
-#+end_src
-
-Use a generic rev syntax (rev-parse) to transparently allow complex rev
-expressions.
-
-#+begin_src conf
-[alias]
-    showtool = "!f() { rev=$(git rev-parse \"${*:-HEAD}\"); git difftool $rev~1 $rev; }; f"
-#+end_src
-
-This allows doing nice things like:
-
-#+begin_src shell :tangle no
-git showtool :/some nasty bug
-#+end_src
-
-Diff the last commit for a given file:
-
-#+begin_src conf
-    diff-file-last-commit = "!f() { \
-            project_root_dir=$(git root); \
-            echo finding full file path of $1 in $project_root_dir; \
-            filepath=$(find $project_root_dir -type f -name $1); \
-            echo full file path $filepath; \
-            last_modified_commit_hash=$(git rev-list -1 HEAD $filepath); \
-            echo last commit file modified $last_modified_commit_hash; \
-            git difftool $last_modified_commit_hash^ $filepath; \
-        }; f"
-#+end_src
-
-Usage (no matter where you are in the repo):
-
-#+begin_src shell :tangle no
-git diff-file-last-commit File.cpp
-#+end_src
-
-This opens your configured ~difftool~ with the changes to =File.cpp= in the last
-commit it was touched.
-
-*** Performing directory diffs (Comparing folders)
-
-The following command makes it similar to the =git-meld.pl= script here:
-https://github.com/wmanley/git-meld:
-
-#+begin_src conf
-[alias]
-    diffall = difftool -t meld --dir-diff
 #+end_src
 
 ** Apply
@@ -575,14 +521,7 @@ The first color given is the foreground; the second is the background.", e.g
 
 #+begin_src conf :tangle no
 [http]
-    proxy = http://proxy-guest.forem.be:8080
-#+end_src
-
-#+begin_src conf
-[alias]
-    # Proxy.
-    setproxy = !git config --global http.proxy http://proxy-guest.forem.be:8080 && git config --global https.proxy https://proxy-guest.forem.be:8080
-    rmvproxy = !git config --global --unset http.proxy && git config --global --unset https.proxy
+    proxy = http://proxy-guest.example.com:8080
 #+end_src
 
 ** Repository administration
@@ -649,6 +588,14 @@ For *free private repositories*, see https://bitbucket.org/.
 
 ** Create a Git repository locally
 
+Set email addresses for you:
+
+#+begin_src conf
+    workprofile = config user.email \"john@work.com\"
+#+end_src
+
+Then:
+
 #+begin_src conf
     create-local-repository = !git init \
                                    && ( [ -n "$(ls)" ] || touch .gitignore ) \
@@ -670,6 +617,14 @@ find . -name '.git' -exec rm -rf {} \;
 #+end_src
 
 ** Clone a repository
+
+#+begin_src conf
+    # Proxy.
+    setproxy = !git config --global http.proxy http://proxy-guest.example.com:8080 \
+                    && git config --global https.proxy https://proxy-guest.example.com:8080
+    rmvproxy = !git config --global --unset http.proxy \
+                    && git config --global --unset https.proxy
+#+end_src
 
 Clone an existing repository including all submodules.
 
@@ -709,7 +664,7 @@ Or, if you want to use RSA:
 *Private* or *public* repository?
 
 #+begin_src conf :tangle no
-    create-repository-gh = "!f() { repo_owner=$1; repo_slug=$2; \
+    create-repository-gh = "!f() { REPO_OWNER=$1; REPO_SLUG=$2; \
         curl -u \"$1\" \
             https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; }; f"
 #+end_src
@@ -774,9 +729,9 @@ Search file (by file path) in the current branch.
 Search file in all branches.
 
 #+begin_src conf
-    find-file-all = "!f() { for branch in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
-                            echo \"${branch}:\"; \
-                                git ls-tree -r --name-only $branch | nl -bn -w3 | grep --color=auto \"$1\"; \
+    find-file-all = "!f() { for BRANCH in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
+                            echo \"$BRANCH:\"; \
+                                git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
                             done; }; f"
 #+end_src
 
@@ -997,6 +952,54 @@ List all the changed files *in a commit*:
     download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
 #+end_src
 
+** Diff
+
+Use a generic rev syntax (rev-parse) to transparently allow complex rev
+expressions.
+
+#+begin_src conf
+    showtool = "!f() { REV=$(git rev-parse \"${*:-HEAD}\"); \
+                       git difftool $REV~1 $REV; }; f"
+#+end_src
+
+This allows doing nice things like:
+
+#+begin_src shell :tangle no
+git showtool :/some nasty bug
+#+end_src
+
+Diff the last commit for a given file:
+
+#+begin_src conf
+    diff-file-last-commit = "!f() { \
+            PROJECT_ROOT_DIR=$(git root); \
+            echo finding full file path of $1 in $PROJECT_ROOT_DIR; \
+            FILEPATH=$(find $PROJECT_ROOT_DIR -type f -name $1); \
+            echo full file path $FILEPATH; \
+            LAST_MODIFIED_COMMIT_HASH=$(git rev-list -1 HEAD $FILEPATH); \
+            echo last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
+            git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
+        }; f"
+#+end_src
+
+Usage (no matter where you are in the repo):
+
+#+begin_src shell :tangle no
+git diff-file-last-commit File.cpp
+#+end_src
+
+This opens your configured ~difftool~ with the changes to =File.cpp= in the last
+commit it was touched.
+
+*** Performing directory diffs (Comparing folders)
+
+The following command makes it similar to the =git-meld.pl= script here:
+https://github.com/wmanley/git-meld:
+
+#+begin_src conf
+    diffall = difftool -t meld --dir-diff
+#+end_src
+
 ** Get the references the commit has been pushed to (branches and tags)
 
 List all the branches and tags that contain a specific commit.
@@ -1070,11 +1073,11 @@ function wrapper.  On the contrary, you can't add other options.
 
 #+begin_src conf
     # Search for commits (Filter by commit message).
-    search-commits = "!f() { str=\"git log --all-match\"; \
-                             for var in \"$@\"; do \
-                                 str=\"$str --grep '$var'\"; \
+    search-commits = "!f() { STR=\"git log --all-match\"; \
+                             for VAR in \"$@\"; do \
+                                 str=\"$STR --grep '$VAR'\"; \
                              done; \
-                             eval $str; }; f"
+                             eval $STR; }; f"
 #+end_src
 
 #+begin_src conf :tangle no
@@ -1446,14 +1449,14 @@ branch "irrespective of its merged status."
 
 *** Delete the merged branches
 
-~delete-merged-branches~ *removes* (in bulk) *all* the *local branches* that have been
-*merged to the current branch* that you are in.
+~delete-local-merged-branches~ *removes* (in bulk) *all* the *local branches* that have
+been *merged to the current branch* that you are in.
 
 #+begin_src conf
     # Delete fully merged branches.
-    delete-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' | \
-                                     egrep -v \"(master|develop)\" | \
-                                     xargs -n 1 git delete-local-branch; }; f"
+    delete-local-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' \
+                                               | egrep -v \"(master|develop)\" \
+                                               | xargs -n 1 git delete-local-branch; }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
@@ -1480,7 +1483,7 @@ https://www.oreilly.com/library/view/git-pocket-guide/9781449327507/ch05.html
 for the distinction between "merged" and "fully merged" branches!
 
 #+begin_src conf
-    delete-merged-remote-branches = "XXX"
+    delete-remote-merged-branches = "XXX"
 #+end_src
 
 - https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
@@ -1571,6 +1574,8 @@ To rename a branch *locally and remotely*:
 3. Delete the old branch.
 
 #+begin_src conf
+    # Usage: git rename-branch BRANCH_OLD BRANCH_NEW
+    # Rename both a local and remote branch.
     rename-branch = "!f() { git rename-local-branch $1 $2 \
                                 && git push --set-upstream origin $2 \
                                 && git delete-remote-branch $1; }; f"
@@ -1684,9 +1689,9 @@ Delete similar tags:
 
 #+begin_src conf
     # Delete local and remote tags.
-    delete-tag = "!f() { [ -z ${1} ] \
+    delete-tag = "!f() { [ -z $1 ] \
                          && echo \"No tags given as an argument!\" \
-                         || (git tag -l ${1} | \
+                         || (git tag -l $1 | \
                              xargs -I % echo \"git tag -d % \
                                             && git push --delete origin %\" | \
                              sh); \
@@ -1697,9 +1702,9 @@ Delete similar tags:
 
 #+begin_src conf :tangle no
     # Delete all local and remote tags.
-    delete-all-tags = "!f() { for t in $(git tag); do
-                                  git tag -d $t
-                                  git push origin :$t
+    delete-all-tags = "!f() { for TAG in $(git tag); do
+                                  git tag -d $TAG
+                                  git push origin :$TAG
                               done;
                             }; f"
 #+end_src
@@ -1942,8 +1947,8 @@ You need to enter a PR summary.  The description is optional.
 Create a pull request against the default branch:
 
 #+begin_src conf
-    pull-request-bb = "!f() { username=$1; \
-        curl --user $username \
+    pull-request-bb = "!f() { USERNAME=$1; \
+        curl --user $USERNAME \
             https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
 #+end_src
 
@@ -1953,17 +1958,17 @@ function pr () {
   then
       echo "Please provide the name of the branch to create a pull request against."
   else
-      local repo=`git remote -v | grep -m 1 "(push)" | sed -e "s/.*github.com[:/]\(.*\)\.git.*/\1/"`
-      local branch=`git name-rev --name-only HEAD`
-      echo "... creating pull request for branch \"$branch\" in \"$repo\""
-      open https://github.com/$repo/compare/$1...$branch
+      local REPO=$(git remote -v | grep -m 1 "(push)" | sed -e "s/.*github.com[:/]\(.*\)\.git.*/\1/")
+      local BRANCH=$(git name-rev --name-only HEAD)
+      echo "... creating pull request for branch \"$BRANCH\" in \"$REPO\""
+      open https://github.com/$REPO/compare/$1...$BRANCH
   fi
 }
 #+end_src
 
 Add a comment in GitHub pull request:
 
-: curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -X POST -d '{\"body\": \"${text_pr}\"}' \"https://api.github.com/repos/${repository_name}/issues/${ghprbPullId}/comments\""
+: curl -s -H \"Authorization: token $GITHUB_TOKEN\" -X POST -d '{\"body\": \"$TEXT_PR\"}' \"https://api.github.com/repos/$REPOSITORY_NAME/issues/$GHPRBPULLID/comments\""
 
 ** List pull requests
 
@@ -2022,14 +2027,14 @@ will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out
 
 #+begin_src shell :tangle no
 #!/bin/bash
-tmpfile=$(mktemp)
-repoSlug=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
-prNumber=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
-curl -s https://api.github.com/repos/${repoSlug}/pulls/${prNumber} > $tmpfile
-trap "{ rm -f $tmpfile; }" EXIT
-headRef=$(cat $tmpfile | jq -r '.head.ref')
-headSlug=$(cat $tmpfile | jq -r '.head.repo.full_name')
-git push -f git@github.com:${headSlug} HEAD:${headRef}
+TMPFILE=$(mktemp)
+REPOSLUG=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
+PRNUMBER=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
+curl -s https://api.github.com/repos/$REPOSLUG/pulls/$PRNUMBER > $TMPFILE
+trap "{ rm -f $TMPFILE; }" EXIT
+HEADREF=$(cat $TMPFILE | jq -r '.head.ref')
+HEADSLUG=$(cat $TMPFILE | jq -r '.head.repo.full_name')
+git push -f git@github.com:$HEADSLUG HEAD:$HEADREF
 #+end_src
 
 For more details on pushing changes to a PR, please see [[https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork][the official article]].
@@ -2049,35 +2054,35 @@ If everything is OK, you can merge the pull request.
 #+begin_src conf
     # For GitHub.
     mpr = "!f() { \
-            declare currentBranch=\"$(git current-branch)\"; \
-            declare branch=\"${2:-$currentBranch}\"; \
+            declare CURRENTBRANCH=\"$(git current-branch)\"; \
+            declare BRANCH=\"${2:-$CURRENTBRANCH}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
                 git fetch origin refs/pull/$1/head:pr/$1 && \
-                git checkout -B $branch && \
-                git rebase $branch pr/$1 && \
-                git checkout -B $branch && \
+                git checkout -B $BRANCH && \
+                git rebase $BRANCH pr/$1 && \
+                git checkout -B $BRANCH && \
                 git merge --ff-only pr/$1 && \
                 git delete-local-branch pr/$1; \
             fi \
         }; f"
 
-    # merges given pull request into the current branch
-    # the commit message will have the same for as if done using the
+    # Merge given pull request into the current branch.
+    # The commit message will have the same for as if done using the
     # merge button on github.com
-    #
-    # git merge-pr origin 5
+    # Example:
+    #   git merge-pr origin 5
     merge-pr = "!sh -c '\
-        user_and_repo=`git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"`; \
-        user=`echo $user_and_repo | cut -d\" \" -f1`; \
-        repo=`echo $user_and_repo | cut -d\" \" -f2`; \
-        tmpfile=`mktemp`; \
-        curl -si https://api.github.com/repos/$user/$repo/pulls/$2 > $tmpfile; \
-        pull_author=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
-        pull_ref=`cat $tmpfile | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
-        pull_title=`cat $tmpfile | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"`; \
-        rm $tmpfile; \
+        USER_AND_REPO=`git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"`; \
+        USER=`echo $USER_AND_REPO | cut -d\" \" -f1`; \
+        REPO=`echo $USER_AND_REPO | cut -d\" \" -f2`; \
+        TMPFILE=`mktemp`; \
+        curl -si https://api.github.com/repos/$USER/$REPO/pulls/$2 > $TMPFILE; \
+        PULL_AUTHOR=`cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
+        PULL_REF=`cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
+        PULL_TITLE=`cat $TMPFILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"`; \
+        rm $TMPFILE; \
         git fetch $1 pull/$2/head; \
-        git merge --no-ff -m \"Merged pull request #$2 from $pull_author/$pull_ref\n\n$pull_title\" FETCH_HEAD; \
+        git merge --no-ff -m \"Merged pull request #$2 from $PULL_AUTHOR/$PULL_REF\n\n$PULL_TITLE\" FETCH_HEAD; \
         ' -"
 #+end_src
 
@@ -2289,9 +2294,9 @@ Once merged:
 ** List All Issues
 
 #+begin_src conf
-    # issues = "!f() { username=$1; \
-    #     curl --user $username \
-    #         https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues \
+    # issues = "!f() { USERNAME=$1; \
+    #     curl --user $USERNAME \
+    #         https://api.bitbucket.org/2.0/repositories/$USERNAME/$(git repo-slug)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
     #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
     #         | sed \"s/new/NEW/\" \
@@ -2303,9 +2308,9 @@ Once merged:
 #+end_src
 
 #+begin_src conf :tangle no
-    issues = "!f() { username=$1; \
-        curl --user $username \
-            'https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues?pagelen=100' \
+    issues = "!f() { USERNAME=$1; \
+        curl --user $USERNAME \
+            'https://api.bitbucket.org/2.0/repositories/$USERNAME/$(git repo-slug)/issues?pagelen=100' \
             | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
             | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
             | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; }; f"
@@ -2315,7 +2320,7 @@ Set color to red or green, depending on issue state.
 
 #+begin_src conf :tangle no
 # Works!  Need to put quotes around the URL!
-curl -u $username -X GET 'https://api.bitbucket.org/2.0/repositories/$username/$(git repo-slug)/issues?pagelen=100' \
+curl -u $USERNAME -X GET 'https://api.bitbucket.org/2.0/repositories/$USERNAME/$(git repo-slug)/issues?pagelen=100' \
     | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
 # curl -s -S
 #+end_src
@@ -2351,7 +2356,8 @@ Show an existing issue specified by NUMBER.
 ** Open Issues in a web browser
 
 #+begin_src conf
-    browse-issues = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}/issues/$1; }; f"
+    browse-issues = "!f() { URL=$(git config --get remote.origin.url); \
+                            open ${URL/.git}/issues/$1; }; f"
 #+end_src
 
 * Downloads
@@ -2392,7 +2398,10 @@ have uncommitted changes that I need to take care of.
 #+begin_src conf
     all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
 
-    print-reponame-then-run = "!f() { echo "======"; basename `git rev-parse --show-toplevel`; echo "======"; git "$@";}; f"
+    print-reponame-then-run = "!f() { echo "======"; \
+                                      basename `git rev-parse --show-toplevel`; \
+                                      echo "======"; \
+                                      git "$@";}; f"
 
     # run commands for each repository in the current directory
     allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
@@ -2430,7 +2439,9 @@ are always executed in the top-level directory.
     d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
     # `git di $number' shows the diff between the state `$number' revisions ago and the current state
-    di = !"d() { git diff --patch-with-stat HEAD~$1; }; git diff-index --quiet HEAD -- || clear; d"
+    di = !"d() { git diff --patch-with-stat HEAD~$1; }; \
+           git diff-index --quiet HEAD -- || clear; \
+           d"
 
     # Pull in remote changes for the current repository and all its submodules
     p = !"git pull; git submodule foreach git pull origin master"
@@ -2476,11 +2487,11 @@ clean and relevant commits, no experiments or fixing typos.
     whoischangingmaster = !sh -c 'git shortlog HEAD..origin/master'
 
     # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
-    showorigin = "!sh -c 'for branch in `git branch -r | grep -v HEAD`;do echo `git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $branch | head -n 1` \\\t$branch; done | sort -r'"
+    showorigin = "!sh -c 'for BRANCH in `git branch -r | grep -v HEAD`;do echo `git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1` \\\t$BRANCH; done | sort -r'"
 
     # get remote branches
-    trackallbranches = !sh -c "for branchname in `git branch -r `; do git branch --track $branchname; done"
-    updateallbranches = !sh -c "for branchname in `git branch -r `; do git checkout $branchname ; git pull; done"
+    trackallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git branch --track $BRANCHNAME; done"
+    updateallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git checkout $BRANCHNAME ; git pull; done"
 
 #TAGS
 
@@ -2808,9 +2819,9 @@ moved or copied the lines.
 See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
 
 #+begin_src conf
-    status-all = "!for d in $(find . -name \".git\"); do \
-                     echo \"\n*** Repository: $d ***\" \
-                     && git --git-dir=$d --work-tree=$d/.. status | grep -q \"is ahead of\"; \
+    status-all = "!for D in $(find . -name \".git\"); do \
+                     echo \"\n*** Repository: $D ***\" \
+                     && git --git-dir=$D --work-tree=$D/.. status | grep -q \"is ahead of\"; \
                    done"
 #+end_src
 
@@ -2824,9 +2835,9 @@ Tell if a file is being tracked:
     # List all tracked files.
     ls-tracked = ls-files -t
 
-    tracked1 = "!f() { tracked=$(git ls-files ${1}); if [ -z \"${tracked}\" ]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
+    tracked1 = "!f() { TRACKED=$(git ls-files $1); if [ -z \"$TRACKED\" ]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
 
-    tracked2 = "!f() { echo -n ${1}': '; if [ -f \"${1}\" ]; then tracked=$(git ls-files ${1}); if [ -z \"${tracked}\" ]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
+    tracked2 = "!f() { echo -n $1': '; if [ -f \"$1\" ]; then TRACKED=$(git ls-files $1); if [ -z \"$TRACKED\" ]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
 # does not work!?
 #+end_src
 
@@ -3030,10 +3041,10 @@ My new favorite alias lets you amend to a specific commit, *no* need to be the
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
 
     # Checkout the commit in question, and amend its message.
-    reword2 = "!f() { branch=$(git current-branch); \
+    reword2 = "!f() { BRANCH=$(git current-branch); \
                       git checkout $1; \
                       git commit --amend; \
-                      git checkout $branch; }; f"
+                      git checkout $BRANCH; }; f"
 #+end_src
 
 *** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
@@ -3208,17 +3219,17 @@ effectively reverses the patch in question. The simplest usage is to revert an
 entire commit:
 
 #+begin_src shell :tangle no
-git revert [HASH]
+git revert [COMMIT]
 #+end_src
 
-This creates a patch that is the opposite of commit ~[HASH]~ and commits it to
+This creates a patch that is the opposite of commit ~[COMMIT]~ and commits it to
 your repository.
 
 If you want to revert that commit without committing it (putting the reversion
 into your index), use:
 
 #+begin_src shell :tangle no
-git revert -n [HASH]
+git revert -n [COMMIT]
 #+end_src
 
 *** Squash
@@ -3227,7 +3238,7 @@ Squash commits:
 https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
 
 #+begin_src conf
-    squash = "!f() { git reset --soft HEAD~${1} && \
+    squash = "!f() { git reset --soft HEAD~$1 && \
                      git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
 #+end_src
 
@@ -3245,13 +3256,13 @@ into one commit:
   merge-span = !"f() { echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); }; f"
 
   # Find the commits that were introduced by a merge
-  merge-span-log = "!git log `git merge-span .. $1`"
+  merge-span-log = "!git log $(git merge-span .. $1)"
 
   # Show the changes that were introduced by a merge
-  merge-span-diff = !"git diff `git merge-span ... $1`"
+  merge-span-diff = !"git diff $(git merge-span ... $1)"
 
   # Show the changes that were introduced by a merge, in your difftool
-  merge-span-difftool = !"git difftool `git merge-span ... $1`"
+  merge-span-difftool = !"git difftool $(git merge-span ... $1)"
 #+end_src
 
 ** UPDATE - Pull
@@ -3415,19 +3426,19 @@ Before doing work (in a new branch), *ensure that the working directory is*
 Pull all:
 
 #+begin_src conf
-  # Do a push/pull for just one branch
+  # Do a push/pull for just one branch.
   push1 = "!git push origin $(git current-branch)"
   pull1 = "!git pull origin $(git current-branch)"
 
-# Pull and push from the current branch
+# Pull and push from the current branch.
 sync = "!f(){ pull1 && push1; }; f"
 
-    pull-all = !"old=$(git current-branch); \
-                 for b in $(git for-each-ref refs/heads --format='%(refname)'); do \
-                     git checkout ${b#refs/heads/}; \
+    pull-all = !"OLD=$(git current-branch); \
+                 for B in $(git for-each-ref refs/heads --format='%(refname)'); do \
+                     git checkout ${B#refs/heads/}; \
                      git pull --ff-only; \
                  done; \
-                 git checkout ${old}"
+                 git checkout $OLD"
 #+end_src
 
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
@@ -3447,10 +3458,10 @@ echo "$REMOTES" | while read REMOTE; do
     echo
     git remote show $REMOTE -n \
         | awk '/merges with remote/ {print $5" "$1}' \
-        | while read line; do
-              RB=$(echo "$line" | cut -f1 -d" ");
+        | while read LINE; do
+              RB=$(echo "$LINE" | cut -f1 -d" ");
               ARB="refs/remotes/$REMOTE/$RB";
-              LB=$(echo "$line" | cut -f2 -d" ");
+              LB=$(echo "$LINE" | cut -f2 -d" ");
               ALB="refs/heads/$LB";
               NBEHIND=$(( $(git rev-list --count $ALB..$ARB 2> /dev/null) + 0));
               NAHEAD=$(( $(git rev-list --count $ARB..$ALB 2> /dev/null) + 0));
@@ -3480,12 +3491,14 @@ XXX Is this ~sync~?
 
 #+begin_src conf
     # For the latest pull (even if there's nothing new).
-    last-pulled = !stat -c %y $(git root)/.git/FETCH_HEAD | cut -d'.' -f1
+    last-pulled = !stat -c %y $(git root)/.git/FETCH_HEAD \
+                       | cut -d'.' -f1
 
     # For the latest pull resulting in changes coming in from the remote master
     # branch (the timestamp won't change when git pull reports there are no
     # changes).
-    last-updated = !stat -c %y $(git root)/.git/refs/heads/$(git current-branch) | cut -d'.' -f1
+    last-updated = !stat -c %y $(git root)/.git/refs/heads/$(git current-branch) \
+                        | cut -d'.' -f1
 #+end_src
 
 ** UPDATE - Merge
@@ -3514,9 +3527,12 @@ applies all those changes together.
 
 #+begin_src conf
     # Merge remote master into the current branch.
-    mm = !git fetch -p && git merge origin/master
+    mm = !git fetch -p \
+              && git merge origin/master
 
-    merge-to-master =  "!f(){ branch_name=\"$(git symbolic-ref HEAD 2>/dev/null)\" || branch_name=\"(unnamed branch)\"; branch_name=${branch_name##refs/heads/}; git checkout master && git merge $branch_name && git checkout $branch_name; };f"
+    merge-to-master =  "!f(){ BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
+                                  BRANCH_NAME=${branch_name##refs/heads/}; \
+                                  git checkout master && git merge $BRANCH_NAME && git checkout $BRANCH_NAME; };f"
     fork-from-master = "!f(){ git checkout master && git branch $1 && git checkout $1; };f"
 #+end_src
 
@@ -3575,7 +3591,9 @@ You can do ~git merge --abort~ after seeing that there are conflicts.
 
 #+begin_src conf
     # Run merge test (before merge) to check for any conflicts beforehand.
-    mergetest = "!f() { git merge --no-commit --no-ff \"$1\"; git merge --abort; echo \"Merge aborted\"; }; f"
+    mergetest = "!f() { git merge --no-commit --no-ff \"$1\"; \
+                        git merge --abort; \
+                        echo \"Merge aborted\"; }; f"
 #+end_src
 
 #+begin_warning
@@ -3610,7 +3628,7 @@ Pick a file(s) from:
 - the *current branch*
 
 #+begin_src conf
-    ours   = "!f() { git checkout --ours   $@ && git add $@; }; f"
+    ours = "!f() { git checkout --ours $@ && git add $@; }; f"
 #+end_src
 
 - the *branch being merged in*
@@ -3699,15 +3717,15 @@ stories, or hotfix patches, etc.
 
 Create a new feature branch:
 
-: feature-start = '!branch=$1; git checkout master; git pull; git create-branch "$branch" master'
+: feature-start = '!BRANCH=$1; git checkout master; git pull; git create-branch "$BRANCH" master'
 
 Update the feature branch:
 
-: feature-pull = '!branch=$(git current-branch); git checkout master; git pull; git checkout "$branch"; git rebase master'
+: feature-pull = '!BRANCH=$(git current-branch); git checkout master; git pull; git checkout "$BRANCH"; git rebase master'
 
 Share the feature branch:
 
-: feature-push = '!branch=$(git current-branch); git push -u origin "$branch"'
+: feature-push = '!BRANCH=$(git current-branch); git push -u origin "$BRANCH"'
 
 If your team uses a different feature flow, you may want to skip including these
 aliases, or you may want to edit these aliases to match your team's feature flow.
@@ -3763,7 +3781,10 @@ example:
 
 #+begin_src shell :tangle no
 cd "$(git root)"
-git checkout $BRANCH 2>&1 | while read f; do [ ! -e "$f" ] || mv -v "$f" "$f.bak"; done
+git checkout $BRANCH 2>&1 \
+    | while read F; do \
+          [ ! -e "$F" ] || mv -v "$F" "$F.bak"; \
+      done
 #+end_src
 
 Another is to throw away local changes using a *forced checkout*:
@@ -3782,17 +3803,17 @@ echo 'setting up gh-pages'
 echo '-------------------'
 
 echo 'Tell me your github account username: '
-read username
+read USERNAME
 
 echo 'Now, tell me your repository name: '
-read repository
+read REPOSITORY
 
 git stash \
 && git create-branch 'gh-pages' \
 && echo 'My Page' > index.html \
 && git add . \
 && git commit -a -m 'Initial commit' \
-&& git remote add origin https://github.com/"$username"/"$repository".git \
+&& git remote add origin https://github.com/"$USERNAME"/"$REPOSITORY".git \
 && git push -u origin gh-pages \
 && echo 'Complete' \
 && echo '-------------------' \
@@ -3809,7 +3830,8 @@ shortcut (an idea borrowed from Bazaar) shows the unique revisions in the
 current branch and the specified branch.
 
 #+begin_src conf
-missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; git rev-list $1.. --oneline | sed -e '1 iOnly in HEAD:'; }; f"
+missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; \
+                  git rev-list $1.. --oneline | sed -e '1 iOnly in HEAD:'; }; f"
 #+end_src
 
 *** See which changes from a branch are already present upstream
@@ -3938,9 +3960,10 @@ stashall = !git add -A && git stash
 
     # checkpoint recover
     cpr = "!f() { git fsck | grep commit | cut -d' ' -f3 | \
-                  while read hash; do \
-                      git rev-parse --verify --no-revs --quiet $hash^2 2>/dev/null && echo $hash | xargs git rev-list --since=${1:-1day} -1; \
-                  done | xargs -L 1 git log --format=%at:%h -1 | sort | cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; }; f"
+                  while read HASH; do \
+                      git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null && echo $HASH | xargs git rev-list --since=${1:-1day} -1; \
+                  done | \
+                  xargs -L 1 git log --format=%at:%h -1 | sort | cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; }; f"
 #+end_src
 
 *** Show a list of all stashes
@@ -3965,7 +3988,10 @@ One very useful feature one may consider is to list contents of all local
 stashes:
 
 #+begin_src shell :tangle no
-git stashes | awk -F: '{ print "\n\n\n\n"; print $0; print "\n\n"; system("git stash show -p " $1); }'
+git stashes | awk -F: '{ print "\n\n\n\n"; \
+                         print $0; \
+                         print "\n\n"; \
+                         system("git stash show -p " $1); }'
 #+end_src
 
 Press [Q] to exit each stash.
@@ -4305,13 +4331,13 @@ See https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release
 
 *** ChangeLog
 
-Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit message since the
-last tag.
+Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit messages since
+the last tag.
 
 A properly formed Git commit subject line should always be able to complete the
 following sentence:
 
-: If applied, this commit will <YOUR SUBJECT LINE HERE>
+: If applied, this commit will YOUR_SUBJECT_LINE_HERE
 
 How to write a good commit message + A changelog generation:
 https://dev.to/gaelthomas/a-beginner-s-guide-to-git-how-to-write-a-good-commit-message-2j49
@@ -4326,11 +4352,11 @@ https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
 
 XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries on mcpflow repo
 
-Use it like this:
-
-#+begin_src shell :tangle no
-git changelog FIRST_TAG_NAME LAST_TAG_NAME
-#+end_src
+# Use it like this:
+#
+# #+begin_src shell :tangle no
+# git changelog TAGNAME_FIRST TAGNAME_LAST
+# #+end_src
 
 See also
 - https://github.com/github-changelog-generator/github-changelog-generator
@@ -4340,7 +4366,7 @@ See also
 
 Generate =zip= archived source code from the given Git tag.
 
-I usfe this when zipping the current branch with the name of the zip file as the
+I use this when zipping the current branch with the name of the zip file as the
 current tag.  Useful for uploading to Elasticbeanstalk.
 
 #+begin_src conf
@@ -4388,7 +4414,8 @@ from the name) remains intact.
 
 #+begin_src conf
     # Usage: git export-commit [COMMIT]
-    export-commit = "!f() { git changed-files ${1:-HEAD} | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
+    export-commit = "!f() { git changed-files ${1:-HEAD} \
+                                | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 #+end_src
 
 XXX This does not handle spaces in file names
@@ -4452,7 +4479,8 @@ de savoir ce qu'embarquera la « prochaine release » de mon projet.
 #+begin_src conf
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
     # branche courante.
-    unreleased = !git log --oneline $(git last-tag)...HEAD && git last-tag
+    unreleased = !git log --oneline $(git last-tag)...HEAD \
+                      && git last-tag
 #+end_src
 
 You can do a lot better with:
@@ -4542,7 +4570,10 @@ Let's do a slightly different command: ~resync~
 
 #+begin_src conf
     # git resync -> sync repository and rebase current branch.
-    resync = !sh -c 'git checkout master && git fetch && git reset --hard origin/master && git rebase master'
+    resync = !sh -c 'git checkout master \
+                         && git fetch \
+                         && git reset --hard origin/master \
+                         && git rebase master'
 #+end_src
 
 ** Cherrypick style recording
@@ -4568,8 +4599,8 @@ will ~reset~ the index.
   directly or by any of its ancestors. You can get these back too!
 
 #+begin_src conf
-    lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
-    lost = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+    lost1 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
+    lost2 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 
 zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
@@ -4578,8 +4609,8 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 
 #+begin_src conf
     logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
-    branch-date = !"sh -c 'for branch in $(git branch --no-merged); do \
-                               git logdate -1 -r $branch --; \
+    branch-date = !"sh -c 'for BRANCH in $(git branch --no-merged); do \
+                               git logdate -1 -r $BRANCH --; \
                            done'"
 #+end_src
 
