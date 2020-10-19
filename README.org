@@ -32,16 +32,6 @@ From [[https://xkcd.com/1597/][xkcd]].
 The following configures interesting global settings for Git. These are stored
 in the =.gitconfig= file located in the user home directory.
 
-#+begin_tip
-*Commit early, commit often* (and with the right message): it is a bad idea to do
-a lot of work without committing... But don't push every single commit: push
-when changes are tested!
-#+end_tip
-
-Branch out often.
-http://kentnguyen.com/development/visualized-git-practices-for-team/
-(definition of git rebase)
-
 * Settings
 
 ** User
@@ -4811,6 +4801,16 @@ working directory*:
 - https://www.belatrixsf.com/blog/a-happy-way-to-combine-svn-and-git
 
 * Documentation
+
+#+begin_tip
+*Commit early, commit often* (and with the right message): it is a bad idea to do
+a lot of work without committing... But don't push every single commit: push
+when changes are tested!
+#+end_tip
+
+Branch out often.
+http://kentnguyen.com/development/visualized-git-practices-for-team/
+(definition of git rebase)
 
 XXX Git-extras (extra commands!)
 https://github.com/tj/git-extras/blob/master/Commands.md
