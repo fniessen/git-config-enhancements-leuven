@@ -11,160 +11,6 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  header-args :tangle .gitconfig :eval no
 
-* Documentation
-
-XXX Git-extras (extra commands!)
-https://github.com/tj/git-extras/blob/master/Commands.md
-
-XXX Hub (extra commands!)
-https://github.com/github/hub/blob/master/share/man/man1/hub.1.md
-
-XXX Git extra commands (and lots of pointers!!!)
-https://github.com/unixorn/git-extra-commands
-
-XXX Bitbucket API
-https://developer.atlassian.com/bitbucket/api/2/reference/resource/
-
-XXX Bitbucket API client for Browser and Node.js
-https://bitbucketjs.netlify.com/
-
-XXX
-https://help.github.com/en/github/searching-for-information-on-github/
-
-XXX GitLab API
-https://docs.gitlab.com/ee/api/
-https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#project-releases
-
-XXX GitAlias.com file of many git alias items, including shortcuts, helpers, workflows, etc.
-https://github.com/gitalias/gitalias/blob/master/gitalias.txt
-
-XXX Today I learned
-https://til.hashrocket.com/git
-
-XXX Visualized Git commands
-https://dev.to/lydiahallie/cs-visualized-useful-git-commands-37p1
-
-XXX See https://blog.liip.ch/archive/2015/12/11/git-tips-tricks.html!!!
-
-** TODO Check out other aliases
-
-For aliases and shell/git configuration, a few pearls:
-
-github.com/zsh-users/antigen
-with oh-my-zsh/git and others according to your tastes. (love gloga)
-
-grml.org/zsh/
-
-github.com/zsh-users/zsh-autosugge...
-
-github.com/iam4x/zsh-iterm-touchbar
-
---rebase by default on git pull is comfortable too.
-
-And obviously for those that didn't know it:
-learngitbranching.js.org/
-
-- https://gist.github.com/HarshadRanganathan/eb48dd68133054fdd9db2de8b426f411
-  (branch edit-description, etc.)
-- https://gist.github.com/chrismccoy/8775224
-- https://github.com/alikins/gitconfig/blob/master/gitconfig
-- https://github.com/GitAlias/gitalias
-- https://gist.github.com/jedmao/5053440 (+ example of CSS style on GitHub)
-
-** TODO Look at Git Power Routines [course]
-
-https://www.youtube.com/playlist?list=PLDshL1Z581YYxLsjYwM25HkIYrymXb7H_
-
-** TODO Read about Git
-
-http://marlacorinne.4parkers.com/2012/07/20/git-pull-vs-git-fetch-then-merge/
-https://adamcod.es/2014/12/10/git-pull-correct-workflow.html
-[[https://bitbucket.org/blog/get-git-guru-gold-with-bitbuckets-glorious-git-guides][Get git guru gold with Bitbucket's glorious git guides]]
-
-** TODO Outsource and include private entries in .gitconfig
-
-Git 1.7.10+ supports this syntax in =.gitconfig=:
-
-#+begin_src conf :tangle no
-[include]
-    path = /path/to/file
-#+end_src
-
-So you can split your gitconfig configurations across multiple files, e.g. you
-can have a =.gitconfig= file for your nonsensitive information and a git ignored
-=.githubconfig= file containing your private github token.
-
-See http://travisjeffery.com/b/2012/03/using-gits-include-for-private-information-like-github-tokens/
-
-Mix professional and personal Git configurations:
-
-http://monkeypatch.me/blog/mixing-professional-and-personal-git-configurations.html
-
-** TODO Git Quick Start For Emacs Devs
-
-http://www.emacswiki.org/emacs/GitQuickStartForEmacsDevs
-
-** TODO Work in progress which I can't commit (from Stephen J. Turnbull)
-
-#+begin_verse
->> With git pull, if there are changes in the working directory, the
->> merge (i.e. merge from remote/master into master) part of the
->> operation is aborted before it starts, giving a message describing its
->> refusal.  It does this even when there are no conflicts to deal with.
->
-> What are we supposed to do in that case, if we're not yet ready to
-> commit our files?
-
-If you have work-in-progress and feel unable to commit, but at the
-same time feel the need to pull into that workspace, I suggest you get
-up and walk around, fight off the pull urge, then finish the commit
-after your head cools off.
-
-If that isn't satisfactory, then
-
-> or putting our work into a new branch, like:
->
-> --8<---------------cut here---------------start------------->8---
-> git create-branch new-branch-name
-> git commit -a -m "Edited"
-> git checkout master
-> git pull
-> ...
-> --8<---------------cut here---------------end--------------->8---
-
-is one way to go.
-
-If you need the pulled code for your work, then a quick stash is the
-better idea.
-#+end_verse
-
-** Git the simple guide
-
-http://rogerdudler.github.io/git-guide/
-
-** Git rebase branch
-
-#+begin_src shell :tangle no
-git pull --rebase -r origin master
-#+end_src
-
-** Comments on branching (from Matthias)
-
-If you have finished your work, feel free to merge the branch into =master= (maybe
-you want to rebase your WIP branch before based on =master=):
-
-The following sequence is here very helpful:
-
-1. git checkout master
-2. git pull (this makes sure that your local =master= branch matches the remote one)
-3. git checkout WIP
-4. git rebase master
-5. git checkout master
-6. git merge WIP
-
-After this, you can delete your local WIP branch and or if you pushed it the
-remote one too.
-
 * Overview
 
 - This is Git.  It tracks collaborative work on projects through a beautiful
@@ -2170,7 +2016,12 @@ Another is to throw away local changes using a *forced checkout*:
 
 : git checkout -f some-branch
 
-*** GitHub Pages
+*** Website and page hosting
+
+You can easily host websites directly in your cloud repository management
+system.  And open HTML files directly from the file browser.
+
+For GitHub pages:
 
 #+begin_src conf :tangle no
 echo 'setting up gh-pages'
@@ -2193,6 +2044,9 @@ git stash \
 && echo '-------------------' \
 && echo 'You can find your last changes in the stash!'
 #+end_src
+
+For Bitbucket:
+https://marketplace.atlassian.com/apps/1212525/pages-for-bitbucket-server?hosting=server&tab=overview
 
 *** Comparing the commits between branches
 
@@ -4956,3 +4810,156 @@ working directory*:
 - http://www.netinstructions.com/git-and-svn-together/
 - https://www.belatrixsf.com/blog/a-happy-way-to-combine-svn-and-git
 
+* Documentation
+
+XXX Git-extras (extra commands!)
+https://github.com/tj/git-extras/blob/master/Commands.md
+
+XXX Hub (extra commands!)
+https://github.com/github/hub/blob/master/share/man/man1/hub.1.md
+
+XXX Git extra commands (and lots of pointers!!!)
+https://github.com/unixorn/git-extra-commands
+
+XXX Bitbucket API
+https://developer.atlassian.com/bitbucket/api/2/reference/resource/
+
+XXX Bitbucket API client for Browser and Node.js
+https://bitbucketjs.netlify.com/
+
+XXX
+https://help.github.com/en/github/searching-for-information-on-github/
+
+XXX GitLab API
+https://docs.gitlab.com/ee/api/
+https://python-gitlab.readthedocs.io/en/stable/gl_objects/projects.html#project-releases
+
+XXX GitAlias.com file of many git alias items, including shortcuts, helpers, workflows, etc.
+https://github.com/gitalias/gitalias/blob/master/gitalias.txt
+
+XXX Today I learned
+https://til.hashrocket.com/git
+
+XXX Visualized Git commands
+https://dev.to/lydiahallie/cs-visualized-useful-git-commands-37p1
+
+XXX See https://blog.liip.ch/archive/2015/12/11/git-tips-tricks.html!!!
+
+** TODO Check out other aliases
+
+For aliases and shell/git configuration, a few pearls:
+
+github.com/zsh-users/antigen
+with oh-my-zsh/git and others according to your tastes. (love gloga)
+
+grml.org/zsh/
+
+github.com/zsh-users/zsh-autosugge...
+
+github.com/iam4x/zsh-iterm-touchbar
+
+--rebase by default on git pull is comfortable too.
+
+And obviously for those that didn't know it:
+learngitbranching.js.org/
+
+- https://gist.github.com/HarshadRanganathan/eb48dd68133054fdd9db2de8b426f411
+  (branch edit-description, etc.)
+- https://gist.github.com/chrismccoy/8775224
+- https://github.com/alikins/gitconfig/blob/master/gitconfig
+- https://github.com/GitAlias/gitalias
+- https://gist.github.com/jedmao/5053440 (+ example of CSS style on GitHub)
+
+** TODO Look at Git Power Routines [course]
+
+https://www.youtube.com/playlist?list=PLDshL1Z581YYxLsjYwM25HkIYrymXb7H_
+
+** TODO Read about Git
+
+http://marlacorinne.4parkers.com/2012/07/20/git-pull-vs-git-fetch-then-merge/
+https://adamcod.es/2014/12/10/git-pull-correct-workflow.html
+[[https://bitbucket.org/blog/get-git-guru-gold-with-bitbuckets-glorious-git-guides][Get git guru gold with Bitbucket's glorious git guides]]
+
+** TODO Outsource and include private entries in .gitconfig
+
+Git 1.7.10+ supports this syntax in =.gitconfig=:
+
+#+begin_src conf :tangle no
+[include]
+    path = /path/to/file
+#+end_src
+
+So you can split your gitconfig configurations across multiple files, e.g. you
+can have a =.gitconfig= file for your nonsensitive information and a git ignored
+=.githubconfig= file containing your private github token.
+
+See http://travisjeffery.com/b/2012/03/using-gits-include-for-private-information-like-github-tokens/
+
+Mix professional and personal Git configurations:
+
+http://monkeypatch.me/blog/mixing-professional-and-personal-git-configurations.html
+
+** TODO Git Quick Start For Emacs Devs
+
+http://www.emacswiki.org/emacs/GitQuickStartForEmacsDevs
+
+** TODO Work in progress which I can't commit (from Stephen J. Turnbull)
+
+#+begin_verse
+>> With git pull, if there are changes in the working directory, the
+>> merge (i.e. merge from remote/master into master) part of the
+>> operation is aborted before it starts, giving a message describing its
+>> refusal.  It does this even when there are no conflicts to deal with.
+>
+> What are we supposed to do in that case, if we're not yet ready to
+> commit our files?
+
+If you have work-in-progress and feel unable to commit, but at the
+same time feel the need to pull into that workspace, I suggest you get
+up and walk around, fight off the pull urge, then finish the commit
+after your head cools off.
+
+If that isn't satisfactory, then
+
+> or putting our work into a new branch, like:
+>
+> --8<---------------cut here---------------start------------->8---
+> git create-branch new-branch-name
+> git commit -a -m "Edited"
+> git checkout master
+> git pull
+> ...
+> --8<---------------cut here---------------end--------------->8---
+
+is one way to go.
+
+If you need the pulled code for your work, then a quick stash is the
+better idea.
+#+end_verse
+
+** Git the simple guide
+
+http://rogerdudler.github.io/git-guide/
+
+** Git rebase branch
+
+#+begin_src shell :tangle no
+git pull --rebase -r origin master
+#+end_src
+
+** Comments on branching (from Matthias)
+
+If you have finished your work, feel free to merge the branch into =master= (maybe
+you want to rebase your WIP branch before based on =master=):
+
+The following sequence is here very helpful:
+
+1. git checkout master
+2. git pull (this makes sure that your local =master= branch matches the remote one)
+3. git checkout WIP
+4. git rebase master
+5. git checkout master
+6. git merge WIP
+
+After this, you can delete your local WIP branch and or if you pushed it the
+remote one too.
