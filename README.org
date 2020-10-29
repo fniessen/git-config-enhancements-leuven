@@ -3012,11 +3012,21 @@ prompting you for the message you've already entered!
     fixup = commit -v --amend --reuse-message HEAD
 #+end_src
 
+Oh, you made a typo!
+
 #+begin_src conf
     # Usage: git reword MSG
     # Change LATEST commit message to what you type in.
     reword = commit --amend -m
+#+end_src
 
+or use:
+
+: git commit --amend
+
+to open your commit editor and reword the message.
+
+#+begin_src conf
     # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
     # Credit an author on the LATEST commit.
     credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
