@@ -667,8 +667,16 @@ Or, if you want to use RSA:
             https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; }; f"
 #+end_src
 
+Fetch URL: git@bitbucket.org-something:user/slug
+
 #+begin_src conf
-    repo-owner = "XXX"
+    repo-owner = "!f() { git remote show origin -n \
+                             | grep 'Fetch URL:' \
+                             | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
+                             | sed 's#.git$##'; }; f"
+#+end_src
+
+#+begin_src conf
     repo-slug = "!f() { git remote show origin -n \
                             | grep 'Fetch URL:' \
                             | sed -E 's#^.*/(.*)$#\\1#' \

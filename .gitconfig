@@ -181,7 +181,11 @@
 
     cl = clone --recursive
 
-    repo-owner = "XXX"
+    repo-owner = "!f() { git remote show origin -n \
+                             | grep 'Fetch URL:' \
+                             | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
+                             | sed 's#.git$##'; }; f"
+
     repo-slug = "!f() { git remote show origin -n \
                             | grep 'Fetch URL:' \
                             | sed -E 's#^.*/(.*)$#\\1#' \
