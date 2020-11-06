@@ -17,7 +17,7 @@ REMOTE=${1-origin}
 
 OLD_URL=$(git remote -v | grep -m1 "^$REMOTE" | sed -Ene 's#.*(https://[^[:space:]]*).*#\1#p')
 if [[ -z "$OLD_URL" ]]; then
-    echo "-- ERROR:  Could not identify Repo url."
+    echo "-- ERROR:  Could not identify Repo URL."
     echo "   It is possible this repo is already using SSH instead of HTTPS."
     exit
 fi
@@ -45,7 +45,7 @@ fi
 echo "REPO_SLUG: ${REPO_SLUG}"
 
 NEW_URL="git@$SITE:$REPO_OWNER/$REPO_SLUG.git"
-echo "Changing repo url from "
+echo "Changing Repo URL from "
 echo "  '$OLD_URL'"
 echo "      to "
 echo "  '$NEW_URL'"
