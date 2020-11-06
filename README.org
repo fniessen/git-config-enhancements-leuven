@@ -552,13 +552,11 @@ If unable to clone Git repository due to *self-signed certificate*...
 [format]
     pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
 
-
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
     ls   = "[%C(auto,yellow)%<|(10)%h%C(reset)] [%C(auto,bold blue)%<(15trunc)%cn%C(reset)]  %C(auto)%d% C(reset)%s"
     find = "[%C(yellow)%<|(20)%h%C(reset)] [%C(bold blue)%<(10)%cn%C(reset)]  %C(auto)%d %C(reset)  %s"
     graph="%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)%n %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)"
-
 #+end_src
 
 See
@@ -579,7 +577,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 #+begin_src conf
     # Usage: git alias
     # Print the current list of Git aliases.
-    alias = "!git config -l | grep alias | cut -c 7- | sort"
+    alias = "!git config -l | grep alias | cut -c 7- | sort | sed 's/=/ = /'"
 #+end_src
 
 * Repository
@@ -685,16 +683,6 @@ part of the basic Bourne shell syntax, so *single quotes* will be needed under a
 information:
 https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
 #+end_tip
-
-** Open a repository in a web browser
-
-#+begin_src conf
-    browse-tree = "!f() { URL=$(git config --get remote.origin.url); open ${URL/.git}; }; f"
-    browse-wiki = XXX
-    browse-commits = XXX
-#+end_src
-
-XXX open = cygstart?
 
 * Instructions
 
@@ -1215,6 +1203,17 @@ Assuming that your branch was created off of ~develop~, then /while in the branc
 
 : git log --no-merges --graph develop..
 
+** Open a repository in a web browser
+
+#+begin_src conf
+    browse-commits = "!f() { URL=$(git config --get remote.origin.url); \
+                             cygstart ${URL/.git}/commits; }; f"
+#+end_src
+
+For Cygwin:
+
+: alias open='cygstart'
+
 ** Push
 
 ** Undo changes
@@ -1284,7 +1283,7 @@ Alternatives:
 
 ** Create a branch
 
-Create a new branch, and then switch to it:
+Create a new branch (40-character name advised), and then switch to it:
 
 #+begin_src conf
     create-branch = checkout -b
@@ -1293,7 +1292,7 @@ Create a new branch, and then switch to it:
 #+begin_note
 To create a branch from a specific commit:
 
-: git create-branch test_branch 7e09ef09
+: git create-branch bugfix 7e09ef09
 
 Otherwise you're in a "detached head" state, which can have odd results.
 The branch method is at least a little more stable.
@@ -2293,10 +2292,12 @@ Once merged:
 
 ** List All Issues
 
+See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
+
 #+begin_src conf
     # issues = "!f() { USERNAME=$1; \
     #     curl --user $USERNAME \
-    #         https://api.bitbucket.org/2.0/repositories/$USERNAME/$(git repo-slug)/issues \
+    #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
     #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
     #         | sed \"s/new/NEW/\" \
@@ -2310,7 +2311,7 @@ Once merged:
 #+begin_src conf :tangle no
     issues = "!f() { USERNAME=$1; \
         curl --user $USERNAME \
-            'https://api.bitbucket.org/2.0/repositories/$USERNAME/$(git repo-slug)/issues?pagelen=100' \
+            'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
             | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
             | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
             | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; }; f"
@@ -2320,7 +2321,7 @@ Set color to red or green, depending on issue state.
 
 #+begin_src conf :tangle no
 # Works!  Need to put quotes around the URL!
-curl -u $USERNAME -X GET 'https://api.bitbucket.org/2.0/repositories/$USERNAME/$(git repo-slug)/issues?pagelen=100' \
+curl -u $USERNAME -X GET 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
     | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
 # curl -s -S
 #+end_src
@@ -2357,7 +2358,14 @@ Show an existing issue specified by NUMBER.
 
 #+begin_src conf
     browse-issues = "!f() { URL=$(git config --get remote.origin.url); \
-                            open ${URL/.git}/issues/$1; }; f"
+                            cygstart ${URL/.git}/issues/$1; }; f"
+#+end_src
+
+* Wiki
+
+#+begin_src conf
+    browse-wiki = "!f() { URL=$(git config --get remote.origin.url); \
+                          cygstart ${URL/.git}/wiki; }; f"
 #+end_src
 
 * Downloads
