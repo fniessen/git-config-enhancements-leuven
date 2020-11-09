@@ -32,7 +32,7 @@ From [[https://xkcd.com/1597/][xkcd]].
 The following configures interesting global settings for Git. These are stored
 in the =.gitconfig= file located in the user home directory.
 
-* Settings
+* Global options
 
 ** User
 
