@@ -91,11 +91,19 @@ Stop viewing ~^M~ symbols in diff:
 Improve the ~git diff~ output: diff-so-fancy or [[https://github.com/dandavison/delta][delta]].
 
 #+begin_src conf
-    pager = diff-so-fancy | less --tabs=4 -RFX
+    pager = diff-so-fancy | LESS= less --tabs=4 -RFX
 #+end_src
 
 (~less~ options -- ~-R~ for colors to persist, ~-F~ to exit immediately if the output
 is less than one screen, and ~-X~ for not clearing the screen).
+
+#+begin_tip
+The diff-so-fancy ruler was 1 char too long.  It turned out I had an option in
+~$LESS~ that enabled the status column, and thus added a space at the beginning
+of every line.  I was able to resolve it by clearing the ~LESS~ environment
+variable in the ~core.pager~ config.
+See https://github.com/so-fancy/diff-so-fancy/issues/364#issuecomment-652598381.
+#+end_tip
 
 [[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ as a newline character
 in Git-handled repositories.  There's an option to auto-convert:
