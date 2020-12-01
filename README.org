@@ -6,7 +6,7 @@
 #+LANGUAGE:  en
 #+OPTIONS:   H:4 num:nil toc:2
 
-#+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  header-args :tangle .gitconfig :eval no
@@ -1232,10 +1232,13 @@ For Cygwin:
 
 ** Push
 
-** Undo changes
+** Undo changes (Oh Shit, Git!?!)
 
-See https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
-and http://gitimmersion.com/lab_16.html.
+See also:
+- https://ohshitgit.com/
+- https://i.pinimg.com/originals/5b/af/1b/5baf1bab9f2285b4d9df6e9a959411e9.png
+- https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
+- http://gitimmersion.com/lab_16.html
 
 *** Undo local changes which were not pushed to remote repository (after you committed)
 
