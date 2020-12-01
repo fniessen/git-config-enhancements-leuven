@@ -5,7 +5,7 @@
 #+KEYWORDS:
 #+LANGUAGE:  en
 
-#+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 
 * Why Git?
 
