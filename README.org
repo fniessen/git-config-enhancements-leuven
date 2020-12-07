@@ -11,6 +11,8 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  header-args :tangle .gitconfig :eval no
 
+* Foreword
+
 - This is Git.  It tracks collaborative work on projects through a beautiful
   distributed graph theory model.
 
@@ -644,7 +646,7 @@ For *passwordless Git pull* (permanently authenticating with Git repositories),
 2. *add* your *public key* to the remote server.
 #+end_tip
 
-** Create and add your SSH public key to a repository management platform
+** Create and add your SSH public key to a repository hosting service
 
 https://docs.gitlab.com/ee/gitlab-basics/create-your-ssh-keys.html
 
@@ -661,7 +663,7 @@ Or, if you want to use RSA:
 
 : ssh-keygen -t rsa -b 4096 -C "email@example.com"
 
-*** Add the key to the repository management platform
+*** Add the key to the repository hosting service
 
 *** Testing that everything is set up correctly
 
@@ -3830,8 +3832,8 @@ Another is to throw away local changes using a *forced checkout*:
 
 *** Website and page hosting
 
-You can easily host websites directly in your repository management platform.
-And open HTML files directly from the file browser.
+You can easily host websites directly in your repository hosting service.  And
+open HTML files directly from the file browser.
 
 For GitHub pages:
 
@@ -4861,6 +4863,11 @@ branch (using ~git push --force~) and someone needs a talkin' to.
 - [[https://git.wiki.kernel.org/index.php/Aliases][Git SCM Wiki - Aliases]]
 - [[https://ochronus.com/git-tips-from-the-trenches/][Git tips from the trenches]]
 # - [[file:~/Public/Repositories/emacs/admin/notes/git-workflow][Emacs Git workflow]]
+
+* Tools
+
+- [[https://jonas.github.io/tig/][Tig]]
+- [[https://www.gitkraken.com/][GitKraken]]
 
 * Use Git and SVN together
 
