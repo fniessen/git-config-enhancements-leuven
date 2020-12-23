@@ -919,6 +919,17 @@ mood -- a good practice. See rule 5 of Chris Beam's "How to write a commit
 message" for the inspiration of this tip and more reasoning on the use of the
 imperative mood.
 
+You can automatically *close an issue* by using a supported keyword in commit
+message, such as ~Closes #10~.  (You should always include the ~#~ if you want to
+ensure that links back to the issue resolve.)
+
+For a list of supported keywords, see:
+- https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword
+- https://support.atlassian.com/bitbucket-cloud/docs/resolve-issues-automatically-when-users-push-code/
+
+See also https://gitlab.com/emacs-stuff/git-commit-insert-issue for better Emacs
+support.
+
 #+begin_src conf
 [commit]
     template = ~/.git_commit_template.txt
