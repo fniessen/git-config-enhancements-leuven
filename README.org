@@ -6,7 +6,7 @@
 #+LANGUAGE:  en
 #+OPTIONS:   H:4 num:nil toc:2
 
-#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+SETUPFILE: ~/org/theme-readtheorg.setup
 
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  header-args :tangle .gitconfig :eval no
@@ -4888,3 +4888,52 @@ working directory*:
 - http://www.netinstructions.com/git-and-svn-together/
 - https://www.belatrixsf.com/blog/a-happy-way-to-combine-svn-and-git
 
+* Contributing
+
+** Issues
+
+Report issues and suggest features and improvements on the [[https://github.com/fniessen/git-leuven/issues/new][GitHub issue tracker]].
+
+** Patches
+
+I love contributions!  Patches under any form are always welcome!
+
+** Donations
+
+If you use the git-leuven project (or any of [[https://github.com/fniessen/][my other projects]]) and feel it is
+making your life better and easier, you can show your appreciation and help
+support future development by making today a [[https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=git%2dleuven&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted][donation]] through PayPal.  Thank
+you!
+
+Regardless of the donations, git-leuven will always be free both as in beer and
+as in speech.
+
+** Follow me
+
+I have an [[https://twitter.com/f_niessen][f_niessen]] account on Twitter.  You should follow it.
+
+* License
+
+Copyright (C) 2013-2021 Fabrice Niessen.
+
+Author: Fabrice Niessen \\
+Keywords: git aliases
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program.  If not, see http://www.gnu.org/licenses/.
+
+#+html: <a href="http://opensource.org/licenses/GPL-3.0">
+#+html:   <img src="http://img.shields.io/:license-gpl-blue.svg" alt=":license-gpl-blue.svg" />
+#+html: </a>
+#+html: <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=git%2dleuven&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted">
+#+html:   <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="btn_donate_LG.gif" />
+#+html: </a>
