@@ -115,7 +115,7 @@ in Git-handled repositories.  There's an option to auto-convert:
     autocrlf = input
 #+end_src
 
-- core.autocrlf = false
+- ~core.autocrlf = false~
 
   This is the default, but most people are encouraged to change this
   immediately. The result of using false is that Git doesn’t ever mess with line
@@ -126,7 +126,7 @@ in Git-handled repositories.  There's an option to auto-convert:
   doing extra work whenever files are written to the object database or written
   out into the working directory.
 
-- core.autocrlf = true
+- ~core.autocrlf = true~
 
   This means that Git will process all text files and make sure that CRLF is
   replaced with LF when writing that file to the object database and *turn all
@@ -134,7 +134,7 @@ in Git-handled repositories.  There's an option to auto-convert:
   recommended setting on Windows because it ensures that your repository can be
   used on other platforms while retaining CRLF in your working directory.
 
-- core.autocrlf = input
+- ~core.autocrlf = input~
 
   This means that Git will process all text files and make sure that CRLF is
   replaced with LF when writing that file to the object database. It will *not*,
