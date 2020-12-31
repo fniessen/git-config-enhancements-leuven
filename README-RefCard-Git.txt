@@ -111,13 +111,6 @@ The [[http://git-scm.com/book/en/Git-Branching-Rebasing][git-scm]] site below is
 
 Only "ref" is primitive, "tag" and "branch" are derived from "ref".
 
-** Git staged files
-   [2011-02-18 Fri]
-
-staging area (to be included in the next commit)
-
-From [[http://cheat.errtheblog.com/s/git][$ cheat git]]
-
 ** Understanding the Git Workflow
 
 > I thought this was an interesting read:
@@ -201,14 +194,6 @@ Well, I prefer merging instead, see above.
 - http://help.github.com/create-a-repo/
 - https://www.assembla.com/code/org-agenda-files/git/repo/instructions?empty=true
 
-** Create a local repository
-
-#+begin_src sh
-mkdir <working-copy>
-cd <working-copy>
-git init
-#+end_src
-
 ** Record changes to the repository
 
 #+begin_src sh
@@ -222,16 +207,6 @@ git commit -m 'First commit'
 #+begin_src sh
 git remote add origin git...<working-copy>.git
 git push origin master
-#+end_src
-
-* Information about the remote
-
-#+begin_src sh
-git remote show origin
-#+end_src
-
-#+begin_src sh
-git remote -v show
 #+end_src
 
 * Git rebase
@@ -275,18 +250,6 @@ matches any line that was added, removed, or changed.
 Find when some code was removed?  =git bisect= with a "test" script that greps
 for the code and returns "true" if the code exists and "false" if it does
 not.
-
-* Git blame
-
-#+begin_src sh
-git blame -L 1509,1511 lisp/ox-html.el
-#+end_src
-
-and the commit shows the change from the code you see to the code I see:
-
-#+begin_src sh
-git show d574bf52
-#+end_src
 
 * Git show
 

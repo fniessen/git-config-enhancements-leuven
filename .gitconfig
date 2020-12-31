@@ -902,6 +902,7 @@ deploy-prod =
   # Show the changes that were introduced by a merge, in your difftool
   merge-span-difftool = !"git difftool $(git merge-span ... $1)"
 
+    # Information about the remote.
     remotes = remote
     r = remote -v
 

@@ -104,7 +104,12 @@ The diff-so-fancy ruler was 1 char too long.  It turned out I had an option in
 ~$LESS~ that enabled the status column, and thus added a space at the beginning
 of every line.  I was able to resolve it by clearing the ~LESS~ environment
 variable in the ~core.pager~ config.
-See https://github.com/so-fancy/diff-so-fancy/issues/364#issuecomment-652598381.
+
+Also, the diff-so-fancy ruler was not displayed in Unicode.  It turned out I had
+set ~LC_CTYPE~ to "".  I had to either unset ~LC_CTYPE~ entirely or set it to
+something with UTF-8 in it.
+
+See https://github.com/so-fancy/diff-so-fancy/issues/364.
 #+end_tip
 
 [[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ as a newline character
@@ -594,7 +599,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 
 For *free private repositories*, see https://bitbucket.org/.
 
-** Create a Git repository locally
+** Create a local Git repository
 
 Set email addresses for you:
 
@@ -602,7 +607,7 @@ Set email addresses for you:
     workprofile = config user.email \"john@work.com\"
 #+end_src
 
-Then:
+Then, in the working copy:
 
 #+begin_src conf
     create-local-repository = !git init \
@@ -848,7 +853,8 @@ When you grab a file from a previous time, it sits *in your index*, modified.
 
 **** Before you committed (in staged state)
 
-*Remove* the specified *files from the index* (proposed next commit, staging area):
+*Remove* the specified *files from the index* (= staging area, to be included in the
+next commit):
 
 #+begin_src conf
     unstage = reset HEAD --
@@ -2848,6 +2854,10 @@ The -C option detects lines that were moved or copied from other files. This
 will report the original author of the lines instead of the last author that
 moved or copied the lines.
 
+#+begin_src shell :tangle no
+git blame -L 1509,1511 lisp/ox-html.el
+#+end_src
+
 #+begin_src conf
     praise = blame -w
     archeology = blame -w -C -n
@@ -3322,6 +3332,7 @@ branch; e.g., ~origin/foo~ (or ~github/foo~, etc., since the remote doesn't have
 be called ~origin~) if the checked out branch is ~foo~.
 
 #+begin_src conf
+    # Information about the remote.
     remotes = remote
     r = remote -v
 #+end_src
