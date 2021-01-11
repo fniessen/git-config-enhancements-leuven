@@ -698,6 +698,15 @@ Fetch URL: git@bitbucket.org-something:user/slug
                             | sed 's#.git$##'; }; f"
 #+end_src
 
+# Updating git aliases for different *default branch* names (~master~, ~main~, etc.):
+#
+# #+begin_src conf
+#     ## git remote show origin | grep "HEAD branch" | cut -d' ' -f5
+#     default-branch = !git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'
+# #+end_src
+#
+# This method can return incorrect results...
+
 #+begin_tip
 The ~sed~ strings contain ~$#~, which will be replaced by the number of arguments to
 the current script/function (generally 0 for an interactive shell).  This is
@@ -1283,7 +1292,7 @@ files from a repository's history you can use:
 
 Consistent *naming conventions* (from the [[https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow][Gitflow]] Git workflow):
 
-- =master= (used for *production releases*)
+- =main= or =master= (used for *production releases*)
 
   It should be the most stable branch. Merges commits from develop, release and
   hotfix branches.
@@ -1312,7 +1321,7 @@ Consistent *naming conventions* (from the [[https://www.atlassian.com/git/tutori
   that have high impact)
 
   Used to fix pressing issues that are found in production. Hotfix branches
-  merge directly to master.
+  merge directly to =master=.
 
 Alternatives:
 - https://about.gitlab.com/blog/2014/09/29/gitlab-flow/
@@ -1461,7 +1470,8 @@ https://help.github.com/articles/viewing-branches-in-your-repository/).
 Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
 
 #+begin_src conf
-    master = checkout master
+    master = !git checkout master
+    main =  !git checkout main
     develop = checkout develop
 #+end_src
 
@@ -1492,12 +1502,12 @@ been *merged to the current branch* that you are in.
 #+begin_src conf
     # Delete fully merged branches.
     delete-local-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' \
-                                               | egrep -v \"(master|develop)\" \
+                                               | egrep -v \"(master|main|develop)\" \
                                                | xargs -n 1 git delete-local-branch; }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
-    #           egrep -v "(^\*|^\s*(master|develop)$)" | \
+    #           egrep -v "(^\*|^\s*(master|main|develop)$)" | \
     #           xargs git branch -d'
 #+end_src
 
@@ -1821,7 +1831,7 @@ If either side is ~HEAD~, it may be omitted (e.g. ~master..~ compares ~master~ t
 
 #+begin_src conf
     # Show commits that haven't made it to master yet.
-    ahead-of-master = log --oneline origin/master..HEAD
+    ahead-of-master = !git log --oneline origin/master..HEAD
 #+end_src
 
 *** What did I do since I forked from the origin branch?
@@ -1855,10 +1865,10 @@ Show all commits in a git branch since original branching point from =master=:
 
 #+begin_src conf
     # log since master.
-    missing-master = log master...
+    missing-master = !git log master...
 
     # diff since master.
-    missing-master-diff = diff master...
+    missing-master-diff = !git diff master...
 #+end_src
 
 *** What did the origin do since I forked from them?

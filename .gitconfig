@@ -347,7 +347,8 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     br-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
     branches-merged = "!f() { git branch -a -vv --merged | grep -v '\\*'; }; f"
 
-    master = checkout master
+    master = !git checkout master
+    main =  !git checkout main
     develop = checkout develop
 
     # Politely ask Git to delete a local branch.
@@ -355,12 +356,12 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     # Delete fully merged branches.
     delete-local-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' \
-                                               | egrep -v \"(master|develop)\" \
+                                               | egrep -v \"(master|main|develop)\" \
                                                | xargs -n 1 git delete-local-branch; }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
-    #           egrep -v "(^\*|^\s*(master|develop)$)" | \
+    #           egrep -v "(^\*|^\s*(master|main|develop)$)" | \
     #           xargs git branch -d'
 
     delete-remote-merged-branches = "XXX"
@@ -428,7 +429,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
     # Show commits that haven't made it to master yet.
-    ahead-of-master = log --oneline origin/master..HEAD
+    ahead-of-master = !git log --oneline origin/master..HEAD
 
     log-local = log --oneline origin..HEAD
 
@@ -436,10 +437,10 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 # XXX We should get the name of the branch merge base
 
     # log since master.
-    missing-master = log master...
+    missing-master = !git log master...
 
     # diff since master.
-    missing-master-diff = diff master...
+    missing-master-diff = !git diff master...
 
     log-fetched = log --oneline HEAD..origin
 
