@@ -824,7 +824,7 @@ Broader search (*case-sensitive*), output *without grouping*:
     gno = "grep -I --files-with-matches"
 #+end_src
 
-*** Find files that contain some terms, not necessarily on the same line
+*** Find files that contain multiple terms, not necessarily on the same line
 
 Match any of these patterns, but print matches only from files that have /all/ of
 them (files must have lines that match each of them):
@@ -832,6 +832,8 @@ them (files must have lines that match each of them):
 #+begin_src shell :tangle no
 git grep --all-match -e REGEXP -e REGEXP
 #+end_src
+
+See also https://askubuntu.com/questions/1019678/find-multiple-word-patterns-in-files
 
 ** Undo local changes
 
@@ -1397,7 +1399,7 @@ branch (if any).
 
 : git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads
 
-fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs/heads/__" | sed "s_refs/remotes/__" | fzf --query="$@" --height=40% --ansi --tac --color=16 --border | awk '{print $1}' | xargs git co; }; f"
+fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs/heads/__" | sed "s_refs/remotes/__" | fzf --query="$@" --height=40% --ansi --tac --color=16 --border | awk '{print $1}' | xargs git checkout; }; f"
 (fuzzy checkout a git branch)
 
 #+begin_src conf
