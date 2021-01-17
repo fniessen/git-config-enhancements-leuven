@@ -1069,7 +1069,7 @@ List all *tags* that contain a specific commit ID:
 #+end_src
 
 #+begin_src conf
-    tag-contains = git tag -l --contains HEAD
+    tag-contains = tag -l --contains HEAD
 #+end_src
 
 ** Search for commits
