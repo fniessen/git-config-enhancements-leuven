@@ -1034,17 +1034,16 @@ https://github.com/wmanley/git-meld:
     diffall = difftool -t meld --dir-diff
 #+end_src
 
-** Get the references the commit has been pushed to (branches and tags)
+** Get the references the commit has been pushed to (which branches and tags?)
 
 List all the branches and tags that contain a specific commit.
 
 #+begin_src conf
     # Usage: git where REV
     # Print only refs which contain the commit.
-    where1 = for-each-ref --contains
+    where1 = for-each-ref --format='%(refname)' --contains
     where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
                          | sort -k5n -k2M -k3n -k4n; }; f"
-    # git for-each-ref --format='%(color:blue)%(refname)%(color:reset)' --contains 4ec324ff
 #+end_src
 
 XXX See also git-ls-object-refs
@@ -1054,7 +1053,7 @@ their ancestors.
 
 #+begin_src conf
     # Find branches containing commit.
-    branches-that-contain = "branch -a --contains"
+    branches-that-contain = branch -a --contains
 #+end_src
 
 This also includes *remote tracking branches* in the list, that is "local
@@ -1065,11 +1064,7 @@ List all *tags* that contain a specific commit ID:
 #+begin_src conf
     # Find tags containing commit.
     tags-that-contain1 = tag --contains
-    tags-that-contain2 = "!f() { git describe --always --contains $1; }; f"
-#+end_src
-
-#+begin_src conf
-    tag-contains = tag -l --contains HEAD
+    tags-that-contain2 = tag -l --contains HEAD
 #+end_src
 
 ** Search for commits
