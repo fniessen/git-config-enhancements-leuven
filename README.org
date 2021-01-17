@@ -1036,14 +1036,14 @@ https://github.com/wmanley/git-meld:
 
 ** Get the references the commit has been pushed to (which branches and tags?)
 
-List all the branches and tags that contain a specific commit.
+List all the *branches and tags* that contain a specific commit.
 
 #+begin_src conf
     # Usage: git where REV
     # Print only refs which contain the commit.
-    where1 = for-each-ref --format='%(refname)' --contains
-    where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
-                         | sort -k5n -k2M -k3n -k4n; }; f"
+    where = for-each-ref --format='%(refname)' --contains
+    where2 = "!f() { git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
+                         | sort -r; }; f"
 #+end_src
 
 XXX See also git-ls-object-refs
@@ -1063,8 +1063,7 @@ List all *tags* that contain a specific commit ID:
 
 #+begin_src conf
     # Find tags containing commit.
-    tags-that-contain1 = tag --contains
-    tags-that-contain2 = tag -l --contains HEAD
+    tags-that-contain = "!f() { git tag -l --contains $1 | sort -r; }; f"
 #+end_src
 
 ** Search for commits

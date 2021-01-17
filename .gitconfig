@@ -258,16 +258,15 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
     # Usage: git where REV
     # Print only refs which contain the commit.
-    where1 = for-each-ref --format='%(refname)' --contains
-    where2 = "!f() { git for-each-ref --format='%(committerdate) %09 %(authorname) %09 %(refname)' --contains $1 \
-                         | sort -k5n -k2M -k3n -k4n; }; f"
+    where = for-each-ref --format='%(refname)' --contains
+    where2 = "!f() { git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
+                         | sort -r; }; f"
 
     # Find branches containing commit.
     branches-that-contain = branch -a --contains
 
     # Find tags containing commit.
-    tags-that-contain1 = tag --contains
-    tags-that-contain2 = tag -l --contains HEAD
+    tags-that-contain = "!f() { git tag -l --contains $1 | sort -r; }; f"
 
     findc1 = "log --decorate -i --all --date=short --grep"
     findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
