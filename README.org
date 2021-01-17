@@ -1501,6 +1501,18 @@ branch "irrespective of its merged status."
 ~delete-local-merged-branches~ *removes* (in bulk) *all* the *local branches* that have
 been *merged to the current branch* that you are in.
 
+XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
+
+#+begin_src conf
+bclean = "!f() { DEFAULT=$(git default); \
+                 git branch --merged ${1-$DEFAULT} \
+                     | grep -v " ${1-$DEFAULT}$" \
+                     | xargs git branch -d; }; f"
+#+end_src
+
+It deletes every branch that's been merged into the specified branch except the
+branch.
+
 #+begin_src conf
     # Delete fully merged branches.
     delete-local-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' \
@@ -1550,8 +1562,8 @@ Delete a *remote* branch:
 *** Delete a branch locally and on the ~origin~ remote
 
 #+begin_src conf
-    nuke-branch = "!f() { git delete-local-branch $1 \
-                              && git delete-remote-branch $1; }; f"
+    delete-branch = "!f() { git delete-local-branch $1 \
+                                && git delete-remote-branch $1; }; f"
 #+end_src
 
 *** Delete all orphaned branches (that no longer exist at remote)

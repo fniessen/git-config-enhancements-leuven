@@ -354,6 +354,11 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
 
+bclean = "!f() { DEFAULT=$(git default); \
+                 git branch --merged ${1-$DEFAULT} \
+                     | grep -v " ${1-$DEFAULT}$" \
+                     | xargs git branch -d; }; f"
+
     # Delete fully merged branches.
     delete-local-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' \
                                                | egrep -v \"(master|main|develop)\" \
@@ -369,8 +374,8 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Delete remote branch.
     delete-remote-branch = push origin --delete
 
-    nuke-branch = "!f() { git delete-local-branch $1 \
-                              && git delete-remote-branch $1; }; f"
+    delete-branch = "!f() { git delete-local-branch $1 \
+                                && git delete-remote-branch $1; }; f"
 
     # Prune deleted branches from all remotes.
     prune-all = !git remote | xargs -n 1 git remote prune
