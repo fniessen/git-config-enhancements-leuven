@@ -1933,22 +1933,9 @@ Tag and push changes to the repository:
 
 #+begin_src conf
     release = "!f() { git tag -a v$1 -m \"Release version $1\" \
-                          && git push origin --tags \
-                          && git push origin; }; f"
+                          && git push $(git origin) --tags \
+                          && git push $(git origin); }; f"
 #+end_src
-
-* ?Contributors
-
-Show authors of commits in the repository, /excluding merge commits/.
-
-#+begin_src conf
-    contributors-name  = shortlog -n -s --no-merges --
-    contributors-email = shortlog -n -s -e --no-merges --
-#+end_src
-
-#+begin_note
-The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
-#+end_note
 
 * ?Graph
 
@@ -1982,6 +1969,19 @@ See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
                                | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
                        echo '}'; }; f"
 #+end_src
+
+* ?Contributors
+
+Show authors of commits in the repository, /excluding merge commits/.
+
+#+begin_src conf
+    contributors-name  = shortlog -n -s --no-merges --
+    contributors-email = shortlog -n -s -e --no-merges --
+#+end_src
+
+#+begin_note
+The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
+#+end_note
 
 * Pull requests
 
