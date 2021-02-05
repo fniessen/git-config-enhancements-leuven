@@ -4904,7 +4904,7 @@ branch (using ~git push --force~) and someone needs a talkin' to.
 - [[https://ochronus.com/git-tips-from-the-trenches/][Git tips from the trenches]]
 # - [[file:~/Public/Repositories/emacs/admin/notes/git-workflow][Emacs Git workflow]]
 
-* Tools
+* Git clients
 
 - [[https://jonas.github.io/tig/][Tig]]
 - [[https://www.gitkraken.com/][GitKraken]]
