@@ -181,12 +181,15 @@
 
     cl = clone --recursive
 
-    repo-owner = "!f() { git remote show origin -n \
+    # origin = !echo "${$(git config clone.defaultRemoteName):-origin}"
+    origin = !echo "origin"
+
+    repo-owner = "!f() { git remote show $(git origin) -n \
                              | grep 'Fetch URL:' \
                              | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
                              | sed 's#.git$##'; }; f"
 
-    repo-slug = "!f() { git remote show origin -n \
+    repo-slug = "!f() { git remote show $(git origin) -n \
                             | grep 'Fetch URL:' \
                             | sed -E 's#^.*/(.*)$#\\1#' \
                             | sed 's#.git$##'; }; f"
@@ -295,17 +298,16 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     grep4d = !sh -c 'git log -p -S'$1' $2' -
 # Not the best example, but: git grep4d CLOSED '*.java'
 
-    browse-commits = "!f() { URL=$(git config --get remote.origin.url); \
+    browse-commits = "!f() { URL=$(git config --get remote.$(git origin).url); \
                              cygstart ${URL/.git}/commits; }; f"
 
     create-branch = checkout -b
 
-    # Push current branch to remote server (create a copy of the current branch
-    # on the remote "origin", and set it to track the upstream branch).
-    publish = !git push -u origin $(git current-branch)
-
-    # Delete current branch on remote server.
-    unpublish = !git delete-remote-branch $(git current-branch)
+    # Usage: git publish
+    # Push current branch to remote server.
+    publish = !git push -u $(git origin) $(git current-branch)
+    # (Create a copy of the current branch on the remote "origin", and set it to
+    # track the upstream branch)
 
     # Get the current branch name (not so useful in itself, but used in other
     # aliases).
@@ -365,10 +367,13 @@ bclean = "!f() { DEFAULT=$(git default); \
     #           egrep -v "(^\*|^\s*(master|main|develop)$)" | \
     #           xargs git branch -d'
 
-    delete-remote-merged-branches = "XXX"
+    # Usage: git delete-remote-branch BRANCH
+    # Delete a remote branch.
+    delete-remote-branch = !git push $(git origin) --delete
 
-    # Delete remote branch.
-    delete-remote-branch = push origin --delete
+    # Usage: git unpublish
+    # Delete current branch on remote server.
+    unpublish = !git delete-remote-branch $(git current-branch)
 
     delete-branch = "!f() { git delete-local-branch $1 \
                                 && git delete-remote-branch $1; }; f"
@@ -388,7 +393,7 @@ bclean = "!f() { DEFAULT=$(git default); \
     # Usage: git rename-branch BRANCH_OLD BRANCH_NEW
     # Rename both a local and remote branch.
     rename-branch = "!f() { git rename-local-branch $1 $2 \
-                                && git push --set-upstream origin $2 \
+                                && git push --set-upstream $(git origin) $2 \
                                 && git delete-remote-branch $1; }; f"
 
     # Show verbose output about tags.
@@ -402,8 +407,8 @@ bclean = "!f() { DEFAULT=$(git default); \
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { git tag $2 $1; \
                          git tag -d $1; \
-                         git push origin $2; \
-                         git push origin :refs/tags/$1; \
+                         git push $(git origin) $2; \
+                         git push $(git origin) :refs/tags/$1; \
                        }; f"
 
     # Delete local and remote tags.
@@ -411,7 +416,7 @@ bclean = "!f() { DEFAULT=$(git default); \
                          && echo \"No tags given as an argument!\" \
                          || (git tag -l $1 | \
                              xargs -I % echo \"git tag -d % \
-                                            && git push --delete origin %\" | \
+                                            && git push --delete $(git origin) %\" | \
                              sh); \
                        }; f"
 
@@ -430,9 +435,9 @@ bclean = "!f() { DEFAULT=$(git default); \
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
     # Show commits that haven't made it to master yet.
-    ahead-of-master = !git log --oneline origin/master..HEAD
+    ahead-of-master = !git log --oneline $(git origin)/master..HEAD
 
-    log-local = log --oneline origin..HEAD
+    log-local = log --oneline $(git origin)..HEAD
 
     show-branch-history = "!f() { git log HEAD --not master; }; f"
 # XXX We should get the name of the branch merge base
@@ -443,16 +448,13 @@ bclean = "!f() { DEFAULT=$(git default); \
     # diff since master.
     missing-master-diff = !git diff master...
 
-    log-fetched = log --oneline HEAD..origin
+    log-fetched = log --oneline HEAD..$(git origin)
 
-    divergence = !git log --left-right --graph --cherry-pick --oneline $1...origin/$1
+    divergence = !git log --left-right --graph --cherry-pick --oneline $1...$(git origin)/$1
 
     release = "!f() { git tag -a v$1 -m \"Release version $1\" \
-                          && git push origin --tags \
-                          && git push origin; }; f"
-
-    contributors-name  = shortlog -n -s --no-merges --
-    contributors-email = shortlog -n -s -e --no-merges --
+                          && git push $(git origin) --tags \
+                          && git push $(git origin); }; f"
 
     graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
@@ -466,6 +468,9 @@ bclean = "!f() { DEFAULT=$(git default); \
                                | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
                        echo '}'; }; f"
 
+    contributors-name  = shortlog -n -s --no-merges --
+    contributors-email = shortlog -n -s -e --no-merges --
+
     pull-request-bb = "!f() { USERNAME=$1; \
         curl --user $USERNAME \
             https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
@@ -473,12 +478,12 @@ bclean = "!f() { DEFAULT=$(git default); \
     pr-list = XXX
 
     # For GitHub.
-    pr-checkout-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
+    pr-checkout-gh = "!f() { git fetch $(git origin) pull/$1/head:pr/$1 \
                                  && git checkout pr/$1; }; f"
     # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
 
     # For GitLab.
-    pr-checkout-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
+    pr-checkout-gl = "!f() { git fetch $(git origin) merge-requests/$1/head:pr/$1 \
                                  && git checkout pr/$1; }; f"
     # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
 
@@ -487,7 +492,7 @@ bclean = "!f() { DEFAULT=$(git default); \
             declare CURRENTBRANCH=\"$(git current-branch)\"; \
             declare BRANCH=\"${2:-$CURRENTBRANCH}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
-                git fetch origin refs/pull/$1/head:pr/$1 && \
+                git fetch $(git origin) refs/pull/$1/head:pr/$1 && \
                 git checkout -B $BRANCH && \
                 git rebase $BRANCH pr/$1 && \
                 git checkout -B $BRANCH && \
@@ -500,7 +505,7 @@ bclean = "!f() { DEFAULT=$(git default); \
     # The commit message will have the same for as if done using the
     # merge button on github.com
     # Example:
-    #   git merge-pr origin 5
+    #   git merge-pr $(git origin) 5
     merge-pr = "!sh -c '\
         USER_AND_REPO=`git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"`; \
         USER=`echo $USER_AND_REPO | cut -d\" \" -f1`; \
@@ -571,10 +576,10 @@ deploy-prod =
 
     show-issue = XXX
 
-    browse-issues = "!f() { URL=$(git config --get remote.origin.url); \
+    browse-issues = "!f() { URL=$(git config --get remote.$(git origin).url); \
                             cygstart ${URL/.git}/issues/$1; }; f"
 
-    browse-wiki = "!f() { URL=$(git config --get remote.origin.url); \
+    browse-wiki = "!f() { URL=$(git config --get remote.$(git origin).url); \
                           cygstart ${URL/.git}/wiki; }; f"
 
     # Put everything in the current repo in a Zip archive.
@@ -596,7 +601,7 @@ deploy-prod =
     type = cat-file -t
     dump = cat-file -p
 
-     catchup = !git fetch; git rebase origin/master
+     catchup = !git fetch; git rebase $(git origin)/master
 # For catching up those random feature branches you haven't had to touch in months.
 
     exec = '!exec '
@@ -610,7 +615,7 @@ deploy-prod =
            d"
 
     # Pull in remote changes for the current repository and all its submodules
-    p = !"git pull; git submodule foreach git pull origin master"
+    p = !"git pull; git submodule foreach git pull $(git origin) master"
 
     # Interactive rebase with the given number of latest commits
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
@@ -636,10 +641,10 @@ deploy-prod =
 
 #WHAT WAS GOING ON, WHILE YOU WERE AWAY
 
-    anychanges = !sh -c 'git fetch' && git log --oneline HEAD..origin/$1
-    anychangesonmaster = !sh -c 'git fetch' && git log --oneline HEAD..origin/master
-    whoischanging = !sh -c 'git shortlog HEAD..origin/$0'
-    whoischangingmaster = !sh -c 'git shortlog HEAD..origin/master'
+    anychanges = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/$1
+    anychangesonmaster = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/master
+    whoischanging = !sh -c 'git shortlog HEAD..$(git origin)/$0'
+    whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
 
     # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
     showorigin = "!sh -c 'for BRANCH in `git branch -r | grep -v HEAD`;do echo `git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1` \\\t$BRANCH; done | sort -r'"
@@ -654,9 +659,9 @@ deploy-prod =
     pushtags = push --tags
     tagwithdate = !sh -c 'git tag "$0"_$(date "+%y-%m-%d_%H-%M-%S")'
     # Pushes given tag to remote 'origin' repo (or the remote passed as the second parameter)
-    publishtag = "!sh -c 'git push ${2:-origin} $1' -"
+    publishtag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
     # Removes given tag from remote 'origin' repo (or the remote passed as the second parameter)
-    unpublishtag = "!sh -c 'git push ${2:-origin} :refs/tags/$1' -"
+    unpublishtag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
 
 #IGNORING
 
@@ -674,7 +679,7 @@ deploy-prod =
     cleanup = !git branch --merged=master | grep -Ev '^\\* | master$' | xargs -r git branch -d
 
     # Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
-    cleanuplocal = !git remote prune origin && git gc && git clean -df
+    cleanuplocal = !git remote prune $(git origin) && git gc && git clean -df
 
     # Check if any file in repo has whitespace errors
     # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
@@ -767,7 +772,7 @@ deploy-prod =
 
     log = log --decorate --date=short
 
-    ll = log --decorate --date=short --stat
+    ll = log --pretty=medium --abbrev-commit --decorate --date=short --stat
 
     ls-modified  = "!git status --porcelain -uno | awk 'match($1, /M/) {print $2}'"
     ls-added     = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
@@ -925,9 +930,9 @@ deploy-prod =
 
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
-    up= "!git fetch origin && git branch -v -a"
+    up= "!git fetch $(git origin) && git branch -v -a"
 
-    f = !git fetch --all && git rebase origin/master
+    f = !git fetch --all && git rebase $(git origin)/master
 
     up-tmpname = "!f() { git remote update -p; git merge --ff-only @{u}; }; f"
 
@@ -944,8 +949,8 @@ deploy-prod =
     update = !git pull --rebase --prune $@ && git submodule update --init --recursive
 
   # Do a push/pull for just one branch.
-  push1 = "!git push origin $(git current-branch)"
-  pull1 = "!git pull origin $(git current-branch)"
+  push1 = "!git push $(git origin) $(git current-branch)"
+  pull1 = "!git pull $(git origin) $(git current-branch)"
 
 # Pull and push from the current branch.
 sync = "!f(){ pull1 && push1; }; f"
@@ -980,7 +985,7 @@ sync = "!f(){ pull1 && push1; }; f"
 
     # Merge remote master into the current branch.
     mm = !git fetch -p \
-              && git merge origin/master
+              && git merge $(git origin)/master
 
     merge-to-master =  "!f(){ BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
                                   BRANCH_NAME=${branch_name##refs/heads/}; \
@@ -1131,7 +1136,7 @@ stashall = !git add -A && git stash
     diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
 
     # Best common ancestor (when it was branched off).
-    mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
+    mbase = !git show --summary $(git merge-base $(git origin)/$1 $(git current-branch))
 # git merge-base --fork-point master
 # git merge-base --all r1 r2
 
@@ -1180,7 +1185,7 @@ stashall = !git add -A && git stash
     # git resync -> sync repository and rebase current branch.
     resync = !sh -c 'git checkout master \
                          && git fetch \
-                         && git reset --hard origin/master \
+                         && git reset --hard $(git origin)/master \
                          && git rebase master'
 
     record = !sh -c '(git add -p -- $@ && git commit) || git reset' --

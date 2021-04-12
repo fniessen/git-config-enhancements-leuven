@@ -685,14 +685,17 @@ Or, if you want to use RSA:
 Fetch URL: git@bitbucket.org-something:user/slug
 
 #+begin_src conf
-    repo-owner = "!f() { git remote show origin -n \
+    # origin = !echo "${$(git config clone.defaultRemoteName):-origin}"
+    origin = !echo "origin"
+
+    repo-owner = "!f() { git remote show $(git origin) -n \
                              | grep 'Fetch URL:' \
                              | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
                              | sed 's#.git$##'; }; f"
 #+end_src
 
 #+begin_src conf
-    repo-slug = "!f() { git remote show origin -n \
+    repo-slug = "!f() { git remote show $(git origin) -n \
                             | grep 'Fetch URL:' \
                             | sed -E 's#^.*/(.*)$#\\1#' \
                             | sed 's#.git$##'; }; f"
@@ -701,8 +704,8 @@ Fetch URL: git@bitbucket.org-something:user/slug
 # Updating git aliases for different *default branch* names (~master~, ~main~, etc.):
 #
 # #+begin_src conf
-#     ## git remote show origin | grep "HEAD branch" | cut -d' ' -f5
-#     default-branch = !git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'
+#     ## git remote show $(git origin) | grep "HEAD branch" | cut -d' ' -f5
+#     default-branch = !git symbolic-ref refs/remotes/$(git origin)/HEAD | sed 's@^refs/remotes/$(git origin)/@@'
 # #+end_src
 #
 # This method can return incorrect results...
@@ -729,7 +732,7 @@ echo "# ${$(git repo-slug):-Repository name}\n\nDescription" >> README.md
 git add README.md
 git commit -m "Add README.md"
 
-git push -u origin master
+git push -u $(git origin) master
 #+end_src
 
 ** Create a .gitignore
@@ -1246,7 +1249,7 @@ Assuming that your branch was created off of ~develop~, then /while in the branc
 ** Open a repository in a web browser
 
 #+begin_src conf
-    browse-commits = "!f() { URL=$(git config --get remote.origin.url); \
+    browse-commits = "!f() { URL=$(git config --get remote.$(git origin).url); \
                              cygstart ${URL/.git}/commits; }; f"
 #+end_src
 
@@ -1358,12 +1361,11 @@ resolved, ie. like so
 Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
 
 #+begin_src conf
-    # Push current branch to remote server (create a copy of the current branch
-    # on the remote "origin", and set it to track the upstream branch).
-    publish = !git push -u origin $(git current-branch)
-
-    # Delete current branch on remote server.
-    unpublish = !git delete-remote-branch $(git current-branch)
+    # Usage: git publish
+    # Push current branch to remote server.
+    publish = !git push -u $(git origin) $(git current-branch)
+    # (Create a copy of the current branch on the remote "origin", and set it to
+    # track the upstream branch)
 #+end_src
 
 #+begin_src conf
@@ -1528,7 +1530,7 @@ In other words, when you might lose commits.
 #+begin_tip
 In the event that you accidentally delete ~master~, get it back with:
 
-: git create-branch master origin/master
+: git create-branch master $(git origin)/master
 #+end_tip
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
@@ -1536,10 +1538,6 @@ See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
 See
 https://www.oreilly.com/library/view/git-pocket-guide/9781449327507/ch05.html
 for the distinction between "merged" and "fully merged" branches!
-
-#+begin_src conf
-    delete-remote-merged-branches = "XXX"
-#+end_src
 
 - https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
 - https://github.com/arc90/git-sweep
@@ -1549,8 +1547,13 @@ for the distinction between "merged" and "fully merged" branches!
 Delete a *remote* branch:
 
 #+begin_src conf
-    # Delete remote branch.
-    delete-remote-branch = push origin --delete
+    # Usage: git delete-remote-branch BRANCH
+    # Delete a remote branch.
+    delete-remote-branch = !git push $(git origin) --delete
+
+    # Usage: git unpublish
+    # Delete current branch on remote server.
+    unpublish = !git delete-remote-branch $(git current-branch)
 #+end_src
 
 *** Delete a branch locally and on the ~origin~ remote
@@ -1566,12 +1569,12 @@ Once you delete the branch from the remote, you can *remove all orphaned
 remote-tracking branches that you have locally*, in =.git/refs/remotes/origin=, but
 are *no more present in the remote repository* ~origin~ with:
 
-: git remote prune origin
+: git remote prune $(git origin)
 
 Use the ~--dry-run~ flag to only see what branches will be pruned, but not
 actually prune them:
 
-: git remote prune origin --dry-run
+: git remote prune $(git origin) --dry-run
 
 #+begin_src conf
     # Prune deleted branches from all remotes.
@@ -1632,7 +1635,7 @@ To rename a branch *locally and remotely*:
     # Usage: git rename-branch BRANCH_OLD BRANCH_NEW
     # Rename both a local and remote branch.
     rename-branch = "!f() { git rename-local-branch $1 $2 \
-                                && git push --set-upstream origin $2 \
+                                && git push --set-upstream $(git origin) $2 \
                                 && git delete-remote-branch $1; }; f"
 #+end_src
 
@@ -1689,7 +1692,7 @@ Push all your tags (a regular push won't push a tag):
 
 #+begin_src shell :tangle no
 git push --tags                         # Only tags.
-git push --tags origin master           # Code and tags.
+git push --tags $(git origin) master    # Code and tags.
 #+end_src
 
 ** List the repository tags
@@ -1731,8 +1734,8 @@ Show latest annotated tag /in all branches/:
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { git tag $2 $1; \
                          git tag -d $1; \
-                         git push origin $2; \
-                         git push origin :refs/tags/$1; \
+                         git push $(git origin) $2; \
+                         git push $(git origin) :refs/tags/$1; \
                        }; f"
 #+end_src
 
@@ -1748,7 +1751,7 @@ Delete similar tags:
                          && echo \"No tags given as an argument!\" \
                          || (git tag -l $1 | \
                              xargs -I % echo \"git tag -d % \
-                                            && git push --delete origin %\" | \
+                                            && git push --delete $(git origin) %\" | \
                              sh); \
                        }; f"
 #+end_src
@@ -1759,7 +1762,7 @@ Delete similar tags:
     # Delete all local and remote tags.
     delete-all-tags = "!f() { for TAG in $(git tag); do
                                   git tag -d $TAG
-                                  git push origin :$TAG
+                                  git push $(git origin) :$TAG
                               done;
                             }; f"
 #+end_src
@@ -1806,7 +1809,7 @@ See the changed files in a branch *since it was forked from another branch*:
 
 See the changed files in a branch since the last merge with the origin branch:
 
-: git diff --stat origin/master...my_forked_branch
+: git diff --stat $(git origin)/master...my_forked_branch
 
 ** Diff
 
@@ -1839,13 +1842,13 @@ If either side is ~HEAD~, it may be omitted (e.g. ~master..~ compares ~master~ t
 
 #+begin_src conf
     # Show commits that haven't made it to master yet.
-    ahead-of-master = !git log --oneline origin/master..HEAD
+    ahead-of-master = !git log --oneline $(git origin)/master..HEAD
 #+end_src
 
 *** What did I do since I forked from the origin branch?
 
 #+begin_src conf
-    log-local = log --oneline origin..HEAD
+    log-local = log --oneline $(git origin)..HEAD
 #+end_src
 
 #+begin_src conf
@@ -1882,7 +1885,7 @@ Show all commits in a git branch since original branching point from =master=:
 *** What did the origin do since I forked from them?
 
 #+begin_src conf
-    log-fetched = log --oneline HEAD..origin
+    log-fetched = log --oneline HEAD..$(git origin)
 #+end_src
 
 *** History of your branch: List all commits on only one side of the branches
@@ -1904,7 +1907,7 @@ differences will collapse.
 = git out?  (if I'm the only one pushing?)
 
 #+begin_src conf
-    divergence = !git log --left-right --graph --cherry-pick --oneline $1...origin/$1
+    divergence = !git log --left-right --graph --cherry-pick --oneline $1...$(git origin)/$1
 #+end_src
 
 * ?Releases
@@ -2041,7 +2044,7 @@ Git aliases for pull requests and other useful stuff
 https://gist.github.com/metlos/9368527
 
 For GitHub
-: git ls-remote origin 'refs/pull/*'
+: git ls-remote $(git origin) 'refs/pull/*'
 
 #+begin_src conf
     pr-list = XXX
@@ -2060,12 +2063,12 @@ branch*:
 
 #+begin_src conf
     # For GitHub.
-    pr-checkout-gh = "!f() { git fetch origin pull/$1/head:pr/$1 \
+    pr-checkout-gh = "!f() { git fetch $(git origin) pull/$1/head:pr/$1 \
                                  && git checkout pr/$1; }; f"
     # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
 
     # For GitLab.
-    pr-checkout-gl = "!f() { git fetch origin merge-requests/$1/head:pr/$1 \
+    pr-checkout-gl = "!f() { git fetch $(git origin) merge-requests/$1/head:pr/$1 \
                                  && git checkout pr/$1; }; f"
     # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
 #+end_src
@@ -2096,8 +2099,8 @@ For more details on pushing changes to a PR, please see [[https://help.github.co
 
 ** 3. Merge the branch and fix any conflicts that come up
 
-git fetch origin
-git checkout "origin/master"
+git fetch $(git origin)
+git checkout "$(git origin)/master"
 git merge --no-ff "1-change-encoding-of-read-sql-file"
 
 XXX See https://gitlab.com/help/user/project/merge_requests/squash_and_merge
@@ -2112,7 +2115,7 @@ If everything is OK, you can merge the pull request.
             declare CURRENTBRANCH=\"$(git current-branch)\"; \
             declare BRANCH=\"${2:-$CURRENTBRANCH}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
-                git fetch origin refs/pull/$1/head:pr/$1 && \
+                git fetch $(git origin) refs/pull/$1/head:pr/$1 && \
                 git checkout -B $BRANCH && \
                 git rebase $BRANCH pr/$1 && \
                 git checkout -B $BRANCH && \
@@ -2125,7 +2128,7 @@ If everything is OK, you can merge the pull request.
     # The commit message will have the same for as if done using the
     # merge button on github.com
     # Example:
-    #   git merge-pr origin 5
+    #   git merge-pr $(git origin) 5
     merge-pr = "!sh -c '\
         USER_AND_REPO=`git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"`; \
         USER=`echo $USER_AND_REPO | cut -d\" \" -f1`; \
@@ -2162,7 +2165,7 @@ without leaving your terminal -- this function will help you.
 
 ** 4. Push the result of the merge to the remote
 
-: git push origin "master"
+: git push $(git origin) "master"
 
 ** Clean up old branch
 
@@ -2187,7 +2190,7 @@ Extra script (called [[https://github.com/mislav/dotfiles/blob/master/bin/git-ov
 original authors of lines changed or removed in a given branch:
 
 #+begin_src shell :tangle no
-git overwritten feature origin/master
+git overwritten feature $(git origin)/master
 #+end_src
 
 This is useful when opening pull requests per GitHub Flow; you'll want your pull
@@ -2413,14 +2416,14 @@ Show an existing issue specified by NUMBER.
 ** Open Issues in a web browser
 
 #+begin_src conf
-    browse-issues = "!f() { URL=$(git config --get remote.origin.url); \
+    browse-issues = "!f() { URL=$(git config --get remote.$(git origin).url); \
                             cygstart ${URL/.git}/issues/$1; }; f"
 #+end_src
 
 * Wiki
 
 #+begin_src conf
-    browse-wiki = "!f() { URL=$(git config --get remote.origin.url); \
+    browse-wiki = "!f() { URL=$(git config --get remote.$(git origin).url); \
                           cygstart ${URL/.git}/wiki; }; f"
 #+end_src
 
@@ -2483,7 +2486,7 @@ http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 #+end_src
 
 #+begin_src conf
-     catchup = !git fetch; git rebase origin/master
+     catchup = !git fetch; git rebase $(git origin)/master
 # For catching up those random feature branches you haven't had to touch in months.
 #+end_src
 
@@ -2508,7 +2511,7 @@ are always executed in the top-level directory.
            d"
 
     # Pull in remote changes for the current repository and all its submodules
-    p = !"git pull; git submodule foreach git pull origin master"
+    p = !"git pull; git submodule foreach git pull $(git origin) master"
 #+end_src
 
 Clean up your commits before publishing.  Before you push your commits to the
@@ -2545,10 +2548,10 @@ clean and relevant commits, no experiments or fixing typos.
 
 #WHAT WAS GOING ON, WHILE YOU WERE AWAY
 
-    anychanges = !sh -c 'git fetch' && git log --oneline HEAD..origin/$1
-    anychangesonmaster = !sh -c 'git fetch' && git log --oneline HEAD..origin/master
-    whoischanging = !sh -c 'git shortlog HEAD..origin/$0'
-    whoischangingmaster = !sh -c 'git shortlog HEAD..origin/master'
+    anychanges = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/$1
+    anychangesonmaster = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/master
+    whoischanging = !sh -c 'git shortlog HEAD..$(git origin)/$0'
+    whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
 
     # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
     showorigin = "!sh -c 'for BRANCH in `git branch -r | grep -v HEAD`;do echo `git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1` \\\t$BRANCH; done | sort -r'"
@@ -2563,9 +2566,9 @@ clean and relevant commits, no experiments or fixing typos.
     pushtags = push --tags
     tagwithdate = !sh -c 'git tag "$0"_$(date "+%y-%m-%d_%H-%M-%S")'
     # Pushes given tag to remote 'origin' repo (or the remote passed as the second parameter)
-    publishtag = "!sh -c 'git push ${2:-origin} $1' -"
+    publishtag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
     # Removes given tag from remote 'origin' repo (or the remote passed as the second parameter)
-    unpublishtag = "!sh -c 'git push ${2:-origin} :refs/tags/$1' -"
+    unpublishtag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
 
 #IGNORING
 
@@ -2583,7 +2586,7 @@ clean and relevant commits, no experiments or fixing typos.
     cleanup = !git branch --merged=master | grep -Ev '^\\* | master$' | xargs -r git branch -d
 
     # Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
-    cleanuplocal = !git remote prune origin && git gc && git clean -df
+    cleanuplocal = !git remote prune $(git origin) && git gc && git clean -df
 
     # Check if any file in repo has whitespace errors
     # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
@@ -2790,7 +2793,7 @@ List commits *showing changed files* (prettier and more concise version of
 ~whatchanged~):
 
 #+begin_src conf
-    ll = log --decorate --date=short --stat
+    ll = log --pretty=medium --abbrev-commit --decorate --date=short --stat
 #+end_src
 
 #+begin_src conf
@@ -3430,9 +3433,9 @@ XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
 #+begin_src conf
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
-    up= "!git fetch origin && git branch -v -a"
+    up= "!git fetch $(git origin) && git branch -v -a"
 
-    f = !git fetch --all && git rebase origin/master
+    f = !git fetch --all && git rebase $(git origin)/master
 #+end_src
 
 See https://www.praqma.com/stories/git-autostash/.
@@ -3506,8 +3509,8 @@ Pull all:
 
 #+begin_src conf
   # Do a push/pull for just one branch.
-  push1 = "!git push origin $(git current-branch)"
-  pull1 = "!git pull origin $(git current-branch)"
+  push1 = "!git push $(git origin) $(git current-branch)"
+  pull1 = "!git pull $(git origin) $(git current-branch)"
 
 # Pull and push from the current branch.
 sync = "!f(){ pull1 && push1; }; f"
@@ -3607,7 +3610,7 @@ applies all those changes together.
 #+begin_src conf
     # Merge remote master into the current branch.
     mm = !git fetch -p \
-              && git merge origin/master
+              && git merge $(git origin)/master
 
     merge-to-master =  "!f(){ BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
                                   BRANCH_NAME=${branch_name##refs/heads/}; \
@@ -3732,9 +3735,9 @@ any files, then it takes the meaning of /switching branches/.
 
 #+begin_src shell :tangle no
 git checkout master
-git pull origin master                  # Get the latest changes from the remote.
+git pull $(git origin) master           # Get the latest changes from the remote.
 git merge test
-git push origin master
+git push $(git origin) master
 
 git branch -d local_branch_name         # Delete local branch.
 #+end_src
@@ -3804,7 +3807,7 @@ Update the feature branch:
 
 Share the feature branch:
 
-: feature-push = '!BRANCH=$(git current-branch); git push -u origin "$BRANCH"'
+: feature-push = '!BRANCH=$(git current-branch); git push -u $(git origin) "$BRANCH"'
 
 If your team uses a different feature flow, you may want to skip including these
 aliases, or you may want to edit these aliases to match your team's feature flow.
@@ -3892,8 +3895,8 @@ git stash \
 && echo 'My Page' > index.html \
 && git add . \
 && git commit -a -m 'Initial commit' \
-&& git remote add origin https://github.com/"$USERNAME"/"$REPOSITORY".git \
-&& git push -u origin gh-pages \
+&& git remote add $(git origin) https://github.com/"$USERNAME"/"$REPOSITORY".git \
+&& git push -u $(git origin) gh-pages \
 && echo 'Complete' \
 && echo '-------------------' \
 && echo 'You can find your last changes in the stash!'
@@ -4486,7 +4489,7 @@ from the name) remains intact.
 
 #+begin_src conf
     # Best common ancestor (when it was branched off).
-    mbase = !git show --summary $(git merge-base origin/$1 $(git current-branch))
+    mbase = !git show --summary $(git merge-base $(git origin)/$1 $(git current-branch))
 # git merge-base --fork-point master
 # git merge-base --all r1 r2
 #+end_src
@@ -4651,7 +4654,7 @@ Let's do a slightly different command: ~resync~
     # git resync -> sync repository and rebase current branch.
     resync = !sh -c 'git checkout master \
                          && git fetch \
-                         && git reset --hard origin/master \
+                         && git reset --hard $(git origin)/master \
                          && git rebase master'
 #+end_src
 
@@ -4785,7 +4788,7 @@ git rename-local-branch master master-busted
 Create a new branch =master= that tracks the origin:
 
 #+begin_src shell
-git branch --track master origin/master
+git branch --track master $(git origin)/master
 #+end_src
 
 Check it out (be careful, this will discard all your local changes):
@@ -4815,7 +4818,7 @@ https://github.com/brianleetest/testGit/blob/master/README.md
 ** Force push
 
 #+begin_src shell
-git push --force origin master
+git push --force $(git origin) master
 #+end_src
 
 *** Doc about push failure
