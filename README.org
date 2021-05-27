@@ -565,7 +565,7 @@ If unable to clone Git repository due to *self-signed certificate*...
 
 #+begin_src conf
 [format]
-    pretty = 'format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)'
+    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
@@ -970,16 +970,6 @@ This is a handy table for labels [[https://github.com/angular/angular/blob/maste
 | chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
 | doc      | Documentation only changes                                                                             |
 
-** Get a commit hash
-
-#+begin_src conf
-    # Usage: git commit-hash [COMMIT_ISH]
-    # Examples:
-    #   git commit-hash               find hash of last commit
-    #   git commit-hash develop       find hash of last commit in develop
-    commit-hash = log -1 --pretty='format:%h'
-#+end_src
-
 ** Get a commit detail
 
 List all the changed files *in a commit*:
@@ -989,7 +979,7 @@ List all the changed files *in a commit*:
     # Examples:
     #   git changed-files             list files modified in last commit
     #   git changed-files bada55      list files modified in this commit
-    changed-files = show --pretty='format:' --name-only
+    changed-files = show --pretty="format:" --name-only
 #+end_src
 
 ** Get the diff of a commit
@@ -1957,7 +1947,7 @@ See example at https://gitlab.com/procps-ng/procps/-/network/master
 To see real *timeline* of who is working on what and when:
 
 #+begin_src conf
-    graph = log --graph -25 --branches --remotes --tags --pretty='format:%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+    graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
     # Show log as a graph
     log-graph = log --graph --all --oneline --decorate
@@ -2545,11 +2535,11 @@ clean and relevant commits, no experiments or fixing typos.
 #+begin_src conf
 #BASIC HISTORY VIEWING
 
-    hist = log --pretty='format:%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
-    histfull = log --pretty='format:%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
-    llog = log --pretty='format:%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
-    changelog = log --pretty='format:%Cgreen%d %Creset%s' --date=iso
-    ls = log --pretty='format:%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
+    hist = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
+    histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
+    llog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
+    changelog = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
+    ls = log --pretty=format:'%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
 
 #BASIC REPO INFORMATION
 
@@ -2715,9 +2705,9 @@ Quickly see what you've done today (list commits that aren't merges, on *all
 branches*):
 
 #+begin_src conf
-    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='format:%C(green)%ad%C(auto) - %s' --date='format:%Y-%m-%d %a %H:%M'
-    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='format:%C(green)%ad%C(auto) - %s' --date='format:%Y-%m-%d %a %H:%M'
-    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='format:%C(green)%ad%C(auto) - %s' --date='format:%Y-%m-%d %a %H:%M'
+    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 #+end_src
 
 #+begin_src conf
@@ -2744,7 +2734,7 @@ Show changes for a daily standup meeting:
                                       echo "yesterday"; \
                                   fi) \
                         --author=$(git config --get user.email) \
-                        --pretty='format:%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
+                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
                         --date=local"
 # XXX git standup W donne un décompte avec une ligne trop peu !
 #+end_src
@@ -2850,7 +2840,7 @@ curl 'https://api.bitbucket.org/2.0/repositories/mcpflow/pflow/filehistory/maste
 #+end_src
 
 #+begin_src conf
-    related = !sh -c 'git log --follow --pretty=\"format:%H\" $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
+    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 #+end_src
 
 Find the *most recent commit* (chronologically) that modified a file -- looking in
@@ -3344,7 +3334,7 @@ into one commit:
   # Given a merge commit, find the span of commits that exist(ed).
   # Not so useful in itself, but used by other aliases.
   # Thanks to Rob Miller for the merge-span-* aliaes.
-  merge-span = !"f() { echo $(git log -1 $2 --merges --pretty='format:%P' | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty='format:%P' | cut -d' ' -f2); }; f"
+  merge-span = !"f() { echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); }; f"
 
   # Find the commits that were introduced by a merge
   merge-span-log = "!git log $(git merge-span .. $1)"
@@ -4438,11 +4428,11 @@ https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
 
 #+begin_src conf
     # Detailed list of changes.
-    changelog = !sh -c 'git log --no-merges --pretty=\"format:* %s\" $(git last-tag)...' -
-    changelog-org = !sh -c 'git log --no-merges --pretty=\"format:- %s\" $(git last-tag)...' -
+    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
+    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 #+end_src
 
-XXX git log --pretty='format:- %s' 2019.10.10...HEAD displays too many entries on mcpflow repo
+XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries on mcpflow repo
 
 # Use it like this:
 #
@@ -4505,13 +4495,12 @@ from the name) remains intact.
 #+end_src
 
 #+begin_src conf
-    # Usage: git export-commit [COMMIT_ISH]
+    # Usage: git export-commit [COMMIT]
     export-commit = "!f() { git changed-files ${1:-HEAD} \
-                                | tr '\\n' '\\0' \
-                                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch)-${1:-HEAD}.zip; }; f"
+                                | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
 #+end_src
 
-XXX Put commit number instead of head
+XXX This does not handle spaces in file names
 
 To see the contents of the zipped file (without extraction), use ~unzip -l FILE~.
 
@@ -4701,7 +4690,7 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 ** TODO To sort out
 
 #+begin_src conf
-    logdate = log --pretty='format:%ad %d %h %s %an%n' --date=short
+    logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
     branch-date = !"sh -c 'for BRANCH in $(git branch --no-merged); do \
                                git logdate -1 -r $BRANCH --; \
                            done'"
@@ -4716,7 +4705,7 @@ zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git 
 #+end_src
 
 #+begin_src conf :tangle no
-    cvs-full-log = log --reverse --pretty='format:%B------------------------------------------------------------------------'
+    cvs-full-log = log --reverse --pretty=format:'%B------------------------------------------------------------------------'
 #+end_src
 
 * Download repository
