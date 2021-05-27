@@ -152,7 +152,7 @@
     selected = white
 
 [format]
-    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
+    pretty = 'format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)'
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
@@ -235,11 +235,17 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
 [alias]
 
+    # Usage: git commit-hash [COMMIT_ISH]
+    # Examples:
+    #   git commit-hash               find hash of last commit
+    #   git commit-hash develop       find hash of last commit in develop
+    commit-hash = log -1 --pretty='format:%h'
+
     # Usage: git changed-files [COMMIT]
     # Examples:
     #   git changed-files             list files modified in last commit
     #   git changed-files bada55      list files modified in this commit
-    changed-files = show --pretty="format:" --name-only
+    changed-files = show --pretty='format:' --name-only
 
     download-email-patch = XXX git format-patch $(git current-branch).patch
     download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
@@ -456,7 +462,7 @@ bclean = "!f() { DEFAULT=$(git default); \
                           && git push $(git origin) --tags \
                           && git push $(git origin); }; f"
 
-    graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+    graph = log --graph -25 --branches --remotes --tags --pretty='format:%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
     # Show log as a graph
     log-graph = log --graph --all --oneline --decorate
@@ -628,11 +634,11 @@ deploy-prod =
 
 #BASIC HISTORY VIEWING
 
-    hist = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
-    histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
-    llog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
-    changelog = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
-    ls = log --pretty=format:'%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
+    hist = log --pretty='format:%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
+    histfull = log --pretty='format:%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
+    llog = log --pretty='format:%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
+    changelog = log --pretty='format:%Cgreen%d %Creset%s' --date=iso
+    ls = log --pretty='format:%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
 
 #BASIC REPO INFORMATION
 
@@ -727,9 +733,9 @@ deploy-prod =
 
     precommit = diff --cached --diff-algorithm=minimal -w
 
-    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='format:%C(green)%ad%C(auto) - %s' --date='format:%Y-%m-%d %a %H:%M'
+    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='format:%C(green)%ad%C(auto) - %s' --date='format:%Y-%m-%d %a %H:%M'
+    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='format:%C(green)%ad%C(auto) - %s' --date='format:%Y-%m-%d %a %H:%M'
 
     today-all = log --since=midnight --no-merges --all
 
@@ -748,7 +754,7 @@ deploy-prod =
                                       echo "yesterday"; \
                                   fi) \
                         --author=$(git config --get user.email) \
-                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
+                        --pretty='format:%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
                         --date=local"
 # XXX git standup W donne un décompte avec une ligne trop peu !
 
@@ -796,7 +802,7 @@ deploy-prod =
 
     file-history = log --follow --date-order --date=short -C --
 
-    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
+    related = !sh -c 'git log --follow --pretty=\"format:%H\" $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 
     file-last-modified = log -n 1 --follow --all --date-order --date=short -C --
 
@@ -898,7 +904,7 @@ deploy-prod =
   # Given a merge commit, find the span of commits that exist(ed).
   # Not so useful in itself, but used by other aliases.
   # Thanks to Rob Miller for the merge-span-* aliaes.
-  merge-span = !"f() { echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); }; f"
+  merge-span = !"f() { echo $(git log -1 $2 --merges --pretty='format:%P' | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty='format:%P' | cut -d' ' -f2); }; f"
 
   # Find the commits that were introduced by a merge
   merge-span-log = "!git log $(git merge-span .. $1)"
@@ -1118,8 +1124,8 @@ stashall = !git add -A && git stash
     ipatch = "!f() { git apply $1; git add -p; }; f"
 
     # Detailed list of changes.
-    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
-    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
+    changelog = !sh -c 'git log --no-merges --pretty=\"format:* %s\" $(git last-tag)...' -
+    changelog-org = !sh -c 'git log --no-merges --pretty=\"format:- %s\" $(git last-tag)...' -
 
     current-tag = tag --points-at HEAD
     zip = "!f() { git archive --format=zip -o $(git current-tag).zip HEAD; }; f"
@@ -1140,9 +1146,10 @@ stashall = !git add -A && git stash
 # git merge-base --fork-point master
 # git merge-base --all r1 r2
 
-    # Usage: git export-commit [COMMIT]
+    # Usage: git export-commit [COMMIT_ISH]
     export-commit = "!f() { git changed-files ${1:-HEAD} \
-                                | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
+                                | tr '\\n' '\\0' \
+                                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch)-${1:-HEAD}.zip; }; f"
 
     # View raw commit.
     email-patch = XXX git format-patch $(git current-branch).patch
@@ -1195,7 +1202,7 @@ stashall = !git add -A && git stash
 
 zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 
-    logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
+    logdate = log --pretty='format:%ad %d %h %s %an%n' --date=short
     branch-date = !"sh -c 'for BRANCH in $(git branch --no-merged); do \
                                git logdate -1 -r $BRANCH --; \
                            done'"
