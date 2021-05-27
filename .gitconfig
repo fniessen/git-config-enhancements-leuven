@@ -235,6 +235,12 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
 
 [alias]
 
+    # Usage: git commit-hash [COMMIT_ISH]
+    # Examples:
+    #   git commit-hash               find hash of last commit
+    #   git commit-hash develop       find hash of last commit in develop
+    commit-hash = log -1 --pretty=format:'%h'
+
     # Usage: git changed-files [COMMIT]
     # Examples:
     #   git changed-files             list files modified in last commit
@@ -1143,7 +1149,7 @@ stashall = !git add -A && git stash
     # Usage: git export-commit [COMMIT_ISH]
     export-commit = "!f() { git changed-files ${1:-HEAD} \
                                 | tr '\\n' '\\0' \
-                                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch)-${1:-HEAD}.zip; }; f"
+                                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch)-${1:-$(git commit-hash)}.zip; }; f"
 
     # View raw commit.
     email-patch = XXX git format-patch $(git current-branch).patch

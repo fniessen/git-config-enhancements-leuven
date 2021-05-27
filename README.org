@@ -970,6 +970,16 @@ This is a handy table for labels [[https://github.com/angular/angular/blob/maste
 | chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
 | doc      | Documentation only changes                                                                             |
 
+** Get a commit hash
+
+#+begin_src conf
+    # Usage: git commit-hash [COMMIT_ISH]
+    # Examples:
+    #   git commit-hash               find hash of last commit
+    #   git commit-hash develop       find hash of last commit in develop
+    commit-hash = log -1 --pretty=format:'%h'
+#+end_src
+
 ** Get a commit detail
 
 List all the changed files *in a commit*:
@@ -3130,7 +3140,7 @@ My new favorite alias lets you amend to a specific commit, *no* need to be the
 
 *** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
 
-: git show commit-hash -- path/to/file.html | git apply --reverse
+: git show COMMIT-HASH -- path/to/file.html | git apply --reverse
 
 *** Throw away a commit
 
@@ -4498,7 +4508,7 @@ from the name) remains intact.
     # Usage: git export-commit [COMMIT_ISH]
     export-commit = "!f() { git changed-files ${1:-HEAD} \
                                 | tr '\\n' '\\0' \
-                                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch)-${1:-HEAD}.zip; }; f"
+                                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch)-${1:-$(git commit-hash)}.zip; }; f"
 #+end_src
 
 XXX This does not handle spaces in file names
