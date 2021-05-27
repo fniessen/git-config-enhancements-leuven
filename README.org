@@ -4495,9 +4495,10 @@ from the name) remains intact.
 #+end_src
 
 #+begin_src conf
-    # Usage: git export-commit [COMMIT]
+    # Usage: git export-commit [COMMIT_ISH]
     export-commit = "!f() { git changed-files ${1:-HEAD} \
-                                | xargs zip -9 $(git repo-slug)-commit-${1:-HEAD}.zip; }; f"
+                                | tr '\\n' '\\0' \
+                                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch)-${1:-HEAD}.zip; }; f"
 #+end_src
 
 XXX This does not handle spaces in file names
