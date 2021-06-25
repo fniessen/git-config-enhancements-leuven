@@ -1872,19 +1872,31 @@ command, like this:
 
 : git log master..branchname
 
-*** TODO Diff all changes since branching from master
+*** How do I find a list of files committed to a Git branch (since branching from master)?
 
-Show all commits in a git branch since original branching point from =master=:
+Show all the changed files in a Git branch *since it was forked from the =master=
+branch*:
 
 #+begin_src conf
-    # log since master.
-    missing-master = "!f() { git log master...$1; }; f"
+    # Usage: git missing-master [COMMIT_ISH]
+    # Show changed files since master.
+    # Examples:
+    #   git missing-master            list changed files for the current branch
+    #   git missing-master feature/7  list changed files for the feature/7 branch
+    missing-master = "!f() { git diff --stat master...$1; }; f"
 #+end_src
 
-See the changed files in a branch *since it was forked from another branch*:
+See the added / copied / deleted / modified / renamed files in a branch:
 
 : git diff forked_from_branch...my_forked_branch --name-status --diff-filter=ACDMR
-: git diff --stat forked_from_branch...my_forked_branch
+
+Available filters for ~--diff-filter~ are:
+
+- A :: Added
+- C :: Copied
+- D :: Deleted
+- M :: Modified
+- R :: Renamed
 
 *** History of your branch: List all commits on only one side of the branches
 

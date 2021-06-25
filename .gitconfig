@@ -448,8 +448,12 @@ bclean = "!f() { DEFAULT=$(git default); \
     show-branch-history = "!f() { git log HEAD --not master; }; f"
 # XXX We should get the name of the branch merge base
 
-    # log since master.
-    missing-master = "!f() { git log master...$1; }; f"
+    # Usage: git missing-master [COMMIT_ISH]
+    # Show changed files since master.
+    # Examples:
+    #   git missing-master            list changed files for the current branch
+    #   git missing-master feature/7  list changed files for the feature/7 branch
+    missing-master = "!f() { git diff --stat master...$1; }; f"
 
     log-fetched = log --oneline HEAD..$(git origin)
 
