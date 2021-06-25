@@ -1813,14 +1813,6 @@ List all the changed *files between 2 commits*:
     compare-changed-files = "!f() { git diff --stat $1...$2; }; f"
 #+end_src
 
-See the changed files in a branch *since it was forked from another branch*:
-
-: git diff --stat forked_from_branch...my_forked_branch
-
-See the changed files in a branch since the last merge with the origin branch:
-
-: git diff --stat $(git origin)/master...my_forked_branch
-
 ** Diff
 
 View all diffs.
@@ -1886,17 +1878,13 @@ Show all commits in a git branch since original branching point from =master=:
 
 #+begin_src conf
     # log since master.
-    missing-master = !git log master...
-
-    # diff since master.
-    missing-master-diff = !git diff master...
+    missing-master = "!f() { git log master...$1; }; f"
 #+end_src
 
-*** What did the origin do since I forked from them?
+See the changed files in a branch *since it was forked from another branch*:
 
-#+begin_src conf
-    log-fetched = log --oneline HEAD..$(git origin)
-#+end_src
+: git diff forked_from_branch...my_forked_branch --name-status --diff-filter=ACDMR
+: git diff --stat forked_from_branch...my_forked_branch
 
 *** History of your branch: List all commits on only one side of the branches
 
@@ -1911,6 +1899,12 @@ from master. This gives you the information you want, but if and only if you
 have never merged 'branch' back to master, and have never merged master into
 'branch' since you created it. If you have merged, then this history of
 differences will collapse.
+
+*** What did the origin do since I forked from them?
+
+#+begin_src conf
+    log-fetched = log --oneline HEAD..$(git origin)
+#+end_src
 
 *** TODO Show the history difference between a local branch and its remote
 

@@ -449,10 +449,7 @@ bclean = "!f() { DEFAULT=$(git default); \
 # XXX We should get the name of the branch merge base
 
     # log since master.
-    missing-master = !git log master...
-
-    # diff since master.
-    missing-master-diff = !git diff master...
+    missing-master = "!f() { git log master...$1; }; f"
 
     log-fetched = log --oneline HEAD..$(git origin)
 
