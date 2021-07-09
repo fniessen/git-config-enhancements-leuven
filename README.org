@@ -1378,10 +1378,12 @@ Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
     # track the upstream branch)
 #+end_src
 
+Name of current branch (not so useful in itself, but used in other aliases):
+
 #+begin_src conf
-    # Get the current branch name (not so useful in itself, but used in other
-    # aliases).
+    # Get the current branch name.
     current-branch = name-rev --name-only HEAD
+    # XXX current-branch = "!f() { git name-rev --name-only HEAD | tr '/' '-'; }; f"
     # XXX Does not work correctly with tags (returns 'tags/2019.04.25~3')
 
     # v2.22+

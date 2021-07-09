@@ -315,9 +315,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # (Create a copy of the current branch on the remote "origin", and set it to
     # track the upstream branch)
 
-    # Get the current branch name (not so useful in itself, but used in other
-    # aliases).
+    # Get the current branch name.
     current-branch = name-rev --name-only HEAD
+    # XXX current-branch = "!f() { git name-rev --name-only HEAD | tr '/' '-'; }; f"
     # XXX Does not work correctly with tags (returns 'tags/2019.04.25~3')
 
     # v2.22+
