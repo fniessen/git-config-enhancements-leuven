@@ -2844,10 +2844,10 @@ List commits *showing changed files* (prettier and more concise version of
 *** Show the history of a file
 
 *List of commits* that modified the *specified file* (will follow renames and
-copies!):
+copies, and shows the merge commits!):
 
 #+begin_src conf
-    file-history = log --follow --date-order --date=short -C --
+    file-history = log --follow --date-order --date=short -C -c --
 #+end_src
 
 #+begin_warning
