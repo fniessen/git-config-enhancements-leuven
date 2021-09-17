@@ -2847,7 +2847,7 @@ List commits *showing changed files* (prettier and more concise version of
 copies, and shows the merge commits!):
 
 #+begin_src conf
-    file-history = log --follow --date-order --date=short -C -c --
+    file-history = log --follow --date-order --date=short -C -m --
 #+end_src
 
 #+begin_warning
@@ -2866,7 +2866,7 @@ Find the *most recent commit* (chronologically) that modified a file -- looking 
 all known commits:
 
 #+begin_src conf
-    file-last-modified = log -n 1 --follow --all --date-order --date=short -C --
+    file-last-modified = log -n 1 --follow --all --date-order --date=short -C -m --
 #+end_src
 
 *** Inspect the commits for each edit
