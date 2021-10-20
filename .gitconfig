@@ -802,11 +802,11 @@ deploy-prod =
     # # Show the last N commits on the current branch.
     # last = !git log --name-status -${1:-1}
 
-    file-history = log --follow --date-order --date=short -C -m --
+    file-history = log --follow --date-order --date=short -C
 
     related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 
-    file-last-modified = log -n 1 --follow --all --date-order --date=short -C -m --
+    file-last-modified = log -n 1 --follow --all --date-order --date=short -C
 
     praise = blame -w
     archeology = blame -w -C -n

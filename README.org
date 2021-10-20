@@ -858,9 +858,10 @@ It can also recover *deleted files* -- if the deletion has not been committed.
 #+end_src
 
 #+begin_note
-The two dashes there (canonically called the "bare double dashes") ensure that
-the checkout command know that we are trying to roll back a file and not /change
-branches/ (the typical usage of the checkout command).
+The two dashes there (~--~, canonically called the "bare double dashes" or the /end
+of options/ character) ensure that the checkout command know that we are trying
+to roll back a file and not /change branches/ (the typical usage of the checkout
+command).
 #+end_note
 
 When you grab a file from a previous time, it sits *in your index*, modified.
@@ -2847,12 +2848,12 @@ List commits *showing changed files* (prettier and more concise version of
 copies, and shows the merge commits!):
 
 #+begin_src conf
-    file-history = log --follow --date-order --date=short -C -m --
+    file-history = log --follow --date-order --date=short -C
 #+end_src
 
-#+begin_warning
-Put a /end of options/ character (~--~) after ~file-history~ and before the path!!
-#+end_warning
+#+begin_tip
+Add ~-m~ to show merge commits.
+#+end_tip
 
 #+begin_src conf :tangle no
 curl 'https://api.bitbucket.org/2.0/repositories/mcpflow/pflow/filehistory/master/CHANGELOG.org'
@@ -2866,7 +2867,7 @@ Find the *most recent commit* (chronologically) that modified a file -- looking 
 all known commits:
 
 #+begin_src conf
-    file-last-modified = log -n 1 --follow --all --date-order --date=short -C -m --
+    file-last-modified = log -n 1 --follow --all --date-order --date=short -C
 #+end_src
 
 *** Inspect the commits for each edit
