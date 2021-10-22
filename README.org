@@ -710,6 +710,9 @@ Fetch URL: git@bitbucket.org-something:user/slug
 #
 # This method can return incorrect results...
 
+: git branch | grep -o -m1 "\b\(master\|main\)\b"
+See https://stackoverflow.com/questions/65703168/how-to-get-the-default-for-the-master-branch-in-git
+
 #+begin_tip
 The ~sed~ strings contain ~$#~, which will be replaced by the number of arguments to
 the current script/function (generally 0 for an interactive shell).  This is
@@ -1078,6 +1081,56 @@ List all *tags* that contain a specific commit ID:
 #+begin_src conf
     # Find tags containing commit.
     tags-that-contain = "!f() { git tag -l --contains $1 | sort -r; }; f"
+#+end_src
+
+** Check if one commit is an ancestor of another
+
+#+begin_src sh :tangle bin/git-is-ancestor
+#!/usr/bin/env bash
+
+#? git-is-ancestor , Time-stamp: <2021-10-22 Fri 16:15>
+#? Copyright (C) 2021 Fabrice Niessen
+#?
+#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+#? This is free software: you are free to change and redistribute it.
+#? There is NO WARRANTY, to the extent permitted by law.
+
+##? Usage: git-is-ancestor [options] REV1 REV2
+##?
+##? Check if one commit is an ancestor of another.
+##?
+##? Arguments:
+##?   REV1                          revision 1
+##?   REV2                          revision 2
+##?
+##? Options:
+##?   -h, --help                    display this help and exit
+##?   -V, --version                 display version information and exit
+##?
+##? Example:
+##?   git-is-ancestor 71031cec HEAD determine if current branch contains the commit
+
+command -v docopts > /dev/null 2>&1 || { echo >&2 "docopts not found"; exit 2; }
+help=$(grep "^##?" "$0" | cut -c 5-)
+version=$(grep "^#?"  "$0" | cut -c 4-)
+parsed="$(docopts -h "$help" -V "$version" : "$@")"
+eval "$parsed"
+
+if $(git merge-base --is-ancestor $1 $2); then
+    echo "$1 is an ancestor of $2"
+    exit 0
+elif $(git merge-base --is-ancestor $2 $1); then
+    echo "$2 is an ancestor of $1"
+    exit 0
+else
+    echo "$1 and $2 are not related"
+    exit 1
+fi
+#+end_src
+
+#+begin_src conf
+    # Check if one commit is an ancestor of another.
+    is-ancestor = !$HOME/bin/ff
 #+end_src
 
 ** Search for commits
@@ -1671,25 +1724,31 @@ key.
 *Lightweight tags* are just pointers to specific commits.  They *don't include any
 further information*.
 
-If knowing *who* tagged *what* and *when* is relevant for you, then use annotated
-tags. If you *just want to tag a specific point in your development*, no matter
-who and when did that, then lightweight tags are good enough.
+If knowing *who* tagged *what* and *when* is relevant for you, then use /annotated
+tags/. If you *just want to tag a specific point in your development*, no matter
+who and when did that, then /lightweight tags/ are good enough.
 
 #+begin_note
-Annotated tags are meant for *release* while lightweight tags are meant for
+/Annotated tags/ are meant for *release* while /lightweight tags/ are meant for
 private or temporary object labels.
 #+end_note
 
-Create an annotated tag:
+Create an /annotated tag/:
 
 #+begin_src shell :tangle no
 git tag -a TAG_NAME -m 'TAG_MESSAGE'
 #+end_src
 
-Create a lightweight tag (/no message!/):
+Create a /lightweight tag/ (/no message!/):
 
 #+begin_src shell :tangle no
 git tag TAG_NAME
+#+end_src
+
+Create a date/time tag with a suffix, e.g: 2021.01.12_15.25_PREVIOUS:
+
+#+begin_src conf
+    tag-with-date = !sh -c 'git tag $(date "+%Y.%m.%d_%H.%M")_"$0"'
 #+end_src
 
 ** See the commits for a tag
@@ -1716,6 +1775,20 @@ List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
 #+begin_src conf
     # Show verbose output about tags.
     tags = tag -l --sort=v:refname -n 1
+#+end_src
+
+#+begin_src conf
+    show-tag-by-date = log --tags --simplify-by-decoration --pretty="format:%ai %d"
+
+    show-tags = show-ref --tags
+
+    push-tags = push --tags
+
+    # Pushes given tag to remote 'origin' repo (or the remote passed as the second parameter)
+    publish-tag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
+
+    # Removes given tag from remote 'origin' repo (or the remote passed as the second parameter)
+    unpublish-tag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
 #+end_src
 
 #+begin_src shell :tangle no
@@ -2579,17 +2652,9 @@ clean and relevant commits, no experiments or fixing typos.
     # get remote branches
     trackallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git branch --track $BRANCHNAME; done"
     updateallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git checkout $BRANCHNAME ; git pull; done"
+#+end_src
 
-#TAGS
-
-    showtags = show-ref --tags
-    pushtags = push --tags
-    tagwithdate = !sh -c 'git tag "$0"_$(date "+%y-%m-%d_%H-%M-%S")'
-    # Pushes given tag to remote 'origin' repo (or the remote passed as the second parameter)
-    publishtag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
-    # Removes given tag from remote 'origin' repo (or the remote passed as the second parameter)
-    unpublishtag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
-
+#+begin_src conf
 #IGNORING
 
     # fix .gitignore

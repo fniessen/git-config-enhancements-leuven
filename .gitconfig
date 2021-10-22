@@ -277,6 +277,9 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Find tags containing commit.
     tags-that-contain = "!f() { git tag -l --contains $1 | sort -r; }; f"
 
+    # Check if one commit is an ancestor of another.
+    is-ancestor = !$HOME/bin/ff
+
     findc1 = "log --decorate -i --all --date=short --grep"
     findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
 
@@ -403,8 +406,22 @@ bclean = "!f() { DEFAULT=$(git default); \
                                 && git push --set-upstream $(git origin) $2 \
                                 && git delete-remote-branch $1; }; f"
 
+    tag-with-date = !sh -c 'git tag $(date "+%Y.%m.%d_%H.%M")_"$0"'
+
     # Show verbose output about tags.
     tags = tag -l --sort=v:refname -n 1
+
+    show-tag-by-date = log --tags --simplify-by-decoration --pretty="format:%ai %d"
+
+    show-tags = show-ref --tags
+
+    push-tags = push --tags
+
+    # Pushes given tag to remote 'origin' repo (or the remote passed as the second parameter)
+    publish-tag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
+
+    # Removes given tag from remote 'origin' repo (or the remote passed as the second parameter)
+    unpublish-tag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
 
     last-tag = describe --tags --abbrev=0
     checkout-last-tag = !sh -c 'git checkout $(git last-tag)'
@@ -660,16 +677,6 @@ deploy-prod =
     # get remote branches
     trackallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git branch --track $BRANCHNAME; done"
     updateallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git checkout $BRANCHNAME ; git pull; done"
-
-#TAGS
-
-    showtags = show-ref --tags
-    pushtags = push --tags
-    tagwithdate = !sh -c 'git tag "$0"_$(date "+%y-%m-%d_%H-%M-%S")'
-    # Pushes given tag to remote 'origin' repo (or the remote passed as the second parameter)
-    publishtag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
-    # Removes given tag from remote 'origin' repo (or the remote passed as the second parameter)
-    unpublishtag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
 
 #IGNORING
 
