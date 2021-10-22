@@ -278,7 +278,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     tags-that-contain = "!f() { git tag -l --contains $1 | sort -r; }; f"
 
     # Check if one commit is an ancestor of another.
-    is-ancestor = !$HOME/bin/ff
+    is-ancestor = !$HOME/bin/git-is-ancestor
 
     findc1 = "log --decorate -i --all --date=short --grep"
     findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"

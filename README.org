@@ -1130,7 +1130,7 @@ fi
 
 #+begin_src conf
     # Check if one commit is an ancestor of another.
-    is-ancestor = !$HOME/bin/ff
+    is-ancestor = !$HOME/bin/git-is-ancestor
 #+end_src
 
 ** Search for commits
