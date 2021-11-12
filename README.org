@@ -986,14 +986,14 @@ This is a handy table for labels [[https://github.com/angular/angular/blob/maste
 
 ** Get a commit detail
 
-List all the changed files *in a commit*:
+List all the changed files *in a commit* (also in a /merge commit/):
 
 #+begin_src conf
     # Usage: git changed-files [COMMIT]
     # Examples:
     #   git changed-files             list files modified in last commit
     #   git changed-files bada55      list files modified in this commit
-    changed-files = show --pretty="format:" --name-only
+    changed-files = show --pretty="format:" --name-only -m
 #+end_src
 
 ** Get the diff of a commit
@@ -2911,14 +2911,15 @@ List commits *showing changed files* (prettier and more concise version of
 *** Show the history of a file
 
 *List of commits* that modified the *specified file* (will follow renames and
-copies, and shows the merge commits!):
+copies):
 
 #+begin_src conf
     file-history = log --follow --date-order --date=short -C
 #+end_src
 
 #+begin_tip
-Add ~-m~ to show merge commits.
+Add ~-m~ to show merge commits.  And add ~--all~ to show commits of /all your
+branches/, not just from the current branch.
 #+end_tip
 
 #+begin_src conf :tangle no

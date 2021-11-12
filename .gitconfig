@@ -245,7 +245,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Examples:
     #   git changed-files             list files modified in last commit
     #   git changed-files bada55      list files modified in this commit
-    changed-files = show --pretty="format:" --name-only
+    changed-files = show --pretty="format:" --name-only -m
 
     download-email-patch = XXX git format-patch $(git current-branch).patch
     download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
