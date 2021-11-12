@@ -677,9 +677,11 @@ Or, if you want to use RSA:
 *Private* or *public* repository?
 
 #+begin_src conf :tangle no
-    create-repository-gh = "!f() { REPO_OWNER=$1; REPO_SLUG=$2; \
-        curl -u \"$1\" \
-            https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; }; f"
+    create-repository-gh = "!f() { \
+            REPO_OWNER=$1; \
+            REPO_SLUG=$2; \
+            curl -u \"$1\" https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; \
+        }; f"
 #+end_src
 
 Fetch URL: git@bitbucket.org-something:user/slug
@@ -688,17 +690,21 @@ Fetch URL: git@bitbucket.org-something:user/slug
     # origin = !echo "${$(git config clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
 
-    repo-owner = "!f() { git remote show $(git origin) -n \
-                             | grep 'Fetch URL:' \
-                             | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
-                             | sed 's#.git$##'; }; f"
+    repo-owner = "!f() { \
+            git remote show $(git origin) -n \
+                | grep 'Fetch URL:' \
+                | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
+                | sed 's#.git$##'; \
+        }; f"
 #+end_src
 
 #+begin_src conf
-    repo-slug = "!f() { git remote show $(git origin) -n \
-                            | grep 'Fetch URL:' \
-                            | sed -E 's#^.*/(.*)$#\\1#' \
-                            | sed 's#.git$##'; }; f"
+    repo-slug = "!f() { \
+            git remote show $(git origin) -n \
+                | grep 'Fetch URL:' \
+                | sed -E 's#^.*/(.*)$#\\1#' \
+                | sed 's#.git$##'; \
+        }; f"
 #+end_src
 
 # Updating git aliases for different *default branch* names (~master~, ~main~, etc.):

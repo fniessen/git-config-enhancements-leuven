@@ -184,15 +184,19 @@
     # origin = !echo "${$(git config clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
 
-    repo-owner = "!f() { git remote show $(git origin) -n \
-                             | grep 'Fetch URL:' \
-                             | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
-                             | sed 's#.git$##'; }; f"
+    repo-owner = "!f() { \
+            git remote show $(git origin) -n \
+                | grep 'Fetch URL:' \
+                | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
+                | sed 's#.git$##'; \
+        }; f"
 
-    repo-slug = "!f() { git remote show $(git origin) -n \
-                            | grep 'Fetch URL:' \
-                            | sed -E 's#^.*/(.*)$#\\1#' \
-                            | sed 's#.git$##'; }; f"
+    repo-slug = "!f() { \
+            git remote show $(git origin) -n \
+                | grep 'Fetch URL:' \
+                | sed -E 's#^.*/(.*)$#\\1#' \
+                | sed 's#.git$##'; \
+        }; f"
 
     # Usage: git search-for-files PATTERN
     # List files matching the pattern.
