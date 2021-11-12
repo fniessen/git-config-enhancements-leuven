@@ -277,6 +277,7 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Find tags containing commit.
     tags-that-contain = "!f() { git tag -l --contains $1 | sort -r; }; f"
 
+    # Usage: git is-ancestor COMMIT_1 COMMIT_2
     # Check if one commit is an ancestor of another.
     is-ancestor = !$HOME/bin/git-is-ancestor
 

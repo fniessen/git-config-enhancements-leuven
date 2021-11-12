@@ -1095,13 +1095,13 @@ List all *tags* that contain a specific commit ID:
 #? This is free software: you are free to change and redistribute it.
 #? There is NO WARRANTY, to the extent permitted by law.
 
-##? Usage: git-is-ancestor [options] REV1 REV2
+##? Usage: git-is-ancestor [options] COMMIT_1 COMMIT_2
 ##?
 ##? Check if one commit is an ancestor of another.
 ##?
 ##? Arguments:
-##?   REV1                          revision 1
-##?   REV2                          revision 2
+##?   COMMIT_1                      commit (or tag) 1
+##?   COMMIT_2                      commit (or tag) 2
 ##?
 ##? Options:
 ##?   -h, --help                    display this help and exit
@@ -1116,19 +1116,20 @@ version=$(grep "^#?"  "$0" | cut -c 4-)
 parsed="$(docopts -h "$help" -V "$version" : "$@")"
 eval "$parsed"
 
-if $(git merge-base --is-ancestor $1 $2); then
-    echo "$1 is an ancestor of $2"
+if $(git merge-base --is-ancestor $COMMIT_1 $COMMIT_2); then
+    echo "$COMMIT_1 is an ancestor of $COMMIT_2"
     exit 0
-elif $(git merge-base --is-ancestor $2 $1); then
-    echo "$2 is an ancestor of $1"
+elif $(git merge-base --is-ancestor $COMMIT_2 $COMMIT_1); then
+    echo "$COMMIT_2 is an ancestor of $COMMIT_1"
     exit 0
 else
-    echo "$1 and $2 are not related"
+    echo "$COMMIT_1 and $COMMIT_2 are not related"
     exit 1
 fi
 #+end_src
 
 #+begin_src conf
+    # Usage: git is-ancestor COMMIT_1 COMMIT_2
     # Check if one commit is an ancestor of another.
     is-ancestor = !$HOME/bin/git-is-ancestor
 #+end_src
