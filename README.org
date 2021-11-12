@@ -746,19 +746,25 @@ You can also create a =.gitignore= file into your repository.
 
 ** Search for files
 
-Search file (by file path) in the current branch.
+Search files (by file path) in the current branch.
 
 #+begin_src conf
-    find-file = !git ls-tree -r --name-only HEAD | grep -i --color=auto
+    # Usage: git search-for-files PATTERN
+    # List files matching the pattern.
+    search-for-files = !git ls-tree -r --name-only HEAD | grep -i --color=auto
+    find-files = !git search-for-files
 #+end_src
 
-Search file in all branches.
+Search files in all branches.
 
 #+begin_src conf
-    find-file-all = "!f() { for BRANCH in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
-                            echo \"$BRANCH:\"; \
-                                git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
-                            done; }; f"
+    search-for-files-all = "!f() { \
+            for BRANCH in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
+                echo \"$(tput bold)$BRANCH:$(tput sgr0)\"; \
+                git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
+            done; \
+        }; f"
+    find-files-all = !git search-for-files-all
 #+end_src
 
 ** Search for code
@@ -772,7 +778,7 @@ https://help.github.com/en/github/searching-for-information-on-github/searching-
 *** Search code for exact matches
 
 #+begin_src conf
-    search-code = "grep -i --line-number --break --heading -C 1"
+    search-for-code = "grep -i --line-number --break --heading -C 1"
 
 # ack = '-c color.grep.linenumber="bold yellow"
 #     -c color.grep.filename="bold green"
@@ -784,13 +790,13 @@ Find all instances of the specified string in code files *with a certain file
 extension*.
 
 #+begin_src conf
-    search-code-in-extension = "XXX"
+    search-for-code-in-extension = "XXX"
 #+end_src
 
 Find all instances of the specified string in code *in the specified path*.
 
 #+begin_src conf
-    search-code-in-path = "XXX"
+    search-for-code-in-path = "XXX"
 #+end_src
 
 *** Pattern in working directory (and its subdirectories)
