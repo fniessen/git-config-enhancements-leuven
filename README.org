@@ -1175,11 +1175,13 @@ function wrapper.  On the contrary, you can't add other options.
 
 #+begin_src conf
     # Search for commits (Filter by commit message).
-    search-commits = "!f() { STR=\"git log --all-match\"; \
-                             for VAR in \"$@\"; do \
-                                 str=\"$STR --grep '$VAR'\"; \
-                             done; \
-                             eval $STR; }; f"
+    search-for-commits = "!f() { \
+            STR=\"git log --all-match\"; \
+            for VAR in \"$@\"; do \
+                str=\"$STR --grep '$VAR'\"; \
+            done; \
+            eval $STR; \
+        }; f"
 #+end_src
 
 #+begin_src conf :tangle no
@@ -1235,8 +1237,11 @@ git show :/^Merge
 *** Search by Author
 
 #+begin_src conf
-    search-author = "log --decorate -i --all --date=short --author"
-    recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
+    # Usage: git search-for-author [PATTERN]
+    # Show the log for an author (or my own user email).
+    search-for-author = "!f() { \
+            git log --decorate -i --no-merges --all --date=short --author=${1-$(git config user.email)}; \
+        }; f"
 #+end_src
 
 *** Search on File Changes
@@ -1286,7 +1291,7 @@ Prettier ~whatchanged~ with full diffs based on text search:
 
 #+begin_src conf
     # Find commits by source code.
-    search-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
+    search-for-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
 # XXX Does not work for strings with spaces in them...
 #+end_src
 
@@ -2834,9 +2839,6 @@ Show changes for a daily standup meeting:
 #+begin_src conf
   # Show log of new commits after you fetched, with stats, excluding merges
   log-fresh = log ORIG_HEAD.. --stat --no-merges
-
-  # Show the log for my own user email
-  log-me = !git log --author=$(git config user.email)
 #+end_src
 
 *** When was this file last updated

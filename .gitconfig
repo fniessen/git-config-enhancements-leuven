@@ -291,24 +291,29 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
 
     # Search for commits (Filter by commit message).
-    search-commits = "!f() { STR=\"git log --all-match\"; \
-                             for VAR in \"$@\"; do \
-                                 str=\"$STR --grep '$VAR'\"; \
-                             done; \
-                             eval $STR; }; f"
+    search-for-commits = "!f() { \
+            STR=\"git log --all-match\"; \
+            for VAR in \"$@\"; do \
+                str=\"$STR --grep '$VAR'\"; \
+            done; \
+            eval $STR; \
+        }; f"
 
     search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
 # XXX Add i, all, date short...
 
     search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
 
-    search-author = "log --decorate -i --all --date=short --author"
-    recap = !git log --all --oneline --no-merges --author=${1-$(git config user.email)}
+    # Usage: git search-for-author [PATTERN]
+    # Show the log for an author (or my own user email).
+    search-for-author = "!f() { \
+            git log --decorate -i --no-merges --all --date=short --author=${1-$(git config user.email)}; \
+        }; f"
 
     whatwhen = log --decorate --date=short -p -S
 
     # Find commits by source code.
-    search-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
+    search-for-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
 # XXX Does not work for strings with spaces in them...
 
     grep4d = !sh -c 'git log -p -S'$1' $2' -
@@ -776,9 +781,6 @@ deploy-prod =
 
   # Show log of new commits after you fetched, with stats, excluding merges
   log-fresh = log ORIG_HEAD.. --stat --no-merges
-
-  # Show the log for my own user email
-  log-me = !git log --author=$(git config user.email)
 
     # When was this file last updated, on each local branch.
     wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
