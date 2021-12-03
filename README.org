@@ -4,12 +4,49 @@
 #+DESCRIPTION: Pretty format for `git log' and different helpful command aliases
 #+KEYWORDS:  git, log, pretty format, alias
 #+LANGUAGE:  en
-#+OPTIONS:   H:4 num:nil toc:2
+#+OPTIONS:   H:4 num:nil toc:nil
 
 #+SETUPFILE: ~/org/theme-readtheorg.setup
 
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+PROPERTY:  header-args :tangle .gitconfig :eval no
+
+* Table of Contents                                                   :TOC_1_gh:
+- [[#foreword][Foreword]]
+- [[#overview][Overview]]
+- [[#global-options][Global options]]
+- [[#------------------------------------------------------------------------------][------------------------------------------------------------------------------]]
+- [[#aliases][Aliases]]
+- [[#repository][Repository]]
+- [[#instructions][Instructions]]
+- [[#source-files][Source Files]]
+- [[#commits][Commits]]
+- [[#branches][Branches]]
+- [[#tags][Tags]]
+- [[#compare-revisions-commits-branches-or-tags][Compare Revisions (commits, branches or tags)]]
+- [[#releases][?Releases]]
+- [[#graph][?Graph]]
+- [[#contributors][?Contributors]]
+- [[#pull-requests][Pull requests]]
+- [[#pipelines][Pipelines]]
+- [[#deployments-to-different-environments][Deployments (to different environments)]]
+- [[#issues][Issues]]
+- [[#wiki][Wiki]]
+- [[#downloads][Downloads]]
+- [[#settings][Settings]]
+- [[#-------------------------------------------------------------------------------1][------------------------------------------------------------------------------]]
+- [[#run-on-all-repositories][Run on All repositories]]
+- [[#sort-out][Sort out]]
+- [[#download-repository][Download repository]]
+- [[#what-if][What if]]
+- [[#if-you-made-a-mistake][If you made a mistake]]
+- [[#if-you-get-errors][If you get errors...]]
+- [[#github-tasks][GitHub tasks]]
+- [[#references][References]]
+- [[#git-clients][Git clients]]
+- [[#use-git-and-svn-together][Use Git and SVN together]]
+- [[#contributing][Contributing]]
+- [[#license][License]]
 
 * Foreword
 
@@ -160,10 +197,18 @@ Performance:
 #+begin_src conf
     # Do filesystem operations in parallel to hide latency (default since v2.1).
     preloadindex = true
+#+end_src
 
-    # Fix UAC issues so you don't need to run Git as administrator (default since v2.8).
+*Enable file system caching.*  File system data will be read in bulk and cached in
+memory for certain operations.  This provides a significant performance boost.
+
+#+begin_src conf
+    # Enable file system caching.  Also, fix UAC issues so you don't need to run
+    # Git as administrator (default since v2.8).
     fscache = true
+#+end_src
 
+#+begin_src conf
 [gc]
     # Minimize the number of files in .git/.
     auto = 256
@@ -541,7 +586,11 @@ The first color given is the foreground; the second is the background.", e.g
 
 ** Repository administration
 
-If unable to clone Git repository due to *self-signed certificate*...
+The error (when cloning, pulling or pushing)
+
+: SSL certificate problem: Unable to get local issuer certificate
+
+occurs when a *self-signed certificate cannot be verified*.
 
 - For a one-time fix, you can use the ~env~ command to create an environment
   variable of ~GIT_SSL_NO_VERIFY=TRUE~:
@@ -558,8 +607,10 @@ If unable to clone Git repository due to *self-signed certificate*...
       sslVerify = false
   #+end_src
 
-  Please be advised disabling SSL verification globally *might be considered
-  a security risk* and should be implemented only temporary.
+#+begin_warning
+Please be advised disabling SSL verification globally *might be considered
+a security risk* and should be implemented only temporary.
+#+end_warning
 
 ** Format
 
@@ -582,16 +633,14 @@ See
 
 * Aliases
 
-#+begin_src conf
-[alias]
-#+end_src
-
 If you forget your aliases and don't want to open =.gitconfig= just to check, type
 ~git alias~.
 
 #+begin_src conf
+[alias]
+
     # Usage: git alias
-    # Print the current list of Git aliases.
+    # Print the list of Git aliases.
     alias = "!git config -l | grep alias | cut -c 7- | sort | sed 's/=/ = /'"
 #+end_src
 
@@ -758,6 +807,7 @@ Search files (by file path) in the current branch.
     # Usage: git search-for-files PATTERN
     # List files matching the pattern.
     search-for-files = !git ls-tree -r --name-only HEAD | grep -i --color=auto
+
     find-files = !git search-for-files
 #+end_src
 
