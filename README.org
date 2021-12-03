@@ -223,7 +223,13 @@ memory for certain operations.  This provides a significant performance boost.
 
 ** Log
 
-Get a better date (current format is 2019-11-26 17:35:30 +0100):
+Get a better date format; for example:
+
+: 2021-12-03 14:26:38 +0100
+
+instead of:
+
+: Fri Dec 3 14:26:38 2021 +0100
 
 #+begin_src conf
 [log]
@@ -878,8 +884,11 @@ git grep "foo" -- '*.java'
 More readable output, *with grouping* (like Ripgrep, ~rg~, or ~ack~):
 
 #+begin_src conf
-# In all commits, not in all branches!!! Lots of duplicates!!!
-grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
+    # In all commits, not in all branches!!! Lots of duplicates!!!
+    grep-all = "!f() { \
+            git rev-list --all \
+                | xargs git grep $1; \
+        }; f"
 #+end_src
 
 Broader search (*case-sensitive*), output *without grouping*:
@@ -1019,8 +1028,6 @@ support.
 #+begin_src conf
 [commit]
     template = ~/.git_commit_template.txt
-
-[alias]
 #+end_src
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
@@ -1039,6 +1046,8 @@ This is a handy table for labels [[https://github.com/angular/angular/blob/maste
 ** Get a commit hash
 
 #+begin_src conf
+[alias]
+
     # Usage: git commit-hash [COMMIT_ISH]
     # Examples:
     #   git commit-hash               find hash of last commit
@@ -1071,8 +1080,10 @@ Use a generic rev syntax (rev-parse) to transparently allow complex rev
 expressions.
 
 #+begin_src conf
-    showtool = "!f() { REV=$(git rev-parse \"${*:-HEAD}\"); \
-                       git difftool $REV~1 $REV; }; f"
+    showtool = "!f() { \
+            REV=$(git rev-parse \"${*:-HEAD}\"); \
+            git difftool $REV~1 $REV; \
+        }; f"
 #+end_src
 
 This allows doing nice things like:
@@ -1121,8 +1132,10 @@ List all the *branches and tags* that contain a specific commit.
     # Usage: git where REV
     # Print only refs which contain the commit.
     where = for-each-ref --format='%(refname)' --contains
-    where2 = "!f() { git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
-                         | sort -r; }; f"
+    where2 = "!f() { \
+            git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
+                | sort -r; \
+        }; f"
 #+end_src
 
 XXX See also git-ls-object-refs
@@ -1142,7 +1155,10 @@ List all *tags* that contain a specific commit ID:
 
 #+begin_src conf
     # Find tags containing commit.
-    tags-that-contain = "!f() { git tag -l --contains $1 | sort -r; }; f"
+    tags-that-contain = "!f() { \
+            git tag -l --contains $1 \
+                | sort -r; \
+        }; f"
 #+end_src
 
 ** Check if one commit is an ancestor of another
@@ -1221,7 +1237,9 @@ expression), use ~find~.
 
 #+begin_src conf
     findc1 = "log --decorate -i --all --date=short --grep"
-    findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
+    findc2 = "!f() { \
+            git log --decorate --grep=$1 -i --all --date=short; \
+        }; f"
 #+end_src
 
 #+begin_tip
@@ -1250,7 +1268,11 @@ Here's the alias which simply loops over each argument and calls ~git
 log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
 
 #+begin_src conf
-    search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
+    search = "!f() { \
+            for l in \"$@\"; do \
+                git log --grep \"$l\"; \
+            done; \
+        }; f"
 # XXX Add i, all, date short...
 #+end_src
 
@@ -1260,7 +1282,9 @@ You may want to add history to search through the whole repository, by adding
 rev-list to your git log:
 
 #+begin_src conf
-    search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
+    search2 = "!f() { \
+            git log --grep \"$1\" $(git rev-list --all); \
+        }; f"
 #+end_src
 
 Add ~--name-status~ to show only names and status of *changed files*.
@@ -1347,7 +1371,9 @@ Prettier ~whatchanged~ with full diffs based on text search:
 
 #+begin_src conf
     # Find commits by source code.
-    search-for-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
+    search-for-commits-contents = "!f() { \
+            git log --decorate --date=short -S $1; \
+        }; f"
 # XXX Does not work for strings with spaces in them...
 #+end_src
 
@@ -1381,8 +1407,10 @@ Assuming that your branch was created off of ~develop~, then /while in the branc
 ** Open a repository in a web browser
 
 #+begin_src conf
-    browse-commits = "!f() { URL=$(git config --get remote.$(git origin).url); \
-                             cygstart ${URL/.git}/commits; }; f"
+    browse-commits = "!f() { \
+            URL=$(git config --get remote.$(git origin).url); \
+            cygstart ${URL/.git}/commits; \
+        }; f"
 #+end_src
 
 For Cygwin:
@@ -1511,7 +1539,10 @@ Name of current branch (not so useful in itself, but used in other aliases):
     current-branch = branch --show-current
     # Does work correctly with tags, but not in detached state.
 
-    current-branch-without-slash = "!f() { git current-branch | tr '/' '-'; }; f"
+    current-branch-without-slash = "!f() { \
+            git current-branch \
+                | tr '/' '-'; \
+        }; f"
 #+end_src
 
 Then:
@@ -1575,8 +1606,14 @@ git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yell
 List branches that are *not merged*.
 
 #+begin_src conf
-    br-active = "!f() { git branch --no-merged | grep -v '\\*'; }; f"
-    branches-active = "!f() { git branch -a -vv --no-merged | grep -v '\\*'; }; f"
+    br-active = "!f() { \
+            git branch --no-merged \
+                | grep -v '\\*'; \
+        }; f"
+    branches-active = "!f() { \
+            git branch -a -vv --no-merged \
+                | grep -v '\\*'; \
+        }; f"
 #+end_src
 
 *** Show merged branches
@@ -1585,8 +1622,14 @@ List branches whose tips are reachable from the specified commit (~HEAD~ if not
 specified).
 
 #+begin_src conf
-    br-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
-    branches-merged = "!f() { git branch -a -vv --merged | grep -v '\\*'; }; f"
+    br-merged = "!f() { \
+            git branch --merged \
+                | grep -v '\\*'; \
+        }; f"
+    branches-merged = "!f() { \
+            git branch -a -vv --merged \
+                | grep -v '\\*'; \
+        }; f"
 #+end_src
 
 *** Show stale branches
@@ -1635,10 +1678,12 @@ been *merged to the current branch* that you are in.
 XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
 
 #+begin_src conf
-bclean = "!f() { DEFAULT=$(git default); \
-                 git branch --merged ${1-$DEFAULT} \
-                     | grep -v " ${1-$DEFAULT}$" \
-                     | xargs git branch -d; }; f"
+bclean = "!f() { \
+        DEFAULT=$(git default); \
+        git branch --merged ${1-$DEFAULT} \
+            | grep -v " ${1-$DEFAULT}$" \
+            | xargs git branch -d; \
+    }; f"
 #+end_src
 
 It deletes every branch that's been merged into the specified branch except the
@@ -1646,9 +1691,12 @@ branch.
 
 #+begin_src conf
     # Delete fully merged branches.
-    delete-local-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' \
-                                               | egrep -v \"(master|main|develop)\" \
-                                               | xargs -n 1 git delete-local-branch; }; f"
+    delete-local-merged-branches = "!f() { \
+            git branch --no-color --merged \
+                | grep -v '\\*' \
+                | egrep -v \"(master|main|develop)\" \
+                | xargs -n 1 git delete-local-branch; \
+        }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
@@ -1694,8 +1742,10 @@ Delete a *remote* branch:
 *** Delete a branch locally and on the ~origin~ remote
 
 #+begin_src conf
-    delete-branch = "!f() { git delete-local-branch $1 \
-                                && git delete-remote-branch $1; }; f"
+    delete-branch = "!f() { \
+            git delete-local-branch $1 \
+                && git delete-remote-branch $1; \
+        }; f"
 #+end_src
 
 *** Delete all orphaned branches (that no longer exist at remote)
@@ -1734,9 +1784,12 @@ remote* one (by deleting the local ones that show they are "gone" in ~git
 branch -vv~):
 
 #+begin_src conf
-    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
-                                   awk '{print $1}' | \
-                                   xargs git delete-local-branch; }; f"
+    prune-local-branches = "!f() { \
+            git branch -vv \
+                | grep ': gone]' \
+                | awk '{print $1}' \
+                | xargs git delete-local-branch; \
+        }; f"
 #+end_src
 
 ** Rename a branch
@@ -1769,9 +1822,11 @@ To rename a branch *locally and remotely*:
 #+begin_src conf
     # Usage: git rename-branch BRANCH_OLD BRANCH_NEW
     # Rename both a local and remote branch.
-    rename-branch = "!f() { git rename-local-branch $1 $2 \
-                                && git push --set-upstream $(git origin) $2 \
-                                && git delete-remote-branch $1; }; f"
+    rename-branch = "!f() { \
+            git rename-local-branch $1 $2 \
+                && git push --set-upstream $(git origin) $2 \
+                && git delete-remote-branch $1; \
+        }; f"
 #+end_src
 
 * Tags
@@ -1887,11 +1942,12 @@ Show latest annotated tag /in all branches/:
 
 #+begin_src conf
     # Rename a tag (locally and remotely).
-    rename-tag = "!f() { git tag $2 $1; \
-                         git tag -d $1; \
-                         git push $(git origin) $2; \
-                         git push $(git origin) :refs/tags/$1; \
-                       }; f"
+    rename-tag = "!f() { \
+            git tag $2 $1; \
+            git tag -d $1; \
+            git push $(git origin) $2; \
+            git push $(git origin) :refs/tags/$1; \
+        }; f"
 #+end_src
 
 ** Remove a tag from a repository
@@ -1902,24 +1958,26 @@ Delete similar tags:
 
 #+begin_src conf
     # Delete local and remote tags.
-    delete-tag = "!f() { [ -z $1 ] \
-                         && echo \"No tags given as an argument!\" \
-                         || (git tag -l $1 | \
-                             xargs -I % echo \"git tag -d % \
-                                            && git push --delete $(git origin) %\" | \
-                             sh); \
-                       }; f"
+    delete-tag = "!f() { \
+            [ -z $1 ] \
+                && echo \"No tags given as an argument!\" \
+                || (git tag -l $1 | \
+                    xargs -I % echo \"git tag -d % \
+                                   && git push --delete $(git origin) %\" | \
+                    sh); \
+        }; f"
 #+end_src
 
 ** Remove all tags
 
 #+begin_src conf :tangle no
     # Delete all local and remote tags.
-    delete-all-tags = "!f() { for TAG in $(git tag); do
-                                  git tag -d $TAG
-                                  git push $(git origin) :$TAG
-                              done;
-                            }; f"
+    delete-all-tags = "!f() { \
+            for TAG in $(git tag); do
+                git tag -d $TAG
+                git push $(git origin) :$TAG
+            done;
+        }; f"
 #+end_src
 
 * Compare Revisions (commits, branches or tags)
@@ -1944,7 +2002,9 @@ You can see:
 
 #+begin_src conf
     # Usage: git compare-commits <rev-base> <rev-compare>
-    compare-commits = "!f() { git log --date=short $1...$2; }; f"
+    compare-commits = "!f() { \
+            git log --date=short $1...$2; \
+        }; f"
 #+end_src
 
 ** Files changed
@@ -1955,7 +2015,9 @@ List all the changed *files between 2 commits*:
     # Usage: git compare-changed-files REV_BASE REV_COMPARE
     # Show changed files (with stat about line additions and line deletions)
     # between two commits.
-    compare-changed-files = "!f() { git diff --stat $1...$2; }; f"
+    compare-changed-files = "!f() { \
+            git diff --stat $1...$2; \
+        }; f"
 #+end_src
 
 ** Diff
@@ -1968,7 +2030,9 @@ View all diffs.
     # Usage: git compare REV_BASE REV_COMPARE
     #      = git diff REV_BASE...REV_COMPARE
     # Example: git compare master@{1day} master
-    compare = "!f() { git diff $1...$2; }; f"
+    compare = "!f() { \
+            git diff $1...$2; \
+        }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
   #+end_src
 
@@ -1999,7 +2063,9 @@ If either side is ~HEAD~, it may be omitted (e.g. ~master..~ compares ~master~ t
 #+end_src
 
 #+begin_src conf
-    show-branch-history = "!f() { git log HEAD --not master; }; f"
+    show-branch-history = "!f() { \
+            git log HEAD --not master; \
+        }; f"
 # XXX We should get the name of the branch merge base
 #+end_src
 
@@ -2027,8 +2093,10 @@ branch*:
     # Show changed files since master.
     # Examples:
     #   git missing-master            list changed files for the current branch
-    #   git missing-master feature/7  list changed files for the feature/7 branch
-    missing-master = "!f() { git diff --stat master...$1; }; f"
+    #   git missing-master feature/7  list changed files for the 'feature/7' branch
+    missing-master = "!f() { \
+            git diff --stat master...$1; \
+        }; f"
 #+end_src
 
 See the added / copied / deleted / modified / renamed files in a branch:
@@ -2096,9 +2164,11 @@ It's common practice to prefix your version names with the letter ~v~.
 Tag and push changes to the repository:
 
 #+begin_src conf
-    release = "!f() { git tag -a v$1 -m \"Release version $1\" \
-                          && git push $(git origin) --tags \
-                          && git push $(git origin); }; f"
+    release = "!f() { \
+            git tag -a v$1 -m \"Release version $1\" \
+                && git push $(git origin) --tags \
+                && git push $(git origin); \
+        }; f"
 #+end_src
 
 * ?Graph

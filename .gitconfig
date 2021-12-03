@@ -25,7 +25,8 @@
     # Do filesystem operations in parallel to hide latency (default since v2.1).
     preloadindex = true
 
-    # Fix UAC issues so you don't need to run Git as administrator (default since v2.8).
+    # Enable file system caching.  Also, fix UAC issues so you don't need to run
+    # Git as administrator (default since v2.8).
     fscache = true
 
 [gc]
@@ -163,7 +164,7 @@
 [alias]
 
     # Usage: git alias
-    # Print the current list of Git aliases.
+    # Print the list of Git aliases.
     alias = "!git config -l | grep alias | cut -c 7- | sort | sed 's/=/ = /'"
 
     workprofile = config user.email \"john@work.com\"
@@ -201,14 +202,16 @@
     # Usage: git search-for-files PATTERN
     # List files matching the pattern.
     search-for-files = !git ls-tree -r --name-only HEAD | grep -i --color=auto
+
     find-files = !git search-for-files
 
     search-for-files-all = "!f() { \
             for BRANCH in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
-                echo \"$(tput bold)$BRANCH:$(tput sgr0)\"; \
+                printf \"\n$(tput bold)$BRANCH:$(tput sgr0)\n\"; \
                 git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
             done; \
         }; f"
+
     find-files-all = !git search-for-files-all
 
     search-for-code = "grep -i --line-number --break --heading -C 1"
@@ -222,8 +225,11 @@
 
     search-for-code-in-path = "XXX"
 
-# In all commits, not in all branches!!! Lots of duplicates!!!
-grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
+    # In all commits, not in all branches!!! Lots of duplicates!!!
+    grep-all = "!f() { \
+            git rev-list --all \
+                | xargs git grep $1; \
+        }; f"
 
     # `-I' = Don't match the pattern in binary files.
     g = "grep -I"
@@ -260,8 +266,10 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     download-email-patch = XXX git format-patch $(git current-branch).patch
     download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
 
-    showtool = "!f() { REV=$(git rev-parse \"${*:-HEAD}\"); \
-                       git difftool $REV~1 $REV; }; f"
+    showtool = "!f() { \
+            REV=$(git rev-parse \"${*:-HEAD}\"); \
+            git difftool $REV~1 $REV; \
+        }; f"
 
     diff-file-last-commit = "!f() { \
             PROJECT_ROOT_DIR=$(git root); \
@@ -278,21 +286,28 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Usage: git where REV
     # Print only refs which contain the commit.
     where = for-each-ref --format='%(refname)' --contains
-    where2 = "!f() { git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
-                         | sort -r; }; f"
+    where2 = "!f() { \
+            git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
+                | sort -r; \
+        }; f"
 
     # Find branches containing commit.
     branches-that-contain = branch -a --contains
 
     # Find tags containing commit.
-    tags-that-contain = "!f() { git tag -l --contains $1 | sort -r; }; f"
+    tags-that-contain = "!f() { \
+            git tag -l --contains $1 \
+                | sort -r; \
+        }; f"
 
     # Usage: git is-ancestor COMMIT_1 COMMIT_2
     # Check if one commit is an ancestor of another.
     is-ancestor = !$HOME/bin/git-is-ancestor
 
     findc1 = "log --decorate -i --all --date=short --grep"
-    findc2 = "!f() { git log --decorate --grep=$1 -i --all --date=short; }; f"
+    findc2 = "!f() { \
+            git log --decorate --grep=$1 -i --all --date=short; \
+        }; f"
 
     # Search for commits (Filter by commit message).
     search-for-commits = "!f() { \
@@ -303,10 +318,16 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
             eval $STR; \
         }; f"
 
-    search = "!f() { for l in \"$@\"; do git log --grep \"$l\"; done; }; f"
+    search = "!f() { \
+            for l in \"$@\"; do \
+                git log --grep \"$l\"; \
+            done; \
+        }; f"
 # XXX Add i, all, date short...
 
-    search2 = "!f() { git log --grep \"$1\" $(git rev-list --all); }; f"
+    search2 = "!f() { \
+            git log --grep \"$1\" $(git rev-list --all); \
+        }; f"
 
     # Usage: git search-for-author [PATTERN]
     # Show the log for an author (or my own user email).
@@ -317,14 +338,18 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     whatwhen = log --decorate --date=short -p -S
 
     # Find commits by source code.
-    search-for-commits-contents = "!f() { git log --decorate --date=short -S $1; }; f"
+    search-for-commits-contents = "!f() { \
+            git log --decorate --date=short -S $1; \
+        }; f"
 # XXX Does not work for strings with spaces in them...
 
     grep4d = !sh -c 'git log -p -S'$1' $2' -
 # Not the best example, but: git grep4d CLOSED '*.java'
 
-    browse-commits = "!f() { URL=$(git config --get remote.$(git origin).url); \
-                             cygstart ${URL/.git}/commits; }; f"
+    browse-commits = "!f() { \
+            URL=$(git config --get remote.$(git origin).url); \
+            cygstart ${URL/.git}/commits; \
+        }; f"
 
     create-branch = checkout -b
 
@@ -342,7 +367,10 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     current-branch = branch --show-current
     # Does work correctly with tags, but not in detached state.
 
-    current-branch-without-slash = "!f() { git current-branch | tr '/' '-'; }; f"
+    current-branch-without-slash = "!f() { \
+            git current-branch \
+                | tr '/' '-'; \
+        }; f"
 
     # Show local and remote branches.
     branches = branch -a -vv
@@ -365,11 +393,23 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
                        --sort=-committerdate \
                        --format='%(committerdate:short) %(refname:short)'
 
-    br-active = "!f() { git branch --no-merged | grep -v '\\*'; }; f"
-    branches-active = "!f() { git branch -a -vv --no-merged | grep -v '\\*'; }; f"
+    br-active = "!f() { \
+            git branch --no-merged \
+                | grep -v '\\*'; \
+        }; f"
+    branches-active = "!f() { \
+            git branch -a -vv --no-merged \
+                | grep -v '\\*'; \
+        }; f"
 
-    br-merged = "!f() { git branch --merged | grep -v '\\*'; }; f"
-    branches-merged = "!f() { git branch -a -vv --merged | grep -v '\\*'; }; f"
+    br-merged = "!f() { \
+            git branch --merged \
+                | grep -v '\\*'; \
+        }; f"
+    branches-merged = "!f() { \
+            git branch -a -vv --merged \
+                | grep -v '\\*'; \
+        }; f"
 
     master = !git checkout master
     main =  !git checkout main
@@ -378,15 +418,20 @@ grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
     # Politely ask Git to delete a local branch.
     delete-local-branch = branch -d
 
-bclean = "!f() { DEFAULT=$(git default); \
-                 git branch --merged ${1-$DEFAULT} \
-                     | grep -v " ${1-$DEFAULT}$" \
-                     | xargs git branch -d; }; f"
+bclean = "!f() { \
+        DEFAULT=$(git default); \
+        git branch --merged ${1-$DEFAULT} \
+            | grep -v " ${1-$DEFAULT}$" \
+            | xargs git branch -d; \
+    }; f"
 
     # Delete fully merged branches.
-    delete-local-merged-branches = "!f() { git branch --no-color --merged | grep -v '\\*' \
-                                               | egrep -v \"(master|main|develop)\" \
-                                               | xargs -n 1 git delete-local-branch; }; f"
+    delete-local-merged-branches = "!f() { \
+            git branch --no-color --merged \
+                | grep -v '\\*' \
+                | egrep -v \"(master|main|develop)\" \
+                | xargs -n 1 git delete-local-branch; \
+        }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
@@ -401,8 +446,10 @@ bclean = "!f() { DEFAULT=$(git default); \
     # Delete current branch on remote server.
     unpublish = !git delete-remote-branch $(git current-branch)
 
-    delete-branch = "!f() { git delete-local-branch $1 \
-                                && git delete-remote-branch $1; }; f"
+    delete-branch = "!f() { \
+            git delete-local-branch $1 \
+                && git delete-remote-branch $1; \
+        }; f"
 
     # Prune deleted branches from all remotes.
     prune-all = !git remote | xargs -n 1 git remote prune
@@ -410,17 +457,22 @@ bclean = "!f() { DEFAULT=$(git default); \
 
     # There's no way to tell git remote update to prune orphaned branches?
 
-    prune-local-branches = "!f() { git branch -vv | grep ': gone]' | \
-                                   awk '{print $1}' | \
-                                   xargs git delete-local-branch; }; f"
+    prune-local-branches = "!f() { \
+            git branch -vv \
+                | grep ': gone]' \
+                | awk '{print $1}' \
+                | xargs git delete-local-branch; \
+        }; f"
 
     rename-local-branch = branch -m
 
     # Usage: git rename-branch BRANCH_OLD BRANCH_NEW
     # Rename both a local and remote branch.
-    rename-branch = "!f() { git rename-local-branch $1 $2 \
-                                && git push --set-upstream $(git origin) $2 \
-                                && git delete-remote-branch $1; }; f"
+    rename-branch = "!f() { \
+            git rename-local-branch $1 $2 \
+                && git push --set-upstream $(git origin) $2 \
+                && git delete-remote-branch $1; \
+        }; f"
 
     tag-with-date = !sh -c 'git tag $(date "+%Y.%m.%d_%H.%M")_"$0"'
 
@@ -445,33 +497,41 @@ bclean = "!f() { DEFAULT=$(git default); \
     last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
 
     # Rename a tag (locally and remotely).
-    rename-tag = "!f() { git tag $2 $1; \
-                         git tag -d $1; \
-                         git push $(git origin) $2; \
-                         git push $(git origin) :refs/tags/$1; \
-                       }; f"
+    rename-tag = "!f() { \
+            git tag $2 $1; \
+            git tag -d $1; \
+            git push $(git origin) $2; \
+            git push $(git origin) :refs/tags/$1; \
+        }; f"
 
     # Delete local and remote tags.
-    delete-tag = "!f() { [ -z $1 ] \
-                         && echo \"No tags given as an argument!\" \
-                         || (git tag -l $1 | \
-                             xargs -I % echo \"git tag -d % \
-                                            && git push --delete $(git origin) %\" | \
-                             sh); \
-                       }; f"
+    delete-tag = "!f() { \
+            [ -z $1 ] \
+                && echo \"No tags given as an argument!\" \
+                || (git tag -l $1 | \
+                    xargs -I % echo \"git tag -d % \
+                                   && git push --delete $(git origin) %\" | \
+                    sh); \
+        }; f"
 
     # Usage: git compare-commits <rev-base> <rev-compare>
-    compare-commits = "!f() { git log --date=short $1...$2; }; f"
+    compare-commits = "!f() { \
+            git log --date=short $1...$2; \
+        }; f"
 
     # Usage: git compare-changed-files REV_BASE REV_COMPARE
     # Show changed files (with stat about line additions and line deletions)
     # between two commits.
-    compare-changed-files = "!f() { git diff --stat $1...$2; }; f"
+    compare-changed-files = "!f() { \
+            git diff --stat $1...$2; \
+        }; f"
 
     # Usage: git compare REV_BASE REV_COMPARE
     #      = git diff REV_BASE...REV_COMPARE
     # Example: git compare master@{1day} master
-    compare = "!f() { git diff $1...$2; }; f"
+    compare = "!f() { \
+            git diff $1...$2; \
+        }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
     # Show commits that haven't made it to master yet.
@@ -479,23 +539,29 @@ bclean = "!f() { DEFAULT=$(git default); \
 
     log-local = log --oneline $(git origin)..HEAD
 
-    show-branch-history = "!f() { git log HEAD --not master; }; f"
+    show-branch-history = "!f() { \
+            git log HEAD --not master; \
+        }; f"
 # XXX We should get the name of the branch merge base
 
     # Usage: git missing-master [COMMIT_ISH]
     # Show changed files since master.
     # Examples:
     #   git missing-master            list changed files for the current branch
-    #   git missing-master feature/7  list changed files for the feature/7 branch
-    missing-master = "!f() { git diff --stat master...$1; }; f"
+    #   git missing-master feature/7  list changed files for the 'feature/7' branch
+    missing-master = "!f() { \
+            git diff --stat master...$1; \
+        }; f"
 
     log-fetched = log --oneline HEAD..$(git origin)
 
     divergence = !git log --left-right --graph --cherry-pick --oneline $1...$(git origin)/$1
 
-    release = "!f() { git tag -a v$1 -m \"Release version $1\" \
-                          && git push $(git origin) --tags \
-                          && git push $(git origin); }; f"
+    release = "!f() { \
+            git tag -a v$1 -m \"Release version $1\" \
+                && git push $(git origin) --tags \
+                && git push $(git origin); \
+        }; f"
 
     graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
@@ -822,9 +888,19 @@ deploy-prod =
     # # Show the last N commits on the current branch.
     # last = !git log --name-status -${1:-1}
 
-    file-history = log --follow --date-order --date=short -C
+    file-history = git show --oneline -s $(git rev-list HEAD -- 32-factures-creation.R)
+    file-history-f = "!f() { git show --oneline -s $(git rev-list --date-order HEAD -- $1); }; f"
+    file-history-sh = !sh -c 'git show --oneline -s $(git rev-list --date-order HEAD -- $1)'
 
-    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
+    file-history-follow = log --follow --date-order --date=short -C
+
+    related = !sh -c 'git log --follow --format=format:%H $1 \
+                          | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
+                          | sort | uniq -c | sort -b -n -r'
+
+    related-files = git show --name-only $(git rev-list HEAD -- 32-factures-creation.R)
+    related-files-f = "!f() { git show --name-only $(git rev-list HEAD -- $1); }; f"
+    related-files-sh = !sh -c 'git show --name-only $(git rev-list HEAD -- $1)'
 
     file-last-modified = log -n 1 --follow --all --date-order --date=short -C
 
