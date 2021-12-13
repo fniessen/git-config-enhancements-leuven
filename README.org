@@ -822,10 +822,11 @@ Search files in all branches.
 #+begin_src conf
     search-for-files-all = "!f() { \
             for BRANCH in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
-                echo \"$(tput bold)$BRANCH:$(tput sgr0)\"; \
+                printf \"\n$(tput bold)$BRANCH:$(tput sgr0)\n\"; \
                 git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
             done; \
         }; f"
+
     find-files-all = !git search-for-files-all
 #+end_src
 
@@ -927,6 +928,8 @@ It can also recover *deleted files* -- if the deletion has not been committed.
 #+end_tip
 
 #+begin_src conf
+    # Usage: git unmodify TREE_ISH
+    # Undo local changes in the working copy at or within TREE_ISH.
     unmodify = checkout --
     undelete = checkout --
 #+end_src
@@ -2198,10 +2201,12 @@ Directed Acyclic Graph:
 See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
 
 #+begin_src conf
-    graphviz = "!f() { echo 'digraph git {' ; \
-                           git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
-                               | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
-                       echo '}'; }; f"
+    graphviz = "!f() { \
+            echo 'digraph git {' ; \
+            git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
+                | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
+            echo '}'; \
+        }; f"
 #+end_src
 
 * ?Contributors
@@ -2236,9 +2241,10 @@ You need to enter a PR summary.  The description is optional.
 Create a pull request against the default branch:
 
 #+begin_src conf
-    pull-request-bb = "!f() { USERNAME=$1; \
-        curl --user $USERNAME \
-            https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; }; f"
+    pull-request-bb = "!f() { \
+            USERNAME=$1; \
+            curl --user $USERNAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
+        }; f"
 #+end_src
 
 #+begin_src conf :tangle no
@@ -2294,13 +2300,17 @@ branch*:
 
 #+begin_src conf
     # For GitHub.
-    pr-checkout-gh = "!f() { git fetch $(git origin) pull/$1/head:pr/$1 \
-                                 && git checkout pr/$1; }; f"
+    pr-checkout-gh = "!f() { \
+            git fetch $(git origin) pull/$1/head:pr/$1 \
+                && git checkout pr/$1; \
+        }; f"
     # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
 
     # For GitLab.
-    pr-checkout-gl = "!f() { git fetch $(git origin) merge-requests/$1/head:pr/$1 \
-                                 && git checkout pr/$1; }; f"
+    pr-checkout-gl = "!f() { \
+            git fetch $(git origin) merge-requests/$1/head:pr/$1 \
+                && git checkout pr/$1; \
+        }; f"
     # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
 #+end_src
 
@@ -2346,12 +2356,12 @@ If everything is OK, you can merge the pull request.
             declare CURRENTBRANCH=\"$(git current-branch)\"; \
             declare BRANCH=\"${2:-$CURRENTBRANCH}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
-                git fetch $(git origin) refs/pull/$1/head:pr/$1 && \
-                git checkout -B $BRANCH && \
-                git rebase $BRANCH pr/$1 && \
-                git checkout -B $BRANCH && \
-                git merge --ff-only pr/$1 && \
-                git delete-local-branch pr/$1; \
+                git fetch $(git origin) refs/pull/$1/head:pr/$1 \
+                    && git checkout -B $BRANCH \
+                    && git rebase $BRANCH pr/$1 \
+                    && git checkout -B $BRANCH \
+                    && git merge --ff-only pr/$1 \
+                    && git delete-local-branch pr/$1; \
             fi \
         }; f"
 
@@ -2361,14 +2371,14 @@ If everything is OK, you can merge the pull request.
     # Example:
     #   git merge-pr $(git origin) 5
     merge-pr = "!sh -c '\
-        USER_AND_REPO=`git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"`; \
-        USER=`echo $USER_AND_REPO | cut -d\" \" -f1`; \
-        REPO=`echo $USER_AND_REPO | cut -d\" \" -f2`; \
-        TMPFILE=`mktemp`; \
+        USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
+        USER=$(echo $USER_AND_REPO | cut -d\" \" -f1); \
+        REPO=$(echo $USER_AND_REPO | cut -d\" \" -f2); \
+        TMPFILE=$(mktemp); \
         curl -si https://api.github.com/repos/$USER/$REPO/pulls/$2 > $TMPFILE; \
-        PULL_AUTHOR=`cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
-        PULL_REF=`cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"`; \
-        PULL_TITLE=`cat $TMPFILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"`; \
+        PULL_AUTHOR=$(cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
+        PULL_REF=$(cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
+        PULL_TITLE=$(cat $TMPFILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"); \
         rm $TMPFILE; \
         git fetch $1 pull/$2/head; \
         git merge --no-ff -m \"Merged pull request #$2 from $PULL_AUTHOR/$PULL_REF\n\n$PULL_TITLE\" FETCH_HEAD; \
@@ -2404,7 +2414,9 @@ Delete the *from* branch after PR is merged (or ignored -- if it was created
 b accident or if it's irrelevant):
 
 #+begin_src conf
-    pr-clean = "!f() { git delete-local-branch pr/$1; }; f"
+    pr-clean = "!f() { \
+            git delete-local-branch pr/$1; \
+        }; f"
 #+end_src
 
 ** Show in a web browser
@@ -2599,12 +2611,13 @@ See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
 #+end_src
 
 #+begin_src conf :tangle no
-    issues = "!f() { USERNAME=$1; \
-        curl --user $USERNAME \
-            'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
-            | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
-            | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
-            | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; }; f"
+    issues = "!f() { \
+            USERNAME=$1; \
+            curl --user $USERNAME 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
+                | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
+                | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
+                | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; \
+        }; f"
 #+end_src
 
 Set color to red or green, depending on issue state.
@@ -2647,15 +2660,19 @@ Show an existing issue specified by NUMBER.
 ** Open Issues in a web browser
 
 #+begin_src conf
-    browse-issues = "!f() { URL=$(git config --get remote.$(git origin).url); \
-                            cygstart ${URL/.git}/issues/$1; }; f"
+    browse-issues = "!f() { \
+            URL=$(git config --get remote.$(git origin).url); \
+            cygstart ${URL/.git}/issues/$1; \
+        }; f"
 #+end_src
 
 * Wiki
 
 #+begin_src conf
-    browse-wiki = "!f() { URL=$(git config --get remote.$(git origin).url); \
-                          cygstart ${URL/.git}/wiki; }; f"
+    browse-wiki = "!f() { \
+            URL=$(git config --get remote.$(git origin).url); \
+            cygstart ${URL/.git}/wiki; \
+        }; f"
 #+end_src
 
 * Downloads
@@ -2664,8 +2681,9 @@ Download repository, tag or branch.
 
 #+begin_src conf
     # Put everything in the current repo in a Zip archive.
-    download-repository = "!f() { git archive ${1:-HEAD} --format=zip \
-                                      -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; }; f"
+    download-repository = "!f() { \
+            git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; \
+        }; f"
 # XXX Test it with tag or branch.
 #+end_src
 
@@ -2696,13 +2714,19 @@ have uncommitted changes that I need to take care of.
 #+begin_src conf
     all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
 
-    print-reponame-then-run = "!f() { echo "======"; \
-                                      basename `git rev-parse --show-toplevel`; \
-                                      echo "======"; \
-                                      git "$@";}; f"
+    print-reponame-then-run = "!f() { \
+            echo "======"; \
+            basename $(git rev-parse --show-toplevel); \
+            echo "======"; \
+            git "$@"; \
+        }; f"
 
-    # run commands for each repository in the current directory
-    allr = "!f() { ls -R -d */.git | sed s,/.git,, | xargs -I{} git -C {} print-reponame-then-run "$@"; }; f"
+    # Run commands for each repository in the current directory.
+    allr = "!f() { \
+            ls -R -d */.git \
+                | sed s,/.git,, \
+                | xargs -I{} git -C {} print-reponame-then-run "$@"; \
+        }; f"
 #+end_src
 
 See also ~git-repos~:
@@ -2785,7 +2809,7 @@ clean and relevant commits, no experiments or fixing typos.
     whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
 
     # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
-    showorigin = "!sh -c 'for BRANCH in `git branch -r | grep -v HEAD`;do echo `git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1` \\\t$BRANCH; done | sort -r'"
+    showorigin = "!sh -c 'for BRANCH in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1) \\\t$BRANCH; done | sort -r'"
 
     # get remote branches
     trackallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git branch --track $BRANCHNAME; done"
@@ -4112,15 +4136,15 @@ echo 'Now, tell me your repository name: '
 read REPOSITORY
 
 git stash \
-&& git create-branch 'gh-pages' \
-&& echo 'My Page' > index.html \
-&& git add . \
-&& git commit -a -m 'Initial commit' \
-&& git remote add $(git origin) https://github.com/"$USERNAME"/"$REPOSITORY".git \
-&& git push -u $(git origin) gh-pages \
-&& echo 'Complete' \
-&& echo '-------------------' \
-&& echo 'You can find your last changes in the stash!'
+    && git create-branch 'gh-pages' \
+    && echo 'My Page' > index.html \
+    && git add . \
+    && git commit -a -m 'Initial commit' \
+    && git remote add $(git origin) https://github.com/"$USERNAME"/"$REPOSITORY".git \
+    && git push -u $(git origin) gh-pages \
+    && echo 'Complete' \
+    && echo '-------------------' \
+    && echo 'You can find your last changes in the stash!'
 #+end_src
 
 For Bitbucket:
@@ -4133,8 +4157,15 @@ shortcut (an idea borrowed from Bazaar) shows the unique revisions in the
 current branch and the specified branch.
 
 #+begin_src conf
-missing = "!f() { git rev-list ..$1 --oneline | sed -e '1 iOnly in other:'; \
-                  git rev-list $1.. --oneline | sed -e '1 iOnly in HEAD:'; }; f"
+    # Usage: git missing COMMIT_ISH
+    # Show the sets of commits which are only in HEAD and only in the given COMMIT_ISH.
+    missing = "!f() { \
+            git rev-list $1.. --oneline \
+                | sed -e '1 iOnly in HEAD:'; \
+            printf \"\n\"; \
+            git rev-list ..$1 --oneline \
+                | sed -e '1 iOnly in other:'; \
+        }; f"
 #+end_src
 
 *** See which changes from a branch are already present upstream
@@ -4230,13 +4261,28 @@ user wants to have an updated repository.
 #+end_src
 
 #+begin_src conf
-    sshow = "!f() { git stash show stash^{/$@} -p; }; f" # Like sapply but shows it only
+    # Like sapply but shows it only.
+    sshow = "!f() { \
+            git stash show stash^{/$@} -p; \
+        }; f"
 
-    sapply = "!f() { git stash apply stash^{/$@}; }; f" # Find stash with name like text
+    # Find stash with name like text.
+    sapply = "!f() { \
+            git stash apply stash^{/$@}; \
+        }; f"
 
-    spop = "!f() { git stash pop stash@{$(git stash-id $@)}; }; f" # Like sapply but pops it off
+    # Like sapply but pops it off.
+    spop = "!f() { \
+            git stash pop stash@{$(git stash-id $@)}; \
+        }; f"
 
-    stash-id = "!f() { git stash list | grep $@ | head -n 1 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; }; f" # only accepts single word, no quotations
+    # Only accepts single word, no quotations.
+    stash-id = "!f() { \
+            git stash list \
+                | grep $@ \
+                | head -n 1 \
+                | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
+        }; f"
 #+end_src
 
 #+begin_src conf
@@ -4262,11 +4308,20 @@ stashall = !git add -A && git stash
     cp = !git stash push -m "$(date +%F--%T)" && git stash pop --index
 
     # checkpoint recover
-    cpr = "!f() { git fsck | grep commit | cut -d' ' -f3 | \
-                  while read HASH; do \
-                      git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null && echo $HASH | xargs git rev-list --since=${1:-1day} -1; \
-                  done | \
-                  xargs -L 1 git log --format=%at:%h -1 | sort | cut -f2 -d: | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; }; f"
+    cpr = "!f() { \
+            git fsck \
+                | grep commit \
+                | cut -d' ' -f3 \
+                | while read HASH; do \
+                      git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null \
+                          && echo $HASH \
+                          | xargs git rev-list --since=${1:-1day} -1; \
+                  done \
+                | xargs -L 1 git log --format=%at:%h -1 \
+                | sort \
+                | cut -f2 -d: \
+                | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
+        }; f"
 #+end_src
 
 *** Show a list of all stashes
@@ -4284,7 +4339,9 @@ stashall = !git add -A && git stash
 https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
 
 #+begin_src conf
-    sshow = "!f() { git stash show stash^{/$*} -p; }; f"
+    sshow = "!f() { \
+            git stash show stash^{/$*} -p; \
+        }; f"
 #+end_src
 
 One very useful feature one may consider is to list contents of all local
@@ -4320,7 +4377,9 @@ Git's other branch merging tools to put things back they way you want them.
 https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
 
 #+begin_src conf
-    sapply = "!f() { git stash apply stash^{/$*}; }; f"
+    sapply = "!f() { \
+            git stash apply stash^{/$*}; \
+        }; f"
 #+end_src
 
 #+begin_src conf
@@ -4517,7 +4576,9 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 ** PUBLISH - Find out if a change is part of a release
 
 #+begin_src conf
-    sha1-tag = "!f() { git name-rev --name-only \"$@\"; }; f"
+    sha1-tag = "!f() { \
+            git name-rev --name-only \"$@\"; \
+        }; f"
 #+end_src
 
 The ~name-rev~ command indicates the *position of a commit relative to tags* in the
@@ -4579,14 +4640,20 @@ patches.
 
 #+begin_src conf
     # Apply a patch to files and/or to the index from URL.
-    apply-url = "!f() { curl -s $1 2>nul | git apply ${@:2}; }; f"
+    apply-url = "!f() { \
+            curl -s $1 2>nul \
+                | git apply ${@:2}; \
+        }; f"
 #+end_src
 
 : git apply-url http://example.org/sample.patch args
 
 #+begin_src conf
     # Apply a series of patches from an URL.
-    am-url = "!f() { curl -s $1 2>nul | git am ${@:2}; }; f"
+    am-url = "!f() { \
+            curl -s $1 2>nul \
+                | git am ${@:2}; \
+        }; f"
 #+end_src
 
 : git am-url http://example.org/sample.patch args
@@ -4595,7 +4662,10 @@ patches.
 
 #+begin_src conf
     # Interactive apply patch.
-    ipatch = "!f() { git apply $1; git add -p; }; f"
+    ipatch = "!f() { \
+            git apply $1; \
+            git add -p; \
+        }; f"
 #+end_src
 
 : git ipatch mypatchfile
@@ -4674,7 +4744,9 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 
 #+begin_src conf
     current-tag = tag --points-at HEAD
-    zip = "!f() { git archive --format=zip -o $(git current-tag).zip HEAD; }; f"
+    zip = "!f() { \
+            git archive --format=zip -o $(git current-tag).zip HEAD; \
+        }; f"
 #+end_src
 
 #+begin_src conf
@@ -4717,9 +4789,11 @@ from the name) remains intact.
 
 #+begin_src conf
     # Usage: git export-commit [COMMIT_ISH]
-    export-commit = "!f() { git changed-files ${1:-HEAD} \
-                                | tr '\\n' '\\0' \
-                                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; }; f"
+    export-commit = "!f() { \
+            git changed-files ${1:-HEAD} \
+                | tr '\\n' '\\0' \
+                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
+        }; f"
 #+end_src
 
 XXX This does not handle spaces in file names
