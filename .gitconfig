@@ -739,9 +739,9 @@ deploy-prod =
     d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
     # `git di $number' shows the diff between the state `$number' revisions ago and the current state
-    di = !"d() { git diff --patch-with-stat HEAD~$1; }; \
+    di = !"f() { git diff --patch-with-stat HEAD~$1; }; \
            git diff-index --quiet HEAD -- || clear; \
-           d"
+           f"
 
     # Pull in remote changes for the current repository and all its submodules
     p = !"git pull; git submodule foreach git pull $(git origin) master"
@@ -1175,6 +1175,17 @@ sync = "!f(){ pull1 && push1; }; f"
                 | sed -e '1 iOnly in other:'; \
         }; f"
 
+    oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
+    branch-diff = '!sh -c "git diff $(git oldest-ancestor).."'
+    branch-log = '!sh -c "git log $(git oldest-ancestor).."'
+
+    diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
+
+    # Best common ancestor (when it was branched off).
+    mbase = !git show --summary $(git merge-base $(git origin)/$1 $(git current-branch))
+# git merge-base --fork-point master
+# git merge-base --all r1 r2
+
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch
     # pg sbt master pu -- if the last line is 'master' and not 'master~'
@@ -1303,17 +1314,6 @@ stashall = !git add -A && git stash
     export-zip = archive -o latest.zip
     export-tgz = archive -o latest.tar.gz -9
 
-    oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
-    branch-diff = '!sh -c "git diff $(git oldest-ancestor).."'
-    branch-log = '!sh -c "git log $(git oldest-ancestor).."'
-
-    diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
-
-    # Best common ancestor (when it was branched off).
-    mbase = !git show --summary $(git merge-base $(git origin)/$1 $(git current-branch))
-# git merge-base --fork-point master
-# git merge-base --all r1 r2
-
     # Usage: git export-commit [COMMIT_ISH]
     export-commit = "!f() { \
             git changed-files ${1:-HEAD} \
@@ -1324,6 +1324,7 @@ stashall = !git add -A && git stash
     # View raw commit.
     email-patch = XXX git format-patch $(git current-branch).patch
 
+    # Since oldest ancestor...
     plain-diff = !git branch-diff > $(git current-branch).diff
 
     patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
