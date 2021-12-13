@@ -738,7 +738,7 @@ deploy-prod =
     # Show the diff between the latest commit and the current state
     d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-    # `git di $number' shows the diff between the state `$number' revisions ago and the current state
+    # `git di $number' shows the diff between the state `$number' commits ago and the current state
     di = !"f() { git diff --patch-with-stat HEAD~$1; }; \
            git diff-index --quiet HEAD -- || clear; \
            f"
@@ -1165,13 +1165,13 @@ sync = "!f(){ pull1 && push1; }; f"
 
     next = "!f() { git checkout $(git rev-list --topo-order HEAD..master | tail -1; }; f"
 
-    # Usage: git missing COMMIT_ISH
-    # Show the sets of commits which are only in HEAD and only in the given COMMIT_ISH.
+    # Usage: git missing [COMMIT_ISH]
+    # Show the missing commits between this and another branch
     missing = "!f() { \
-            git rev-list $1.. --oneline \
+            git rev-list "${1:-master}".. --oneline \
                 | sed -e '1 iOnly in HEAD:'; \
             printf \"\n\"; \
-            git rev-list ..$1 --oneline \
+            git rev-list .."${1:-master}" --oneline \
                 | sed -e '1 iOnly in other:'; \
         }; f"
 

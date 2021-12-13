@@ -2760,7 +2760,7 @@ are always executed in the top-level directory.
     # Show the diff between the latest commit and the current state
     d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
-    # `git di $number' shows the diff between the state `$number' revisions ago and the current state
+    # `git di $number' shows the diff between the state `$number' commits ago and the current state
     di = !"f() { git diff --patch-with-stat HEAD~$1; }; \
            git diff-index --quiet HEAD -- || clear; \
            f"
@@ -4150,20 +4150,19 @@ git stash \
 For Bitbucket:
 https://marketplace.atlassian.com/apps/1212525/pages-for-bitbucket-server?hosting=server&tab=overview
 
-*** Comparing the commits between branches
+*** Show unmerged commits between two branches
 
-Sometimes I lose track of which branch contains which other branch. This
-shortcut (an idea borrowed from Bazaar) shows the unique revisions in the
+The alias ~missing~ (an idea borrowed from Bazaar) shows the unique commits in the
 current branch and the specified branch.
 
 #+begin_src conf
-    # Usage: git missing COMMIT_ISH
-    # Show the sets of commits which are only in HEAD and only in the given COMMIT_ISH.
+    # Usage: git missing [COMMIT_ISH]
+    # Show the missing commits between this and another branch
     missing = "!f() { \
-            git rev-list $1.. --oneline \
+            git rev-list "${1:-master}".. --oneline \
                 | sed -e '1 iOnly in HEAD:'; \
             printf \"\n\"; \
-            git rev-list ..$1 --oneline \
+            git rev-list .."${1:-master}" --oneline \
                 | sed -e '1 iOnly in other:'; \
         }; f"
 #+end_src
