@@ -468,7 +468,7 @@ bclean = "!f() { \
 
     rename-local-branch = branch -m
 
-    # Usage: git rename-branch BRANCH_OLD BRANCH_NEW
+    # Usage: git rename-branch OLD_BRANCH_NAME NEW_BRANCH_NAME
     # Rename both a local and remote branch.
     rename-branch = "!f() { \
             git rename-local-branch $1 $2 \
@@ -478,26 +478,28 @@ bclean = "!f() { \
 
     tag-with-date = !sh -c 'git tag $(date "+%Y.%m.%d_%H.%M")_"$0"'
 
-    # Show verbose output about tags.
-    tags = tag -l --sort=v:refname -n 1
+    # Push TAG_NAME to remote repo.
+    publish-tag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
 
-    show-tag-by-date = log --tags --simplify-by-decoration --pretty="format:%ai %d"
-
-    show-tags = show-ref --tags
+    # Remove TAG_NAME from remote repo.
+    unpublish-tag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
 
     push-tags = push --tags
 
-    # Pushes given tag to remote 'origin' repo (or the remote passed as the second parameter)
-    publish-tag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
+    # List tags.
+    tags = tag -l --sort=v:refname
 
-    # Removes given tag from remote 'origin' repo (or the remote passed as the second parameter)
-    unpublish-tag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
+    # Show a list of tag names and the commits they reference.
+    tags-show-ids = show-ref --tags
+
+    show-tags-by-date = log --tags --simplify-by-decoration --pretty="format:%ai %d"
 
     last-tag = describe --tags --abbrev=0
     checkout-last-tag = !sh -c 'git checkout $(git last-tag)'
 
     last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
 
+    # Usage: git rename-tag OLD_TAG_NAME NEW_TAG_NAME
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { \
             git tag $2 $1; \
@@ -516,7 +518,7 @@ bclean = "!f() { \
                     sh); \
         }; f"
 
-    # Usage: git compare-commits <rev-base> <rev-compare>
+    # Usage: git compare-commits REV_BASE REV_COMPARE
     compare-commits = "!f() { \
             git log --date=short $1...$2; \
         }; f"

@@ -1803,10 +1803,10 @@ not meaningful to the work we are doing.
 To rename a branch *locally*:
 
 - If we are on the branch we want to rename, we can just
-  ~git rename-local-branch NEWBRANCH~.
+  ~git rename-local-branch NEW_BRANCH_NAME~.
 
 - If we are on another branch, we have to use
-  ~git rename-local-branch OLDBRANCH NEWBRANCH~.
+  ~git rename-local-branch OLD_BRANCH_NAME NEW_BRANCH_NAME~.
 
 #+begin_src conf
     rename-local-branch = branch -m
@@ -1823,7 +1823,7 @@ To rename a branch *locally and remotely*:
 3. Delete the old branch.
 
 #+begin_src conf
-    # Usage: git rename-branch BRANCH_OLD BRANCH_NEW
+    # Usage: git rename-branch OLD_BRANCH_NAME NEW_BRANCH_NAME
     # Rename both a local and remote branch.
     rename-branch = "!f() { \
             git rename-local-branch $1 $2 \
@@ -1887,7 +1887,19 @@ git ls <tag>
 
 ** Push a tag to your repository
 
+#+begin_src conf
+    # Push TAG_NAME to remote repo.
+    publish-tag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
+
+    # Remove TAG_NAME from remote repo.
+    unpublish-tag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
+#+end_src
+
 Push all your tags (a regular push won't push a tag):
+
+#+begin_src conf
+    push-tags = push --tags
+#+end_src
 
 #+begin_src shell :tangle no
 git push --tags                         # Only tags.
@@ -1899,33 +1911,30 @@ git push --tags $(git origin) master    # Code and tags.
 List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
 
 #+begin_src conf
-    # Show verbose output about tags.
-    tags = tag -l --sort=v:refname -n 1
+    # List tags.
+    tags = tag -l --sort=v:refname
+
+    # Show a list of tag names and the commits they reference.
+    tags-show-ids = show-ref --tags
 #+end_src
 
 #+begin_src conf
-    show-tag-by-date = log --tags --simplify-by-decoration --pretty="format:%ai %d"
-
-    show-tags = show-ref --tags
-
-    push-tags = push --tags
-
-    # Pushes given tag to remote 'origin' repo (or the remote passed as the second parameter)
-    publish-tag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
-
-    # Removes given tag from remote 'origin' repo (or the remote passed as the second parameter)
-    unpublish-tag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
+    show-tags-by-date = log --tags --simplify-by-decoration --pretty="format:%ai %d"
 #+end_src
 
 #+begin_src shell :tangle no
 # Show annotated and lightweight tags.
-git show-ref -d --tags       |
-cut -b 42-                   | # Remove the commit-id.
-sort                         |
-sed 's/\^{}//'               | # Remove ^{} markings.
-uniq -c                      | # Count identical lines.
-sed 's/2\ refs\/tags\// a /' | # 2 identicals = annotated.
-sed 's/1\ refs\/tags\//lw /'
+git show-ref -d --tags \
+    | cut -b 42- \
+    | sort \
+    | sed 's/\^{}//' \
+    | uniq -c \
+    | sed 's/2\ refs\/tags\// a /' \
+    | sed 's/1\ refs\/tags\//lw /'
+# 2. Remove the commit-id.
+# 4. Remove ^{} markings.
+# 5. Count identical lines.
+# 6. 2 identicals = annotated.
 #+end_src
 
 Show the last tag /in the current branch/:
@@ -1935,7 +1944,7 @@ Show the last tag /in the current branch/:
     checkout-last-tag = !sh -c 'git checkout $(git last-tag)'
 #+end_src
 
-Show latest annotated tag /in all branches/:
+Show the latest tag /in all branches/:
 
 #+begin_src conf
     last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
@@ -1943,7 +1952,10 @@ Show latest annotated tag /in all branches/:
 
 ** Rename a tag
 
+Change the tag name but keep it on the same commit.
+
 #+begin_src conf
+    # Usage: git rename-tag OLD_TAG_NAME NEW_TAG_NAME
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { \
             git tag $2 $1; \
@@ -2004,7 +2016,7 @@ You can see:
 ** Commits
 
 #+begin_src conf
-    # Usage: git compare-commits <rev-base> <rev-compare>
+    # Usage: git compare-commits REV_BASE REV_COMPARE
     compare-commits = "!f() { \
             git log --date=short $1...$2; \
         }; f"
