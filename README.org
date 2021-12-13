@@ -4168,15 +4168,17 @@ current branch and the specified branch.
         }; f"
 #+end_src
 
-**** Branch point
+**** Fork point
 
 https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git:
 
 #+begin_src conf
+    # Find the point at which a branch forked from another branch
     oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
-    branch-diff = '!sh -c "git diff $(git oldest-ancestor).."'
-    branch-log = '!sh -c "git log $(git oldest-ancestor).."'
+#+end_src
 
+#+begin_src conf
+    # Find the point at which a branch forked from another branch
     diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
 #+end_src
 
@@ -4186,10 +4188,19 @@ and substitutes that in for the left-side SHA. The right-side SHA (as resolved
 from the name) remains intact.
 
 #+begin_src conf
+    # Find the point at which a branch forked from another branch
     # Best common ancestor (when it was branched off).
-    mbase = !git show --summary $(git merge-base $(git origin)/$1 $(git current-branch))
-# git merge-base --fork-point master
-# git merge-base --all r1 r2
+    mbase = "!f() { git show --summary $(git merge-base $(git origin)/$1 $(git current-branch)); }; f"
+
+    # Also:
+    # git merge-base --fork-point master
+    # git merge-base --all r1 r2
+#+end_src
+
+#+begin_src conf
+    # Since fork point.
+    branch-diff = !sh -c 'git diff $(git oldest-ancestor)..'
+    branch-log = !sh -c 'git log $(git oldest-ancestor)..'
 #+end_src
 
 *** See which changes from a branch are already present upstream
