@@ -171,15 +171,15 @@
     workprofile = config user.email \"john@work.com\"
 
     create-local-repository = !git init \
-                                   && ( [ -n "$(ls)" ] || touch .gitignore ) \
-                                   && git add . \
-                                   && git commit -m \"Initial commit\"
+                && ( [ -n "$(ls)" ] || touch .gitignore ) \
+                && git add . \
+                && git commit -m \"Initial commit\"
 
     # Proxy.
-    setproxy = !git config --global http.proxy http://proxy-guest.example.com:8080 \
-                    && git config --global https.proxy https://proxy-guest.example.com:8080
-    rmvproxy = !git config --global --unset http.proxy \
-                    && git config --global --unset https.proxy
+    set-proxy = !git config --global http.proxy http://proxy-guest.example.com:8080 \
+                && git config --global https.proxy https://proxy-guest.example.com:8080
+    rmv-proxy = !git config --global --unset http.proxy \
+                && git config --global --unset https.proxy
 
     cl = clone --recursive
 
@@ -1386,13 +1386,14 @@ stashall = !git add -A && git stash
                          && git reset --hard $(git origin)/master \
                          && git rebase master'
 
-    # Show record of pending changes.
-    record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+    # Show record of pending changes, letting you choose which patch hunks to commit.
+    commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+    record = !git commit-interactive
 
     lost1 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
     lost2 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 
-zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
+    zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
     serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
