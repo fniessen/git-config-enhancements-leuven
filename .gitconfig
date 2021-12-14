@@ -1,4 +1,5 @@
 [user]
+    # Telling Git about yourself.
     name = John Doe
     email = john.doe@example.com
 
@@ -495,7 +496,6 @@ bclean = "!f() { \
     show-tags-by-date = log --tags --simplify-by-decoration --pretty="format:%ai %d"
 
     last-tag = describe --tags --abbrev=0
-    checkout-last-tag = !sh -c 'git checkout $(git last-tag)'
 
     last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
 
@@ -567,10 +567,16 @@ bclean = "!f() { \
                 && git push $(git origin); \
         }; f"
 
+    # this is a summary?
     graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
     # Show log as a graph
-    log-graph = log --graph --all --oneline --decorate
+    glog = log --graph --all --oneline --decorate
+
+    releases = log --decorate --no-merges --all --simplify-by-decoration --oneline --graph
+    # XXX Add date
+
+    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 
     hist = log --date=short --graph
 
@@ -789,10 +795,6 @@ deploy-prod =
     # fix .gitignore
     fixgitignore = !git rm -r --cached . && git add . && git commit -m \"Just a .gitignore fix \"
 
-    # Ignore files only locally
-    hide = update-index --assume-unchanged
-    unhide = update-index --no-assume-unchanged
-
 #OTHER
 
     # Deletes all branches that were safely merged into the master. All other are skipped (no worries).
@@ -885,7 +887,9 @@ deploy-prod =
 
     wip = commit -am "WIP"
 
+    # Show the log entries in oneline format.
     ls = log --decorate --date=short
+
     ld = log --decorate --date=relative
 
     log = log --decorate --date=short
@@ -907,6 +911,7 @@ deploy-prod =
                      --exclude-from=.git/info/exclude \
                      -v -d -o -m -s -u
 
+    # Return the last commit.
     last = log --decorate -1 --date=short --stat
 
     # # Show the last N commits on the current branch.
@@ -962,6 +967,10 @@ deploy-prod =
     skip = update-index --assume-unchanged
     unskip = update-index --no-assume-unchanged
 
+    # Ignore files only locally.
+    hide = update-index --assume-unchanged
+    unhide = update-index --no-assume-unchanged
+
     skip-all = "!git status -s | awk {'print $2'} | xargs git skip"
 
     unskip-all = "!git skipped | xargs git update-index --no-assume-unchanged"
@@ -971,7 +980,7 @@ deploy-prod =
 
     # Append your staged changes to the LATEST commit (keeping the pre-existing
     # commit message).
-    fixup = commit -v --amend --reuse-message HEAD
+    recommit = commit -v --amend --reuse-message HEAD
 
     # Usage: git reword MSG
     # Change LATEST commit message to what you type in.
@@ -992,8 +1001,7 @@ deploy-prod =
                       git commit --amend; \
                       git checkout $BRANCH; }; f"
 
-    # Keep the changes from the commit you want to undo.
-    undo-soft = reset --soft HEAD~1
+    # Remove the last commit.
     uncommit = reset --soft HEAD~1
 
     undo-mixed = reset --mixed HEAD~1
@@ -1020,8 +1028,11 @@ deploy-prod =
     clear-with-fire = !git clean -d -f -x \
                            && git reset --hard
 
-    squash = "!f() { git reset --soft HEAD~$1 && \
-                     git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
+    # "Bundle" the last N changes into a single commit.
+    squash = "!f() { \
+            git reset --soft HEAD~$1 \
+                && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
+        }; f"
 
   # Given a merge commit, find the span of commits that exist(ed).
   # Not so useful in itself, but used by other aliases.
@@ -1178,22 +1189,22 @@ sync = "!f(){ pull1 && push1; }; f"
         }; f"
 
     # Find the point at which a branch forked from another branch
-    oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
+    ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
 
     # Find the point at which a branch forked from another branch
-    diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
+    ancestor2 = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
 
     # Find the point at which a branch forked from another branch
     # Best common ancestor (when it was branched off).
-    mbase = "!f() { git show --summary $(git merge-base $(git origin)/$1 $(git current-branch)); }; f"
+    ancestor3 = "!f() { git show --summary $(git merge-base $(git origin)/$1 $(git current-branch)); }; f"
 
     # Also:
     # git merge-base --fork-point master
     # git merge-base --all r1 r2
 
     # Since fork point.
-    branch-diff = !sh -c 'git diff $(git oldest-ancestor)..'
-    branch-log = !sh -c 'git log $(git oldest-ancestor)..'
+    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
+    log-ancestor = !sh -c 'git log $(git ancestor)..'
 
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch
@@ -1342,11 +1353,6 @@ stashall = !git add -A && git stash
     # branche courante.
     unreleased = !git log --oneline $(git last-tag)...HEAD \
                       && git last-tag
-
-    releases = log --decorate --no-merges --all --simplify-by-decoration --oneline --graph
-    # XXX Add date
-
-    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 
     debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
 

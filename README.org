@@ -80,6 +80,7 @@ committer and author of a change in every commit.
 
 #+begin_src conf
 [user]
+    # Telling Git about yourself.
     name = John Doe
     email = john.doe@example.com
 
@@ -87,7 +88,8 @@ committer and author of a change in every commit.
     user = jdoe
 #+end_src
 
-You should "override" the above with your personal details:
+You should "override" the above with your personal details in the file
+=.gitconfig_local=:
 
 #+begin_src conf
 [include]
@@ -926,6 +928,9 @@ committed version, removing all the changes detected by Git.
 #+begin_tip
 It can also recover *deleted files* -- if the deletion has not been committed.
 #+end_tip
+
+If you decide that the changes you have made since the last commit ought to be
+thrown away, the alias to use is ~unmodify~;
 
 #+begin_src conf
     # Usage: git unmodify TREE_ISH
@@ -1861,15 +1866,11 @@ private or temporary object labels.
 
 Create an /annotated tag/:
 
-#+begin_src shell :tangle no
-git tag -a TAG_NAME -m 'TAG_MESSAGE'
-#+end_src
+: git tag -a TAG_NAME -m 'TAG_MESSAGE'
 
 Create a /lightweight tag/ (/no message!/):
 
-#+begin_src shell :tangle no
-git tag TAG_NAME
-#+end_src
+: git tag TAG_NAME
 
 Create a date/time tag with a suffix, e.g: 2021.01.12_15.25_PREVIOUS:
 
@@ -1941,7 +1942,6 @@ Show the last tag /in the current branch/:
 
 #+begin_src conf
     last-tag = describe --tags --abbrev=0
-    checkout-last-tag = !sh -c 'git checkout $(git last-tag)'
 #+end_src
 
 Show the latest tag /in all branches/:
@@ -1965,11 +1965,10 @@ Change the tag name but keep it on the same commit.
         }; f"
 #+end_src
 
-** Remove a tag from a repository
+** Clear a tag
 
-Delete similar tags:
-
-: git delete-tag 'v0.8.*'
+If you have defined a tag and no longer want it defined, use the ~delete-tag~
+alias to remove it.
 
 #+begin_src conf
     # Delete local and remote tags.
@@ -1983,14 +1982,24 @@ Delete similar tags:
         }; f"
 #+end_src
 
+For example:
+
+: git tag v2.0-beta-4
+: (oops, we're not releasing a 4th beta)
+: git delete-tag v2.0-beta-4
+
+Delete similar tags:
+
+: git delete-tag 'v2.0-*'
+
 ** Remove all tags
 
 #+begin_src conf :tangle no
     # Delete all local and remote tags.
     delete-all-tags = "!f() { \
-            for TAG in $(git tag); do
-                git tag -d $TAG
-                git push $(git origin) :$TAG
+            for TAG_NAME in $(git tags); do
+                git tag -d $TAG_NAME
+                git push $(git origin) :$TAG_NAME
             done;
         }; f"
 #+end_src
@@ -2188,15 +2197,27 @@ Tag and push changes to the repository:
 
 * ?Graph
 
+Graphical history viewers
+
 See example at https://gitlab.com/procps-ng/procps/-/network/master
+
+[[https://jonas.github.io/tig/][Tig]]
 
 To see real *timeline* of who is working on what and when:
 
 #+begin_src conf
+    # this is a summary?
     graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
 
     # Show log as a graph
-    log-graph = log --graph --all --oneline --decorate
+    glog = log --graph --all --oneline --decorate
+#+end_src
+
+#+begin_src conf
+    releases = log --decorate --no-merges --all --simplify-by-decoration --oneline --graph
+    # XXX Add date
+
+    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 #+end_src
 
 #+begin_src conf
@@ -2834,10 +2855,6 @@ clean and relevant commits, no experiments or fixing typos.
     # fix .gitignore
     fixgitignore = !git rm -r --cached . && git add . && git commit -m \"Just a .gitignore fix \"
 
-    # Ignore files only locally
-    hide = update-index --assume-unchanged
-    unhide = update-index --no-assume-unchanged
-
 #OTHER
 
     # Deletes all branches that were safely merged into the master. All other are skipped (no worries).
@@ -3037,7 +3054,9 @@ date".
 #+end_note
 
 #+begin_src conf
+    # Show the log entries in oneline format.
     ls = log --decorate --date=short
+
     ld = log --decorate --date=relative
 
     log = log --decorate --date=short
@@ -3072,6 +3091,7 @@ List commits *showing changed files* (prettier and more concise version of
 #+end_src
 
 #+begin_src conf
+    # Return the last commit.
     last = log --decorate -1 --date=short --stat
 
     # # Show the last N commits on the current branch.
@@ -3247,6 +3267,10 @@ Ignore/unignore changes to *tracked file(s)* without =.gitignore=:
 #+begin_src conf
     skip = update-index --assume-unchanged
     unskip = update-index --no-assume-unchanged
+
+    # Ignore files only locally.
+    hide = update-index --assume-unchanged
+    unhide = update-index --no-assume-unchanged
 #+end_src
 
 XXX Have a look at Git lock = skip-worktree
@@ -3279,19 +3303,7 @@ List ignored files (*marked unchanged*):
     skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
 #+end_src
 
-** REVERT - Undo things
-
-> The reason I don't commit a change immediately after I write it is
-> that I want to test it in real (and varied) use.  Sometimes I find
-> bugs and have to change it.  After some period in which it works well,
-> I decide it is ready to install.
-
-That is a good reason. However, for your information there is the variant ~git
-commit --amend~, which as the option suggests amends the *current* commit. Just
-~git add~ the files you changed and run ~git commit --amend~. It also lets you edit
-the commit message. After discovering this option, I find I am less fearful of
-making premature commits, since they are easily fixed. (But not after pushing,
-of course. That way lies madness.)
+** REVERT - Undo mistakes
 
 *** Change your last commit
 
@@ -3337,7 +3349,7 @@ prompting you for the message you've already entered!
 #+begin_src conf
     # Append your staged changes to the LATEST commit (keeping the pre-existing
     # commit message).
-    fixup = commit -v --amend --reuse-message HEAD
+    recommit = commit -v --amend --reuse-message HEAD
 #+end_src
 
 Oh, you made a typo!
@@ -3359,6 +3371,9 @@ to open your commit editor and reword the message.
     # Credit an author on the LATEST commit.
     credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
 #+end_src
+
+After discovering these options, I find I am less fearful of making premature
+commits, since they are easily fixed. (But not after pushing, of course.)
 
 #+begin_warning
 *NEVER AMEND a commit* that you've *ALREADY PUSHED* to a remote repository.
@@ -3402,27 +3417,33 @@ See « Undo 'git add' before commit ».
 
 **** Soft option -- Do not touch the index file or the working tree at all
 
-Go back before last commit, with files in uncommitted state:
-
 #+begin_src conf
-    # Keep the changes from the commit you want to undo.
-    undo-soft = reset --soft HEAD~1
+    # Remove the last commit.
     uncommit = reset --soft HEAD~1
 #+end_src
 
+If you make a commit and really didn't mean to, use the ~uncommit~ alias to undo
+it like this:
+
+: git uncommit
+
 ~uncommit~ *undoes the last commit*, and *puts the changes* in the commit *into your
-index* -- keeping changes in the working directory (it doesn't touch it).  It's
+index* -- leaving the content of your working directory exactly as it is.  It's
 like going back in time to the moment right before you committed.
 
+That's really handy if you make a commit and accidently provide the wrong commit
+message. For example:
+
+: git commit -m "Fix bug #11"
+: (damn - wrong bug number)
+: git uncommit
+: git commit -m "Fix bug #1"
+
 #+begin_note
-~uncommit~ here means to do just the reverse of commit, i.e. just like commit it
-shouldn't touch the files's contents, only the metadata.
+~uncommit~ here means to do just the reverse of ~commit~.
 #+end_note
 
-This is a useful technique in resuming work on an unfinished changeset.
-
-Other scenario: squash change in several commits into one commit so that people
-think you are smart.
+This can be a useful technique in resuming work on an unfinished changeset.
 
 **** Mixed option -- Do not touch the working tree (but regenerate the index)
 
@@ -3549,35 +3570,37 @@ git branch my-saved-work
 
 *** Revert a commit
 
-Once you've pushed changes to a remote repository, it is considered dangerous to
-modify the history because someone else may have already pulled it.
+If you make an unwanted change but it doesn't make sense to uncommit it (because
+that code has been pushed to a remote repository say), you can use ~revert~ to
+effectively reverse the commit in question. For example:
 
-However, Git offers you an easy way to undo a patch by committing a change that
-effectively reverses the patch in question. The simplest usage is to revert an
-entire commit:
+: git commit "Fix bug #5"
+: git push
+: (hmm - bad fix)
+: git revert 2a5daf3f
 
-#+begin_src shell :tangle no
-git revert [COMMIT]
-#+end_src
-
-This creates a patch that is the opposite of commit ~[COMMIT]~ and commits it to
+This creates a patch that is the opposite of commit ~COMMIT~ and commits it to
 your repository.
 
 If you want to revert that commit without committing it (putting the reversion
 into your index), use:
 
-#+begin_src shell :tangle no
-git revert -n [COMMIT]
-#+end_src
+: git revert -n COMMIT
 
 *** Squash
+
+Squash change in several commits into one commit so that people think you are
+smart.
 
 Squash commits:
 https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
 
 #+begin_src conf
-    squash = "!f() { git reset --soft HEAD~$1 && \
-                     git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; }; f"
+    # "Bundle" the last N changes into a single commit.
+    squash = "!f() { \
+            git reset --soft HEAD~$1 \
+                && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
+        }; f"
 #+end_src
 
 Now it is possible to use this command to *combine together the last N commits*
@@ -4181,16 +4204,17 @@ current branch and the specified branch.
 
 **** Fork point
 
-https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git:
+The *common ancestor* is the last commit that existed in both branches. Usually
+this is the branch point, but it could also be a commit that was merged.
 
 #+begin_src conf
     # Find the point at which a branch forked from another branch
-    oldest-ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
+    ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
 #+end_src
 
 #+begin_src conf
     # Find the point at which a branch forked from another branch
-    diverges = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
+    ancestor2 = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
 #+end_src
 
 When you use three dots (...), ~git diff~ finds the merge-base between the left
@@ -4201,17 +4225,23 @@ from the name) remains intact.
 #+begin_src conf
     # Find the point at which a branch forked from another branch
     # Best common ancestor (when it was branched off).
-    mbase = "!f() { git show --summary $(git merge-base $(git origin)/$1 $(git current-branch)); }; f"
+    ancestor3 = "!f() { git show --summary $(git merge-base $(git origin)/$1 $(git current-branch)); }; f"
 
     # Also:
     # git merge-base --fork-point master
     # git merge-base --all r1 r2
 #+end_src
 
+https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git
+
+The common ancestor is frequently used with ~diff~ to return all of the changes
+that your branch introduces, while excluding the changes that you have not
+merged from the remote branch.
+
 #+begin_src conf
     # Since fork point.
-    branch-diff = !sh -c 'git diff $(git oldest-ancestor)..'
-    branch-log = !sh -c 'git log $(git oldest-ancestor)..'
+    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
+    log-ancestor = !sh -c 'git log $(git ancestor)..'
 #+end_src
 
 *** See which changes from a branch are already present upstream
@@ -4882,15 +4912,6 @@ de savoir ce qu'embarquera la « prochaine release » de mon projet.
     # branche courante.
     unreleased = !git log --oneline $(git last-tag)...HEAD \
                       && git last-tag
-#+end_src
-
-You can do a lot better with:
-
-#+begin_src conf
-    releases = log --decorate --no-merges --all --simplify-by-decoration --oneline --graph
-    # XXX Add date
-
-    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
 #+end_src
 
 ** Debugging
