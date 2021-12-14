@@ -631,8 +631,8 @@ bclean = "!f() { \
     contributors-email = shortlog -n -s -e --no-merges --
 
     pull-request-bb = "!f() { \
-            USERNAME=$1; \
-            curl --user $USERNAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
+            USER_NAME=$1; \
+            curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
         }; f"
 
     pr-list = XXX
@@ -722,8 +722,8 @@ deploy-prod =
 
     create-issue-pull-request = XXX
 
-    # issues = "!f() { USERNAME=$1; \
-    #     curl --user $USERNAME \
+    # issues = "!f() { USER_NAME=$1; \
+    #     curl --user $USER_NAME \
     #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
     #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
@@ -826,8 +826,8 @@ deploy-prod =
     showorigin = "!sh -c 'for BRANCH in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1) \\\t$BRANCH; done | sort -r'"
 
     # get remote branches
-    trackallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git branch --track $BRANCHNAME; done"
-    updateallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git checkout $BRANCHNAME ; git pull; done"
+    trackallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git branch --track $BRANCH_NAME; done"
+    updateallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git checkout $BRANCH_NAME ; git pull; done"
 
 #IGNORING
 
@@ -1276,6 +1276,9 @@ stashall = !git add -A && git stash
     # Get the upstream branch name.
     upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
 
+    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
+    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
+
     sha1-tag = "!f() { \
             git name-rev --name-only \"$@\"; \
         }; f"
@@ -1306,14 +1309,11 @@ stashall = !git add -A && git stash
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 
     today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-
+    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
     today-all = log --since=midnight --no-merges --all
 
-    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
-    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
+    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 
     # Summarize your own changes since 24h, suitable for a daily standup meeting.
     log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short

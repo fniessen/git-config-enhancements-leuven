@@ -2348,7 +2348,7 @@ or
 If you are not in the branch, then you can add the branch name to the "git log"
 command, like this:
 
-: git log master..branchname
+: git log master..BRANCH_NAME
 
 *** How do I find a list of files committed to a Git branch (since branching from master)?
 
@@ -2518,8 +2518,8 @@ Create a pull request against the default branch:
 
 #+begin_src conf
     pull-request-bb = "!f() { \
-            USERNAME=$1; \
-            curl --user $USERNAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
+            USER_NAME=$1; \
+            curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
         }; f"
 #+end_src
 
@@ -2873,8 +2873,8 @@ Once merged:
 See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
 
 #+begin_src conf
-    # issues = "!f() { USERNAME=$1; \
-    #     curl --user $USERNAME \
+    # issues = "!f() { USER_NAME=$1; \
+    #     curl --user $USER_NAME \
     #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
     #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
@@ -2888,8 +2888,8 @@ See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
 
 #+begin_src conf :tangle no
     issues = "!f() { \
-            USERNAME=$1; \
-            curl --user $USERNAME 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
+            USER_NAME=$1; \
+            curl --user $USER_NAME 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
                 | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
                 | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
                 | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; \
@@ -2900,7 +2900,7 @@ Set color to red or green, depending on issue state.
 
 #+begin_src conf :tangle no
 # Works!  Need to put quotes around the URL!
-curl -u $USERNAME -X GET 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
+curl -u $USER_NAME -X GET 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
     | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
 # curl -s -S
 #+end_src
@@ -3087,8 +3087,8 @@ clean and relevant commits, no experiments or fixing typos.
     showorigin = "!sh -c 'for BRANCH in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1) \\\t$BRANCH; done | sort -r'"
 
     # get remote branches
-    trackallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git branch --track $BRANCHNAME; done"
-    updateallbranches = !sh -c "for BRANCHNAME in $(git branch -r); do git checkout $BRANCHNAME ; git pull; done"
+    trackallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git branch --track $BRANCH_NAME; done"
+    updateallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git checkout $BRANCH_NAME ; git pull; done"
 #+end_src
 
 #+begin_src conf
@@ -4125,7 +4125,7 @@ echo 'setting up gh-pages'
 echo '-------------------'
 
 echo 'Tell me your github account username: '
-read USERNAME
+read USER_NAME
 
 echo 'Now, tell me your repository name: '
 read REPOSITORY
@@ -4135,7 +4135,7 @@ git stash \
     && echo 'My Page' > index.html \
     && git add . \
     && git commit -a -m 'Initial commit' \
-    && git remote add $(git origin) https://github.com/"$USERNAME"/"$REPOSITORY".git \
+    && git remote add $(git origin) https://github.com/"$USER_NAME"/"$REPOSITORY".git \
     && git push -u $(git origin) gh-pages \
     && echo 'Complete' \
     && echo '-------------------' \
@@ -4268,7 +4268,7 @@ Use ~git stash~ if Git refused to merge because it foresees conflicts.
 
 If you anticipate that you might have trouble merging the work you want to stash
 with the work you're about to do on the clean tree, you can create a new branch
-with ~git stash branch NEW_BRANCHNAME~.
+with ~git stash branch NEW_BRANCH_NAME~.
 
 Information that is used by default if you don't provide a message:
 
@@ -4615,6 +4615,11 @@ If you want to see all *unpushed* commits from *all branches*, do this:
     upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
 #+end_src
 
+#+begin_src conf
+    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
+    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
+#+end_src
+
 ** PUBLISH - Find out if a change is part of a release
 
 #+begin_src conf
@@ -4771,7 +4776,7 @@ XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries o
 # Use it like this:
 #
 # #+begin_src shell :tangle no
-# git changelog TAGNAME_FIRST TAGNAME_LAST
+# git changelog FIRST_TAG_NAME LAST_TAG_NAME
 # #+end_src
 
 See also
@@ -4785,18 +4790,11 @@ branches*):
 
 #+begin_src conf
     today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+    today-all = log --since=midnight --no-merges --all
+
     yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
     this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-#+end_src
-
-#+begin_src conf
-    today-all = log --since=midnight --no-merges --all
-#+end_src
-
-#+begin_src conf
-    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
-    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 #+end_src
 
 Show changes for a daily standup meeting:
