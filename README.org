@@ -358,14 +358,37 @@ If you are using submodules, it might be useful to turn on the submodule summary
 
 ** Pull
 
-Configure Git to do the ~--rebase~ part automatically.
+Git pull allows you to integrate with and fetch from another repository or local
+Git branch.
 
-#+begin_src conf
-[pull]
-    rebase = true
-#+end_src
+Choose the default behavior of ~git pull~:
 
-(The merge commit doesn't get deleted!)
+- *Default (fast-forward or merge)*
+
+  This is the standard behavior of ~git pull~: fast-forward the current branch to
+  the fetched branch when possible, otherwise create a merge commit.
+
+  #+begin_src conf :tangle no
+  [pull]
+      rebase = merges
+  #+end_src
+
+- *Rebase*
+
+  Rebase the current branch onto the fetched branch.  If there are no local
+  commits to rebase, this is equivalent to a fast-forward.
+
+  #+begin_src conf :tangle no
+  [pull]
+      rebase = true
+  #+end_src
+
+- *Only ever fast-forward*
+
+  Fast-forward to the fetched branch.  Fail if that is not possible.
+
+rebase with auto-abort
+: git rebase foo || git rebase --abort
 
 ** Push
 
