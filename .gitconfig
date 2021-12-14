@@ -778,8 +778,8 @@ deploy-prod =
     type = cat-file -t
     dump = cat-file -p
 
+     # Catch up those random feature branches you haven't had to touch in months.
      catchup = !git fetch; git rebase $(git origin)/master
-# For catching up those random feature branches you haven't had to touch in months.
 
     exec = '!exec '
 
@@ -808,7 +808,6 @@ deploy-prod =
     hist = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
     histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
     llog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
-    changelog = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
     ls = log --pretty=format:'%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
 
 #BASIC REPO INFORMATION
@@ -890,31 +889,6 @@ deploy-prod =
 
     precommit = diff --cached --diff-algorithm=minimal -w
 
-    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-
-    today-all = log --since=midnight --no-merges --all
-
-    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-    changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
-    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
-    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
-
-    # Summarize your own changes since 24h, suitable for a daily standup meeting.
-    log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
-
-    standup = "!git log --branches \
-                        --since=$(if [ "$(date +%a)" = "Mon" ]; then \
-                                      echo "friday"; \
-                                  else \
-                                      echo "yesterday"; \
-                                  fi) \
-                        --author=$(git config --get user.email) \
-                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
-                        --date=local"
-# XXX git standup W donne un décompte avec une ligne trop peu !
-
   # Show log of new commits after you fetched, with stats, excluding merges
   log-fresh = log ORIG_HEAD.. --stat --no-merges
 
@@ -965,7 +939,9 @@ deploy-prod =
 
     related = !sh -c 'git log --follow --format=format:%H $1 \
                           | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
-                          | sort | uniq -c | sort -b -n -r'
+                          | sort \
+                          | uniq -c \
+                          | sort -b -n -r'
 
     related-files = git show --name-only $(git rev-list HEAD -- 32-factures-creation.R)
     related-files-f = "!f() { git show --name-only $(git rev-list HEAD -- $1); }; f"
@@ -1319,9 +1295,36 @@ stashall = !git add -A && git stash
             git add -p; \
         }; f"
 
+    changelog1 = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
+    changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
+
     # Detailed list of changes.
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
+
+    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+
+    today-all = log --since=midnight --no-merges --all
+
+    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
+    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
+
+    # Summarize your own changes since 24h, suitable for a daily standup meeting.
+    log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
+
+    standup = "!git log --branches \
+                        --since=$(if [ "$(date +%a)" = "Mon" ]; then \
+                                      echo "friday"; \
+                                  else \
+                                      echo "yesterday"; \
+                                  fi) \
+                        --author=$(git config --get user.email) \
+                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
+                        --date=local"
+# XXX git standup W donne un décompte avec une ligne trop peu !
 
     current-tag = tag --points-at HEAD
     zip = "!f() { \

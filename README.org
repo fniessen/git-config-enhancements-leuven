@@ -3017,8 +3017,8 @@ http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 #+end_src
 
 #+begin_src conf
+     # Catch up those random feature branches you haven't had to touch in months.
      catchup = !git fetch; git rebase $(git origin)/master
-# For catching up those random feature branches you haven't had to touch in months.
 #+end_src
 
 (see http://gitimmersion.com/lab_11.html)
@@ -3069,7 +3069,6 @@ clean and relevant commits, no experiments or fixing typos.
     hist = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
     histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
     llog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
-    changelog = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
     ls = log --pretty=format:'%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
 
 #BASIC REPO INFORMATION
@@ -3216,46 +3215,6 @@ I don't need to use the undo commands.
 
 #+begin_src conf
     precommit = diff --cached --diff-algorithm=minimal -w
-#+end_src
-
-*** Today
-
-Quickly see what you've done today (list commits that aren't merges, on *all
-branches*):
-
-#+begin_src conf
-    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-#+end_src
-
-#+begin_src conf
-    today-all = log --since=midnight --no-merges --all
-#+end_src
-
-#+begin_src conf
-    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-    changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
-    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
-    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
-#+end_src
-
-Show changes for a daily standup meeting:
-
-#+begin_src conf
-    # Summarize your own changes since 24h, suitable for a daily standup meeting.
-    log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
-
-    standup = "!git log --branches \
-                        --since=$(if [ "$(date +%a)" = "Mon" ]; then \
-                                      echo "friday"; \
-                                  else \
-                                      echo "yesterday"; \
-                                  fi) \
-                        --author=$(git config --get user.email) \
-                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
-                        --date=local"
-# XXX git standup W donne un décompte avec une ligne trop peu !
 #+end_src
 
 #+begin_src conf
@@ -4794,6 +4753,11 @@ https://dev.to/chrissiemhrk/git-commit-message-5e21
 https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
 
 #+begin_src conf
+    changelog1 = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
+    changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
+#+end_src
+
+#+begin_src conf
     # Detailed list of changes.
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
@@ -4810,6 +4774,45 @@ XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries o
 See also
 - https://github.com/github-changelog-generator/github-changelog-generator
 - https://github.com/github-changelog-generator/github-changelog-generator/wiki/Alternatives
+
+**** Today
+
+Quickly see what you've done today (list commits that aren't merges, on *all
+branches*):
+
+#+begin_src conf
+    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+#+end_src
+
+#+begin_src conf
+    today-all = log --since=midnight --no-merges --all
+#+end_src
+
+#+begin_src conf
+    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
+    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
+    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
+#+end_src
+
+Show changes for a daily standup meeting:
+
+#+begin_src conf
+    # Summarize your own changes since 24h, suitable for a daily standup meeting.
+    log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
+
+    standup = "!git log --branches \
+                        --since=$(if [ "$(date +%a)" = "Mon" ]; then \
+                                      echo "friday"; \
+                                  else \
+                                      echo "yesterday"; \
+                                  fi) \
+                        --author=$(git config --get user.email) \
+                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
+                        --date=local"
+# XXX git standup W donne un décompte avec une ligne trop peu !
+#+end_src
 
 *** Release assets
 
