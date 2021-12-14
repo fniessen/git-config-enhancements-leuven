@@ -168,23 +168,23 @@ in Git-handled repositories.  There's an option to auto-convert:
   read and merges more difficult. Most people working in a Unix/Linux world use
   this value because they don’t have CRLF problems and they don’t need Git to be
   doing extra work whenever files are written to the object database or written
-  out into the working directory.
+  out into the working tree.
 
 - ~core.autocrlf = true~
 
   This means that Git will process all text files and make sure that CRLF is
-  replaced with LF when writing that file to the object database and *turn all
-  LF back into CRLF when writing out into the working directory*. This is the
-  recommended setting on Windows because it ensures that your repository can be
-  used on other platforms while retaining CRLF in your working directory.
+  replaced with LF when writing that file to the object database and *turn all LF
+  back into CRLF when writing out into the working tree*. This is the recommended
+  setting on Windows because it ensures that your repository can be used on
+  other platforms while retaining CRLF in your working tree.
 
 - ~core.autocrlf = input~
 
   This means that Git will process all text files and make sure that CRLF is
   replaced with LF when writing that file to the object database. It will *not*,
   however, *do the reverse*. When you read files back out of the object database
-  and write them into the working directory they will still have LFs to denote
-  the end of line. This setting is generally used on Unix/Linux/OS X to prevent
+  and write them into the working tree they will still have LFs to denote the
+  end of line. This setting is generally used on Unix/Linux/OS X to prevent
   CRLFs from getting written into the repository. The idea being that if you
   pasted code from a web browser and accidentally got CRLFs into one of your
   files, Git would make sure they were replaced with LFs when you wrote to the
@@ -835,7 +835,7 @@ Search files in all branches.
 ** Search for code
 
 *Code search* looks through all lines of code of all the files (by the *file
-contents*) from the working directory (and its subdirectories).
+contents*) from the current directory (and its subdirectories).
 
 https://confluence.atlassian.com/bitbucketserver/search-for-code-in-bitbucket-server-814204781.html
 https://help.github.com/en/github/searching-for-information-on-github/searching-code
@@ -864,7 +864,7 @@ Find all instances of the specified string in code *in the specified path*.
     search-for-code-in-path = "XXX"
 #+end_src
 
-*** Pattern in working directory (and its subdirectories)
+*** Pattern in current directory (and its subdirectories)
 
 The advantages of ~git grep~ are not only its *speed*, and the fact it only searches
 your project files (i.e. no files in =.git=), but also that is allows you to
@@ -922,7 +922,7 @@ and http://gitimmersion.com/lab_14.html.
 
 **** Before you staged (in unstaged state)
 
-*Undo* the local changes *in the working directory*: roll a file back to its last
+*Undo* the local changes *in the working tree*: roll a file back to its last
 committed version, removing all the changes detected by Git.
 
 #+begin_tip
@@ -3428,8 +3428,8 @@ it like this:
 : git uncommit
 
 ~uncommit~ *undoes the last commit*, and *puts the changes* in the commit *into your
-index* -- leaving the content of your working directory exactly as it is.  It's
-like going back in time to the moment right before you committed.
+index* -- leaving the content of your working tree exactly as it is.  It's like
+going back in time to the moment right before you committed.
 
 That's really handy if you make a commit and accidently provide the wrong commit
 message. For example:
@@ -3448,10 +3448,9 @@ This can be a useful technique in resuming work on an unfinished changeset.
 **** Mixed option -- Do not touch the working tree (but regenerate the index)
 
 Reset the previous commit, but *puts* all *the changes* from that commit *in the
-working directory*:
+working tree*:
 
 #+begin_src conf
-    undo-mixed = reset --mixed HEAD~1
     uncommit-unstage = reset --mixed HEAD~1
 #+end_src
 
@@ -3463,8 +3462,8 @@ This is a useful technique if your pull fails to merge the new stuff from
 upstream: ~git reset HEAD~1~, pull again, fix the conflicts, then commit your
 changes again.
 
-Other scenario: slice a single big commit to different small commits to haste
-review process.
+This can also be a useful technique to slice a single big commit to different
+small commits to haste review process.
 
 **** Hard option -- Regenerate both the index and working tree
 
@@ -3490,8 +3489,8 @@ This command will *overwrite all CHANGED tracked files* in the working tree!
 #+end_warning
 
 #+begin_tip
-If you have changes in your working directory or staging area, you'll probably
-want to stash them before doing the above.
+If you have changes in your working tree or staging area, you'll probably want
+to stash them before doing the above.
 #+end_tip
 
 #+begin_note
@@ -3507,66 +3506,6 @@ Other scenarios:
 - Overtime working, did lots of stupid things.  You want to run away from what
   had been done...
 - Recover context before a stale merge.
-
-**** Delete untracked files
-
-#+begin_src conf
-    nuke-untracked-files = clean -f
-#+end_src
-
-~git clean~ will *remove any files* from the tracked root directory *that are not
-under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
-
-#+begin_note
-*WARNING -- BE CAREFUL WITH THIS!*  It is helpful to run a dry-run with ~git clean~
-first, to see what it will delete.
-#+end_note
-
-Usage:
-- ~git clean -n~ (dry run) to see what ~git clean -f~ will do, so you can be sure
-  it's what you want.
-- ~git clean -f~ (to *force removing* the *untracked files*) and
-- ~git clean -d -f~ (to also *remove untracked directories* in addition to untracked
-  files).
-
-**** Soft option -- Clean branch (delete changes + untracked files)
-
-#+begin_src conf
-    clear-soft-dry-run = clean -d -n
-
-    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
-    # Files and directories in .gitignore will be preserved.
-    clear-soft = !git clean -d -f \
-                      && git reset --hard
-    # Discard current changes and throw out new files.
-#+end_src
-
-which:
-- unstages changes in the index,
-- discards changes in the working directory, and
-- removes any new files (*all untracked changes will be lost*).
-
-If you want to save your current branch's state before doing this (just in
-case), you can do:
-
-#+begin_src shell :tangle no
-git commit -a -m "Saving my work, just in case"
-git branch my-saved-work
-#+end_src
-
-**** Hard option -- Clean branch (delete ignored files in addition to changes + untracked files)
-
-*NUCLEAR VERSION* which will:
-- undo all your changes to *tracked* files,
-- wipe out all the *ignored and untracked* files and directories, and
-- start from the ~HEAD~.
-
-#+begin_src conf
-    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
-    # including those in .gitignore.
-    clear-with-fire = !git clean -d -f -x \
-                           && git reset --hard
-#+end_src
 
 *** Revert a commit
 
@@ -3607,6 +3546,68 @@ Now it is possible to use this command to *combine together the last N commits*
 into one commit:
 
 : git squash N
+
+** Clean
+
+**** Delete untracked files
+
+#+begin_src conf
+    nuke-untracked-files = clean -f
+#+end_src
+
+~git clean~ will *remove any files* from the tracked root directory *that are not
+under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
+
+#+begin_note
+*WARNING -- BE CAREFUL WITH THIS!*  It is helpful to run a dry-run with ~git clean~
+first, to see what it will delete.
+#+end_note
+
+Usage:
+- ~git clean -n~ (dry run) to see what ~git clean -f~ will do, so you can be sure
+  it's what you want.
+- ~git clean -f~ (to *force removing* the *untracked files*) and
+- ~git clean -d -f~ (to also *remove untracked directories* in addition to untracked
+  files).
+
+**** Soft option -- Clean branch (delete changes + untracked files)
+
+#+begin_src conf
+    clear-soft-dry-run = clean -d -n
+
+    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
+    # Files and directories in .gitignore will be preserved.
+    clear-soft = !git clean -d -f \
+                      && git reset --hard
+    # Discard current changes and throw out new files.
+#+end_src
+
+which:
+- unstages changes in the index,
+- discards changes in the working tree, and
+- removes any new files (*all untracked changes will be lost*).
+
+If you want to save your current branch's state before doing this (just in
+case), you can do:
+
+#+begin_src shell :tangle no
+git commit -a -m "Saving my work, just in case"
+git branch my-saved-work
+#+end_src
+
+**** Hard option -- Clean branch (delete ignored files in addition to changes + untracked files)
+
+*NUCLEAR VERSION* which will:
+- undo all your changes to *tracked* files,
+- wipe out all the *ignored and untracked* files and directories, and
+- start from the ~HEAD~.
+
+#+begin_src conf
+    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
+    # including those in .gitignore.
+    clear-with-fire = !git clean -d -f -x \
+                           && git reset --hard
+#+end_src
 
 ** Merge
 
@@ -3771,8 +3772,8 @@ one; ~merge~ then merges the appropriate *single branch*.
 ... but read "you're not using git as it was intended" on
 https://news.ycombinator.com/item?id=2301765.
 
-Before doing work (in a new branch), *ensure that the working directory is*
-*up-to-date* with the ~origin~ (pull and get latest for all submodules):
+Before doing work (in a new branch), *ensure that the working tree is* *up-to-date*
+with the ~origin~ (pull and get latest for all submodules):
 
 #+begin_src conf
     # Get everything new.
@@ -4509,7 +4510,7 @@ XXX See doc of git help stash for workflows...
    #+begin_src shell :tangle no
    git reset --mixed                       # Reset the previous commit (but
                                            # keeps all the changes from that
-                                           # commit in the working directory).
+                                           # commit in the working tree).
 
    git reset --soft                        # Or this one???
    #+end_src
@@ -5256,7 +5257,7 @@ branch (using ~git push --force~) and someone needs a talkin' to.
 * Use Git and SVN together
 
 You can combine both Git and SVN on the same project codebase, *in the same
-working directory*:
+working tree*:
 
 - http://www.netinstructions.com/git-and-svn-together/
 - https://www.belatrixsf.com/blog/a-happy-way-to-combine-svn-and-git

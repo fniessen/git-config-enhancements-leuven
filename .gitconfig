@@ -1004,7 +1004,6 @@ deploy-prod =
     # Remove the last commit.
     uncommit = reset --soft HEAD~1
 
-    undo-mixed = reset --mixed HEAD~1
     uncommit-unstage = reset --mixed HEAD~1
 
     # Erase any changes since your last commit (reset every file in your working
@@ -1012,6 +1011,12 @@ deploy-prod =
     # Destroy the changes from the commit you want to undo.
     undo = reset --hard HEAD~1
     # Delete last commit.
+
+    # "Bundle" the last N changes into a single commit.
+    squash = "!f() { \
+            git reset --soft HEAD~$1 \
+                && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
+        }; f"
 
     nuke-untracked-files = clean -f
 
@@ -1027,12 +1032,6 @@ deploy-prod =
     # including those in .gitignore.
     clear-with-fire = !git clean -d -f -x \
                            && git reset --hard
-
-    # "Bundle" the last N changes into a single commit.
-    squash = "!f() { \
-            git reset --soft HEAD~$1 \
-                && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
-        }; f"
 
   # Given a merge commit, find the span of commits that exist(ed).
   # Not so useful in itself, but used by other aliases.
