@@ -20,9 +20,6 @@
 
     pager = diff-so-fancy | LESS= less --tabs=4 -RFX
 
-    # Commit as LF, but does not check out as CRLF (for Shell scripts!)
-    autocrlf = input
-
     # Do filesystem operations in parallel to hide latency (default since v2.1).
     preloadindex = true
 

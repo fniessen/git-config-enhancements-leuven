@@ -150,44 +150,59 @@ something with UTF-8 in it.
 See https://github.com/so-fancy/diff-so-fancy/issues/364.
 #+end_tip
 
-[[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ as a newline character
-in Git-handled repositories.  There's an option to auto-convert:
+[[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ (LF) as a newline
+character in Git-handled repositories.
 
-#+begin_src conf
-    # Commit as LF, but does not check out as CRLF (for Shell scripts!)
-    autocrlf = input
-#+end_src
+- *Checkout Windows-style, commit Unix-style line endings*
 
-- ~core.autocrlf = false~
+  Git will convert LF to CRLF when checking out text files.  When committing
+  text files, CRLF will be converted to LF.  *For cross-platform projects*, this
+  is the *recommended setting on Windows* (~core.autocrlf~ is set to ~true~) because
+  it ensures that your repository can be used on other platforms while retaining
+  CRLF in your working tree.
+
+  #+begin_src conf :tangle no
+      # Configure Git to ensure line endings in files you checkout are correct
+      # for Windows.  For compatibility, line endings are converted to Unix
+      # style when you commit files.
+      autocrlf = true
+  #+end_src
+
+  This /turns all LF back into CRLF when writing out into the working tree/.
+
+- *Checkout as-is, commit Unix-style line endings*
+
+  Git will /not perform any conversion when checking out text files/.  When
+  committing text files, CRLF will be converted to LF.  *For cross-platform
+  projects*, this is the *recommended setting on Unix* (~core.autocrlf~ is set to
+  ~input~) to prevent CRLF from getting written into the repository.
+
+  #+begin_src conf :tangle no
+      # Configure Git to ensure line endings in files you checkout are correct
+      # for Linux and macOS.
+      autocrlf = input
+  #+end_src
+
+  When you read files back out of the object database and write them into the
+  working tree, they will still have LF to denote the end of line.
+
+- *Checkout as-is, commit as-is*
+
+  Git will not perform any conversions when checking out or committing text
+  files.  Choosing this option is *not recommended for cross-platform projects*
+  (~core.autocrlf~ is set to ~false~).
+
+  #+begin_src conf :tangle no
+      autocrlf = false
+  #+end_src
 
   This is the default, but most people are encouraged to change this
-  immediately. The result of using false is that Git doesn’t ever mess with line
-  endings on your file. You can check in files with LF or CRLF or CR or some
-  random mix of those three and Git does not care. This can make diffs harder to
-  read and merges more difficult. Most people working in a Unix/Linux world use
-  this value because they don’t have CRLF problems and they don’t need Git to be
-  doing extra work whenever files are written to the object database or written
-  out into the working tree.
+  immediately.
 
-- ~core.autocrlf = true~
-
-  This means that Git will process all text files and make sure that CRLF is
-  replaced with LF when writing that file to the object database and *turn all LF
-  back into CRLF when writing out into the working tree*. This is the recommended
-  setting on Windows because it ensures that your repository can be used on
-  other platforms while retaining CRLF in your working tree.
-
-- ~core.autocrlf = input~
-
-  This means that Git will process all text files and make sure that CRLF is
-  replaced with LF when writing that file to the object database. It will *not*,
-  however, *do the reverse*. When you read files back out of the object database
-  and write them into the working tree they will still have LFs to denote the
-  end of line. This setting is generally used on Unix/Linux/OS X to prevent
-  CRLFs from getting written into the repository. The idea being that if you
-  pasted code from a web browser and accidentally got CRLFs into one of your
-  files, Git would make sure they were replaced with LFs when you wrote to the
-  object database.
+  The result of using ~false~ is that Git doesn't ever mess with line endings on
+  your file. You can check in files with LF or CRLF or CR or some random mix of
+  those three and Git does not care. This can make diffs harder to read and
+  merges more difficult.
 
 #+begin_src conf :tangle no
     safecrlf = true
