@@ -2356,13 +2356,13 @@ Show all the changed files in a Git branch *since it was forked from the =master
 branch*:
 
 #+begin_src conf
-    # Usage: git missing-master [COMMIT_ISH]
-    # Show changed files since master.
+    # Usage: git missing-files [COMMIT_ISH]
+    # Show the changed files between this and another branch
     # Examples:
-    #   git missing-master            list changed files for the current branch
-    #   git missing-master feature/7  list changed files for the 'feature/7' branch
-    missing-master = "!f() { \
-            git diff --stat master...$1; \
+    #   git missing-files             list changed files between this and master
+    #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
+    missing-files = "!f() { \
+            git diff --stat ${1:-master}...; \
         }; f"
 #+end_src
 
@@ -3218,8 +3218,8 @@ I don't need to use the undo commands.
 #+end_src
 
 #+begin_src conf
-  # Show log of new commits after you fetched, with stats, excluding merges
-  log-fresh = log ORIG_HEAD.. --stat --no-merges
+    # Show log of new commits after you fetched, with stats, excluding merges
+    log-fresh = log ORIG_HEAD.. --stat --no-merges
 #+end_src
 
 *** When was this file last updated
@@ -3615,11 +3615,12 @@ after a ~git fetch~, to fetch down *all the data* it has for the *current remote
 you do not --, the next time you do a merge.
 
 #+begin_src conf
+    # See changes committed by others
     in = !(git remote update -p && git log --decorate ..@{u})
 #+end_src
 
 #+begin_src conf
-    in-stat = log --stat ..@{u}
+    in-files = log --stat ..@{u}
 #+end_src
 
 Show the changes between the last local commit and the *remote* branch:
@@ -4153,10 +4154,12 @@ current branch and the specified branch.
     # Usage: git missing [COMMIT_ISH]
     # Show the missing commits between this and another branch
     missing = "!f() { \
-            git rev-list "${1:-master}".. --oneline \
+            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short "${1:-master}".. \
+                | awk 'NR%2==0' \
                 | sed -e '1 iOnly in HEAD:'; \
             printf \"\n\"; \
-            git rev-list .."${1:-master}" --oneline \
+            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short .."${1:-master}" \
+                | awk 'NR%2==0' \
                 | sed -e '1 iOnly in other:'; \
         }; f"
 #+end_src
@@ -4250,7 +4253,7 @@ See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its
     sbs = show-branch --sha1-name
 #+end_src
 
-** Stash
+** Stash (shelve)
 
 A *stash* is nothing but a *(temporary) branch*.
 
@@ -4585,9 +4588,12 @@ The ~out~ command returns a list of *unpushed* (outgoing) commits for the *curre
 branch*, the next time you do a push.
 
 #+begin_src conf
-    # Unpushed.
+    # See what is not pushed to remote branch.
     out = log --date=short @{u}..
-    out-stat = log --stat --date=short @{u}..
+#+end_src
+
+#+begin_src conf
+    out-files = log --stat --date=short @{u}..
 #+end_src
 
 This causes ~git log~ to show all commits reachable from =HEAD= excluding those
@@ -4598,6 +4604,7 @@ can be omitted for shorthand purposes.
 If you want to see all *unpushed* commits from *all branches*, do this:
 
 #+begin_src conf
+    # See all local commits.
     outgoing = log --branches --not --remotes --decorate
 #+end_src
 
@@ -4753,12 +4760,8 @@ https://dev.to/chrissiemhrk/git-commit-message-5e21
 https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
 
 #+begin_src conf
-    changelog1 = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
-    changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
-#+end_src
-
-#+begin_src conf
     # Detailed list of changes.
+    changelog1 = !git log --oneline --no-merges ${1-$(git last-tag)}..HEAD
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 #+end_src
@@ -5006,6 +5009,7 @@ Let's do a slightly different command: ~resync~
 Ask interactively which patch hunk to commit, and then do the commit:
 
 #+begin_src conf
+    # Show record of pending changes.
     record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 #+end_src
 

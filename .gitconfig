@@ -588,13 +588,13 @@ bclean = "!f() { \
         }; f"
 # XXX We should get the name of the branch merge base
 
-    # Usage: git missing-master [COMMIT_ISH]
-    # Show changed files since master.
+    # Usage: git missing-files [COMMIT_ISH]
+    # Show the changed files between this and another branch
     # Examples:
-    #   git missing-master            list changed files for the current branch
-    #   git missing-master feature/7  list changed files for the 'feature/7' branch
-    missing-master = "!f() { \
-            git diff --stat master...$1; \
+    #   git missing-files             list changed files between this and master
+    #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
+    missing-files = "!f() { \
+            git diff --stat ${1:-master}...; \
         }; f"
 
     log-fetched = log --oneline HEAD..$(git origin)
@@ -889,8 +889,8 @@ deploy-prod =
 
     precommit = diff --cached --diff-algorithm=minimal -w
 
-  # Show log of new commits after you fetched, with stats, excluding merges
-  log-fresh = log ORIG_HEAD.. --stat --no-merges
+    # Show log of new commits after you fetched, with stats, excluding merges
+    log-fresh = log ORIG_HEAD.. --stat --no-merges
 
     # When was this file last updated, on each local branch.
     wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
@@ -1027,9 +1027,10 @@ deploy-prod =
     remotes = remote
     r = remote -v
 
+    # See changes committed by others
     in = !(git remote update -p && git log --decorate ..@{u})
 
-    in-stat = log --stat ..@{u}
+    in-files = log --stat ..@{u}
 
     in-what = diff --stat ...@{u}
 
@@ -1156,10 +1157,12 @@ sync = "!f(){ pull1 && push1; }; f"
     # Usage: git missing [COMMIT_ISH]
     # Show the missing commits between this and another branch
     missing = "!f() { \
-            git rev-list "${1:-master}".. --oneline \
+            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short "${1:-master}".. \
+                | awk 'NR%2==0' \
                 | sed -e '1 iOnly in HEAD:'; \
             printf \"\n\"; \
-            git rev-list .."${1:-master}" --oneline \
+            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short .."${1:-master}" \
+                | awk 'NR%2==0' \
                 | sed -e '1 iOnly in other:'; \
         }; f"
 
@@ -1262,10 +1265,12 @@ stashall = !git add -A && git stash
 
     std = stash drop
 
-    # Unpushed.
+    # See what is not pushed to remote branch.
     out = log --date=short @{u}..
-    out-stat = log --stat --date=short @{u}..
 
+    out-files = log --stat --date=short @{u}..
+
+    # See all local commits.
     outgoing = log --branches --not --remotes --decorate
 
     # Get the upstream branch name.
@@ -1295,10 +1300,8 @@ stashall = !git add -A && git stash
             git add -p; \
         }; f"
 
-    changelog1 = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
-    changelog2 = !git log --oneline --no-merges ${1-$(git describe --abbrev=0)}..HEAD
-
     # Detailed list of changes.
+    changelog1 = !git log --oneline --no-merges ${1-$(git last-tag)}..HEAD
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 
@@ -1383,6 +1386,7 @@ stashall = !git add -A && git stash
                          && git reset --hard $(git origin)/master \
                          && git rebase master'
 
+    # Show record of pending changes.
     record = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 
     lost1 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
