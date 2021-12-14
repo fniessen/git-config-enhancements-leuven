@@ -354,6 +354,46 @@
             cygstart ${URL/.git}/commits; \
         }; f"
 
+    # Append your staged changes to the LATEST commit (keeping the pre-existing
+    # commit message).
+    recommit = commit -v --amend --reuse-message HEAD
+
+    # Usage: git reword MSG
+    # Change LATEST commit message to what you type in.
+    reword = commit --amend -m
+
+    # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
+    # Credit an author on the LATEST commit.
+    credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
+
+    fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
+                     git commit --fixup=$TARGET ${@:2} \
+                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
+    # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
+
+    # Checkout the commit in question, and amend its message.
+    reword2 = "!f() { BRANCH=$(git current-branch); \
+                      git checkout $1; \
+                      git commit --amend; \
+                      git checkout $BRANCH; }; f"
+
+    # Remove the last commit.
+    uncommit = reset --soft HEAD~1
+
+    uncommit-unstage = reset --mixed HEAD~1
+
+    # Erase any changes since your last commit (reset every file in your working
+    # directory to its committed state).
+    # Destroy the changes from the commit you want to undo.
+    undo = reset --hard HEAD~1
+    # Delete last commit.
+
+    # "Bundle" the last N changes into a single commit.
+    squash = "!f() { \
+            git reset --soft HEAD~$1 \
+                && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
+        }; f"
+
     create-branch = checkout -b
 
     # Usage: git publish
@@ -978,46 +1018,6 @@ deploy-prod =
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
     skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
 
-    # Append your staged changes to the LATEST commit (keeping the pre-existing
-    # commit message).
-    recommit = commit -v --amend --reuse-message HEAD
-
-    # Usage: git reword MSG
-    # Change LATEST commit message to what you type in.
-    reword = commit --amend -m
-
-    # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
-    # Credit an author on the LATEST commit.
-    credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
-
-    fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
-                     git commit --fixup=$TARGET ${@:2} \
-                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
-    # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
-
-    # Checkout the commit in question, and amend its message.
-    reword2 = "!f() { BRANCH=$(git current-branch); \
-                      git checkout $1; \
-                      git commit --amend; \
-                      git checkout $BRANCH; }; f"
-
-    # Remove the last commit.
-    uncommit = reset --soft HEAD~1
-
-    uncommit-unstage = reset --mixed HEAD~1
-
-    # Erase any changes since your last commit (reset every file in your working
-    # directory to its committed state).
-    # Destroy the changes from the commit you want to undo.
-    undo = reset --hard HEAD~1
-    # Delete last commit.
-
-    # "Bundle" the last N changes into a single commit.
-    squash = "!f() { \
-            git reset --soft HEAD~$1 \
-                && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
-        }; f"
-
     nuke-untracked-files = clean -f
 
     clear-soft-dry-run = clean -d -n
@@ -1386,11 +1386,6 @@ stashall = !git add -A && git stash
     lost2 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
 
 zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
-
-    logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
-    branch-date = !"sh -c 'for BRANCH in $(git branch --no-merged); do \
-                               git logdate -1 -r $BRANCH --; \
-                           done'"
 
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
     serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"

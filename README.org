@@ -44,7 +44,6 @@
 - [[#github-tasks][GitHub tasks]]
 - [[#references][References]]
 - [[#git-clients][Git clients]]
-- [[#use-git-and-svn-together][Use Git and SVN together]]
 - [[#contributing][Contributing]]
 - [[#license][License]]
 
@@ -1452,6 +1451,250 @@ repository, you can remove it from the history. To entirely remove unwanted
 files from a repository's history you can use:
 - either the ~git filter-branch~ command
 - or the BFG Repo-Cleaner open source tool.
+
+** REVERT - Undo mistakes
+
+*** Change your last commit
+
+This will help when we need to change the most recent commit.
+
+#+begin_warning
+~git commit --amend~ is a dangerous operation.  Someone might forget that the
+current commit has already been pushed, and amend it anyway.  What will they do
+then?
+
+Try to push the result, see a message about non-fast-forward pushes being not
+allowed, then go along the "If pushing fails" section (pull, resolve, commit,
+push), and we'll have two similar commits in the history.
+#+end_warning
+
+#+begin_verse
+The key to understanding that is that Git does not rewrite history, it creates
+new history and calls that reality.  The commits in this history have different
+IDs (because the ID is the content plus the ID of its parent, changing just one
+commit means everything after it must change).  If you push this new history
+(with --force) everyone else will have the old divergent history.  All their
+work will be on top of this divergent history.  They have to do the surgery to
+put their work on your new history.
+
+When users do a "git pull", git doesn't store that you did a rebase (it would be
+nice if it did) so it assumes something has gone wrong and refuses to pull.  Git
+gets a human to look at the divergence and decide what to do with it.
+Unfortunately, most people don't know what to do with a divergent repository.
+
+And yes, this applies to amended commits.
+
+This is a common question answered on Stack Overflow.
+https://stackoverflow.com/questions/8939977/git-push-rejected-after-feature-branch-rebase
+
+This answer isn't specifically about rebase, but it illustrates how Git creates
+new history.
+https://stackoverflow.com/questions/27692954/change-mail-address-in-each-commit/27709938#27709938
+#+end_verse
+
+Modify the *last* commit, amending with the same message -- without your editor
+prompting you for the message you've already entered!
+
+#+begin_src conf
+    # Append your staged changes to the LATEST commit (keeping the pre-existing
+    # commit message).
+    recommit = commit -v --amend --reuse-message HEAD
+#+end_src
+
+Oh, you made a typo!
+
+#+begin_src conf
+    # Usage: git reword MSG
+    # Change LATEST commit message to what you type in.
+    reword = commit --amend -m
+#+end_src
+
+or use:
+
+: git commit --amend
+
+to open your commit editor and reword the message.
+
+#+begin_src conf
+    # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
+    # Credit an author on the LATEST commit.
+    credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
+#+end_src
+
+After discovering these options, I find I am less fearful of making premature
+commits, since they are easily fixed. (But not after pushing, of course.)
+
+#+begin_warning
+*NEVER AMEND a commit* that you've *ALREADY PUSHED* to a remote repository.
+https://stackoverflow.com/questions/17176859/amending-a-pushed-commit-message
+#+end_warning
+
+Solution for *amending older commits*:
+https://stackoverflow.com/questions/3042437/change-commit-author-at-one-specific-commit
+(see 1st and 2nd answers!)
+
+My new favorite alias lets you amend to a specific commit, *no* need to be the
+*latest* one.
+
+#+begin_src conf
+    fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
+                     git commit --fixup=$TARGET ${@:2} \
+                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
+    # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
+
+    # Checkout the commit in question, and amend its message.
+    reword2 = "!f() { BRANCH=$(git current-branch); \
+                      git checkout $1; \
+                      git commit --amend; \
+                      git checkout $BRANCH; }; f"
+#+end_src
+
+*** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
+
+: git show COMMIT-HASH -- path/to/file.html | git apply --reverse
+
+*** Throw away a commit
+
+http://www.vogella.com/tutorials/Git/article.html#resetcommits
+http://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified
+http://git-scm.com/2011/07/11/reset.html
+
+~git reset~ is a simple way to undo changes that haven't been shared with anyone
+else.
+
+See « Undo 'git add' before commit ».
+
+**** Soft option -- Do not touch the index file or the working tree at all
+
+#+begin_src conf
+    # Remove the last commit.
+    uncommit = reset --soft HEAD~1
+#+end_src
+
+If you make a commit and really didn't mean to, use the ~uncommit~ alias to undo
+it like this:
+
+: git uncommit
+
+~uncommit~ *undoes the last commit*, and *puts the changes* in the commit *into your
+index* -- leaving the content of your working tree exactly as it is.  It's like
+going back in time to the moment right before you committed.
+
+That's really handy if you make a commit and accidently provide the wrong commit
+message. For example:
+
+: git commit -m "Fix bug #11"
+: (damn - wrong bug number)
+: git uncommit
+: git commit -m "Fix bug #1"
+
+#+begin_note
+~uncommit~ here means to do just the reverse of ~commit~.
+#+end_note
+
+This can be a useful technique in resuming work on an unfinished changeset.
+
+**** Mixed option -- Do not touch the working tree (but regenerate the index)
+
+Reset the previous commit, but *puts* all *the changes* from that commit *in the
+working tree*:
+
+#+begin_src conf
+    uncommit-unstage = reset --mixed HEAD~1
+#+end_src
+
+#+begin_note
+~--mixed~ with paths is deprecated; use ~git reset -- <paths>~ instead.
+#+end_note
+
+This is a useful technique if your pull fails to merge the new stuff from
+upstream: ~git reset HEAD~1~, pull again, fix the conflicts, then commit your
+changes again.
+
+This can also be a useful technique to slice a single big commit to different
+small commits to haste review process.
+
+**** Hard option -- Regenerate both the index and working tree
+
+Remove the last commit, *delete changes in your staging area and in your working
+directory*:
+
+#+begin_src conf
+    # Erase any changes since your last commit (reset every file in your working
+    # directory to its committed state).
+    # Destroy the changes from the commit you want to undo.
+    undo = reset --hard HEAD~1
+    # Delete last commit.
+#+end_src
+
+If you reset work that you /never committed/, it is gone for good.  Too bad!  This
+is quite a dangerous command (~git reset --hard~ is one of the few Git commands
+which deletes information with no backout), and must be used with *EXTREME
+CAUTION*.
+
+#+begin_warning
+This command will *overwrite all CHANGED tracked files* in the working tree!
+(/Untracked files/ are out of scope.)
+#+end_warning
+
+#+begin_tip
+If you have changes in your working tree or staging area, you'll probably want
+to stash them before doing the above.
+#+end_tip
+
+#+begin_note
+See the functionality of the partly overlapping ~git checkout .~ command (note
+that it will only erase all your unstaged changes: the *files in your staging
+index will be untouched*), by comparing [[https://wiki.mozilla.org/Cjku/git#git-reset_and_git-checkout][git reset and git checkout]].
+#+end_note
+
+Use ~git reset --hard @{u}~ to make sure the integration branch is up-to-date
+before merging.
+
+Other scenarios:
+- Overtime working, did lots of stupid things.  You want to run away from what
+  had been done...
+- Recover context before a stale merge.
+
+*** Revert a commit
+
+If you make an unwanted change but it doesn't make sense to uncommit it (because
+that code has been pushed to a remote repository say), you can use ~revert~ to
+effectively reverse the commit in question. For example:
+
+: git commit "Fix bug #5"
+: git push
+: (hmm - bad fix)
+: git revert 2a5daf3f
+
+This creates a patch that is the opposite of commit ~COMMIT~ and commits it to
+your repository.
+
+If you want to revert that commit without committing it (putting the reversion
+into your index), use:
+
+: git revert -n COMMIT
+
+*** Squash
+
+Squash change in several commits into one commit so that people think you are
+smart.
+
+Squash commits:
+https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
+
+#+begin_src conf
+    # "Bundle" the last N changes into a single commit.
+    squash = "!f() { \
+            git reset --soft HEAD~$1 \
+                && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
+        }; f"
+#+end_src
+
+Now it is possible to use this command to *combine together the last N commits*
+into one commit:
+
+: git squash N
 
 * Branches
 
@@ -3303,250 +3546,6 @@ List ignored files (*marked unchanged*):
     skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
 #+end_src
 
-** REVERT - Undo mistakes
-
-*** Change your last commit
-
-This will help when we need to change the most recent commit.
-
-#+begin_warning
-~git commit --amend~ is a dangerous operation.  Someone might forget that the
-current commit has already been pushed, and amend it anyway.  What will they do
-then?
-
-Try to push the result, see a message about non-fast-forward pushes being not
-allowed, then go along the "If pushing fails" section (pull, resolve, commit,
-push), and we'll have two similar commits in the history.
-#+end_warning
-
-#+begin_verse
-The key to understanding that is that Git does not rewrite history, it creates
-new history and calls that reality.  The commits in this history have different
-IDs (because the ID is the content plus the ID of its parent, changing just one
-commit means everything after it must change).  If you push this new history
-(with --force) everyone else will have the old divergent history.  All their
-work will be on top of this divergent history.  They have to do the surgery to
-put their work on your new history.
-
-When users do a "git pull", git doesn't store that you did a rebase (it would be
-nice if it did) so it assumes something has gone wrong and refuses to pull.  Git
-gets a human to look at the divergence and decide what to do with it.
-Unfortunately, most people don't know what to do with a divergent repository.
-
-And yes, this applies to amended commits.
-
-This is a common question answered on Stack Overflow.
-https://stackoverflow.com/questions/8939977/git-push-rejected-after-feature-branch-rebase
-
-This answer isn't specifically about rebase, but it illustrates how Git creates
-new history.
-https://stackoverflow.com/questions/27692954/change-mail-address-in-each-commit/27709938#27709938
-#+end_verse
-
-Modify the *last* commit, amending with the same message -- without your editor
-prompting you for the message you've already entered!
-
-#+begin_src conf
-    # Append your staged changes to the LATEST commit (keeping the pre-existing
-    # commit message).
-    recommit = commit -v --amend --reuse-message HEAD
-#+end_src
-
-Oh, you made a typo!
-
-#+begin_src conf
-    # Usage: git reword MSG
-    # Change LATEST commit message to what you type in.
-    reword = commit --amend -m
-#+end_src
-
-or use:
-
-: git commit --amend
-
-to open your commit editor and reword the message.
-
-#+begin_src conf
-    # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
-    # Credit an author on the LATEST commit.
-    credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
-#+end_src
-
-After discovering these options, I find I am less fearful of making premature
-commits, since they are easily fixed. (But not after pushing, of course.)
-
-#+begin_warning
-*NEVER AMEND a commit* that you've *ALREADY PUSHED* to a remote repository.
-https://stackoverflow.com/questions/17176859/amending-a-pushed-commit-message
-#+end_warning
-
-Solution for *amending older commits*:
-https://stackoverflow.com/questions/3042437/change-commit-author-at-one-specific-commit
-(see 1st and 2nd answers!)
-
-My new favorite alias lets you amend to a specific commit, *no* need to be the
-*latest* one.
-
-#+begin_src conf
-    fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
-                     git commit --fixup=$TARGET ${@:2} \
-                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
-    # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
-
-    # Checkout the commit in question, and amend its message.
-    reword2 = "!f() { BRANCH=$(git current-branch); \
-                      git checkout $1; \
-                      git commit --amend; \
-                      git checkout $BRANCH; }; f"
-#+end_src
-
-*** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
-
-: git show COMMIT-HASH -- path/to/file.html | git apply --reverse
-
-*** Throw away a commit
-
-http://www.vogella.com/tutorials/Git/article.html#resetcommits
-http://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified
-http://git-scm.com/2011/07/11/reset.html
-
-~git reset~ is a simple way to undo changes that haven't been shared with anyone
-else.
-
-See « Undo 'git add' before commit ».
-
-**** Soft option -- Do not touch the index file or the working tree at all
-
-#+begin_src conf
-    # Remove the last commit.
-    uncommit = reset --soft HEAD~1
-#+end_src
-
-If you make a commit and really didn't mean to, use the ~uncommit~ alias to undo
-it like this:
-
-: git uncommit
-
-~uncommit~ *undoes the last commit*, and *puts the changes* in the commit *into your
-index* -- leaving the content of your working tree exactly as it is.  It's like
-going back in time to the moment right before you committed.
-
-That's really handy if you make a commit and accidently provide the wrong commit
-message. For example:
-
-: git commit -m "Fix bug #11"
-: (damn - wrong bug number)
-: git uncommit
-: git commit -m "Fix bug #1"
-
-#+begin_note
-~uncommit~ here means to do just the reverse of ~commit~.
-#+end_note
-
-This can be a useful technique in resuming work on an unfinished changeset.
-
-**** Mixed option -- Do not touch the working tree (but regenerate the index)
-
-Reset the previous commit, but *puts* all *the changes* from that commit *in the
-working tree*:
-
-#+begin_src conf
-    uncommit-unstage = reset --mixed HEAD~1
-#+end_src
-
-#+begin_note
-~--mixed~ with paths is deprecated; use ~git reset -- <paths>~ instead.
-#+end_note
-
-This is a useful technique if your pull fails to merge the new stuff from
-upstream: ~git reset HEAD~1~, pull again, fix the conflicts, then commit your
-changes again.
-
-This can also be a useful technique to slice a single big commit to different
-small commits to haste review process.
-
-**** Hard option -- Regenerate both the index and working tree
-
-Remove the last commit, *delete changes in your staging area and in your working
-directory*:
-
-#+begin_src conf
-    # Erase any changes since your last commit (reset every file in your working
-    # directory to its committed state).
-    # Destroy the changes from the commit you want to undo.
-    undo = reset --hard HEAD~1
-    # Delete last commit.
-#+end_src
-
-If you reset work that you /never committed/, it is gone for good.  Too bad!  This
-is quite a dangerous command (~git reset --hard~ is one of the few Git commands
-which deletes information with no backout), and must be used with *EXTREME
-CAUTION*.
-
-#+begin_warning
-This command will *overwrite all CHANGED tracked files* in the working tree!
-(/Untracked files/ are out of scope.)
-#+end_warning
-
-#+begin_tip
-If you have changes in your working tree or staging area, you'll probably want
-to stash them before doing the above.
-#+end_tip
-
-#+begin_note
-See the functionality of the partly overlapping ~git checkout .~ command (note
-that it will only erase all your unstaged changes: the *files in your staging
-index will be untouched*), by comparing [[https://wiki.mozilla.org/Cjku/git#git-reset_and_git-checkout][git reset and git checkout]].
-#+end_note
-
-Use ~git reset --hard @{u}~ to make sure the integration branch is up-to-date
-before merging.
-
-Other scenarios:
-- Overtime working, did lots of stupid things.  You want to run away from what
-  had been done...
-- Recover context before a stale merge.
-
-*** Revert a commit
-
-If you make an unwanted change but it doesn't make sense to uncommit it (because
-that code has been pushed to a remote repository say), you can use ~revert~ to
-effectively reverse the commit in question. For example:
-
-: git commit "Fix bug #5"
-: git push
-: (hmm - bad fix)
-: git revert 2a5daf3f
-
-This creates a patch that is the opposite of commit ~COMMIT~ and commits it to
-your repository.
-
-If you want to revert that commit without committing it (putting the reversion
-into your index), use:
-
-: git revert -n COMMIT
-
-*** Squash
-
-Squash change in several commits into one commit so that people think you are
-smart.
-
-Squash commits:
-https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
-
-#+begin_src conf
-    # "Bundle" the last N changes into a single commit.
-    squash = "!f() { \
-            git reset --soft HEAD~$1 \
-                && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
-        }; f"
-#+end_src
-
-Now it is possible to use this command to *combine together the last N commits*
-into one commit:
-
-: git squash N
-
 ** Clean
 
 **** Delete untracked files
@@ -5028,27 +5027,6 @@ will ~reset~ the index.
 zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
-** TODO To sort out
-
-#+begin_src conf
-    logdate = log --format=format:'%ad %d %h %s %an%n' --date=short
-    branch-date = !"sh -c 'for BRANCH in $(git branch --no-merged); do \
-                               git logdate -1 -r $BRANCH --; \
-                           done'"
-#+end_src
-
-** Git and Subversion
-
-#+begin_src conf :tangle no
-    spull = svn rebase
-    spush = svn dcommit
-    slog = svn log --oneline --show-commit
-#+end_src
-
-#+begin_src conf :tangle no
-    cvs-full-log = log --reverse --pretty=format:'%B------------------------------------------------------------------------'
-#+end_src
-
 * Download repository
 
 ** Easily launch a temporary one-off Git server from any local repository, to enable a peer-to-peer Git workflow
@@ -5253,14 +5231,6 @@ branch (using ~git push --force~) and someone needs a talkin' to.
 
 - [[https://jonas.github.io/tig/][Tig]]
 - [[https://www.gitkraken.com/][GitKraken]]
-
-* Use Git and SVN together
-
-You can combine both Git and SVN on the same project codebase, *in the same
-working tree*:
-
-- http://www.netinstructions.com/git-and-svn-together/
-- https://www.belatrixsf.com/blog/a-happy-way-to-combine-svn-and-git
 
 * Contributing
 
