@@ -162,9 +162,9 @@
     # Print the list of Git aliases.
     alias = "!git config -l | grep alias | cut -c 7- | sort | sed 's/=/ = /'"
 
-    workprofile = config user.email \"john@work.com\"
+    work-profile = config user.email \"john@work.com\"
 
-    create-local-repository = !git init \
+    create-repository = !git init \
                 && ( [ -n "$(ls)" ] || touch .gitignore ) \
                 && git add . \
                 && git commit -m \"Initial commit\"

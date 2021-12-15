@@ -630,34 +630,6 @@ The first color given is the foreground; the second is the background.", e.g
     proxy = http://proxy-guest.example.com:8080
 #+end_src
 
-** Repository administration
-
-The error (when cloning, pulling or pushing)
-
-: SSL certificate problem: Unable to get local issuer certificate
-
-occurs when a *self-signed certificate cannot be verified*.
-
-- For a one-time fix, you can use the ~env~ command to create an environment
-  variable of ~GIT_SSL_NO_VERIFY=TRUE~:
-
-  #+begin_src shell :tangle no
-  env GIT_SSL_NO_VERIFY=TRUE git COMMAND ARGUMENTS
-  #+end_src
-
-- If you don't want to do this all the time, you can disable Git SSL
-  verification:
-
-  #+begin_src conf :tangle no
-  [http]
-      sslVerify = false
-  #+end_src
-
-#+begin_warning
-Please be advised disabling SSL verification globally *might be considered
-a security risk* and should be implemented only temporary.
-#+end_warning
-
 ** Format
 
 #+begin_src conf
@@ -694,18 +666,18 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 
 For *free private repositories*, see https://bitbucket.org/.
 
-** Create a local Git repository
+** Initialize a new repository
 
 Set email addresses for you:
 
 #+begin_src conf
-    workprofile = config user.email \"john@work.com\"
+    work-profile = config user.email \"john@work.com\"
 #+end_src
 
 Then, in the working copy:
 
 #+begin_src conf
-    create-local-repository = !git init \
+    create-repository = !git init \
                 && ( [ -n "$(ls)" ] || touch .gitignore ) \
                 && git add . \
                 && git commit -m \"Initial commit\"
@@ -718,13 +690,16 @@ these directories.  (The file could be called anything; Git assigns no special
 significance to this name.)
 #+end_tip
 
-Remove Git from current project:
+** Drop the revision history for a project
+
+If you accidentally put the wrong tree under version control, simply delete the
+=.git= directory.
 
 #+begin_src conf :tangle no
 find . -name '.git' -exec rm -rf {} \;
 #+end_src
 
-** Clone a repository
+** Proxy configuration
 
 #+begin_src conf
     # Proxy.
@@ -734,17 +709,43 @@ find . -name '.git' -exec rm -rf {} \;
                 && git config --global --unset https.proxy
 #+end_src
 
+** Clone an existing repository
+
 Clone an existing repository including all submodules.
 
 #+begin_src conf
     cl = clone --recursive
 #+end_src
 
-#+begin_tip
 For *passwordless Git pull* (permanently authenticating with Git repositories),
 1. *use SSH* when cloning, and
 2. *add* your *public key* to the remote server.
-#+end_tip
+
+*** I'm having an SSH issue
+
+The error (when cloning, pulling or pushing)
+
+: SSL certificate problem: Unable to get local issuer certificate
+
+occurs when a *self-signed certificate cannot be verified*.
+
+- For a one-time fix, you can use the ~env~ command to create an environment
+  variable of ~GIT_SSL_NO_VERIFY=TRUE~:
+
+  : env GIT_SSL_NO_VERIFY=TRUE git COMMAND ARGUMENTS
+
+- If you don't want to do this all the time, you can disable Git SSL
+  verification:
+
+  #+begin_src conf :tangle no
+  [http]
+      sslVerify = false
+  #+end_src
+
+#+begin_warning
+Please be advised disabling SSL verification globally *might be considered
+a security risk* and should be implemented only temporary.
+#+end_warning
 
 ** Create and add your SSH public key to a repository hosting service
 
@@ -767,24 +768,16 @@ Or, if you want to use RSA:
 
 *** Testing that everything is set up correctly
 
-** Create a new repository in GitHub
-
-*Private* or *public* repository?
-
-#+begin_src conf :tangle no
-    create-repository-gh = "!f() { \
-            REPO_OWNER=$1; \
-            REPO_SLUG=$2; \
-            curl -u \"$1\" https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; \
-        }; f"
-#+end_src
+** Remote repo integrations
 
 Fetch URL: git@bitbucket.org-something:user/slug
 
 #+begin_src conf
     # origin = !echo "${$(git config clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
+#+end_src
 
+#+begin_src conf
     repo-owner = "!f() { \
             git remote show $(git origin) -n \
                 | grep 'Fetch URL:' \
@@ -822,6 +815,18 @@ part of the basic Bourne shell syntax, so *single quotes* will be needed under a
 information:
 https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
 #+end_tip
+
+*** Create a new repository in GitHub
+
+*Private* or *public* repository?
+
+#+begin_src conf :tangle no
+    create-repository-gh = "!f() { \
+            REPO_OWNER=$1; \
+            REPO_SLUG=$2; \
+            curl -u \"$1\" https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; \
+        }; f"
+#+end_src
 
 * Instructions
 
