@@ -1312,8 +1312,6 @@ stashall = !git add -A && git stash
     this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 
     # Summarize your own changes since 24h, suitable for a daily standup meeting.
-    log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
-
     standup = "!git log --branches \
                         --since=$(if [ "$(date +%a)" = "Mon" ]; then \
                                       echo "friday"; \
@@ -1336,6 +1334,7 @@ stashall = !git add -A && git stash
     export-tgz = archive -o latest.tar.gz -9
 
     # Usage: git export-commit [COMMIT_ISH]
+    # Create an archive of a commit.
     export-commit = "!f() { \
             git changed-files ${1:-HEAD} \
                 | tr '\\n' '\\0' \

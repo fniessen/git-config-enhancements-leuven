@@ -4856,8 +4856,6 @@ Show changes for a daily standup meeting:
 
 #+begin_src conf
     # Summarize your own changes since 24h, suitable for a daily standup meeting.
-    log-standup = log --since=yesterday --author=\"$(git config user.email)\" --pretty=short
-
     standup = "!git log --branches \
                         --since=$(if [ "$(date +%a)" = "Mon" ]; then \
                                       echo "friday"; \
@@ -4898,8 +4896,11 @@ you've already checked it out) as a tarball:
 
 Note that the /output format/ is inferred by the extension of the output file.
 
+**** Export a commit
+
 #+begin_src conf
     # Usage: git export-commit [COMMIT_ISH]
+    # Create an archive of a commit.
     export-commit = "!f() { \
             git changed-files ${1:-HEAD} \
                 | tr '\\n' '\\0' \
@@ -4910,6 +4911,8 @@ Note that the /output format/ is inferred by the extension of the output file.
 XXX This does not handle spaces in file names
 
 To see the contents of the zipped file (without extraction), use ~unzip -l FILE~.
+
+**** Generate patch emails
 
 #+begin_src conf
     # View raw commit.
