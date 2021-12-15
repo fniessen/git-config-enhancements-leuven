@@ -1,5 +1,5 @@
 [user]
-    # Telling Git about yourself.
+    # Tell Git about yourself.
     name = John Doe
     email = john.doe@example.com
 
@@ -63,9 +63,6 @@
 
 [status]
     submoduleSummary = true
-
-[pull]
-    rebase = true
 
 [push]
     default = simple
@@ -455,7 +452,7 @@
     main =  !git checkout main
     develop = checkout develop
 
-    # Politely ask Git to delete a local branch.
+    # Delete a local branch.
     delete-local-branch = branch -d
 
 bclean = "!f() { \
@@ -561,8 +558,7 @@ bclean = "!f() { \
         }; f"
 
     # Usage: git compare-changed-files REV_BASE REV_COMPARE
-    # Show changed files (with stat about line additions and line deletions)
-    # between two commits.
+    # Show changed files between two commits.
     compare-changed-files = "!f() { \
             git diff --stat $1...$2; \
         }; f"
@@ -650,13 +646,13 @@ bclean = "!f() { \
 
     # For GitHub.
     mpr = "!f() { \
-            declare CURRENTBRANCH=\"$(git current-branch)\"; \
-            declare BRANCH=\"${2:-$CURRENTBRANCH}\"; \
+            declare CURRENT_BRANCH=\"$(git current-branch)\"; \
+            declare BRANCH_NAME=\"${2:-$CURRENT_BRANCH}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
                 git fetch $(git origin) refs/pull/$1/head:pr/$1 \
-                    && git checkout -B $BRANCH \
-                    && git rebase $BRANCH pr/$1 \
-                    && git checkout -B $BRANCH \
+                    && git checkout -B $BRANCH_NAME \
+                    && git rebase $BRANCH_NAME pr/$1 \
+                    && git checkout -B $BRANCH_NAME \
                     && git merge --ff-only pr/$1 \
                     && git delete-local-branch pr/$1; \
             fi \
@@ -671,12 +667,12 @@ bclean = "!f() { \
         USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
         USER=$(echo $USER_AND_REPO | cut -d\" \" -f1); \
         REPO=$(echo $USER_AND_REPO | cut -d\" \" -f2); \
-        TMPFILE=$(mktemp); \
-        curl -si https://api.github.com/repos/$USER/$REPO/pulls/$2 > $TMPFILE; \
-        PULL_AUTHOR=$(cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
-        PULL_REF=$(cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
-        PULL_TITLE=$(cat $TMPFILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"); \
-        rm $TMPFILE; \
+        TMP_FILE=$(mktemp); \
+        curl -si https://api.github.com/repos/$USER/$REPO/pulls/$2 > $TMP_FILE; \
+        PULL_AUTHOR=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
+        PULL_REF=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
+        PULL_TITLE=$(cat $TMP_FILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"); \
+        rm $TMP_FILE; \
         git fetch $1 pull/$2/head; \
         git merge --no-ff -m \"Merged pull request #$2 from $PULL_AUTHOR/$PULL_REF\n\n$PULL_TITLE\" FETCH_HEAD; \
         ' -"
@@ -820,7 +816,7 @@ deploy-prod =
     whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
 
     # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
-    showorigin = "!sh -c 'for BRANCH in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1) \\\t$BRANCH; done | sort -r'"
+    showorigin = "!sh -c 'for BRANCH_NAME in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; done | sort -r'"
 
     # get remote branches
     trackallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git branch --track $BRANCH_NAME; done"

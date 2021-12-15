@@ -79,7 +79,7 @@ committer and author of a change in every commit.
 
 #+begin_src conf
 [user]
-    # Telling Git about yourself.
+    # Tell Git about yourself.
     name = John Doe
     email = john.doe@example.com
 
@@ -88,7 +88,7 @@ committer and author of a change in every commit.
 #+end_src
 
 You should "override" the above with your personal details in the file
-=.gitconfig_local=:
+=.gitconfig_local=.
 
 #+begin_src conf
 [include]
@@ -363,9 +363,9 @@ Git branch.
 
 Choose the default behavior of ~git pull~:
 
-- *Default (fast-forward or merge)*
+- *Fast-forward if possible (or merge)*
 
-  This is the standard behavior of ~git pull~: fast-forward the current branch to
+  This is the *default* behavior of ~git pull~: fast-forward the current branch to
   the fetched branch when possible, otherwise create a merge commit.
 
   #+begin_src conf :tangle no
@@ -373,19 +373,20 @@ Choose the default behavior of ~git pull~:
       rebase = merges
   #+end_src
 
+- *Fast-forward only*
+
+  Fast-forward to the fetched branch.  Fail if that is not possible.
+
 - *Rebase*
 
-  Rebase the current branch onto the fetched branch.  If there are no local
-  commits to rebase, this is equivalent to a fast-forward.
+  Rebase the current branch onto the fetched branch.
 
   #+begin_src conf :tangle no
   [pull]
       rebase = true
   #+end_src
 
-- *Only ever fast-forward*
-
-  Fast-forward to the fetched branch.  Fail if that is not possible.
+  If there are no local commits to rebase, this is equivalent to a fast-forward.
 
 rebase with auto-abort
 : git rebase foo || git rebase --abort
@@ -1315,6 +1316,8 @@ log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
 
 
 
+
+
 You may want to add history to search through the whole repository, by adding
 rev-list to your git log:
 
@@ -1943,7 +1946,7 @@ default.
 Delete a *local* branch:
 
 #+begin_src conf
-    # Politely ask Git to delete a local branch.
+    # Delete a local branch.
     delete-local-branch = branch -d
 #+end_src
 
@@ -2010,7 +2013,7 @@ for the distinction between "merged" and "fully merged" branches!
 - https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
 - https://github.com/arc90/git-sweep
 
-*** Delete remote branch
+*** Delete a remote branch
 
 Delete a *remote* branch:
 
@@ -2122,15 +2125,15 @@ being important.
 ** Create a tag
 
 While Git supports annotated and lightweight tags, you can only *create*
-- *annotated tags* in /Bitbucket/ and in /GitLab/, and
-- *lightweight tags* via /GitHub/ interface (for releases).
+- *lightweight tags* via /GitHub/ interface (for releases), and
+- *annotated tags* in /Bitbucket/ and in /GitLab/.
+
+*Lightweight tags* are just pointers to specific commits.  They *don't include any
+further information*.
 
 *Annotated tags* are *regular objects* in the repository, which means they have an
 author, a date, a message, and can be referred because they have their own SHA
 key.
-
-*Lightweight tags* are just pointers to specific commits.  They *don't include any
-further information*.
 
 If knowing *who* tagged *what* and *when* is relevant for you, then use /annotated
 tags/. If you *just want to tag a specific point in your development*, no matter
@@ -2308,8 +2311,7 @@ List all the changed *files between 2 commits*:
 
 #+begin_src conf
     # Usage: git compare-changed-files REV_BASE REV_COMPARE
-    # Show changed files (with stat about line additions and line deletions)
-    # between two commits.
+    # Show changed files between two commits.
     compare-changed-files = "!f() { \
             git diff --stat $1...$2; \
         }; f"
@@ -2628,14 +2630,14 @@ will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out
 
 #+begin_src shell :tangle no
 #!/bin/bash
-TMPFILE=$(mktemp)
-REPOSLUG=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
-PRNUMBER=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
-curl -s https://api.github.com/repos/$REPOSLUG/pulls/$PRNUMBER > $TMPFILE
-trap "{ rm -f $TMPFILE; }" EXIT
-HEADREF=$(cat $TMPFILE | jq -r '.head.ref')
-HEADSLUG=$(cat $TMPFILE | jq -r '.head.repo.full_name')
-git push -f git@github.com:$HEADSLUG HEAD:$HEADREF
+TMP_FILE=$(mktemp)
+REPO_SLUG=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
+PR_NUMBER=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
+curl -s https://api.github.com/repos/$REPO_SLUG/pulls/$PR_NUMBER > $TMP_FILE
+trap "{ rm -f $TMP_FILE; }" EXIT
+HEAD_REF=$(cat $TMP_FILE | jq -r '.head.ref')
+HEAD_SLUG=$(cat $TMP_FILE | jq -r '.head.repo.full_name')
+git push -f git@github.com:$HEAD_SLUG HEAD:$HEAD_REF
 #+end_src
 
 For more details on pushing changes to a PR, please see [[https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork][the official article]].
@@ -2655,13 +2657,13 @@ If everything is OK, you can merge the pull request.
 #+begin_src conf
     # For GitHub.
     mpr = "!f() { \
-            declare CURRENTBRANCH=\"$(git current-branch)\"; \
-            declare BRANCH=\"${2:-$CURRENTBRANCH}\"; \
+            declare CURRENT_BRANCH=\"$(git current-branch)\"; \
+            declare BRANCH_NAME=\"${2:-$CURRENT_BRANCH}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
                 git fetch $(git origin) refs/pull/$1/head:pr/$1 \
-                    && git checkout -B $BRANCH \
-                    && git rebase $BRANCH pr/$1 \
-                    && git checkout -B $BRANCH \
+                    && git checkout -B $BRANCH_NAME \
+                    && git rebase $BRANCH_NAME pr/$1 \
+                    && git checkout -B $BRANCH_NAME \
                     && git merge --ff-only pr/$1 \
                     && git delete-local-branch pr/$1; \
             fi \
@@ -2676,12 +2678,12 @@ If everything is OK, you can merge the pull request.
         USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
         USER=$(echo $USER_AND_REPO | cut -d\" \" -f1); \
         REPO=$(echo $USER_AND_REPO | cut -d\" \" -f2); \
-        TMPFILE=$(mktemp); \
-        curl -si https://api.github.com/repos/$USER/$REPO/pulls/$2 > $TMPFILE; \
-        PULL_AUTHOR=$(cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
-        PULL_REF=$(cat $TMPFILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
-        PULL_TITLE=$(cat $TMPFILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"); \
-        rm $TMPFILE; \
+        TMP_FILE=$(mktemp); \
+        curl -si https://api.github.com/repos/$USER/$REPO/pulls/$2 > $TMP_FILE; \
+        PULL_AUTHOR=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
+        PULL_REF=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
+        PULL_TITLE=$(cat $TMP_FILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"); \
+        rm $TMP_FILE; \
         git fetch $1 pull/$2/head; \
         git merge --no-ff -m \"Merged pull request #$2 from $PULL_AUTHOR/$PULL_REF\n\n$PULL_TITLE\" FETCH_HEAD; \
         ' -"
@@ -3106,7 +3108,7 @@ clean and relevant commits, no experiments or fixing typos.
     whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
 
     # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
-    showorigin = "!sh -c 'for BRANCH in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1) \\\t$BRANCH; done | sort -r'"
+    showorigin = "!sh -c 'for BRANCH_NAME in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; done | sort -r'"
 
     # get remote branches
     trackallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git branch --track $BRANCH_NAME; done"
@@ -3919,7 +3921,7 @@ Performing a Git merge with *no commit* and *no fast-forward* will merge the two
 code bases together -- it will *modify your working copy*.  This will allow you to
 examine, test, and undo the merge if required.
 
-: git merge --no-commit --no-ff $BRANCH
+: git merge --no-commit --no-ff BRANCH_NAME
 
 You can do ~git merge --abort~ after seeing that there are conflicts.
 
@@ -4049,15 +4051,15 @@ stories, or hotfix patches, etc.
 
 Create a new feature branch:
 
-: feature-start = '!BRANCH=$1; git checkout master; git pull; git create-branch "$BRANCH" master'
+: feature-start = '!BRANCH_NAME=$1; git checkout master; git pull; git create-branch "$BRANCH_NAME" master'
 
 Update the feature branch:
 
-: feature-pull = '!BRANCH=$(git current-branch); git checkout master; git pull; git checkout "$BRANCH"; git rebase master'
+: feature-pull = '!BRANCH_NAME=$(git current-branch); git checkout master; git pull; git checkout "$BRANCH_NAME"; git rebase master'
 
 Share the feature branch:
 
-: feature-push = '!BRANCH=$(git current-branch); git push -u $(git origin) "$BRANCH"'
+: feature-push = '!BRANCH_NAME=$(git current-branch); git push -u $(git origin) "$BRANCH_NAME"'
 
 If your team uses a different feature flow, you may want to skip including these
 aliases, or you may want to edit these aliases to match your team's feature flow.
