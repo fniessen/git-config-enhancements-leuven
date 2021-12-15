@@ -101,52 +101,6 @@ You should "override" the above with your personal details in the file
 [core]
 #+end_src
 
-#+begin_note
-When the ~LESS~ environment variable is unset, Git sets it to ~FRSX~.  If the ~LESS~
-environment variable is set, Git does not change it at all.
-
-We use ~-R~ in the command itself to be sure to *interpret the color codes* when Git
-is run from /Windows/ Emacs (~C-x v l~), with /no/ value for the ~LESS~ /environment
-variable/.
-#+end_note
-
-#+begin_src conf
-    # git-grep to ignore ^M.
-    pager = tr -d '\\r' | less -REX
-#+end_src
-
-Stop viewing non-printable characters (for example, ISO Latin 1 accents in
-a UTF-8 terminal) in reverse video and hexadecimals: see ~LESSBINFMT~.
-
-Stop viewing ~^M~ symbols in diff:
-
-#+begin_src conf
-    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
-    whitespace = cr-at-eol
-#+end_src
-
-Improve the ~git diff~ output: diff-so-fancy or [[https://github.com/dandavison/delta][delta]].
-
-#+begin_src conf
-    pager = diff-so-fancy | LESS= less --tabs=4 -RFX
-#+end_src
-
-(~less~ options -- ~-R~ for colors to persist, ~-F~ to exit immediately if the output
-is less than one screen, and ~-X~ for not clearing the screen).
-
-#+begin_tip
-The diff-so-fancy ruler was 1 char too long.  It turned out I had an option in
-~$LESS~ that enabled the status column, and thus added a space at the beginning
-of every line.  I was able to resolve it by clearing the ~LESS~ environment
-variable in the ~core.pager~ config.
-
-Also, the diff-so-fancy ruler was not displayed in Unicode.  It turned out I had
-set ~LC_CTYPE~ to "".  I had to either unset ~LC_CTYPE~ entirely or set it to
-something with UTF-8 in it.
-
-See https://github.com/so-fancy/diff-so-fancy/issues/364.
-#+end_tip
-
 Performance:
 
 #+begin_src conf
@@ -623,7 +577,68 @@ Supported editors include:
 
 ** Delete ".orig" files
 
-** Default Terminal
+Clean the byproducts of the merge conflict process:
+
+: find -name "*.orig" -delete
+
+** Pager Support
+
+Some Git commands can produce a lot of output, and Git will attempt to use
+a pager to make those commands more pleasant.
+
+To set the pager that should be used, set the application variable ~pager~.
+
+*** Less
+
+#+begin_note
+When the ~LESS~ environment variable is unset, Git sets it to ~FRSX~.  If the ~LESS~
+environment variable is set, Git does not change it at all.
+
+We use ~-R~ in the command itself to be sure to *interpret the color codes* when Git
+is run from /Windows/ Emacs (~C-x v l~), with /no/ value for the ~LESS~ /environment
+variable/.
+#+end_note
+
+#+begin_src conf
+    # git-grep to ignore ^M.
+    pager = tr -d '\\r' | less -REX
+#+end_src
+
+Stop viewing non-printable characters (for example, ISO Latin 1 accents in
+a UTF-8 terminal) in reverse video and hexadecimals: see ~LESSBINFMT~.
+
+Stop viewing ~^M~ symbols in diff:
+
+#+begin_src conf
+    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    whitespace = cr-at-eol
+#+end_src
+
+*** Diff-so-fancy extension
+
+Improve the ~git diff~ output using a tool like:
+- [[https://github.com/so-fancy/diff-so-fancy][diff-so-fancy]] or
+- [[https://github.com/dandavison/delta][delta]].
+
+#+begin_src conf
+    pager = diff-so-fancy | LESS= less --tabs=4 -FRX
+#+end_src
+
+(~less~ options -- ~-F~ to exit immediately if the output is less than one screen,
+~-R~ for colors to persist, and ~-X~ for not clearing the screen).
+
+#+begin_tip
+The diff-so-fancy ruler was 1 char too long.  It turned out I had an option in
+~$LESS~ that enabled the status column, and thus added a space at the beginning
+of every line.  I was able to resolve it by clearing the ~LESS~ environment
+variable in the ~core.pager~ config.
+
+Also, the diff-so-fancy ruler was not displayed in Unicode.  It turned out I had
+set ~LC_CTYPE~ to "".  I had to either unset ~LC_CTYPE~ entirely or set it to
+something with UTF-8 in it.
+
+See https://github.com/so-fancy/diff-so-fancy/issues/364.
+#+end_tip
 
 ** AutoCRLF
 
