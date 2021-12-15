@@ -10,7 +10,6 @@
     path = .gitconfig_local
 
 [core]
-    editor = emacsclient
 
     # git-grep to ignore ^M.
     pager = tr -d '\\r' | less -REX
@@ -152,9 +151,13 @@
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
-    ls   = "[%C(auto,yellow)%<|(10)%h%C(reset)] [%C(auto,bold blue)%<(15trunc)%cn%C(reset)]  %C(auto)%d% C(reset)%s"
+    ls = "[%C(auto,yellow)%<|(10)%h%C(reset)] [%C(auto,bold blue)%<(15trunc)%cn%C(reset)]  %C(auto)%d% C(reset)%s"
     find = "[%C(yellow)%<|(20)%h%C(reset)] [%C(bold blue)%<(10)%cn%C(reset)]  %C(auto)%d %C(reset)  %s"
-    graph="%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)%n %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)"
+    graph = "%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)%n %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)"
+
+[core]
+
+    editor = emacsclient
 
 [alias]
 

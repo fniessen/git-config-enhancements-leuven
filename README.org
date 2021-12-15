@@ -99,10 +99,7 @@ You should "override" the above with your personal details in the file
 
 #+begin_src conf
 [core]
-    editor = emacsclient
 #+end_src
-
-*Text viewer* for use by Git commands.
 
 #+begin_note
 When the ~LESS~ environment variable is unset, Git sets it to ~FRSX~.  If the ~LESS~
@@ -149,64 +146,6 @@ something with UTF-8 in it.
 
 See https://github.com/so-fancy/diff-so-fancy/issues/364.
 #+end_tip
-
-[[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ (LF) as a newline
-character in Git-handled repositories.
-
-- *Checkout Windows-style, commit Unix-style line endings*
-
-  Git will convert LF to CRLF when checking out text files.  When committing
-  text files, CRLF will be converted to LF.  *For cross-platform projects*, this
-  is the *recommended setting on Windows* (~core.autocrlf~ is set to ~true~) because
-  it ensures that your repository can be used on other platforms while retaining
-  CRLF in your working tree.
-
-  #+begin_src conf :tangle no
-      # Configure Git to ensure line endings in files you checkout are correct
-      # for Windows.  For compatibility, line endings are converted to Unix
-      # style when you commit files.
-      autocrlf = true
-  #+end_src
-
-  This /turns all LF back into CRLF when writing out into the working tree/.
-
-- *Checkout as-is, commit Unix-style line endings*
-
-  Git will /not perform any conversion when checking out text files/.  When
-  committing text files, CRLF will be converted to LF.  *For cross-platform
-  projects*, this is the *recommended setting on Unix* (~core.autocrlf~ is set to
-  ~input~) to prevent CRLF from getting written into the repository.
-
-  #+begin_src conf :tangle no
-      # Configure Git to ensure line endings in files you checkout are correct
-      # for Linux and macOS.
-      autocrlf = input
-  #+end_src
-
-  When you read files back out of the object database and write them into the
-  working tree, they will still have LF to denote the end of line.
-
-- *Checkout as-is, commit as-is*
-
-  Git will not perform any conversions when checking out or committing text
-  files.  Choosing this option is *not recommended for cross-platform projects*
-  (~core.autocrlf~ is set to ~false~).
-
-  #+begin_src conf :tangle no
-      autocrlf = false
-  #+end_src
-
-  This is the default, but most people are encouraged to change this
-  immediately.
-
-  The result of using ~false~ is that Git doesn't ever mess with line endings on
-  your file. You can check in files with LF or CRLF or CR or some random mix of
-  those three and Git does not care. This can make diffs harder to read and
-  merges more difficult.
-
-#+begin_src conf :tangle no
-    safecrlf = true
-#+end_src
 
 Performance:
 
@@ -638,9 +577,9 @@ The first color given is the foreground; the second is the background.", e.g
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
-    ls   = "[%C(auto,yellow)%<|(10)%h%C(reset)] [%C(auto,bold blue)%<(15trunc)%cn%C(reset)]  %C(auto)%d% C(reset)%s"
+    ls = "[%C(auto,yellow)%<|(10)%h%C(reset)] [%C(auto,bold blue)%<(15trunc)%cn%C(reset)]  %C(auto)%d% C(reset)%s"
     find = "[%C(yellow)%<|(20)%h%C(reset)] [%C(bold blue)%<(10)%cn%C(reset)]  %C(auto)%d %C(reset)  %s"
-    graph="%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)%n %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)"
+    graph = "%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)%n %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)"
 #+end_src
 
 See
@@ -648,6 +587,103 @@ See
 - https://git-scm.com/docs/pretty-formats (XXX)
 
 * ------------------------------------------------------------------------------
+
+* Preferences
+
+#+begin_src conf
+[core]
+#+end_src
+
+** General
+
+** Auto-Fetch
+
+** Auto-Prune
+
+** Default Branch Name
+
+** External Merge Tool
+
+** External Diff Tool
+
+** External Editor
+
+You may edit your commit messages in your preferred external *text editor*.
+
+Supported editors include:
+- Atom
+- Emacs
+- IntelliJ
+- Sublime
+- VS Code
+
+#+begin_src conf
+    editor = emacsclient
+#+end_src
+
+** Delete ".orig" files
+
+** Default Terminal
+
+** AutoCRLF
+
+[[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ (LF) as a newline
+character in Git-handled repositories.
+
+- *Checkout Windows-style, commit Unix-style line endings*
+
+  Git will convert LF to CRLF when checking out text files onto your file
+  system.  When committing text files, CRLF will be converted to LF.  *For
+  cross-platform projects*, this is the *recommended setting on Windows*
+  (~core.autocrlf~ is set to ~true~) because it ensures that your repository can be
+  used on other platforms while retaining CRLF in your working tree.
+
+  #+begin_src conf :tangle no
+      # Configure Git to ensure line endings in files you checkout are correct
+      # for Windows.  For compatibility, line endings are converted to Unix
+      # style when you commit files.
+      autocrlf = true
+  #+end_src
+
+  This /turns all LF back into CRLF when writing out into the working tree/.
+
+- *Checkout as-is, commit Unix-style line endings*
+
+  Git will /not perform any conversion when checking out text files/.  When
+  committing text files, CRLF will be converted to LF.  *For cross-platform
+  projects*, this is the *recommended setting on Unix* (~core.autocrlf~ is set to
+  ~input~) to prevent CRLF from getting written into the repository.
+
+  #+begin_src conf :tangle no
+      # Configure Git to ensure line endings in files you checkout are correct
+      # for Linux and macOS.
+      autocrlf = input
+  #+end_src
+
+  When you read files back out of the object database and write them into the
+  working tree, they will still have LF to denote the end of line.
+
+- *Checkout as-is, commit as-is*
+
+  Git will not perform any conversions when checking out or committing text
+  files.  Choosing this option is *not recommended for cross-platform projects*
+  (~core.autocrlf~ is set to ~false~).
+
+  #+begin_src conf :tangle no
+      autocrlf = false
+  #+end_src
+
+  This is the default, but most people are encouraged to change this
+  immediately.
+
+  The result of using ~false~ is that Git doesn't ever mess with line endings on
+  your file. You can check in files with LF or CRLF or CR or some random mix of
+  those three and Git does not care. This can make diffs harder to read and
+  merges more difficult.
+
+** Use extended logging in activity log
+
+** Forget all Usernames and Passwords
 
 * Aliases
 
@@ -2533,8 +2569,9 @@ The ~--~ signals the /end of options/, that the rest of the parameters are limit
 
 * Pull requests
 
-A pull request (PR) is a request from someone to merge in code from one branch
-to another.
+A pull request (PR), sometimes called merge request, is a review request. You
+are asking someone to check the changes on a branch before merging into another
+branch.
 
 XXX See https://github.com/github/hub/
 
