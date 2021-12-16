@@ -174,6 +174,7 @@
                 && git add . \
                 && git commit -m \"Initial commit\"
 
+[alias]
     # Proxy.
     set-proxy = !git config --global http.proxy http://proxy-guest.example.com:8080 \
                 && git config --global https.proxy https://proxy-guest.example.com:8080
@@ -365,9 +366,11 @@
 
     # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
     # Credit an author on the LATEST commit.
-    credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
+    credit = "!f() { \
+            git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; \
+        }; f"
 
-    fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
+    recommit2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
                      git commit --fixup=$TARGET ${@:2} \
                          && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
@@ -389,7 +392,8 @@
     undo = reset --hard HEAD~1
     # Delete last commit.
 
-    # "Bundle" the last N changes into a single commit.
+    # Usage: git squash N
+    # Bundle the last N commits into a single commit.
     squash = "!f() { \
             git reset --soft HEAD~$1 \
                 && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
@@ -397,13 +401,7 @@
 
     create-branch = checkout -b
 
-    # Usage: git publish
-    # Push current branch to remote server.
-    publish = !git push -u $(git origin) $(git current-branch)
-    # (Create a copy of the current branch on the remote "origin", and set it to
-    # track the upstream branch)
-
-    # current-branch = name-rev --name-only HEAD
+    # current-branch = git name-rev --name-only --refs="refs/heads/*" HEAD
     # XXX Does not work correctly with tags (returns 'tags/2019.04.25~3')
 
     # Usage: git current-branch
@@ -416,31 +414,42 @@
                 | tr '/' '-'; \
         }; f"
 
+    # Usage: git publish
+    # Push current branch to remote server.
+    publish = !git push -u $(git origin) $(git current-branch)
+    # (Create a copy of the current branch on the remote "origin", and set it to
+    # track the upstream branch)
+
     # Show local and remote branches.
     branches = branch -a -vv
+
+    # Show info for branches which have been checked out locally...
+    br = for-each-ref \
+                --sort=-committerdate refs/heads/ \
+                --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
+
+    recent1 = for-each-ref \
+                --sort=committerdate refs/heads/ \
+                --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
+
+    recent2 = for-each-ref \
+                --sort=-committerdate refs/heads/ \
+                --format='%(authordate:short) %(color:red)%(objectname:short) %(color:yellow)%(refname:short)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
+
+    # Sort by date for branches; can be useful for spring cleaning
+    branches-by-date = for-each-ref \
+                --sort=-committerdate refs/heads/ \
+                --format='%(committerdate:short) %(refname:short)'
 
     be = branch --edit-description
 
     track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
 
-    # Show info for branches which have been checked out locally...
-    br = for-each-ref \
-             --sort=-committerdate refs/heads/ \
-             --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
-
-    recent = for-each-ref \
-                 --sort=-committerdate refs/heads/ \
-                 --format='%(authordate:short) %(color:red)%(objectname:short) %(color:yellow)%(refname:short)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
-
-    # Sort by date for branches; can be useful for spring cleaning
-    refs-by-date = for-each-ref \
-                       --sort=-committerdate \
-                       --format='%(committerdate:short) %(refname:short)'
-
     br-active = "!f() { \
             git branch --no-merged \
                 | grep -v '\\*'; \
         }; f"
+
     branches-active = "!f() { \
             git branch -a -vv --no-merged \
                 | grep -v '\\*'; \
@@ -450,6 +459,7 @@
             git branch --merged \
                 | grep -v '\\*'; \
         }; f"
+
     branches-merged = "!f() { \
             git branch -a -vv --merged \
                 | grep -v '\\*'; \
@@ -1041,7 +1051,11 @@ deploy-prod =
 
     # up = "!git stash && git pull && git stash pop"
 
-    pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] && git pull || git stash push -m "autostash" && git pull && git stash pop
+    pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] \
+                && git pull \
+                || git stash push -m "autostash" \
+                && git pull \
+                && git stash pop
 
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
@@ -1049,26 +1063,28 @@ deploy-prod =
 
     f = !git fetch --all && git rebase $(git origin)/master
 
-    up-tmpname = "!f() { git remote update -p; git merge --ff-only @{u}; }; f"
+    up-tmpname = "!f() { \
+            git remote update -p; \
+            git merge --ff-only @{u}; \
+        }; f"
 
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
-    upr = "!f() { git remote update -p; git rebase -p @{u}; }; f"
-
-# cleanpull
-# update (like svn? if we add a git reset in front?)
-# sync
+    upr = "!f() { \
+            git remote update -p; \
+            git rebase -p @{u}; \
+        }; f"
 
     # Get everything new.
     update = !git pull                     && git submodule update --init --recursive
     get    = !git pull --rebase            && git submodule update --init --recursive
     update = !git pull --rebase --prune $@ && git submodule update --init --recursive
 
-  # Do a push/pull for just one branch.
-  push1 = "!git push $(git origin) $(git current-branch)"
-  pull1 = "!git pull $(git origin) $(git current-branch)"
+    # Do a push/pull for just one branch.
+    push1 = "!git push $(git origin) $(git current-branch)"
+    pull1 = "!git pull $(git origin) $(git current-branch)"
 
-# Pull and push from the current branch.
-sync = "!f(){ pull1 && push1; }; f"
+    # Pull and push from the current branch.
+    sync = "!f(){ pull1 && push1; }; f"
 
     pull-all = !"OLD=$(git current-branch); \
                  for B in $(git for-each-ref refs/heads --format='%(refname)'); do \
@@ -1104,11 +1120,19 @@ sync = "!f(){ pull1 && push1; }; f"
 
     merge-to-master =  "!f(){ BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
                                   BRANCH_NAME=${branch_name##refs/heads/}; \
-                                  git checkout master && git merge $BRANCH_NAME && git checkout $BRANCH_NAME; };f"
-    fork-from-master = "!f(){ git checkout master && git branch $1 && git checkout $1; };f"
+                                  git checkout master \
+                                      && git merge $BRANCH_NAME \
+                                      && git checkout $BRANCH_NAME; \
+        };f"
 
-    m = "!f() { local OLD=$(git current-branch); \
-                git co \"$1\" && git pu && git merge $OLD && git p && git co $OLD; }; f"
+    m = "!f() { \
+            local OLD=$(git current-branch); \
+            git checkout \"$1\" \
+                && git pull \
+                && git merge $OLD \
+                && git push \
+                && git checkout $OLD; \
+        }; f"
 
     # Run merge test (before merge) to check for any conflicts beforehand.
     mergetest = "!f() { git merge --no-commit --no-ff \"$1\"; \
@@ -1216,16 +1240,18 @@ sync = "!f(){ pull1 && push1; }; f"
                 | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
         }; f"
 
-stashall = !git add -A && git stash
-# "Add" modified files, deleted files, and new untracked files.
+    # "Add" modified files, deleted files, and new untracked files.
+    stash-all = !git add -A && git stash
 
-    hide = stash push --include-untracked # Hide all files, including untracked files (faster than using --all).
+    # Hide all files, including untracked files (faster than using --all).
+    hide = stash push --include-untracked
 
     snapshot = !git stash push -m "snapshot-$(date +%Y%m%d_%H%M)" \
-                    && git stash apply "stash@{0}"
+                && git stash apply "stash@{0}"
 
     # checkpoint
-    cp = !git stash push -m "$(date +%F--%T)" && git stash pop --index
+    cp = !git stash push -m "$(date +%F--%T)" \
+                && git stash pop --index
 
     # checkpoint recover
     cpr = "!f() { \

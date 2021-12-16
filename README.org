@@ -272,6 +272,10 @@ Choose the default behavior of ~git pull~:
 rebase with auto-abort
 : git rebase foo || git rebase --abort
 
+See https://www.gitkraken.com/learn/git/problems/git-pull-rebase!!!
+
+At this point, let us remind you of [[https://git-scm.com/book/en/v2/Git-Branching-Rebasing#The-Perils-of-Rebasing][the perils of rebasing]].
+
 ** Push
 
 Push *only* the *current working branch* (sane pushing -- instead of pushing all
@@ -400,10 +404,6 @@ Set ~rebase.stat = true~, so the ~diffstat~ output is still shown when they pull
     stat = true
 #+end_src
 
-#+begin_warning
-At this point, let us remind you of [[https://git-scm.com/book/en/v2/Git-Branching-Rebasing#The-Perils-of-Rebasing][the perils of rebasing]].
-#+end_warning
-
 ** Grep
 
 https://git-scm.com/docs/git-grep
@@ -502,13 +502,6 @@ The first color given is the foreground; the second is the background.", e.g
     matchSelected = yellow bold blue
     separator = red bold
     selected = white
-#+end_src
-
-** Proxy
-
-#+begin_src conf :tangle no
-[http]
-    proxy = http://proxy-guest.example.com:8080
 #+end_src
 
 ** Format
@@ -756,7 +749,13 @@ find . -name '.git' -exec rm -rf {} \;
 
 ** Proxy configuration
 
+#+begin_src conf :tangle no
+[http]
+    proxy = http://proxy-guest.example.com:8080
+#+end_src
+
 #+begin_src conf
+[alias]
     # Proxy.
     set-proxy = !git config --global http.proxy http://proxy-guest.example.com:8080 \
                 && git config --global https.proxy https://proxy-guest.example.com:8080
@@ -1604,7 +1603,9 @@ to open your commit editor and reword the message.
 #+begin_src conf
     # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
     # Credit an author on the LATEST commit.
-    credit = "!f() { git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; }; f"
+    credit = "!f() { \
+            git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; \
+        }; f"
 #+end_src
 
 After discovering these options, I find I am less fearful of making premature
@@ -1623,7 +1624,7 @@ My new favorite alias lets you amend to a specific commit, *no* need to be the
 *latest* one.
 
 #+begin_src conf
-    fixup2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
+    recommit2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
                      git commit --fixup=$TARGET ${@:2} \
                          && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
@@ -1637,7 +1638,7 @@ My new favorite alias lets you amend to a specific commit, *no* need to be the
 
 *** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
 
-: git show COMMIT-HASH -- path/to/file.html | git apply --reverse
+: git show COMMIT_HASH -- PATH/TO/FILE | git apply --reverse
 
 *** Throw away a commit
 
@@ -1753,7 +1754,7 @@ effectively reverse the commit in question. For example:
 : (hmm - bad fix)
 : git revert 2a5daf3f
 
-This creates a patch that is the opposite of commit ~COMMIT~ and commits it to
+This creates a patch that is the opposite of commit ~2a5daf3f~ and commits it to
 your repository.
 
 If you want to revert that commit without committing it (putting the reversion
@@ -1763,24 +1764,28 @@ into your index), use:
 
 *** Squash
 
-Squash change in several commits into one commit so that people think you are
-smart.
-
-Squash commits:
-https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
+Combine together a change done in several commits into one commit so that people
+think you are smart.
 
 #+begin_src conf
-    # "Bundle" the last N changes into a single commit.
+    # Usage: git squash N
+    # Bundle the last N commits into a single commit.
     squash = "!f() { \
             git reset --soft HEAD~$1 \
                 && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
         }; f"
 #+end_src
 
-Now it is possible to use this command to *combine together the last N commits*
-into one commit:
+https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
 
-: git squash N
+*** Revert a faulty merge
+
+https://mirrors.edge.kernel.org/pub/software/scm/git/docs/howto/revert-a-faulty-merge.txt
+
+*** How to undo almost anything with Git
+
+Absolutely read
+https://github.com/blog/2019-how-to-undo-almost-anything-with-git!
 
 * Branches
 
@@ -1826,7 +1831,7 @@ Alternatives:
 
 ** Create a branch
 
-Create a new branch (40-character name advised), and then switch to it:
+Create a new branch (maximum 40-character name advised), and then switch to it:
 
 #+begin_src conf
     create-branch = checkout -b
@@ -1848,27 +1853,18 @@ resolve it myself).
 
 Or I branch off =master= and revert the offending commit until things are
 resolved, ie. like so
- git checkout master
- git create-branch sb-master
- git revert sha1-of-offending-commit
+
+: git checkout master
+: git create-branch sb-master
+: git revert sha1-of-offending-commit
 #+end_note
 
-** Publish a branch
-
-Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
-
-#+begin_src conf
-    # Usage: git publish
-    # Push current branch to remote server.
-    publish = !git push -u $(git origin) $(git current-branch)
-    # (Create a copy of the current branch on the remote "origin", and set it to
-    # track the upstream branch)
-#+end_src
+** Current branch
 
 Name of current branch (not so useful in itself, but used in other aliases):
 
 #+begin_src conf
-    # current-branch = name-rev --name-only HEAD
+    # current-branch = git name-rev --name-only --refs="refs/heads/*" HEAD
     # XXX Does not work correctly with tags (returns 'tags/2019.04.25~3')
 
     # Usage: git current-branch
@@ -1880,6 +1876,25 @@ Name of current branch (not so useful in itself, but used in other aliases):
             git current-branch \
                 | tr '/' '-'; \
         }; f"
+#+end_src
+
+Others:
+
+: git for-each-ref --format="%(refname:short)" --points-at HEAD refs/heads
+
+Caveat: if several refs/branches point at the current commit, the above commands
+will list them all.
+
+** Publish a branch
+
+Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
+
+#+begin_src conf
+    # Usage: git publish
+    # Push current branch to remote server.
+    publish = !git push -u $(git origin) $(git current-branch)
+    # (Create a copy of the current branch on the remote "origin", and set it to
+    # track the upstream branch)
 #+end_src
 
 Then:
@@ -1907,33 +1922,37 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 #+end_src
 
 #+begin_src conf
+    # Show info for branches which have been checked out locally...
+    br = for-each-ref \
+                --sort=-committerdate refs/heads/ \
+                --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
+#+end_src
+
+#+begin_src conf
+    recent1 = for-each-ref \
+                --sort=committerdate refs/heads/ \
+                --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
+#+end_src
+
+#+begin_src conf
+    recent2 = for-each-ref \
+                --sort=-committerdate refs/heads/ \
+                --format='%(authordate:short) %(color:red)%(objectname:short) %(color:yellow)%(refname:short)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
+#+end_src
+
+#+begin_src conf
+    # Sort by date for branches; can be useful for spring cleaning
+    branches-by-date = for-each-ref \
+                --sort=-committerdate refs/heads/ \
+                --format='%(committerdate:short) %(refname:short)'
+#+end_src
+
+#+begin_src conf
     be = branch --edit-description
 #+end_src
 
 #+begin_src conf
     track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
-#+end_src
-
-#+begin_src conf
-    # Show info for branches which have been checked out locally...
-    br = for-each-ref \
-             --sort=-committerdate refs/heads/ \
-             --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
-#+end_src
-
-git for-each-ref --sort=committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
-
-#+begin_src conf
-    recent = for-each-ref \
-                 --sort=-committerdate refs/heads/ \
-                 --format='%(authordate:short) %(color:red)%(objectname:short) %(color:yellow)%(refname:short)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
-#+end_src
-
-#+begin_src conf
-    # Sort by date for branches; can be useful for spring cleaning
-    refs-by-date = for-each-ref \
-                       --sort=-committerdate \
-                       --format='%(committerdate:short) %(refname:short)'
 #+end_src
 
 *** Show my branches
@@ -1947,6 +1966,7 @@ List branches that are *not merged*.
             git branch --no-merged \
                 | grep -v '\\*'; \
         }; f"
+
     branches-active = "!f() { \
             git branch -a -vv --no-merged \
                 | grep -v '\\*'; \
@@ -1963,6 +1983,7 @@ specified).
             git branch --merged \
                 | grep -v '\\*'; \
         }; f"
+
     branches-merged = "!f() { \
             git branch -a -vv --merged \
                 | grep -v '\\*'; \
@@ -3749,7 +3770,11 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
 #+end_warning
 
 #+begin_src conf
-    pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] && git pull || git stash push -m "autostash" && git pull && git stash pop
+    pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] \
+                && git pull \
+                || git stash push -m "autostash" \
+                && git pull \
+                && git stash pop
 #+end_src
 
 XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
@@ -3787,7 +3812,10 @@ result in non-trivial conflicts.
 With *all versions* of Git, I recommend using ~git up~ instead of ~git pull~.
 
 #+begin_src conf
-    up-tmpname = "!f() { git remote update -p; git merge --ff-only @{u}; }; f"
+    up-tmpname = "!f() { \
+            git remote update -p; \
+            git merge --ff-only @{u}; \
+        }; f"
 #+end_src
 
 It is pretty safe: it will abort the merge if it can't be done using
@@ -3801,13 +3829,10 @@ one; ~merge~ then merges the appropriate *single branch*.
 
 #+begin_src conf
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
-    upr = "!f() { git remote update -p; git rebase -p @{u}; }; f"
-#+end_src
-
-#+begin_src conf
-# cleanpull
-# update (like svn? if we add a git reset in front?)
-# sync
+    upr = "!f() { \
+            git remote update -p; \
+            git rebase -p @{u}; \
+        }; f"
 #+end_src
 
 ... but read "you're not using git as it was intended" on
@@ -3830,12 +3855,12 @@ with the ~origin~ (pull and get latest for all submodules):
 Pull all:
 
 #+begin_src conf
-  # Do a push/pull for just one branch.
-  push1 = "!git push $(git origin) $(git current-branch)"
-  pull1 = "!git pull $(git origin) $(git current-branch)"
+    # Do a push/pull for just one branch.
+    push1 = "!git push $(git origin) $(git current-branch)"
+    pull1 = "!git pull $(git origin) $(git current-branch)"
 
-# Pull and push from the current branch.
-sync = "!f(){ pull1 && push1; }; f"
+    # Pull and push from the current branch.
+    sync = "!f(){ pull1 && push1; }; f"
 
     pull-all = !"OLD=$(git current-branch); \
                  for B in $(git for-each-ref refs/heads --format='%(refname)'); do \
@@ -3936,8 +3961,10 @@ applies all those changes together.
 
     merge-to-master =  "!f(){ BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
                                   BRANCH_NAME=${branch_name##refs/heads/}; \
-                                  git checkout master && git merge $BRANCH_NAME && git checkout $BRANCH_NAME; };f"
-    fork-from-master = "!f(){ git checkout master && git branch $1 && git checkout $1; };f"
+                                  git checkout master \
+                                      && git merge $BRANCH_NAME \
+                                      && git checkout $BRANCH_NAME; \
+        };f"
 #+end_src
 
 *** Undo the merge
@@ -3952,8 +3979,14 @@ On projects where we work with a staging or test branch, I regularly merge my
 work in progress into it so others can test it.
 
 #+begin_src conf
-    m = "!f() { local OLD=$(git current-branch); \
-                git co \"$1\" && git pu && git merge $OLD && git p && git co $OLD; }; f"
+    m = "!f() { \
+            local OLD=$(git current-branch); \
+            git checkout \"$1\" \
+                && git pull \
+                && git merge $OLD \
+                && git push \
+                && git checkout $OLD; \
+        }; f"
 #+end_src
 
 If you now type ~git m staging~ while on the ~feature~ branch, this will happen:
@@ -4194,7 +4227,7 @@ open HTML files directly from the file browser.
 
 For GitHub pages:
 
-#+begin_src conf :tangle no
+#+begin_src shell :tangle no
 echo 'setting up gh-pages'
 echo '-------------------'
 
@@ -4355,13 +4388,9 @@ You can operate on the "stash" ref as if it were any other ref.
 ~git stash push~ also optionally takes a message describing the contents of the
 stash (much, much more useful):
 
-#+begin_src conf :tangle no
-git stash push -m "Describe what you did here"
-#+end_src
+: git stash push -m "Describe what you did here"
 
-#+begin_example
-stash@{0}: On BRANCH: Describe what you did here
-#+end_example
+: stash@{0}: On BRANCH: Describe what you did here
 
 This command is useful in saving all changes not ready to be committed and the
 user wants to have an updated repository.
@@ -4396,12 +4425,13 @@ user wants to have an updated repository.
 #+end_src
 
 #+begin_src conf
-stashall = !git add -A && git stash
-# "Add" modified files, deleted files, and new untracked files.
+    # "Add" modified files, deleted files, and new untracked files.
+    stash-all = !git add -A && git stash
 #+end_src
 
 #+begin_src conf
-    hide = stash push --include-untracked # Hide all files, including untracked files (faster than using --all).
+    # Hide all files, including untracked files (faster than using --all).
+    hide = stash push --include-untracked
 #+end_src
 
 *** Take named stash
@@ -4410,12 +4440,13 @@ stashall = !git add -A && git stash
 
 #+begin_src conf
     snapshot = !git stash push -m "snapshot-$(date +%Y%m%d_%H%M)" \
-                    && git stash apply "stash@{0}"
+                && git stash apply "stash@{0}"
 #+end_src
 
 #+begin_src conf
     # checkpoint
-    cp = !git stash push -m "$(date +%F--%T)" && git stash pop --index
+    cp = !git stash push -m "$(date +%F--%T)" \
+                && git stash pop --index
 
     # checkpoint recover
     cpr = "!f() { \
@@ -4781,7 +4812,7 @@ patches.
 
 *** Patch shortcuts
 
-#+begin_src conf :tangle no
+#+begin_src shell :tangle no
 # Copy a patch URL to the clipboard, then run one of these commands to download
 # the patch and apply it. Hat tip to @chrisjlee for making me reconsider curl.
 
@@ -4837,9 +4868,7 @@ XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries o
 
 # Use it like this:
 #
-# #+begin_src shell :tangle no
-# git changelog FIRST_TAG_NAME LAST_TAG_NAME
-# #+end_src
+# : git changelog FIRST_TAG_NAME LAST_TAG_NAME
 
 See also
 - https://github.com/github-changelog-generator/github-changelog-generator
@@ -5118,10 +5147,6 @@ will ~reset~ the index.
 it was not so simple and it should have been better to work into a new branch.
 
 http://stackoverflow.com/questions/2569459/git-create-a-branch-from-unstaged-uncommited-changes-on-master
-
-* If you made a mistake
-
-Absolutely read https://github.com/blog/2019-how-to-undo-almost-anything-with-git!
 
 * If you get errors...
 
