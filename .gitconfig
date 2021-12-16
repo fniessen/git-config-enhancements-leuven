@@ -40,14 +40,6 @@
 
     colorMoved = dimmed_zebra
 
-    tool = meld
-
-[difftool]
-    prompt = false
-
-[difftool "meld"]
-    cmd = meld "$LOCAL" "$REMOTE"
-
 [apply]
     # Don't detect whitespace errors when applying a patch.
     whitespace = nowarn
@@ -149,6 +141,16 @@
 
 [core]
 
+[diff]
+    tool = meld
+
+[difftool]
+    prompt = false
+
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
+
+[core]
     editor = emacsclient
 
     # git-grep to ignore ^M.
@@ -240,6 +242,8 @@
     unmodify = checkout --
     undelete = checkout --
 
+    # Usage: git unstage [FILE...]
+    # Undo a 'git add' before the next commit.
     unstage = reset HEAD --
     unadd = reset HEAD --
 

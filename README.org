@@ -195,8 +195,8 @@ Same end result but much easier to read.
     algorithm = patience
 #+end_src
 
-Git diff will use (i)ndex, (w)ork tree, (c)ommit and (o)bject instead of a/b/c/d
-as prefixes for patches:
+Git diff will use ~(i)ndex~, ~(w)ork tree~, ~(c)ommit~ and ~(o)bject~ instead of ~a~ / ~b~
+/ ~c~ / ~d~ as prefixes for patches:
 
 #+begin_src conf
     mnemonicprefix = true
@@ -208,18 +208,6 @@ as prefixes for patches:
 
 #+begin_src conf
     colorMoved = dimmed_zebra
-#+end_src
-
-*** Use Meld as Git ~difftool~
-
-#+begin_src conf
-    tool = meld
-
-[difftool]
-    prompt = false
-
-[difftool "meld"]
-    cmd = meld "$LOCAL" "$REMOTE"
 #+end_src
 
 ** Apply
@@ -560,6 +548,19 @@ See
 
 ** External Diff Tool
 
+Use Meld as Git ~difftool:~
+
+#+begin_src conf
+[diff]
+    tool = meld
+
+[difftool]
+    prompt = false
+
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
+#+end_src
+
 ** External Editor
 
 You may edit your commit messages in your preferred external *text editor*.
@@ -572,6 +573,7 @@ Supported editors include:
 - VS Code
 
 #+begin_src conf
+[core]
     editor = emacsclient
 #+end_src
 
@@ -624,8 +626,10 @@ Improve the ~git diff~ output using a tool like:
     pager = diff-so-fancy | LESS= less --tabs=4 -FRX
 #+end_src
 
-(~less~ options -- ~-F~ to exit immediately if the output is less than one screen,
-~-R~ for colors to persist, and ~-X~ for not clearing the screen).
+~less~ options:
+- ~-F~ to exit immediately if the output is less than one screen,
+- ~-R~ for colors to persist, and
+- ~-X~ for not clearing the screen.
 
 #+begin_tip
 The diff-so-fancy ruler was 1 char too long.  It turned out I had an option in
@@ -642,7 +646,7 @@ See https://github.com/so-fancy/diff-so-fancy/issues/364.
 
 ** AutoCRLF
 
-[[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use ~\n~ (LF) as a newline
+[[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use LF (~\n~) as a newline
 character in Git-handled repositories.
 
 - *Checkout Windows-style, commit Unix-style line endings*
@@ -887,13 +891,11 @@ Start working with your repository.
 
 Create a =README.md= file into your repository.
 
-#+begin_src conf :tangle no
-echo "# ${$(git repo-slug):-Repository name}\n\nDescription" >> README.md
-git add README.md
-git commit -m "Add README.md"
-
-git push -u $(git origin) master
-#+end_src
+: echo "# ${$(git repo-slug):-Repository name}\n\nDescription" >> README.md
+: git add README.md
+: git commit -m "Add README.md"
+:
+: git push -u $(git origin) master
 
 ** Create a .gitignore
 
@@ -1040,18 +1042,23 @@ When you grab a file from a previous time, it sits *in your index*, modified.
 
 **** Before you committed (in staged state)
 
-*Remove* the specified *files from the index* (= staging area, to be included in the
-next commit):
+If you accidentally include a file in the next commit (using ~git add~), you can
+use the ~unstage~ alias to tell Git to forget about it (remove it from the staging
+area).
+
+: git add foo.html
+: (oops - didn't mean that)
+: git unstage foo.html
+: (foo.html left on disk, but excluded from the next commit)
 
 #+begin_src conf
+    # Usage: git unstage [FILE...]
+    # Undo a 'git add' before the next commit.
     unstage = reset HEAD --
     unadd = reset HEAD --
 #+end_src
 
-~unstage~ is the opposite of ~git add~.  It lets you remove items from the staging
-area.  This makes it a very useful tool when you're deciding which files to
-stage for a commit.  If you've accidentally added something to the staging area,
-just use ~unstage~ to remove it.
+~unstage~ is the opposite of ~git add~.
 
 * Commits
 
