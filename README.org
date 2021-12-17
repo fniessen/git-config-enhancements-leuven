@@ -911,6 +911,7 @@ Search files (by file path) in the current branch.
     # List files matching the pattern.
     search-for-files = !git ls-tree -r --name-only HEAD | grep -i --color=auto
 
+    # Alias of search-for-files.
     find-files = !git search-for-files
 #+end_src
 
@@ -924,6 +925,7 @@ Search files in all branches.
             done; \
         }; f"
 
+    # Alias of search-for-files-all.
     find-files-all = !git search-for-files-all
 #+end_src
 
@@ -3724,12 +3726,19 @@ after a ~git fetch~, to fetch down *all the data* it has for the *current remote
 you do not --, the next time you do a merge.
 
 #+begin_src conf
-    # See changes committed by others
-    in = !(git remote update -p && git log --decorate ..@{u})
+    # Show new commits found in the remote repository.
+    # Usage: git incoming
+    incoming = !(git remote update -p && git log --decorate ..@{u})
+
+    # Alias of incoming.
+    in = !git incoming
 #+end_src
 
 #+begin_src conf
-    in-files = log --stat ..@{u}
+    incoming-files = !(git remote update -p && git log --stat ..@{u})
+
+    # Alias of incoming-files.
+    in-files = !git incoming-files
 #+end_src
 
 Show the changes between the last local commit and the *remote* branch:
@@ -4439,7 +4448,8 @@ user wants to have an updated repository.
 
 #+begin_src conf
     # "Add" modified files, deleted files, and new untracked files.
-    stash-all = !git add -A && git stash
+    stash-all = !git add -A \
+                && git stash
 #+end_src
 
 #+begin_src conf
@@ -4535,7 +4545,8 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
 #+end_src
 
 #+begin_src conf
-    stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
+    stash-unapply = !git stash show -p --no-textconv --binary \
+                | git apply -R
 #+end_src
 
 *** Stash pop
@@ -4694,12 +4705,19 @@ The ~out~ command returns a list of *unpushed* (outgoing) commits for the *curre
 branch*, the next time you do a push.
 
 #+begin_src conf
-    # See what is not pushed to remote branch.
-    out = log --date=short @{u}..
+    # Usage: git outgoing
+    # Show commits not found in the remote branch.
+    outgoing = log --date=short @{u}..
+
+    # Alias of outgoing.
+    out = !git outgoing
 #+end_src
 
 #+begin_src conf
-    out-files = log --stat --date=short @{u}..
+    outgoing-files = log --stat --date=short @{u}..
+
+    # Alias of outgoing-files.
+    out-files = !git outgoing-files
 #+end_src
 
 This causes ~git log~ to show all commits reachable from =HEAD= excluding those
@@ -4710,8 +4728,12 @@ can be omitted for shorthand purposes.
 If you want to see all *unpushed* commits from *all branches*, do this:
 
 #+begin_src conf
-    # See all local commits.
-    outgoing = log --branches --not --remotes --decorate
+    # Usage: git outgoing-all
+    # Show commits not found in the destination repository.
+    outgoing-all = log --branches --not --remotes --decorate
+
+    # Alias of outgoing.
+    out-all = !git outgoing-all
 #+end_src
 
 *** Upload your changes
@@ -5102,11 +5124,15 @@ Fetch Git objects from upstream and update local branches.
 
 #+begin_src conf
     # Pull then push current branch.
-    sync = !git pull && git push
+    sync = !git pull \
+                && git push
 #+end_src
 
 #+begin_src conf
-    sync = !git update && git co master && git pull && git commit @{-1}
+    sync = !git update \
+                && git checkout master \
+                && git pull \
+                && git commit @{-1}
 #+end_src
 
 That's rather basic -- it doesn't actually rebase my branch that I'm on.
@@ -5128,6 +5154,8 @@ Ask interactively which patch hunk to commit, and then do the commit:
 #+begin_src conf
     # Show record of pending changes, letting you choose which patch hunks to commit.
     commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+
+    # Alias of commit-interactive.
     record = !git commit-interactive
 #+end_src
 

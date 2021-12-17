@@ -204,6 +204,7 @@
     # List files matching the pattern.
     search-for-files = !git ls-tree -r --name-only HEAD | grep -i --color=auto
 
+    # Alias of search-for-files.
     find-files = !git search-for-files
 
     search-for-files-all = "!f() { \
@@ -213,6 +214,7 @@
             done; \
         }; f"
 
+    # Alias of search-for-files-all.
     find-files-all = !git search-for-files-all
 
     search-for-code = "grep -i --line-number --break --heading -C 1"
@@ -1024,10 +1026,17 @@ deploy-prod =
     remotes = remote
     r = remote -v
 
-    # See changes committed by others
-    in = !(git remote update -p && git log --decorate ..@{u})
+    # Show new commits found in the remote repository.
+    # Usage: git incoming
+    incoming = !(git remote update -p && git log --decorate ..@{u})
 
-    in-files = log --stat ..@{u}
+    # Alias of incoming.
+    in = !git incoming
+
+    incoming-files = !(git remote update -p && git log --stat ..@{u})
+
+    # Alias of incoming-files.
+    in-files = !git incoming-files
 
     in-what = diff --stat ...@{u}
 
@@ -1233,7 +1242,8 @@ deploy-prod =
         }; f"
 
     # "Add" modified files, deleted files, and new untracked files.
-    stash-all = !git add -A && git stash
+    stash-all = !git add -A \
+                && git stash
 
     # Hide all files, including untracked files (faster than using --all).
     hide = stash push --include-untracked
@@ -1277,19 +1287,31 @@ deploy-prod =
             git stash apply stash^{/$*}; \
         }; f"
 
-    stash-unapply = !git stash show -p --no-textconv --binary | git apply -R
+    stash-unapply = !git stash show -p --no-textconv --binary \
+                | git apply -R
 
     sp = stash pop
 
     std = stash drop
 
-    # See what is not pushed to remote branch.
-    out = log --date=short @{u}..
+    # Usage: git outgoing
+    # Show commits not found in the remote branch.
+    outgoing = log --date=short @{u}..
 
-    out-files = log --stat --date=short @{u}..
+    # Alias of outgoing.
+    out = !git outgoing
 
-    # See all local commits.
-    outgoing = log --branches --not --remotes --decorate
+    outgoing-files = log --stat --date=short @{u}..
+
+    # Alias of outgoing-files.
+    out-files = !git outgoing-files
+
+    # Usage: git outgoing-all
+    # Show commits not found in the destination repository.
+    outgoing-all = log --branches --not --remotes --decorate
+
+    # Alias of outgoing.
+    out-all = !git outgoing-all
 
     # Get the upstream branch name.
     upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
@@ -1393,9 +1415,13 @@ deploy-prod =
     root-relative = rev-parse --show-prefix
 
     # Pull then push current branch.
-    sync = !git pull && git push
+    sync = !git pull \
+                && git push
 
-    sync = !git update && git co master && git pull && git commit @{-1}
+    sync = !git update \
+                && git checkout master \
+                && git pull \
+                && git commit @{-1}
 
     # git resync -> sync repository and rebase current branch.
     resync = !sh -c 'git checkout master \
@@ -1405,6 +1431,8 @@ deploy-prod =
 
     # Show record of pending changes, letting you choose which patch hunks to commit.
     commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+
+    # Alias of commit-interactive.
     record = !git commit-interactive
 
     lost1 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
