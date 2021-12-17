@@ -1232,13 +1232,12 @@ List all the *branches and tags* that contain a specific commit.
     # Usage: git where REV
     # Print only refs which contain the commit.
     where = for-each-ref --format='%(refname)' --contains
-    where2 = "!f() { \
+    where2 = for-each-ref --format="%(refname:short)" --points-at HEAD refs/heads
+    where3 = "!f() { \
             git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
                 | sort -r; \
         }; f"
 #+end_src
-
-XXX See also git-ls-object-refs
 
 Filter the list of *branches* to only those which have the given *commit ID* among
 their ancestors.
@@ -1864,26 +1863,24 @@ resolved, ie. like so
 Name of current branch (not so useful in itself, but used in other aliases):
 
 #+begin_src conf
-    # current-branch = git name-rev --name-only --refs="refs/heads/*" HEAD
-    # XXX Does not work correctly with tags (returns 'tags/2019.04.25~3')
-
     # Usage: git current-branch
-    # Get the current branch name (v2.22+).
+    # Show the current branch name (v2.22+).
     current-branch = branch --show-current
-    # Does work correctly with tags, but not in detached state.
+#+end_src
 
+#+begin_note
+In the "detached HEAD" state, that is when ~HEAD~ is not attached to a branch
+name, there is *no branch name*. You can't get something that doesn't exist.
+#+end_note
+
+#+begin_src conf
+    # Usage: git current-branch-without-slash
+    # Show the current branch name (without slash).
     current-branch-without-slash = "!f() { \
             git current-branch \
                 | tr '/' '-'; \
         }; f"
 #+end_src
-
-Others:
-
-: git for-each-ref --format="%(refname:short)" --points-at HEAD refs/heads
-
-Caveat: if several refs/branches point at the current commit, the above commands
-will list them all.
 
 ** Publish a branch
 
@@ -1917,7 +1914,7 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 (fuzzy checkout a git branch)
 
 #+begin_src conf
-    # Show local and remote branches.
+    # List local and remote branches.
     branches = branch -a -vv
 #+end_src
 
@@ -1953,6 +1950,15 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 
 #+begin_src conf
     track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
+#+end_src
+
+#+begin_src conf
+    # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
+    showorigin = "!sh -c 'for BRANCH_NAME in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; done | sort -r'"
+
+    # get remote branches
+    trackallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git branch --track $BRANCH_NAME; done"
+    updateallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git checkout $BRANCH_NAME ; git pull; done"
 #+end_src
 
 *** Show my branches
@@ -3191,13 +3197,6 @@ clean and relevant commits, no experiments or fixing typos.
     anychangesonmaster = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/master
     whoischanging = !sh -c 'git shortlog HEAD..$(git origin)/$0'
     whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
-
-    # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
-    showorigin = "!sh -c 'for BRANCH_NAME in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; done | sort -r'"
-
-    # get remote branches
-    trackallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git branch --track $BRANCH_NAME; done"
-    updateallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git checkout $BRANCH_NAME ; git pull; done"
 #+end_src
 
 #+begin_src conf
