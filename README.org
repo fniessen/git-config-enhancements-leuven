@@ -882,6 +882,25 @@ https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
         }; f"
 #+end_src
 
+** Download repository
+
+Easily launch a temporary one-off Git server from any local repository, to
+enable a peer-to-peer Git workflow.
+
+#+begin_src conf
+    # Usage: git serve
+    # Fire up a builtin local webserver for browsing and sharing repository over HTTP.
+    serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
+    serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
+#+end_src
+
+1. Run ~git serve~. "Ready to rumble," it will report. Git is bad-ass.
+2. Find out your IP address. Say it's 192.168.1.123.
+3. Say "hey Jane, I'm not ready/able to push these commits up to origin, but you
+   can fetch my commits into your clone by running git fetch
+   git://192.168.1.123/"
+4. Press ctrl+c when you don't want to serve that repo any longer.
+
 * Instructions
 
 Start working with your repository.
@@ -1655,6 +1674,7 @@ See « Undo 'git add' before commit ».
 **** Soft option -- Do not touch the index file or the working tree at all
 
 #+begin_src conf
+    # Usage: git uncommit
     # Remove the last commit.
     uncommit = reset --soft HEAD~1
 #+end_src
@@ -2208,6 +2228,13 @@ To rename a branch *locally and remotely*:
                 && git delete-remote-branch $1; \
         }; f"
 #+end_src
+
+** What if
+
+... I'm working on =master= adding a simple feature. After a few minutes I realize
+it was not so simple and it should have been better to work into a new branch.
+
+http://stackoverflow.com/questions/2569459/git-create-a-branch-from-unstaged-uncommited-changes-on-master
 
 * Tags
 
@@ -3620,43 +3647,25 @@ List ignored files (*marked unchanged*):
 
 ** Clean
 
-**** Delete untracked files
+**** Delete all untracked files
+
+To delete all untracked files (and directories), you can run ~git purge~. It won't
+remove staged changes, like modified files still uncommitted.
 
 #+begin_src conf
-    nuke-untracked-files = clean -f
-#+end_src
-
-~git clean~ will *remove any files* from the tracked root directory *that are not
-under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
-
-#+begin_note
-*WARNING -- BE CAREFUL WITH THIS!*  It is helpful to run a dry-run with ~git clean~
-first, to see what it will delete.
-#+end_note
-
-Usage:
-- ~git clean -n~ (dry run) to see what ~git clean -f~ will do, so you can be sure
-  it's what you want.
-- ~git clean -f~ (to *force removing* the *untracked files*) and
-- ~git clean -d -f~ (to also *remove untracked directories* in addition to untracked
-  files).
-
-**** Soft option -- Clean branch (delete changes + untracked files)
-
-#+begin_src conf
-    clear-soft-dry-run = clean -d -n
-
+    # Usage: git purge
+    # Delete (only) untracked files and directories.
+    purge = clean -d -f
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
     # Files and directories in .gitignore will be preserved.
-    clear-soft = !git clean -d -f \
-                      && git reset --hard
-    # Discard current changes and throw out new files.
 #+end_src
 
-which:
-- unstages changes in the index,
-- discards changes in the working tree, and
-- removes any new files (*all untracked changes will be lost*).
+*WARNING -- BE CAREFUL WITH THIS!* It is helpful to run a dry-run with ~git
+purge-dry-run~ first, to see what it will delete, and be sure it's what you want.
+
+#+begin_src conf
+    purge-dry-run = clean -d -n
+#+end_src
 
 If you want to save your current branch's state before doing this (just in
 case), you can do:
@@ -3664,19 +3673,23 @@ case), you can do:
 : git commit -a -m "Saving my work, just in case"
 : git branch my-saved-work
 
-**** Hard option -- Clean branch (delete ignored files in addition to changes + untracked files)
+**** Delete all untracked files and also ignored files
 
-*NUCLEAR VERSION* which will:
-- undo all your changes to *tracked* files,
-- wipe out all the *ignored and untracked* files and directories, and
-- start from the ~HEAD~.
+*PLAY WITH FIRE VERSION* which will wipe out all the *ignored and untracked* files
+and directories:
 
 #+begin_src conf
+    # Usage: git purge-all
+    # Delete untracked files (and directories), and also ignored files.
+    purge-all = clean -d -f -x
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
     # including those in .gitignore.
-    clear-with-fire = !git clean -d -f -x \
-                           && git reset --hard
 #+end_src
+
+#+begin_note
+~git clean~ will *remove any files* from the tracked root directory *that are not
+under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
+#+end_note
 
 ** Merge
 
@@ -5180,29 +5193,6 @@ will ~reset~ the index.
     zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
-* Download repository
-
-** Easily launch a temporary one-off Git server from any local repository, to enable a peer-to-peer Git workflow
-
-#+begin_src conf
-    serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
-    serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
-#+end_src
-
-1. Run git serve. "Ready to rumble," it will report. Git is bad-ass.
-2. Find out your IP address. Say it's 192.168.1.123.
-3. Say "hey Jane, I'm not ready/able to push these commits up to origin, but you
-   can fetch my commits into your clone by running git fetch
-   git://192.168.1.123/"
-4. Press ctrl+c when you don't want to serve that repo any longer.
-
-* What if
-
-... I'm working on =master= adding a simple feature. After a few minutes I realize
-it was not so simple and it should have been better to work into a new branch.
-
-http://stackoverflow.com/questions/2569459/git-create-a-branch-from-unstaged-uncommited-changes-on-master
-
 * If you get errors...
 
 Many situations may cause "errors":
@@ -5261,15 +5251,11 @@ Make sure the =master= is up-to-date:
 You can experiment with resolving a Git conflict with this repository:
 https://github.com/brianleetest/testGit/blob/master/README.md
 
-* GitHub tasks
+** GitHub tasks
 
 # https://github.com/abo-abo/oremacs/blob/github/etc/org/wiki/git.org
 
-** Force push
-
-: git push --force $(git origin) master
-
-*** Doc about push failure
+** Doc about push failure
 
 If a push fails, that does not necessarily indicate a "bad state" -- it simply
 represents that your history is different than what the remote server has, and
