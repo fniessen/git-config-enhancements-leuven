@@ -4730,7 +4730,7 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 #+begin_src conf
     # Usage: git outgoing-all
     # Show commits not found in the destination repository.
-    outgoing-all = log --branches --not --remotes --decorate
+    outgoing-all = log --branches --not --remotes --decorate --date=short
 
     # Alias of outgoing.
     out-all = !git outgoing-all
