@@ -777,9 +777,9 @@ deploy-prod =
     all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
 
     print-reponame-then-run = "!f() { \
-            echo "======"; \
+            echo "======="; \
             basename $(git rev-parse --show-toplevel); \
-            echo "======"; \
+            echo "======="; \
             git "$@"; \
         }; f"
 
@@ -940,21 +940,9 @@ deploy-prod =
     # # Show the last N commits on the current branch.
     # last = !git log --name-status -${1:-1}
 
-    file-history = git show --oneline -s $(git rev-list HEAD -- 32-factures-creation.R)
-    file-history-f = "!f() { git show --oneline -s $(git rev-list --date-order HEAD -- $1); }; f"
-    file-history-sh = !sh -c 'git show --oneline -s $(git rev-list --date-order HEAD -- $1)'
+    file-history = log --follow --date-order --date=short -C
 
-    file-history-follow = log --follow --date-order --date=short -C
-
-    related = !sh -c 'git log --follow --format=format:%H $1 \
-                          | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
-                          | sort \
-                          | uniq -c \
-                          | sort -b -n -r'
-
-    related-files = git show --name-only $(git rev-list HEAD -- 32-factures-creation.R)
-    related-files-f = "!f() { git show --name-only $(git rev-list HEAD -- $1); }; f"
-    related-files-sh = !sh -c 'git show --name-only $(git rev-list HEAD -- $1)'
+    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
 
     file-last-modified = log -n 1 --follow --all --date-order --date=short -C
 
@@ -1083,7 +1071,7 @@ deploy-prod =
     pull1 = "!git pull $(git origin) $(git current-branch)"
 
     # Pull and push from the current branch.
-    sync = "!f(){ pull1 && push1; }; f"
+    sync = "!f() { pull1 && push1; }; f"
 
     pull-all = !"OLD=$(git current-branch); \
                  for B in $(git for-each-ref refs/heads --format='%(refname)'); do \
@@ -1123,6 +1111,11 @@ deploy-prod =
                                       && git merge $BRANCH_NAME \
                                       && git checkout $BRANCH_NAME; \
         };f"
+
+    merge-master = !git checkout master \
+        && git pull \
+        && git checkout - \
+        && git merge -
 
     m = "!f() { \
             local OLD=$(git current-branch); \

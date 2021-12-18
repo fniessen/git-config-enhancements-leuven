@@ -2735,9 +2735,14 @@ For more details on pushing changes to a PR, please see [[https://help.github.co
 
 ** 3. Merge the branch and fix any conflicts that come up
 
-git fetch $(git origin)
-git checkout "$(git origin)/master"
-git merge --no-ff "1-change-encoding-of-read-sql-file"
+#+begin_note
+We generally don't like $Revision:$, $Date:$, $Log$, and friends like
+timestamps, because they're sources of gratuitous *merge conflicts*.
+#+end_note
+
+: git fetch $(git origin)
+: git checkout "$(git origin)/master"
+: git merge --no-ff "1-change-encoding-of-read-sql-file"
 
 XXX See https://gitlab.com/help/user/project/merge_requests/squash_and_merge
 
@@ -3106,9 +3111,9 @@ have uncommitted changes that I need to take care of.
     all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
 
     print-reponame-then-run = "!f() { \
-            echo "======"; \
+            echo "======="; \
             basename $(git rev-parse --show-toplevel); \
-            echo "======"; \
+            echo "======="; \
             git "$@"; \
         }; f"
 
@@ -3859,7 +3864,7 @@ Pull all:
     pull1 = "!git pull $(git origin) $(git current-branch)"
 
     # Pull and push from the current branch.
-    sync = "!f(){ pull1 && push1; }; f"
+    sync = "!f() { pull1 && push1; }; f"
 
     pull-all = !"OLD=$(git current-branch); \
                  for B in $(git for-each-ref refs/heads --format='%(refname)'); do \
@@ -3957,13 +3962,22 @@ applies all those changes together.
     # Merge remote master into the current branch.
     mm = !git fetch -p \
               && git merge $(git origin)/master
+#+end_src
 
+Git merge ~master~ into feature branch:
+
+#+begin_src conf
     merge-to-master =  "!f(){ BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
                                   BRANCH_NAME=${branch_name##refs/heads/}; \
                                   git checkout master \
                                       && git merge $BRANCH_NAME \
                                       && git checkout $BRANCH_NAME; \
         };f"
+
+    merge-master = !git checkout master \
+        && git pull \
+        && git checkout - \
+        && git merge -
 #+end_src
 
 *** Undo the merge
@@ -3990,11 +4004,11 @@ work in progress into it so others can test it.
 
 If you now type ~git m staging~ while on the ~feature~ branch, this will happen:
 
-- First, the function checks out the ~staging~ branch.
-- It then pulls the latest changes to the ~staging~ branch from origin.
-- Then it merges ~feature~ into ~staging~.
-- Next, it pushes the updated ~staging~ branch back to origin.
-- Finally, it checks out the ~feature~ branch again.
+1. First, the function checks out the ~staging~ branch.
+2. It then pulls the latest changes to the ~staging~ branch from origin.
+3. Then it merges ~feature~ into ~staging~.
+4. Next, it pushes the updated ~staging~ branch back to origin.
+5. Finally, it checks out the ~feature~ branch again.
 
 Such a timesaver!
 
@@ -4744,6 +4758,20 @@ the v2.3 tag -- we can be certain that this change is part of v2.3, then.
    For example:
 
    : git format-patch HEAD~
+
+*** Git apply
+
+> Indeed.  I cannot apply the patch, git am returns "patch format
+> detection failed."  Can you resubmit it using git format-patch?
+
+You want to use 'git apply' on that patch, 'git am' is for applying
+patches produced by 'git format-patch' only.  In a pinch however, you
+can relatively easily convert the patch format from 'git show to
+something suitable for 'git am':
+
+Replace "commit" with "From", Replace "Author" with "From" and replace
+the whitespace at the beginning of the first line of the commit message
+with "Subject: [PATCH] ".
 
 *** Applying the patch
 
