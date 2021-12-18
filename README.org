@@ -725,7 +725,9 @@ Set email addresses for you:
 Then, in the working copy:
 
 #+begin_src conf
-    create-repository = !git init \
+    # Usage: git init-repository
+    # Create a repository.
+    init-repository = !git init \
                 && ( [ -n "$(ls)" ] || touch .gitignore ) \
                 && git add . \
                 && git commit -m \"Initial commit\"
@@ -743,9 +745,7 @@ significance to this name.)
 If you accidentally put the wrong tree under version control, simply delete the
 =.git= directory.
 
-#+begin_src conf :tangle no
-find . -name '.git' -exec rm -rf {} \;
-#+end_src
+: find . -name '.git' -exec rm -rf {} \;
 
 ** Proxy configuration
 
@@ -889,7 +889,7 @@ enable a peer-to-peer Git workflow.
 
 #+begin_src conf
     # Usage: git serve
-    # Fire up a builtin local webserver for browsing and sharing repository over HTTP.
+    # Fire up a builtin local webserver (for browsing and sharing repository over HTTP).
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
     serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
 #+end_src
@@ -1995,6 +1995,8 @@ List branches that are *not merged*.
                 | grep -v '\\*'; \
         }; f"
 
+    # Usage: git branches-active
+    # Show only branches that are unmerged.
     branches-active = "!f() { \
             git branch -a -vv --no-merged \
                 | grep -v '\\*'; \
@@ -2012,6 +2014,8 @@ specified).
                 | grep -v '\\*'; \
         }; f"
 
+    # Usage: git branches-merged
+    # Show only branches that are merged.
     branches-merged = "!f() { \
             git branch -a -vv --merged \
                 | grep -v '\\*'; \
@@ -2082,7 +2086,7 @@ bclean = "!f() { \
         DEFAULT=$(git default); \
         git branch --merged ${1-$DEFAULT} \
             | grep -v " ${1-$DEFAULT}$" \
-            | xargs git branch -d; \
+            | xargs git delete-local-branch; \
     }; f"
 #+end_src
 
@@ -2101,7 +2105,7 @@ branch.
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
     #           egrep -v "(^\*|^\s*(master|main|develop)$)" | \
-    #           xargs git branch -d'
+    #           xargs git delete-local-branch'
 #+end_src
 
 Not "fully merged" means the branch you are about to delete contains commits
@@ -2124,6 +2128,15 @@ for the distinction between "merged" and "fully merged" branches!
 
 - https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
 - https://github.com/arc90/git-sweep
+
+#+begin_src conf
+    # Delete all branches that were safely merged into the master. All other are skipped (no worries).
+    # On osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation.
+    cleanup = !git branch --merged=master \
+              | grep -Ev '^\\* \
+              | master$' \
+              | xargs -r git delete-local-branch
+#+end_src
 
 *** Delete a remote branch
 
@@ -2177,7 +2190,7 @@ If you want this to be run automatically every time you fetch/pull:
 
 or prune individual remote tracking branches with:
 
-: git branch -dr BRANCH_NAME
+: git delete-local-branchr BRANCH_NAME
 
 *Remove orphaned branches in your local repository* that *no longer exist in the
 remote* one (by deleting the local ones that show they are "gone" in ~git
@@ -3241,10 +3254,6 @@ clean and relevant commits, no experiments or fixing typos.
 
 #OTHER
 
-    # Deletes all branches that were safely merged into the master. All other are skipped (no worries).
-    # on osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation
-    cleanup = !git branch --merged=master | grep -Ev '^\\* | master$' | xargs -r git branch -d
-
     # Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
     cleanuplocal = !git remote prune $(git origin) && git gc && git clean -df
 
@@ -3418,7 +3427,15 @@ List commits *showing changed files* (prettier and more concise version of
 #+begin_src conf
     ls-modified  = "!git status --porcelain -uno | awk 'match($1, /M/) {print $2}'"
     ls-added     = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
-    ls-deleted   = "!git status --porcelain -uno | awk 'match($1, /D/) {print $2}'"
+#+end_src
+
+#+begin_src conf
+    # Usage: git deleted
+    # List files deleted in the working tree.
+    deleted   = "!git status --porcelain -uno | awk 'match($1, /D/) {print $2}'"
+#+end_src
+
+#+begin_src conf
     ls-renamed   = "!git status --porcelain -uno | awk 'match($1, /R/) {print $2}'"
     ls-copied    = "!git status --porcelain -uno | awk 'match($1, /C/) {print $2}'"
     ls-updated   = "!git status --porcelain -uno | awk 'match($1, /U/) {print $2}'"
@@ -3649,8 +3666,10 @@ List ignored files (*marked unchanged*):
 
 **** Delete all untracked files
 
-To delete all untracked files (and directories), you can run ~git purge~. It won't
-remove staged changes, like modified files still uncommitted.
+To delete all files (and directories) unknown to Git, you can run ~git purge~.
+Only unknown files, not ignored files, are deleted.
+
+It won't remove staged changes, like modified files still uncommitted.
 
 #+begin_src conf
     # Usage: git purge
@@ -3658,13 +3677,25 @@ remove staged changes, like modified files still uncommitted.
     purge = clean -d -f
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
     # Files and directories in .gitignore will be preserved.
+
+    # Alias to purge.
+    clean-tree-unknown = !git purge
 #+end_src
 
-*WARNING -- BE CAREFUL WITH THIS!* It is helpful to run a dry-run with ~git
-purge-dry-run~ first, to see what it will delete, and be sure it's what you want.
+*WARNING -- BE CAREFUL WITH THIS!*
+
+**** Show files to delete
+
+To check what ~git purge~ will delete, and be sure it's what you want, use ~git
+purge-dry-run~.
 
 #+begin_src conf
+    # Usage: git purge-dry-run
+    # Show files to delete instead of deleting them.
     purge-dry-run = clean -d -n
+
+    # Alias to purge-dry-run.
+    clean-tree-unknown-dry-run = !git purge-dry-run
 #+end_src
 
 If you want to save your current branch's state before doing this (just in
@@ -3684,6 +3715,9 @@ and directories:
     purge-all = clean -d -f -x
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
     # including those in .gitignore.
+
+    # Alias to purge-all.
+    clean-tree-unknown-ignored = !git purge-all
 #+end_src
 
 #+begin_note
@@ -4124,7 +4158,7 @@ any files, then it takes the meaning of /switching branches/.
 : git merge test
 : git push $(git origin) master
 :
-: git branch -d local_branch_name         # Delete local branch.
+: git delete-local-branch BRANCH_NAME     # Delete local branch.
 
 #+begin_warning
 *Update first the branch (to merge in) of the RIGHT LOCAL CLONE.* -- if you do
@@ -4139,6 +4173,8 @@ https://stackoverflow.com/questions/366860/when-would-you-use-the-different-git-
 List unmerged files (after a merge failure), having leftover conflict markers:
 
 #+begin_src conf
+    # Usage: git conflicts
+    # List files with conflicts.
     conflicts = diff --name-only --diff-filter=U
 #+end_src
 
@@ -4510,7 +4546,10 @@ user wants to have an updated repository.
 *** Show the stash
 
 #+begin_src conf
-    stash-diff = stash show -p
+    # Usage: git unstash-preview
+    # Instead of unshelving the changes, show the diff that would result from
+    # unshelving.
+    unstash-preview = stash show -p
 #+end_src
 
 https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
@@ -4546,7 +4585,9 @@ you were.  But if that doesn't work, for whatever reason, you can use any of
 Git's other branch merging tools to put things back they way you want them.
 
 #+begin_src conf
-    sa = stash apply
+    # Usage: git unstash-keep [STASH_ID]
+    # Apply changes but don't delete them.
+    unstash-keep = stash apply
 #+end_src
 
 https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
@@ -4562,18 +4603,20 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
                 | git apply -R
 #+end_src
 
-*** Stash pop
+*** Restore shelved changes
 
-~git stash pop~ removes the most recent stash or any stash specified and applies
+~git unstash~ removes the most recent stash or any stash specified and applies
 changes as a merge.  If merge fails, the stash is not removed from the list and
 must be removed manually.
 
 #+begin_src conf
-    sp = stash pop
+    # Usage: git unstash [STASH_ID]
+    # Apply changes and remove them from the shelf.
+    unstash = stash pop
 #+end_src
 
 #+begin_warning
-Be aware that, unlike ~git stash apply~ (though it has its use), ~git stash pop~
+Be aware that, unlike ~git stash apply~ (though it has its use), ~git unstash~
 *deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
 conflicts, Git will not remove it (but it will still apply it)!
 #+end_warning
@@ -4581,7 +4624,9 @@ conflicts, Git will not remove it (but it will still apply it)!
 *** Drop the stash
 
 #+begin_src conf
-    std = stash drop
+    # Usage: git unstash-delete-only [STASH_ID]
+    # Delete changes without applying them.
+    unstash-delete-only = stash drop
 #+end_src
 
 *** Clear

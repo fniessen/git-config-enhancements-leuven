@@ -169,7 +169,9 @@
 
     work-profile = config user.email \"john@work.com\"
 
-    create-repository = !git init \
+    # Usage: git init-repository
+    # Create a repository.
+    init-repository = !git init \
                 && ( [ -n "$(ls)" ] || touch .gitignore ) \
                 && git add . \
                 && git commit -m \"Initial commit\"
@@ -201,7 +203,7 @@
         }; f"
 
     # Usage: git serve
-    # Fire up a builtin local webserver for browsing and sharing repository over HTTP.
+    # Fire up a builtin local webserver (for browsing and sharing repository over HTTP).
     serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
     serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
 
@@ -464,6 +466,8 @@
                 | grep -v '\\*'; \
         }; f"
 
+    # Usage: git branches-active
+    # Show only branches that are unmerged.
     branches-active = "!f() { \
             git branch -a -vv --no-merged \
                 | grep -v '\\*'; \
@@ -474,6 +478,8 @@
                 | grep -v '\\*'; \
         }; f"
 
+    # Usage: git branches-merged
+    # Show only branches that are merged.
     branches-merged = "!f() { \
             git branch -a -vv --merged \
                 | grep -v '\\*'; \
@@ -490,7 +496,7 @@ bclean = "!f() { \
         DEFAULT=$(git default); \
         git branch --merged ${1-$DEFAULT} \
             | grep -v " ${1-$DEFAULT}$" \
-            | xargs git branch -d; \
+            | xargs git delete-local-branch; \
     }; f"
 
     # Delete fully merged branches.
@@ -504,7 +510,14 @@ bclean = "!f() { \
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
     #           egrep -v "(^\*|^\s*(master|main|develop)$)" | \
-    #           xargs git branch -d'
+    #           xargs git delete-local-branch'
+
+    # Delete all branches that were safely merged into the master. All other are skipped (no worries).
+    # On osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation.
+    cleanup = !git branch --merged=master \
+              | grep -Ev '^\\* \
+              | master$' \
+              | xargs -r git delete-local-branch
 
     # Usage: git delete-remote-branch BRANCH
     # Delete a remote branch.
@@ -853,10 +866,6 @@ deploy-prod =
 
 #OTHER
 
-    # Deletes all branches that were safely merged into the master. All other are skipped (no worries).
-    # on osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation
-    cleanup = !git branch --merged=master | grep -Ev '^\\* | master$' | xargs -r git branch -d
-
     # Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
     cleanuplocal = !git remote prune $(git origin) && git gc && git clean -df
 
@@ -929,7 +938,11 @@ deploy-prod =
 
     ls-modified  = "!git status --porcelain -uno | awk 'match($1, /M/) {print $2}'"
     ls-added     = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
-    ls-deleted   = "!git status --porcelain -uno | awk 'match($1, /D/) {print $2}'"
+
+    # Usage: git deleted
+    # List files deleted in the working tree.
+    deleted   = "!git status --porcelain -uno | awk 'match($1, /D/) {print $2}'"
+
     ls-renamed   = "!git status --porcelain -uno | awk 'match($1, /R/) {print $2}'"
     ls-copied    = "!git status --porcelain -uno | awk 'match($1, /C/) {print $2}'"
     ls-updated   = "!git status --porcelain -uno | awk 'match($1, /U/) {print $2}'"
@@ -1005,13 +1018,24 @@ deploy-prod =
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
     # Files and directories in .gitignore will be preserved.
 
+    # Alias to purge.
+    clean-tree-unknown = !git purge
+
+    # Usage: git purge-dry-run
+    # Show files to delete instead of deleting them.
     purge-dry-run = clean -d -n
+
+    # Alias to purge-dry-run.
+    clean-tree-unknown-dry-run = !git purge-dry-run
 
     # Usage: git purge-all
     # Delete untracked files (and directories), and also ignored files.
     purge-all = clean -d -f -x
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
     # including those in .gitignore.
+
+    # Alias to purge-all.
+    clean-tree-unknown-ignored = !git purge-all
 
   # Given a merge commit, find the span of commits that exist(ed).
   # Not so useful in itself, but used by other aliases.
@@ -1159,6 +1183,8 @@ deploy-prod =
 
     theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 
+    # Usage: git conflicts
+    # List files with conflicts.
     conflicts = diff --name-only --diff-filter=U
 
     edit-unmerged = "!$EDITOR $(git conflicts)"
@@ -1278,7 +1304,10 @@ deploy-prod =
 
     stashes = stash list --date=local
 
-    stash-diff = stash show -p
+    # Usage: git unstash-preview
+    # Instead of unshelving the changes, show the diff that would result from
+    # unshelving.
+    unstash-preview = stash show -p
 
     sshow = "!f() { \
             git stash show stash^{/$*} -p; \
@@ -1286,7 +1315,9 @@ deploy-prod =
 
     sshno = stash show --name-only
 
-    sa = stash apply
+    # Usage: git unstash-keep [STASH_ID]
+    # Apply changes but don't delete them.
+    unstash-keep = stash apply
 
     sapply = "!f() { \
             git stash apply stash^{/$*}; \
@@ -1295,9 +1326,13 @@ deploy-prod =
     stash-unapply = !git stash show -p --no-textconv --binary \
                 | git apply -R
 
-    sp = stash pop
+    # Usage: git unstash [STASH_ID]
+    # Apply changes and remove them from the shelf.
+    unstash = stash pop
 
-    std = stash drop
+    # Usage: git unstash-delete-only [STASH_ID]
+    # Delete changes without applying them.
+    unstash-delete-only = stash drop
 
     # Usage: git outgoing
     # Show commits not found in the remote branch.
