@@ -1080,6 +1080,79 @@ area).
 
 ~unstage~ is the opposite of ~git add~.
 
+** Clean
+
+**** Delete all untracked files
+
+To delete all files (and directories) unknown to Git, you can run ~git
+clean-tree-unknown~.  Only unknown files, not ignored files, are deleted.
+
+It won't remove staged changes, like modified files still uncommitted.
+
+#+begin_src conf
+    # Usage: git clean-tree-unknown
+    # Delete (only) untracked files and directories.
+    clean-tree-unknown = clean -d -f
+    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
+    # Files and directories in .gitignore will be preserved.
+
+    # Alias to git clean-tree-unknown.
+    purge = !git clean-tree-unknown
+#+end_src
+
+*WARNING -- BE CAREFUL WITH THIS!*
+
+To check what ~git clean-tree-unknown~ will delete, and be sure it's what you
+want, use ~git clean-tree-unknown-dry-run~.
+
+#+begin_src conf
+    # Usage: git clean-tree-unknown-dry-run
+    # Show files to delete instead of deleting them.
+    clean-tree-unknown-dry-run = clean -d -n
+
+    # Alias to clean-tree-unknown-dry-run.
+    purge-dry-run = !git clean-tree-unknown-dry-run
+#+end_src
+
+If you want to save your current branch's state before doing this (just in
+case), you can do:
+
+: git commit -a -m "Saving my work, just in case"
+: git branch my-saved-work
+
+**** Delete all untracked files and also ignored files
+
+*PLAY WITH FIRE VERSION* which will wipe out all the *ignored and untracked* files
+and directories:
+
+#+begin_src conf
+    # Usage: git clean-tree-unknown-ignored
+    # Delete untracked files (and directories), and also ignored files.
+    clean-tree-unknown-ignored = clean -d -f -x
+    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
+    # including those in .gitignore.
+
+    # Alias to clean-tree-unknown-ignored.
+    purge-all = !git clean-tree-unknown-ignored
+#+end_src
+
+#+begin_note
+~git clean~ will *remove any files* from the tracked root directory *that are not
+under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
+#+end_note
+
+To check what ~git clean-tree-unknown-ignored~ will delete, and be sure it's what
+you want, use ~git clean-tree-unknown-ignored-dry-run~.
+
+#+begin_src conf
+    # Usage: git clean-tree-unknown-ignored-dry-run
+    # Show files to delete instead of deleting them.
+    clean-tree-unknown-ignored-dry-run = clean -d -n -x
+
+    # Alias to clean-tree-unknown-ignored-dry-run.
+    purge-all-dry-run = !git clean-tree-unknown-ignored-dry-run
+#+end_src
+
 * Commits
 
 ** Create a commit
@@ -3661,69 +3734,6 @@ List ignored files (*marked unchanged*):
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
     skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
 #+end_src
-
-** Clean
-
-**** Delete all untracked files
-
-To delete all files (and directories) unknown to Git, you can run ~git purge~.
-Only unknown files, not ignored files, are deleted.
-
-It won't remove staged changes, like modified files still uncommitted.
-
-#+begin_src conf
-    # Usage: git purge
-    # Delete (only) untracked files and directories.
-    purge = clean -d -f
-    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
-    # Files and directories in .gitignore will be preserved.
-
-    # Alias to purge.
-    clean-tree-unknown = !git purge
-#+end_src
-
-*WARNING -- BE CAREFUL WITH THIS!*
-
-**** Show files to delete
-
-To check what ~git purge~ will delete, and be sure it's what you want, use ~git
-purge-dry-run~.
-
-#+begin_src conf
-    # Usage: git purge-dry-run
-    # Show files to delete instead of deleting them.
-    purge-dry-run = clean -d -n
-
-    # Alias to purge-dry-run.
-    clean-tree-unknown-dry-run = !git purge-dry-run
-#+end_src
-
-If you want to save your current branch's state before doing this (just in
-case), you can do:
-
-: git commit -a -m "Saving my work, just in case"
-: git branch my-saved-work
-
-**** Delete all untracked files and also ignored files
-
-*PLAY WITH FIRE VERSION* which will wipe out all the *ignored and untracked* files
-and directories:
-
-#+begin_src conf
-    # Usage: git purge-all
-    # Delete untracked files (and directories), and also ignored files.
-    purge-all = clean -d -f -x
-    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
-    # including those in .gitignore.
-
-    # Alias to purge-all.
-    clean-tree-unknown-ignored = !git purge-all
-#+end_src
-
-#+begin_note
-~git clean~ will *remove any files* from the tracked root directory *that are not
-under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
-#+end_note
 
 ** Merge
 

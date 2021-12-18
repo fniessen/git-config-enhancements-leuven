@@ -257,6 +257,38 @@
     unstage = reset HEAD --
     unadd = reset HEAD --
 
+    # Usage: git clean-tree-unknown
+    # Delete (only) untracked files and directories.
+    clean-tree-unknown = clean -d -f
+    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
+    # Files and directories in .gitignore will be preserved.
+
+    # Alias to git clean-tree-unknown.
+    purge = !git clean-tree-unknown
+
+    # Usage: git clean-tree-unknown-dry-run
+    # Show files to delete instead of deleting them.
+    clean-tree-unknown-dry-run = clean -d -n
+
+    # Alias to clean-tree-unknown-dry-run.
+    purge-dry-run = !git clean-tree-unknown-dry-run
+
+    # Usage: git clean-tree-unknown-ignored
+    # Delete untracked files (and directories), and also ignored files.
+    clean-tree-unknown-ignored = clean -d -f -x
+    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
+    # including those in .gitignore.
+
+    # Alias to clean-tree-unknown-ignored.
+    purge-all = !git clean-tree-unknown-ignored
+
+    # Usage: git clean-tree-unknown-ignored-dry-run
+    # Show files to delete instead of deleting them.
+    clean-tree-unknown-ignored-dry-run = clean -d -n -x
+
+    # Alias to clean-tree-unknown-ignored-dry-run.
+    purge-all-dry-run = !git clean-tree-unknown-ignored-dry-run
+
     # Shortcut for commit.
     ci = commit
 
@@ -961,9 +993,21 @@ deploy-prod =
     # # Show the last N commits on the current branch.
     # last = !git log --name-status -${1:-1}
 
-    file-history = log --follow --date-order --date=short -C
+    file-history = git show --oneline -s $(git rev-list HEAD -- 32-factures-creation.R)
+    file-history-f = "!f() { git show --oneline -s $(git rev-list --date-order HEAD -- $1); }; f"
+    file-history-sh = !sh -c 'git show --oneline -s $(git rev-list --date-order HEAD -- $1)'
 
-    related = !sh -c 'git log --follow --format=format:%H $1 | xargs -L 1 git diff-tree --no-commit-id --name-only -r | sort | uniq -c | sort -b -n -r'
+    file-history-follow = log --follow --date-order --date=short -C
+
+    related = !sh -c 'git log --follow --format=format:%H $1 \
+                          | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
+                          | sort \
+                          | uniq -c \
+                          | sort -b -n -r'
+
+    related-files = git show --name-only $(git rev-list HEAD -- 32-factures-creation.R)
+    related-files-f = "!f() { git show --name-only $(git rev-list HEAD -- $1); }; f"
+    related-files-sh = !sh -c 'git show --name-only $(git rev-list HEAD -- $1)'
 
     file-last-modified = log -n 1 --follow --all --date-order --date=short -C
 
@@ -1011,31 +1055,6 @@ deploy-prod =
 
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
     skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
-
-    # Usage: git purge
-    # Delete (only) untracked files and directories.
-    purge = clean -d -f
-    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
-    # Files and directories in .gitignore will be preserved.
-
-    # Alias to purge.
-    clean-tree-unknown = !git purge
-
-    # Usage: git purge-dry-run
-    # Show files to delete instead of deleting them.
-    purge-dry-run = clean -d -n
-
-    # Alias to purge-dry-run.
-    clean-tree-unknown-dry-run = !git purge-dry-run
-
-    # Usage: git purge-all
-    # Delete untracked files (and directories), and also ignored files.
-    purge-all = clean -d -f -x
-    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
-    # including those in .gitignore.
-
-    # Alias to purge-all.
-    clean-tree-unknown-ignored = !git purge-all
 
   # Given a merge commit, find the span of commits that exist(ed).
   # Not so useful in itself, but used by other aliases.
