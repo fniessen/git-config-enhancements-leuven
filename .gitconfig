@@ -289,6 +289,93 @@
     # Alias to clean-tree-unknown-ignored-dry-run.
     purge-all-dry-run = !git clean-tree-unknown-ignored-dry-run
 
+    spush = stash push
+
+    # Like sapply but shows it only.
+    sshow = "!f() { \
+            git stash show stash^{/$@} -p; \
+        }; f"
+
+    # Find stash with name like text.
+    sapply = "!f() { \
+            git stash apply stash^{/$@}; \
+        }; f"
+
+    # Like sapply but pops it off.
+    spop = "!f() { \
+            git stash pop stash@{$(git stash-id $@)}; \
+        }; f"
+
+    # Only accepts single word, no quotations.
+    stash-id = "!f() { \
+            git stash list \
+                | grep $@ \
+                | head -n 1 \
+                | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
+        }; f"
+
+    # "Add" modified files, deleted files, and new untracked files.
+    stash-all = !git add -A \
+                && git stash
+
+    # Hide all files, including untracked files (faster than using --all).
+    hide = stash push --include-untracked
+
+    snapshot = !git stash push -m "snapshot-$(date +%Y%m%d_%H%M)" \
+                && git stash apply "stash@{0}"
+
+    # checkpoint
+    cp = !git stash push -m "$(date +%F--%T)" \
+                && git stash pop --index
+
+    # checkpoint recover
+    cpr = "!f() { \
+            git fsck \
+                | grep commit \
+                | cut -d' ' -f3 \
+                | while read HASH; do \
+                      git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null \
+                          && echo $HASH \
+                          | xargs git rev-list --since=${1:-1day} -1; \
+                  done \
+                | xargs -L 1 git log --format=%at:%h -1 \
+                | sort \
+                | cut -f2 -d: \
+                | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
+        }; f"
+
+    stashes = stash list --date=local
+
+    # Usage: git unstash-preview
+    # Instead of unshelving the changes, show the diff that would result from
+    # unshelving.
+    unstash-preview = stash show -p
+
+    sshow = "!f() { \
+            git stash show stash^{/$*} -p; \
+        }; f"
+
+    sshno = stash show --name-only
+
+    # Usage: git unstash-keep [STASH_ID]
+    # Apply changes but don't delete them.
+    unstash-keep = stash apply
+
+    sapply = "!f() { \
+            git stash apply stash^{/$*}; \
+        }; f"
+
+    stash-unapply = !git stash show -p --no-textconv --binary \
+                | git apply -R
+
+    # Usage: git unstash [STASH_ID]
+    # Apply changes and remove them from the shelf.
+    unstash = stash pop
+
+    # Usage: git unstash-delete-only [STASH_ID]
+    # Delete changes without applying them.
+    unstash-delete-only = stash drop
+
     # Shortcut for commit.
     ci = commit
 
@@ -1265,93 +1352,6 @@ deploy-prod =
     # or 'master~N' then pu is a descendent of master
     sbt = show-branch --topics
     sbs = show-branch --sha1-name
-
-    spush = stash push
-
-    # Like sapply but shows it only.
-    sshow = "!f() { \
-            git stash show stash^{/$@} -p; \
-        }; f"
-
-    # Find stash with name like text.
-    sapply = "!f() { \
-            git stash apply stash^{/$@}; \
-        }; f"
-
-    # Like sapply but pops it off.
-    spop = "!f() { \
-            git stash pop stash@{$(git stash-id $@)}; \
-        }; f"
-
-    # Only accepts single word, no quotations.
-    stash-id = "!f() { \
-            git stash list \
-                | grep $@ \
-                | head -n 1 \
-                | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
-        }; f"
-
-    # "Add" modified files, deleted files, and new untracked files.
-    stash-all = !git add -A \
-                && git stash
-
-    # Hide all files, including untracked files (faster than using --all).
-    hide = stash push --include-untracked
-
-    snapshot = !git stash push -m "snapshot-$(date +%Y%m%d_%H%M)" \
-                && git stash apply "stash@{0}"
-
-    # checkpoint
-    cp = !git stash push -m "$(date +%F--%T)" \
-                && git stash pop --index
-
-    # checkpoint recover
-    cpr = "!f() { \
-            git fsck \
-                | grep commit \
-                | cut -d' ' -f3 \
-                | while read HASH; do \
-                      git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null \
-                          && echo $HASH \
-                          | xargs git rev-list --since=${1:-1day} -1; \
-                  done \
-                | xargs -L 1 git log --format=%at:%h -1 \
-                | sort \
-                | cut -f2 -d: \
-                | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
-        }; f"
-
-    stashes = stash list --date=local
-
-    # Usage: git unstash-preview
-    # Instead of unshelving the changes, show the diff that would result from
-    # unshelving.
-    unstash-preview = stash show -p
-
-    sshow = "!f() { \
-            git stash show stash^{/$*} -p; \
-        }; f"
-
-    sshno = stash show --name-only
-
-    # Usage: git unstash-keep [STASH_ID]
-    # Apply changes but don't delete them.
-    unstash-keep = stash apply
-
-    sapply = "!f() { \
-            git stash apply stash^{/$*}; \
-        }; f"
-
-    stash-unapply = !git stash show -p --no-textconv --binary \
-                | git apply -R
-
-    # Usage: git unstash [STASH_ID]
-    # Apply changes and remove them from the shelf.
-    unstash = stash pop
-
-    # Usage: git unstash-delete-only [STASH_ID]
-    # Delete changes without applying them.
-    unstash-delete-only = stash drop
 
     # Usage: git outgoing
     # Show commits not found in the remote branch.

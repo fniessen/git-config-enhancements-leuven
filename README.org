@@ -1153,6 +1153,354 @@ you want, use ~git clean-tree-unknown-ignored-dry-run~.
     purge-all-dry-run = !git clean-tree-unknown-ignored-dry-run
 #+end_src
 
+*** Hg shelve untracked files
+
+*** Hg ignore untracked files
+
+*** Hg remove untracked files
+
+*** Forget all missing files
+
+forget = select files that have been deleted
+
+** Stash (shelve)
+
+Temporarily set aside some changes from the current tree.
+
+Shelve allows you to temporarily put changes you've made "on the shelf", ie. out
+of the way, until a later time when you can bring them back from the shelf with
+the `unshelve' command. The changes are stored alongside your working tree, and
+so they aren't propagated along with your branch nor will they survive its
+deletion.
+
+If shelve -list is specified, previously-shelved changes are listed.
+
+Shelve is intended to help separate several sets of changes that have been
+inappropriately mingled. If you just want to get rid of all changes and you
+don't need to restore them later, use revert. If you want to shelve all text
+changes at once, use shelve -all.
+
+If filenames are specified, only the changes to those files will be
+shelved. Other files will be left untouched.
+
+If a revision is specified, changes since that revision will be shelved.
+
+You can put multiple items on the shelf, and by default, `unshelve' will restore
+the most recently shelved changes.
+
+
+bzr unshelve [SHELF_ID]
+Restore shelved changes.
+
+
+
+
+A *stash* is nothing but a *(temporary) branch*.
+
+~git stash~ makes a temporary copy of the changes in your *index* (staging area) and
+*working tree*, and clears the decks so you can easily work on something else; it
+reverts your local modifications, allowing you to get rid of some incomplete
+changes.
+
+#+begin_tip
+Use ~git stash~ if Git refused to merge because it foresees conflicts.
+#+end_tip
+
+If you anticipate that you might have trouble merging the work you want to stash
+with the work you're about to do on the clean tree, you can create a new branch
+with ~git stash branch NEW_BRANCH_NAME~.
+
+Information that is used by default if you don't provide a message:
+
+#+begin_example
+stash@{0}: WIP on BRANCH: SHA1_OF_HEAD TITLE_LINE_OF_HEAD
+#+end_example
+
+You can operate on the "stash" ref as if it were any other ref.
+
+*** Stash push
+
+~git stash push~ also optionally takes a message describing the contents of the
+stash (much, much more useful):
+
+: git stash push -m "Describe what you did here"
+
+: stash@{0}: On BRANCH: Describe what you did here
+
+This command is useful in saving all changes not ready to be committed and the
+user wants to have an updated repository.
+
+#+begin_src conf
+    spush = stash push
+#+end_src
+
+#+begin_src conf
+    # Like sapply but shows it only.
+    sshow = "!f() { \
+            git stash show stash^{/$@} -p; \
+        }; f"
+
+    # Find stash with name like text.
+    sapply = "!f() { \
+            git stash apply stash^{/$@}; \
+        }; f"
+
+    # Like sapply but pops it off.
+    spop = "!f() { \
+            git stash pop stash@{$(git stash-id $@)}; \
+        }; f"
+
+    # Only accepts single word, no quotations.
+    stash-id = "!f() { \
+            git stash list \
+                | grep $@ \
+                | head -n 1 \
+                | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
+        }; f"
+#+end_src
+
+#+begin_src conf
+    # "Add" modified files, deleted files, and new untracked files.
+    stash-all = !git add -A \
+                && git stash
+#+end_src
+
+#+begin_src conf
+    # Hide all files, including untracked files (faster than using --all).
+    hide = stash push --include-untracked
+#+end_src
+
+*** Take named stash
+
+"WIP:"
+
+#+begin_src conf
+    snapshot = !git stash push -m "snapshot-$(date +%Y%m%d_%H%M)" \
+                && git stash apply "stash@{0}"
+#+end_src
+
+#+begin_src conf
+    # checkpoint
+    cp = !git stash push -m "$(date +%F--%T)" \
+                && git stash pop --index
+
+    # checkpoint recover
+    cpr = "!f() { \
+            git fsck \
+                | grep commit \
+                | cut -d' ' -f3 \
+                | while read HASH; do \
+                      git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null \
+                          && echo $HASH \
+                          | xargs git rev-list --since=${1:-1day} -1; \
+                  done \
+                | xargs -L 1 git log --format=%at:%h -1 \
+                | sort \
+                | cut -f2 -d: \
+                | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
+        }; f"
+#+end_src
+
+*** Show a list of all stashes
+
+#+begin_src conf
+    stashes = stash list --date=local
+#+end_src
+
+*** Show the stash
+
+#+begin_src conf
+    # Usage: git unstash-preview
+    # Instead of unshelving the changes, show the diff that would result from
+    # unshelving.
+    unstash-preview = stash show -p
+#+end_src
+
+https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
+
+#+begin_src conf
+    sshow = "!f() { \
+            git stash show stash^{/$*} -p; \
+        }; f"
+#+end_src
+
+One very useful feature one may consider is to list contents of all local
+stashes:
+
+: git stashes | awk -F: '{ print "\n\n\n\n"; \
+:                          print $0; \
+:                          print "\n\n"; \
+:                          system("git stash show -p " $1); }'
+
+Press [Q] to exit each stash.
+
+It helped me a lot in the past (cleaning stashes stack).
+
+*** Show name-only
+
+#+begin_src conf
+    sshno = stash show --name-only
+#+end_src
+
+*** Apply the stash only, don't delete it from the stash list
+
+When you're done, with ~git stash apply~ (top stash by default), you're back where
+you were.  But if that doesn't work, for whatever reason, you can use any of
+Git's other branch merging tools to put things back they way you want them.
+
+#+begin_src conf
+    # Usage: git unstash-keep [STASH_ID]
+    # Apply changes but don't delete them.
+    unstash-keep = stash apply
+#+end_src
+
+https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
+
+#+begin_src conf
+    sapply = "!f() { \
+            git stash apply stash^{/$*}; \
+        }; f"
+#+end_src
+
+#+begin_src conf
+    stash-unapply = !git stash show -p --no-textconv --binary \
+                | git apply -R
+#+end_src
+
+*** Restore shelved changes
+
+~git unstash~ removes the most recent stash or any stash specified and applies
+changes as a merge.  If merge fails, the stash is not removed from the list and
+must be removed manually.
+
+#+begin_src conf
+    # Usage: git unstash [STASH_ID]
+    # Apply changes and remove them from the shelf.
+    unstash = stash pop
+#+end_src
+
+#+begin_warning
+Be aware that, unlike ~git stash apply~ (though it has its use), ~git unstash~
+*deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
+conflicts, Git will not remove it (but it will still apply it)!
+#+end_warning
+
+*** Drop the stash
+
+#+begin_src conf
+    # Usage: git unstash-delete-only [STASH_ID]
+    # Delete changes without applying them.
+    unstash-delete-only = stash drop
+#+end_src
+
+*** Clear
+
+: git stash clear
+
+*** Workflows
+
+Alternative to ~stash~ (writing a commit with a default message):
+
+XXX See doc of git help stash for workflows...
+
+1. Do a regular ~commit~:
+
+   : git add -A && git commit -m 'WIP'       # Add all changes (including untracked files).
+
+2. Do some other work...
+
+3. Return to previous work:
+
+   : git reset --mixed                       # Reset the previous commit (but
+   :                                         # keeps all the changes from that
+   :                                         # commit in the working tree).
+   :
+   : git reset --soft                        # Or this one???
+
+   Or, if I merely need to modify the *previous* commit:
+
+   : git commit -a --amend
+
+   The ~-a~ *adds any modifications and deletions of existing files* to the commit
+   but ignores brand new files.
+
+   The ~--amend~ launches your default commit editor and lets you change the
+   commit message of the *most recent* commit.
+
+*** From git help stash
+
+       Pulling into a dirty tree
+
+           When you are in the middle of something, you learn that there are
+           upstream changes that are possibly relevant to what you are
+           doing. When your local changes do not conflict with the changes in
+           the upstream, a simple git pull will let you move forward.
+
+           However, there are cases in which your local changes do conflict with
+           the upstream changes, and git pull refuses to overwrite your
+           changes. In such a case, you can stash your changes away, perform
+           a pull, and then unstash, like this:
+
+               $ git pull
+                ...
+               file foobar not up to date, cannot merge.
+               $ git stash
+               $ git pull
+               $ git stash pop
+
+       Interrupted workflow
+
+           When you are in the middle of something, your boss comes in and
+           demands that you fix something immediately. Traditionally, you would
+           make a commit to a temporary branch to store your changes away, and
+           return to your original branch to make the emergency fix, like this:
+
+               # ... hack hack hack ...
+               $ git create-branch my_wip
+               $ git commit -a -m "WIP"
+               $ git checkout master
+               $ edit emergency fix
+               $ git commit -a -m "Fix in a hurry"
+               $ git checkout my_wip
+               $ git reset --soft HEAD~
+               # ... continue hacking ...
+
+           You can use git stash to simplify the above, like this:
+
+               # ... hack hack hack ...
+               $ git stash
+               $ edit emergency fix
+               $ git commit -a -m "Fix in a hurry"
+               $ git stash pop
+               # ... continue hacking ...
+
+       Testing partial commits
+
+           You can use git stash push --keep-index when you want to make two or
+           more commits out of the changes in the work tree, and you want to
+           test each change before committing:
+
+               # ... hack hack hack ...
+               $ git add --patch foo            # add just first part to the index
+               $ git stash push --keep-index    # save all other changes to the stash
+               $ edit/build/test first part
+               $ git commit -m 'First part'     # commit fully tested change
+               $ git stash pop                  # prepare to work on all other changes
+               # ... repeat above five steps until one commit remains ...
+               $ edit/build/test remaining parts
+               $ git commit foo -m 'Remaining parts'
+
+       Recovering stashes that were cleared/dropped erroneously
+
+           If you mistakenly drop or clear stashes, they cannot be recovered
+           through the normal safety mechanisms. However, you can try the
+           following incantation to get a list of stashes that are still in your
+           repository, but not reachable any more:
+
+               git fsck --unreachable |
+               grep commit | cut -d\  -f3 |
+               xargs git log --merges --no-walk --grep=WIP
+
 * Commits
 
 ** Create a commit
@@ -4438,314 +4786,6 @@ See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its
     sbt = show-branch --topics
     sbs = show-branch --sha1-name
 #+end_src
-
-** Stash (shelve)
-
-A *stash* is nothing but a *(temporary) branch*.
-
-~git stash~ makes a temporary copy of the changes in your *index* (staging area) and
-*working tree*, and clears the decks so you can easily work on something else; it
-reverts your local modifications, allowing you to get rid of some incomplete
-changes.
-
-#+begin_tip
-Use ~git stash~ if Git refused to merge because it foresees conflicts.
-#+end_tip
-
-If you anticipate that you might have trouble merging the work you want to stash
-with the work you're about to do on the clean tree, you can create a new branch
-with ~git stash branch NEW_BRANCH_NAME~.
-
-Information that is used by default if you don't provide a message:
-
-#+begin_example
-stash@{0}: WIP on BRANCH: SHA1_OF_HEAD TITLE_LINE_OF_HEAD
-#+end_example
-
-You can operate on the "stash" ref as if it were any other ref.
-
-*** Stash push
-
-~git stash push~ also optionally takes a message describing the contents of the
-stash (much, much more useful):
-
-: git stash push -m "Describe what you did here"
-
-: stash@{0}: On BRANCH: Describe what you did here
-
-This command is useful in saving all changes not ready to be committed and the
-user wants to have an updated repository.
-
-#+begin_src conf
-    spush = stash push
-#+end_src
-
-#+begin_src conf
-    # Like sapply but shows it only.
-    sshow = "!f() { \
-            git stash show stash^{/$@} -p; \
-        }; f"
-
-    # Find stash with name like text.
-    sapply = "!f() { \
-            git stash apply stash^{/$@}; \
-        }; f"
-
-    # Like sapply but pops it off.
-    spop = "!f() { \
-            git stash pop stash@{$(git stash-id $@)}; \
-        }; f"
-
-    # Only accepts single word, no quotations.
-    stash-id = "!f() { \
-            git stash list \
-                | grep $@ \
-                | head -n 1 \
-                | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
-        }; f"
-#+end_src
-
-#+begin_src conf
-    # "Add" modified files, deleted files, and new untracked files.
-    stash-all = !git add -A \
-                && git stash
-#+end_src
-
-#+begin_src conf
-    # Hide all files, including untracked files (faster than using --all).
-    hide = stash push --include-untracked
-#+end_src
-
-*** Take named stash
-
-"WIP:"
-
-#+begin_src conf
-    snapshot = !git stash push -m "snapshot-$(date +%Y%m%d_%H%M)" \
-                && git stash apply "stash@{0}"
-#+end_src
-
-#+begin_src conf
-    # checkpoint
-    cp = !git stash push -m "$(date +%F--%T)" \
-                && git stash pop --index
-
-    # checkpoint recover
-    cpr = "!f() { \
-            git fsck \
-                | grep commit \
-                | cut -d' ' -f3 \
-                | while read HASH; do \
-                      git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null \
-                          && echo $HASH \
-                          | xargs git rev-list --since=${1:-1day} -1; \
-                  done \
-                | xargs -L 1 git log --format=%at:%h -1 \
-                | sort \
-                | cut -f2 -d: \
-                | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
-        }; f"
-#+end_src
-
-*** Show a list of all stashes
-
-#+begin_src conf
-    stashes = stash list --date=local
-#+end_src
-
-*** Show the stash
-
-#+begin_src conf
-    # Usage: git unstash-preview
-    # Instead of unshelving the changes, show the diff that would result from
-    # unshelving.
-    unstash-preview = stash show -p
-#+end_src
-
-https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
-
-#+begin_src conf
-    sshow = "!f() { \
-            git stash show stash^{/$*} -p; \
-        }; f"
-#+end_src
-
-One very useful feature one may consider is to list contents of all local
-stashes:
-
-: git stashes | awk -F: '{ print "\n\n\n\n"; \
-:                          print $0; \
-:                          print "\n\n"; \
-:                          system("git stash show -p " $1); }'
-
-Press [Q] to exit each stash.
-
-It helped me a lot in the past (cleaning stashes stack).
-
-*** Show name-only
-
-#+begin_src conf
-    sshno = stash show --name-only
-#+end_src
-
-*** Apply the stash only, don't delete it from the stash list
-
-When you're done, with ~git stash apply~ (top stash by default), you're back where
-you were.  But if that doesn't work, for whatever reason, you can use any of
-Git's other branch merging tools to put things back they way you want them.
-
-#+begin_src conf
-    # Usage: git unstash-keep [STASH_ID]
-    # Apply changes but don't delete them.
-    unstash-keep = stash apply
-#+end_src
-
-https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
-
-#+begin_src conf
-    sapply = "!f() { \
-            git stash apply stash^{/$*}; \
-        }; f"
-#+end_src
-
-#+begin_src conf
-    stash-unapply = !git stash show -p --no-textconv --binary \
-                | git apply -R
-#+end_src
-
-*** Restore shelved changes
-
-~git unstash~ removes the most recent stash or any stash specified and applies
-changes as a merge.  If merge fails, the stash is not removed from the list and
-must be removed manually.
-
-#+begin_src conf
-    # Usage: git unstash [STASH_ID]
-    # Apply changes and remove them from the shelf.
-    unstash = stash pop
-#+end_src
-
-#+begin_warning
-Be aware that, unlike ~git stash apply~ (though it has its use), ~git unstash~
-*deletes the applied stash* -- /only/ if the stash is cleanly applied.  If there are
-conflicts, Git will not remove it (but it will still apply it)!
-#+end_warning
-
-*** Drop the stash
-
-#+begin_src conf
-    # Usage: git unstash-delete-only [STASH_ID]
-    # Delete changes without applying them.
-    unstash-delete-only = stash drop
-#+end_src
-
-*** Clear
-
-: git stash clear
-
-*** Workflows
-
-Alternative to ~stash~ (writing a commit with a default message):
-
-XXX See doc of git help stash for workflows...
-
-1. Do a regular ~commit~:
-
-   : git add -A && git commit -m 'WIP'       # Add all changes (including untracked files).
-
-2. Do some other work...
-
-3. Return to previous work:
-
-   : git reset --mixed                       # Reset the previous commit (but
-   :                                         # keeps all the changes from that
-   :                                         # commit in the working tree).
-   :
-   : git reset --soft                        # Or this one???
-
-   Or, if I merely need to modify the *previous* commit:
-
-   : git commit -a --amend
-
-   The ~-a~ *adds any modifications and deletions of existing files* to the commit
-   but ignores brand new files.
-
-   The ~--amend~ launches your default commit editor and lets you change the
-   commit message of the *most recent* commit.
-
-*** From git help stash
-
-       Pulling into a dirty tree
-
-           When you are in the middle of something, you learn that there are
-           upstream changes that are possibly relevant to what you are
-           doing. When your local changes do not conflict with the changes in
-           the upstream, a simple git pull will let you move forward.
-
-           However, there are cases in which your local changes do conflict with
-           the upstream changes, and git pull refuses to overwrite your
-           changes. In such a case, you can stash your changes away, perform
-           a pull, and then unstash, like this:
-
-               $ git pull
-                ...
-               file foobar not up to date, cannot merge.
-               $ git stash
-               $ git pull
-               $ git stash pop
-
-       Interrupted workflow
-
-           When you are in the middle of something, your boss comes in and
-           demands that you fix something immediately. Traditionally, you would
-           make a commit to a temporary branch to store your changes away, and
-           return to your original branch to make the emergency fix, like this:
-
-               # ... hack hack hack ...
-               $ git create-branch my_wip
-               $ git commit -a -m "WIP"
-               $ git checkout master
-               $ edit emergency fix
-               $ git commit -a -m "Fix in a hurry"
-               $ git checkout my_wip
-               $ git reset --soft HEAD~
-               # ... continue hacking ...
-
-           You can use git stash to simplify the above, like this:
-
-               # ... hack hack hack ...
-               $ git stash
-               $ edit emergency fix
-               $ git commit -a -m "Fix in a hurry"
-               $ git stash pop
-               # ... continue hacking ...
-
-       Testing partial commits
-
-           You can use git stash push --keep-index when you want to make two or
-           more commits out of the changes in the work tree, and you want to
-           test each change before committing:
-
-               # ... hack hack hack ...
-               $ git add --patch foo            # add just first part to the index
-               $ git stash push --keep-index    # save all other changes to the stash
-               $ edit/build/test first part
-               $ git commit -m 'First part'     # commit fully tested change
-               $ git stash pop                  # prepare to work on all other changes
-               # ... repeat above five steps until one commit remains ...
-               $ edit/build/test remaining parts
-               $ git commit foo -m 'Remaining parts'
-
-       Recovering stashes that were cleared/dropped erroneously
-
-           If you mistakenly drop or clear stashes, they cannot be recovered
-           through the normal safety mechanisms. However, you can try the
-           following incantation to get a list of stashes that are still in your
-           repository, but not reachable any more:
-
-               git fsck --unreachable |
-               grep commit | cut -d\  -f3 |
-               xargs git log --merges --no-walk --grep=WIP
 
 ** PUBLISH - Push
 
