@@ -742,6 +742,35 @@ bclean = "!f() { \
         }; f"
 # XXX We should get the name of the branch merge base
 
+    # Usage: git missing [COMMIT_ISH]
+    # Show the missing commits between this and another branch
+    missing = "!f() { \
+            printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
+            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short "${1:-master}".. \
+                | awk 'NR%2==0'; \
+            printf \"\n\"; \
+            printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
+            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short .."${1:-master}" \
+                | awk 'NR%2==0'; \
+        }; f"
+
+    # Find the point at which a branch forked from another branch
+    ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' \
+                    <(git rev-list --first-parent "${1:-master}") \
+                    <(git rev-list --first-parent "${2:-HEAD}") \
+                | head -1' -
+
+    # Since branch point.
+    log-ancestor = !sh -c 'git log $(git ancestor)..'
+    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
+
+    # Find the point at which a branch forked from another branch
+    # Best common ancestor (when it was branched off).
+    ancestor2 = !git merge-base $(git origin)/master $(git current-branch)
+
+    # Also:
+    # git merge-base --all COMMIT_1 COMMIT_2
+
     # Usage: git missing-files [COMMIT_ISH]
     # Show the changed files between this and another branch
     # Examples:
@@ -1326,35 +1355,6 @@ deploy-prod =
     co = checkout
 
     next = "!f() { git checkout $(git rev-list --topo-order HEAD..master | tail -1; }; f"
-
-    # Usage: git missing [COMMIT_ISH]
-    # Show the missing commits between this and another branch
-    missing = "!f() { \
-            printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short "${1:-master}".. \
-                | awk 'NR%2==0'; \
-            printf \"\n\"; \
-            printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short .."${1:-master}" \
-                | awk 'NR%2==0'; \
-        }; f"
-
-    # Find the point at which a branch forked from another branch
-    ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' \
-                    <(git rev-list --first-parent "${1:-master}") \
-                    <(git rev-list --first-parent "${2:-HEAD}") \
-                | head -1' -
-
-    # Since branch point.
-    log-ancestor = !sh -c 'git log $(git ancestor)..'
-    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
-
-    # Find the point at which a branch forked from another branch
-    # Best common ancestor (when it was branched off).
-    ancestor2 = !git merge-base $(git origin)/master $(git current-branch)
-
-    # Also:
-    # git merge-base --all COMMIT_1 COMMIT_2
 
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch

@@ -2924,6 +2924,84 @@ command, like this:
 
 : git log master..BRANCH_NAME
 
+*** How to find all the commits made only on a specific branch
+
+Assuming that your branch was created off of ~develop~, then /while in the branch/
+(that is, you have the branch checked out):
+
+: git log --no-merges --graph develop..
+
+*** Show unmerged commits between two branches
+
+The alias ~missing~ (an idea borrowed from Bazaar) shows the unique commits in the
+current branch and the specified branch.
+
+#+begin_src conf
+    # Usage: git missing [COMMIT_ISH]
+    # Show the missing commits between this and another branch
+    missing = "!f() { \
+            printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
+            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short "${1:-master}".. \
+                | awk 'NR%2==0'; \
+            printf \"\n\"; \
+            printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
+            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short .."${1:-master}" \
+                | awk 'NR%2==0'; \
+        }; f"
+#+end_src
+
+**** Branch point
+
+The *common ancestor* is the last commit that existed in both branches. Usually
+this is the branch point, but it could also be a commit that was merged.
+
+#+begin_src conf
+    # Find the point at which a branch forked from another branch
+    ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' \
+                    <(git rev-list --first-parent "${1:-master}") \
+                    <(git rev-list --first-parent "${2:-HEAD}") \
+                | head -1' -
+#+end_src
+
+The common ancestor is frequently used with ~diff~ to return all of the changes
+that your branch introduces, while excluding the changes that you have not
+merged from the remote branch.
+
+#+begin_src conf
+    # Since branch point.
+    log-ancestor = !sh -c 'git log $(git ancestor)..'
+    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
+#+end_src
+
+#+begin_src conf
+    # Find the point at which a branch forked from another branch
+    # Best common ancestor (when it was branched off).
+    ancestor2 = !git merge-base $(git origin)/master $(git current-branch)
+
+    # Also:
+    # git merge-base --all COMMIT_1 COMMIT_2
+#+end_src
+
+https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git
+
+*** See which changes from a branch are already present upstream
+
+While on =feature= branch:
+
+: git cherry -v master
+
+#+begin_example
++ 497034f2 Listener.new now accepts a hash of options
+- 2d0333ff Cache the absolute images path for growl messages
++ e4406858 Rename Listener#run to #start
+#+end_example
+
+The ~cherry~ command is useful to see which commits have been cherry-picked from
+a development branch to the stable branch, for instance. This command compares
+changes on the current (=feature=) branch to upstream (=master=) and indicates which
+are present on both with the ~-~ sign. Changes still missing from upstream are
+marked with ~+~.
+
 *** How do I find a list of files committed to a Git branch (since branching from master)?
 
 Show all the changed files in a Git branch *since it was forked from the =master=
@@ -4691,84 +4769,6 @@ git stash \
 
 For Bitbucket:
 https://marketplace.atlassian.com/apps/1212525/pages-for-bitbucket-server?hosting=server&tab=overview
-
-*** How to find all the commits made only on a specific branch
-
-Assuming that your branch was created off of ~develop~, then /while in the branch/
-(that is, you have the branch checked out):
-
-: git log --no-merges --graph develop..
-
-*** Show unmerged commits between two branches
-
-The alias ~missing~ (an idea borrowed from Bazaar) shows the unique commits in the
-current branch and the specified branch.
-
-#+begin_src conf
-    # Usage: git missing [COMMIT_ISH]
-    # Show the missing commits between this and another branch
-    missing = "!f() { \
-            printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short "${1:-master}".. \
-                | awk 'NR%2==0'; \
-            printf \"\n\"; \
-            printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short .."${1:-master}" \
-                | awk 'NR%2==0'; \
-        }; f"
-#+end_src
-
-**** Branch point
-
-The *common ancestor* is the last commit that existed in both branches. Usually
-this is the branch point, but it could also be a commit that was merged.
-
-#+begin_src conf
-    # Find the point at which a branch forked from another branch
-    ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' \
-                    <(git rev-list --first-parent "${1:-master}") \
-                    <(git rev-list --first-parent "${2:-HEAD}") \
-                | head -1' -
-#+end_src
-
-The common ancestor is frequently used with ~diff~ to return all of the changes
-that your branch introduces, while excluding the changes that you have not
-merged from the remote branch.
-
-#+begin_src conf
-    # Since branch point.
-    log-ancestor = !sh -c 'git log $(git ancestor)..'
-    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
-#+end_src
-
-#+begin_src conf
-    # Find the point at which a branch forked from another branch
-    # Best common ancestor (when it was branched off).
-    ancestor2 = !git merge-base $(git origin)/master $(git current-branch)
-
-    # Also:
-    # git merge-base --all COMMIT_1 COMMIT_2
-#+end_src
-
-https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git
-
-*** See which changes from a branch are already present upstream
-
-While on =feature= branch:
-
-: git cherry -v master
-
-#+begin_example
-+ 497034f2 Listener.new now accepts a hash of options
-- 2d0333ff Cache the absolute images path for growl messages
-+ e4406858 Rename Listener#run to #start
-#+end_example
-
-The ~cherry~ command is useful to see which commits have been cherry-picked from
-a development branch to the stable branch, for instance. This command compares
-changes on the current (=feature=) branch to upstream (=master=) and indicates which
-are present on both with the ~-~ sign. Changes still missing from upstream are
-marked with ~+~.
 
 *** Recover a branch after its deletion in Git
 
