@@ -768,8 +768,6 @@ bclean = "!f() { \
             git diff --stat ${1:-master}...; \
         }; f"
 
-    log-fetched = log --oneline HEAD..$(git origin)
-
     divergence = !git log --left-right --graph --cherry-pick --oneline $1...$(git origin)/$1
 
     # Usage: git release VERSION

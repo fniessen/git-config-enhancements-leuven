@@ -2913,6 +2913,7 @@ current branch and the specified branch.
 branch was created off of ~master~, then /while on the specific branch/ (that is,
 you have that branch checked out):
 
+: git missing $(git ancestor)
 : git log --no-merges master..
 : git log HEAD --not master
 : git cherry -v master
@@ -2931,6 +2932,16 @@ a development branch to the stable branch, for instance. This command compares
 changes on the current (=feature=) branch to upstream (=master=) and indicates which
 are present on both with the ~-~ sign. Changes still missing from upstream are
 marked with ~+~.
+
+**** History of a branch: List all commits on only one side of the branches
+
+: git log --graph --left-right --cherry-pick --oneline master...BRANCH_NAME
+
+It is a list of commits reachable from ~BRANCH_NAME~ that are not reachable from
+~master~. This gives you the information you want, but if and only if you have
+never merged ~BRANCH_NAME~ back to ~master~, and have never merged ~master~ into
+~BRANCH_NAME~ since you created it. If you have merged, then this history of
+differences will collapse.
 
 **** Branch point
 
@@ -2992,26 +3003,6 @@ Available filters for ~--diff-filter~ are:
 - D :: Deleted
 - M :: Modified
 - R :: Renamed
-
-*** History of your branch: List all commits on only one side of the branches
-
-= UNION of log-local AND log-fetched?  (with prefix < or > for branch A or B)
-
-#+begin_src conf :tangle no
-    git log --graph --left-right --cherry-pick --oneline master...<branch>
-#+end_src
-
-It is really a list of commits reachable from 'branch' that are not reachable
-from master. This gives you the information you want, but if and only if you
-have never merged 'branch' back to master, and have never merged master into
-'branch' since you created it. If you have merged, then this history of
-differences will collapse.
-
-*** What did the origin do since I forked from them?
-
-#+begin_src conf
-    log-fetched = log --oneline HEAD..$(git origin)
-#+end_src
 
 *** TODO Show the history difference between a local branch and its remote
 
