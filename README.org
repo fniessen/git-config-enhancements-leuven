@@ -514,7 +514,7 @@ The first color given is the foreground; the second is the background.", e.g
 [custom.formats]
     ls = "[%C(auto,yellow)%<|(10)%h%C(reset)] [%C(auto,bold blue)%<(15trunc)%cn%C(reset)]  %C(auto)%d% C(reset)%s"
     find = "[%C(yellow)%<|(20)%h%C(reset)] [%C(bold blue)%<(10)%cn%C(reset)]  %C(auto)%d %C(reset)  %s"
-    graph = "%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)%n %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)"
+    graph = "%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(yellow)%d%C(reset)%n %C(white)%s%C(reset)%n %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)"
 #+end_src
 
 See
@@ -2741,10 +2741,6 @@ List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
     tags-show-ids = show-ref --tags
 #+end_src
 
-#+begin_src conf
-    show-tags-by-date = log --tags --simplify-by-decoration --pretty="format:%ai %d"
-#+end_src
-
 : # Show annotated and lightweight tags.
 : git show-ref -d --tags \
 :     | cut -b 42- \
@@ -2767,7 +2763,7 @@ Show the last tag /in the current branch/:
 Show the latest tag /in all branches/:
 
 #+begin_src conf
-    last-tagged = !git describe --tags $(git rev-list --tags --max-count=1)
+    last-tag-all = !git describe --tags $(git rev-list --tags --max-count=1)
 #+end_src
 
 ** Rename a tag
@@ -3005,6 +3001,8 @@ It's common practice to prefix your version names with the letter ~v~.
 Tag and push changes to the repository:
 
 #+begin_src conf
+    # Usage: git release VERSION
+    # Release a new version of your project.
     release = "!f() { \
             git tag -a v$1 -m \"Release version $1\" \
                 && git push $(git origin) --tags \
@@ -3023,29 +3021,29 @@ See example at https://gitlab.com/procps-ng/procps/-/network/master
 To see real *timeline* of who is working on what and when:
 
 #+begin_src conf
-    # this is a summary?
-    graph = log --graph -25 --branches --remotes --tags --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --date-order
+    # 50 most recent commits.
+    # XXX this is a summary?
+    graph = log -50 --branches --tags --remotes --date-order --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --graph
 
     # Show log as a graph
-    glog = log --graph --all --oneline --decorate
+    glog = log --decorate --all --oneline --graph
 #+end_src
 
 #+begin_src conf
     releases = log --decorate --no-merges --all --simplify-by-decoration --oneline --graph
-    # XXX Add date
-
-    show-tree = log --decorate --all --simplify-by-decoration --oneline --date=short --graph
+    # XXX Add short date in the output
 #+end_src
 
 #+begin_src conf
     hist = log --date=short --graph
 
-    hist2 = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
-    histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
+    hist-full = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
 #+end_src
 
 #+begin_src conf
-    zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
+    # Resurrection of lost commits.
+    zopa = !git log --decorate --all --pretty=oneline --abbrev-commit --graph \
+                $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
 Directed Acyclic Graph:
@@ -3647,11 +3645,6 @@ clean and relevant commits, no experiments or fixing typos.
 #+end_src
 
 #+begin_src conf
-#BASIC HISTORY VIEWING
-
-    llog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
-    ls = log --pretty=format:'%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
-
 #BASIC REPO INFORMATION
 
     whois = "!sh -c 'git log -i -1 --pretty=\"format::%an <%ae>\n\" --author=\"$1\"' -"
@@ -3826,12 +3819,9 @@ date".
 #+end_note
 
 #+begin_src conf
-    # Show the log entries in oneline format.
+    # Usage: git ls
+    # Print a summary of activity.
     ls = log --decorate --date=short
-
-    ld = log --decorate --date=relative
-
-    log = log --decorate --date=short
 #+end_src
 
 XXX Check out http://marcgg.com/blog/2015/08/04/git-first-parent-log/
