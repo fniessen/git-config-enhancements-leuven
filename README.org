@@ -1213,7 +1213,7 @@ with ~git stash branch NEW_BRANCH_NAME~.
 Information that is used by default if you don't provide a message:
 
 #+begin_example
-stash@{0}: WIP on BRANCH: SHA1_OF_HEAD TITLE_LINE_OF_HEAD
+stash@{0}: WIP on BRANCH: SHA_1_OF_HEAD TITLE_LINE_OF_HEAD
 #+end_example
 
 You can operate on the "stash" ref as if it were any other ref.
@@ -2338,7 +2338,7 @@ Then:
 
 *** Show all branches
 
-*List all branches* (both local remote-tracking and local branches), showing SHA
+*List all branches* (both local remote-tracking and local branches), showing SHA-1
 and commit subject line for each head, along with the name of the upstream
 branch (if any).
 
@@ -2678,7 +2678,7 @@ While Git supports annotated and lightweight tags, you can only *create*
 further information*.
 
 *Annotated tags* are *regular objects* in the repository, which means they have an
-author, a date, a message, and can be referred because they have their own SHA
+author, a date, a message, and can be referred because they have their own SHA-1
 key.
 
 If knowing *who* tagged *what* and *when* is relevant for you, then use /annotated
@@ -2832,8 +2832,8 @@ Easily determine which changes:
 Diff using three-dot (~...~) notation.
 
 When you use three dots (...), ~git diff~ finds the merge-base between the left
-and right side commit SHAs and substitutes that in for the left-side SHA. The
-right-side SHA remains intact.
+and right side commit SHA-1s and substitutes that in for the left-side
+SHA-1. The right-side SHA-1 remains intact.
 #+end_note
 
 You can see:
@@ -3074,12 +3074,6 @@ To see real *timeline* of who is working on what and when:
     hist = log --date=short --graph
 
     hist-full = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
-#+end_src
-
-#+begin_src conf
-    # Resurrection of lost commits.
-    zopa = !git log --decorate --all --pretty=oneline --abbrev-commit --graph \
-                $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
 Directed Acyclic Graph:
@@ -4731,11 +4725,11 @@ try is to look at the reflog* using the command ~git reflog~ (which display the
 reflog for =HEAD=).
 
 1. Perhaps something easier if the commit was part of a specific branch still
-   existing is to use the command ~git reflog name-of-my-branch~ to *find the SHA*
+   existing is to use the command ~git reflog name-of-my-branch~ to *find the SHA-1*
    for the commit at the tip of your deleted branch -- It works also with
    a remote, for example if you forced push.  Otherwise, use ~git reflog~.
 
-2. Then, you can just ~git create-branch BRANCH SHA1~ to recreate the branch from
+2. Then, you can just ~git create-branch BRANCH SHA_1~ to recreate the branch from
    there.
 
 See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its-deletion-in-git
@@ -5224,8 +5218,10 @@ Let's do a slightly different command: ~resync~
 Ask interactively which patch hunk to commit, and then do the commit:
 
 #+begin_src conf
+    # Usage: git commit-interactive [FILE...]
     # Show record of pending changes, letting you choose which patch hunks to commit.
-    commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+    commit-interactive = !sh -c '(git add -p -- $@ && git commit) \
+                || git reset' --
 
     # Alias of commit-interactive.
     record = !git commit-interactive
@@ -5246,8 +5242,16 @@ will ~reset~ the index.
   directly or by any of its ancestors. You can get these back too!
 
 #+begin_src conf
-    lost1 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
-    lost2 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+    lost = "!git fsck \
+                | awk '/dangling commit/ {print $3}' \
+                | git show --format='SHA-1: %C(yellow)%h%C(reset)  %s' --stdin \
+                | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
+#+end_src
+
+#+begin_src conf
+    # Resurrection of lost commits.
+    zopa = !git log --decorate --all --pretty=oneline --abbrev-commit --graph \
+                    $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
 * If you get errors...

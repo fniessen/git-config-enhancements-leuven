@@ -792,10 +792,6 @@ bclean = "!f() { \
 
     hist-full = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
 
-    # Resurrection of lost commits.
-    zopa = !git log --decorate --all --pretty=oneline --abbrev-commit --graph \
-                $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
-
     graphviz = "!f() { \
             echo 'digraph git {' ; \
             git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
@@ -1484,11 +1480,19 @@ deploy-prod =
                 && git reset --hard $(git origin)/master \
                 && git rebase master'
 
+    # Usage: git commit-interactive [FILE...]
     # Show record of pending changes, letting you choose which patch hunks to commit.
-    commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+    commit-interactive = !sh -c '(git add -p -- $@ && git commit) \
+                || git reset' --
 
     # Alias of commit-interactive.
     record = !git commit-interactive
 
-    lost1 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
-    lost2 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
+    lost = "!git fsck \
+                | awk '/dangling commit/ {print $3}' \
+                | git show --format='SHA-1: %C(yellow)%h%C(reset)  %s' --stdin \
+                | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
+
+    # Resurrection of lost commits.
+    zopa = !git log --decorate --all --pretty=oneline --abbrev-commit --graph \
+                    $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
