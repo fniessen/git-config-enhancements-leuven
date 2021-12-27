@@ -26,7 +26,7 @@
     autocorrect = 1
 
 [log]
-    date = iso
+    date = short
 
 [diff]
     renames = copies
@@ -344,7 +344,7 @@
                 | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
         }; f"
 
-    stashes = stash list --date=local
+    stashes = stash list --date=short
 
     # Usage: git unstash-preview
     # Instead of unshelving the changes, show the diff that would result from
@@ -438,9 +438,9 @@
     # Check if one commit is an ancestor of another.
     is-ancestor = !$HOME/bin/git-is-ancestor
 
-    findc1 = "log --decorate -i --all --date=short --grep"
+    findc1 = "log --decorate -i --all --grep"
     findc2 = "!f() { \
-            git log --decorate --grep=$1 -i --all --date=short; \
+            git log --decorate --grep=$1 -i --all; \
         }; f"
 
     # Search for commits (Filter by commit message).
@@ -466,14 +466,14 @@
     # Usage: git search-for-author [PATTERN]
     # Show the log for an author (or my own user email).
     search-for-author = "!f() { \
-            git log --decorate -i --no-merges --all --date=short --author=${1-$(git config user.email)}; \
+            git log --decorate -i --no-merges --all --author=${1-$(git config user.email)}; \
         }; f"
 
-    whatwhen = log --decorate --date=short -p -S
+    whatwhen = log --decorate -p -S
 
     # Find commits by source code.
     search-for-commits-contents = "!f() { \
-            git log --decorate --date=short -S $1; \
+            git log --decorate -S $1; \
         }; f"
 # XXX Does not work for strings with spaces in them...
 
@@ -715,7 +715,7 @@ bclean = "!f() { \
 
     # Usage: git compare-commits REV_BASE REV_COMPARE
     compare-commits = "!f() { \
-            git log --date=short $1...$2; \
+            git log $1...$2; \
         }; f"
 
     # Usage: git compare-changed-files REV_BASE REV_COMPARE
@@ -736,10 +736,10 @@ bclean = "!f() { \
     # Show the missing commits between this and another branch
     missing = "!f() { \
             printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-            git log --date=short "${1:-master}"..; \
+            git log "${1:-master}"..; \
             printf \"\n\"; \
             printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-            git log --date=short .."${1:-master}"; \
+            git log .."${1:-master}"; \
         }; f"
 
     # Find the point at which a branch forked from another branch
@@ -788,7 +788,7 @@ bclean = "!f() { \
     releases = log --decorate --no-merges --all --simplify-by-decoration --oneline --graph
     # XXX Add short date in the output
 
-    hist = log --date=short --graph
+    hist = log --graph
 
     hist-full = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
 
@@ -981,7 +981,7 @@ deploy-prod =
 #BASIC REPO INFORMATION
 
     whois = "!sh -c 'git log -i -1 --pretty=\"format::%an <%ae>\n\" --author=\"$1\"' -"
-    whatis = show -s --pretty='tformat::%h (%s, %ad)' --date=short
+    whatis = show -s --pretty='tformat::%h (%s, %ad)'
 
 #IGNORING
 
@@ -1053,9 +1053,9 @@ deploy-prod =
 
     # Usage: git ls
     # Print a summary of activity.
-    ls = log --decorate --date=short
+    ls = log --decorate
 
-    ll = log --pretty=medium --abbrev-commit --decorate --date=short --stat
+    ll = log --pretty=medium --abbrev-commit --decorate --stat
 
     ls-modified  = "!git status --porcelain -uno | awk 'match($1, /M/) {print $2}'"
     ls-added     = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
@@ -1078,7 +1078,7 @@ deploy-prod =
 
     # Usage: git last
     # Return the last commit.
-    last = log --decorate -1 --date=short --stat
+    last = log --decorate -1 --stat
 
     # Show the last N commits on the current branch.
     lastn = !git log --name-status -${1:-1}
@@ -1087,7 +1087,7 @@ deploy-prod =
     file-history-f = "!f() { git show --oneline -s $(git rev-list --date-order HEAD -- $1); }; f"
     file-history-sh = !sh -c 'git show --oneline -s $(git rev-list --date-order HEAD -- $1)'
 
-    file-history-follow = log --follow --date-order --date=short -C
+    file-history-follow = log --follow --date-order -C
 
     related = !sh -c 'git log --follow --format=format:%H $1 \
                           | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
@@ -1099,7 +1099,7 @@ deploy-prod =
     related-files-f = "!f() { git show --name-only $(git rev-list HEAD -- $1); }; f"
     related-files-sh = !sh -c 'git show --name-only $(git rev-list HEAD -- $1)'
 
-    file-last-modified = log -n 1 --follow --all --date-order --date=short -C
+    file-last-modified = log -n 1 --follow --all --date-order -C
 
     praise = blame -w
     archeology = blame -w -C -n
@@ -1347,19 +1347,19 @@ deploy-prod =
 
     # Usage: git outgoing
     # Show commits not found in the remote branch.
-    outgoing = log --date=short @{u}..
+    outgoing = log @{u}..
 
     # Alias of outgoing.
     out = !git outgoing
 
-    outgoing-files = log --stat --date=short @{u}..
+    outgoing-files = log --stat @{u}..
 
     # Alias of outgoing-files.
     out-files = !git outgoing-files
 
     # Usage: git outgoing-all
     # Show commits not found in the destination repository.
-    outgoing-all = log --branches --not --remotes --decorate --date=short
+    outgoing-all = log --branches --not --remotes --decorate
 
     # Alias of outgoing-all.
     out-all = !git outgoing-all

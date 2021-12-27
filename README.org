@@ -134,7 +134,7 @@ memory for certain operations.  This provides a significant performance boost.
 
 Get a better date format; for example:
 
-: 2021-12-03 14:26:38 +0100
+: 2021-12-03
 
 instead of:
 
@@ -142,7 +142,7 @@ instead of:
 
 #+begin_src conf
 [log]
-    date = iso
+    date = short
 #+end_src
 
 ** Diff
@@ -1304,7 +1304,7 @@ user wants to have an updated repository.
 *** Show a list of all stashes
 
 #+begin_src conf
-    stashes = stash list --date=local
+    stashes = stash list --date=short
 #+end_src
 
 *** Show the stash
@@ -1777,9 +1777,9 @@ of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-    findc1 = "log --decorate -i --all --date=short --grep"
+    findc1 = "log --decorate -i --all --grep"
     findc2 = "!f() { \
-            git log --decorate --grep=$1 -i --all --date=short; \
+            git log --decorate --grep=$1 -i --all; \
         }; f"
 #+end_src
 
@@ -1857,7 +1857,7 @@ Show the *last commit* whose *message matches a regexp*:
     # Usage: git search-for-author [PATTERN]
     # Show the log for an author (or my own user email).
     search-for-author = "!f() { \
-            git log --decorate -i --no-merges --all --date=short --author=${1-$(git config user.email)}; \
+            git log --decorate -i --no-merges --all --author=${1-$(git config user.email)}; \
         }; f"
 #+end_src
 
@@ -1899,7 +1899,7 @@ that commit!
 : git log --all -S "foo" --since="1 week ago"
 
 #+begin_src conf
-    whatwhen = log --decorate --date=short -p -S
+    whatwhen = log --decorate -p -S
 #+end_src
 
 Prettier ~whatchanged~ with full diffs based on text search:
@@ -1907,7 +1907,7 @@ Prettier ~whatchanged~ with full diffs based on text search:
 #+begin_src conf
     # Find commits by source code.
     search-for-commits-contents = "!f() { \
-            git log --decorate --date=short -S $1; \
+            git log --decorate -S $1; \
         }; f"
 # XXX Does not work for strings with spaces in them...
 #+end_src
@@ -2847,7 +2847,7 @@ You can see:
 #+begin_src conf
     # Usage: git compare-commits REV_BASE REV_COMPARE
     compare-commits = "!f() { \
-            git log --date=short $1...$2; \
+            git log $1...$2; \
         }; f"
 #+end_src
 
@@ -2902,10 +2902,10 @@ current branch and the specified branch.
     # Show the missing commits between this and another branch
     missing = "!f() { \
             printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-            git log --date=short "${1:-master}"..; \
+            git log "${1:-master}"..; \
             printf \"\n\"; \
             printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-            git log --date=short .."${1:-master}"; \
+            git log .."${1:-master}"; \
         }; f"
 #+end_src
 
@@ -3071,7 +3071,7 @@ To see real *timeline* of who is working on what and when:
 #+end_src
 
 #+begin_src conf
-    hist = log --date=short --graph
+    hist = log --graph
 
     hist-full = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
 #+end_src
@@ -3683,7 +3683,7 @@ clean and relevant commits, no experiments or fixing typos.
 #BASIC REPO INFORMATION
 
     whois = "!sh -c 'git log -i -1 --pretty=\"format::%an <%ae>\n\" --author=\"$1\"' -"
-    whatis = show -s --pretty='tformat::%h (%s, %ad)' --date=short
+    whatis = show -s --pretty='tformat::%h (%s, %ad)'
 #+end_src
 
 #+begin_src conf
@@ -3849,7 +3849,7 @@ date".
 #+begin_src conf
     # Usage: git ls
     # Print a summary of activity.
-    ls = log --decorate --date=short
+    ls = log --decorate
 #+end_src
 
 XXX Check out http://marcgg.com/blog/2015/08/04/git-first-parent-log/
@@ -3858,7 +3858,7 @@ List commits *showing changed files* (prettier and more concise version of
 ~whatchanged~):
 
 #+begin_src conf
-    ll = log --pretty=medium --abbrev-commit --decorate --date=short --stat
+    ll = log --pretty=medium --abbrev-commit --decorate --stat
 #+end_src
 
 #+begin_src conf
@@ -4773,14 +4773,14 @@ The ~outgoing~ command returns a list of *unpushed* (outgoing) commits for the
 #+begin_src conf
     # Usage: git outgoing
     # Show commits not found in the remote branch.
-    outgoing = log --date=short @{u}..
+    outgoing = log @{u}..
 
     # Alias of outgoing.
     out = !git outgoing
 #+end_src
 
 #+begin_src conf
-    outgoing-files = log --stat --date=short @{u}..
+    outgoing-files = log --stat @{u}..
 
     # Alias of outgoing-files.
     out-files = !git outgoing-files
@@ -4796,7 +4796,7 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 #+begin_src conf
     # Usage: git outgoing-all
     # Show commits not found in the destination repository.
-    outgoing-all = log --branches --not --remotes --decorate --date=short
+    outgoing-all = log --branches --not --remotes --decorate
 
     # Alias of outgoing-all.
     out-all = !git outgoing-all
