@@ -541,7 +541,7 @@ See
 
 ** External Diff Tool
 
-Use Meld as Git ~difftool:~
+Use [[https://meldmerge.org/][Meld]] as Git ~difftool:~
 
 #+begin_src conf
 [diff]
@@ -560,7 +560,7 @@ You may edit your commit messages in your preferred external *text editor*.
 
 Supported editors include:
 - Atom
-- Emacs
+- *Emacs*
 - IntelliJ
 - Sublime
 - VS Code
@@ -574,7 +574,7 @@ Supported editors include:
 
 Clean the byproducts of the merge conflict process:
 
-: find -name "*.orig" -delete
+: find . -name "*.orig" -delete
 
 ** Pager Support
 
@@ -1930,13 +1930,6 @@ any *line* that was added, removed, or changed.
 : git log --all -G "foo" --since="1 week ago"
 : git log --all -G "foo" --full-history --since="1 week ago"
 
-*** How to find all the commits made only on a specific branch
-
-Assuming that your branch was created off of ~develop~, then /while in the branch/
-(that is, you have the branch checked out):
-
-: git log --no-merges --graph develop..
-
 ** Open a repository in a web browser
 
 #+begin_src conf
@@ -2987,7 +2980,7 @@ differences will collapse.
     divergence = !git log --left-right --graph --cherry-pick --oneline $1...$(git origin)/$1
 #+end_src
 
-* ?Releases
+* xReleases
 
 You can create a release to package software, along with release notes and links
 to binary files, for other people to use.
@@ -3019,7 +3012,7 @@ Tag and push changes to the repository:
         }; f"
 #+end_src
 
-* ?Graph
+* xGraph
 
 Graphical history viewers
 
@@ -3046,6 +3039,13 @@ To see real *timeline* of who is working on what and when:
 
 #+begin_src conf
     hist = log --date=short --graph
+
+    hist2 = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
+    histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
+#+end_src
+
+#+begin_src conf
+    zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
 Directed Acyclic Graph:
@@ -3066,7 +3066,7 @@ See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
         }; f"
 #+end_src
 
-* ?Contributors
+* xContributors
 
 Show authors of commits in the repository, /excluding merge commits/.
 
@@ -3649,8 +3649,6 @@ clean and relevant commits, no experiments or fixing typos.
 #+begin_src conf
 #BASIC HISTORY VIEWING
 
-    hist = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
-    histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
     llog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
     ls = log --pretty=format:'%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
 
@@ -4126,13 +4124,13 @@ https://itnext.io/become-a-git-pro-in-just-one-blog-a-thorough-guide-to-git-arch
 
 *** Show incoming changes
 
-The ~in~ command returns a list of *incoming* commits for the *current branch* --
-after a ~git fetch~, to fetch down *all the data* it has for the *current remote* that
-you do not --, the next time you do a merge.
+The ~incoming~ command returns a list of *incoming* commits for the *current
+branch* -- after a ~git fetch~, to fetch down *all the data* it has for the *current
+remote* that you do not --, the next time you do a merge.
 
 #+begin_src conf
-    # Show new commits found in the remote repository.
     # Usage: git incoming
+    # Show new commits found in the remote repository.
     incoming = !(git remote update -p && git log --decorate ..@{u})
 
     # Alias of incoming.
@@ -4467,15 +4465,21 @@ See if the merge is applicable to the current working tree and/or the index file
 and *detects conflicts*:
 
 #+begin_src conf
-    # Check how the merge of `develop' into master will go:
-    # git merge-dry-run develop
-    merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) \
-                                && echo 'Merge conflicts!' \
-                                || echo 'This branch can be automatically merged.'; }; f"
+    # Usage: git merge-dry-run BRANCH_NAME
+    # Check how the merge of BRANCH_NAME into master will go
+    merge-dry-run = "!f() { \
+            grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) \
+                && echo 'Merge conflicts!' \
+                || echo 'This branch can be automatically merged.'; \
+        }; f"
 # DOESN'T work for git fetch & git merge
 
     # Extract the "changed in both" lines as well as the conflicting parts.
-    merge-dry-run-conflicts = "!f() { git merge-tree $(git merge-base $1 $2) $1 $2 | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' | cdiff; }; f"
+    merge-dry-run-conflicts = "!f() { \
+            git merge-tree $(git merge-base $1 $2) $1 $2 \
+                | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' \
+                | cdiff; \
+        }; f"
 #+end_src
 
 *** Branch/Integration manager
@@ -4488,13 +4492,19 @@ Pick a file(s) from:
 - the *current branch*
 
 #+begin_src conf
-    ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+    ours = "!f() { \
+            git checkout --ours $@ \
+                && git add $@; \
+        }; f"
 #+end_src
 
 - the *branch being merged in*
 
 #+begin_src conf
-    theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+    theirs = "!f() { \
+            git checkout --theirs $@ \
+                && git add $@; \
+        }; f"
 #+end_src
 
 #+begin_warning
@@ -4560,9 +4570,11 @@ Then, add the conflicted files.
     # XXX or feature-start?
 
     # Incorporate a finished feature on develop.
-    feature-finish = "!f() { git checkout develop; \
-                             git merge --no-ff feature/$1 \
-                             && git delete-local-branch feature/$1; }; f"
+    feature-finish = "!f() { \
+            git checkout develop; \
+            git merge --no-ff feature/$1 \
+                && git delete-local-branch feature/$1; \
+        }; f"
 
     # XXX Also bug and refactor.
 
@@ -4681,6 +4693,13 @@ git stash \
 For Bitbucket:
 https://marketplace.atlassian.com/apps/1212525/pages-for-bitbucket-server?hosting=server&tab=overview
 
+*** How to find all the commits made only on a specific branch
+
+Assuming that your branch was created off of ~develop~, then /while in the branch/
+(that is, you have the branch checked out):
+
+: git log --no-merges --graph develop..
+
 *** Show unmerged commits between two branches
 
 The alias ~missing~ (an idea borrowed from Bazaar) shows the unique commits in the
@@ -4700,7 +4719,7 @@ current branch and the specified branch.
         }; f"
 #+end_src
 
-**** Fork point
+**** Branch point
 
 The *common ancestor* is the last commit that existed in both branches. Usually
 this is the branch point, but it could also be a commit that was merged.
@@ -4737,7 +4756,7 @@ that your branch introduces, while excluding the changes that you have not
 merged from the remote branch.
 
 #+begin_src conf
-    # Since fork point.
+    # Since branch point.
     diff-ancestor = !sh -c 'git diff $(git ancestor)..'
     log-ancestor = !sh -c 'git log $(git ancestor)..'
 #+end_src
@@ -4809,8 +4828,8 @@ changes.  (When you do have uncommitted changes, "git diff" will include them,
 while "git show" will not.)
 #+end_note
 
-The ~out~ command returns a list of *unpushed* (outgoing) commits for the *current
-branch*, the next time you do a push.
+The ~outgoing~ command returns a list of *unpushed* (outgoing) commits for the
+*current branch*, the next time you do a push.
 
 #+begin_src conf
     # Usage: git outgoing
@@ -4840,7 +4859,7 @@ If you want to see all *unpushed* commits from *all branches*, do this:
     # Show commits not found in the destination repository.
     outgoing-all = log --branches --not --remotes --decorate --date=short
 
-    # Alias of outgoing.
+    # Alias of outgoing-all.
     out-all = !git outgoing-all
 #+end_src
 
@@ -5166,7 +5185,7 @@ de savoir ce qu'embarquera la « prochaine release » de mon projet.
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
     # branche courante.
     unreleased = !git log --oneline $(git last-tag)...HEAD \
-                      && git last-tag
+                && git last-tag
 #+end_src
 
 ** Debugging
@@ -5250,9 +5269,9 @@ Let's do a slightly different command: ~resync~
 #+begin_src conf
     # git resync -> sync repository and rebase current branch.
     resync = !sh -c 'git checkout master \
-                         && git fetch \
-                         && git reset --hard $(git origin)/master \
-                         && git rebase master'
+                && git fetch \
+                && git reset --hard $(git origin)/master \
+                && git rebase master'
 #+end_src
 
 ** Cherrypick style recording
@@ -5284,8 +5303,6 @@ will ~reset~ the index.
 #+begin_src conf
     lost1 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
     lost2 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
-
-    zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
 * If you get errors...

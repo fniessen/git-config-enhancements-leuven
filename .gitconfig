@@ -776,6 +776,11 @@ bclean = "!f() { \
 
     hist = log --date=short --graph
 
+    hist2 = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
+    histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
+
+    zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
+
     graphviz = "!f() { \
             echo 'digraph git {' ; \
             git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
@@ -961,8 +966,6 @@ deploy-prod =
 
 #BASIC HISTORY VIEWING
 
-    hist = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
-    histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
     llog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
     ls = log --pretty=format:'%C(yellow)%p..%h %C(white dim)%cd %<|(49,trunc)%an %C(reset)%s' --date=short --abbrev=8 --no-merges
 
@@ -1161,8 +1164,8 @@ deploy-prod =
     remotes = remote
     r = remote -v
 
-    # Show new commits found in the remote repository.
     # Usage: git incoming
+    # Show new commits found in the remote repository.
     incoming = !(git remote update -p && git log --decorate ..@{u})
 
     # Alias of incoming.
@@ -1275,19 +1278,31 @@ deploy-prod =
                         git merge --abort; \
                         echo \"Merge aborted\"; }; f"
 
-    # Check how the merge of `develop' into master will go:
-    # git merge-dry-run develop
-    merge-dry-run = "!f() { grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) \
-                                && echo 'Merge conflicts!' \
-                                || echo 'This branch can be automatically merged.'; }; f"
+    # Usage: git merge-dry-run BRANCH_NAME
+    # Check how the merge of BRANCH_NAME into master will go
+    merge-dry-run = "!f() { \
+            grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) \
+                && echo 'Merge conflicts!' \
+                || echo 'This branch can be automatically merged.'; \
+        }; f"
 # DOESN'T work for git fetch & git merge
 
     # Extract the "changed in both" lines as well as the conflicting parts.
-    merge-dry-run-conflicts = "!f() { git merge-tree $(git merge-base $1 $2) $1 $2 | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' | cdiff; }; f"
+    merge-dry-run-conflicts = "!f() { \
+            git merge-tree $(git merge-base $1 $2) $1 $2 \
+                | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' \
+                | cdiff; \
+        }; f"
 
-    ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+    ours = "!f() { \
+            git checkout --ours $@ \
+                && git add $@; \
+        }; f"
 
-    theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+    theirs = "!f() { \
+            git checkout --theirs $@ \
+                && git add $@; \
+        }; f"
 
     # Usage: git conflicts
     # List files with conflicts.
@@ -1302,9 +1317,11 @@ deploy-prod =
     # XXX or feature-start?
 
     # Incorporate a finished feature on develop.
-    feature-finish = "!f() { git checkout develop; \
-                             git merge --no-ff feature/$1 \
-                             && git delete-local-branch feature/$1; }; f"
+    feature-finish = "!f() { \
+            git checkout develop; \
+            git merge --no-ff feature/$1 \
+                && git delete-local-branch feature/$1; \
+        }; f"
 
     # XXX Also bug and refactor.
 
@@ -1342,7 +1359,7 @@ deploy-prod =
     # git merge-base --fork-point master
     # git merge-base --all r1 r2
 
-    # Since fork point.
+    # Since branch point.
     diff-ancestor = !sh -c 'git diff $(git ancestor)..'
     log-ancestor = !sh -c 'git log $(git ancestor)..'
 
@@ -1369,7 +1386,7 @@ deploy-prod =
     # Show commits not found in the destination repository.
     outgoing-all = log --branches --not --remotes --decorate --date=short
 
-    # Alias of outgoing.
+    # Alias of outgoing-all.
     out-all = !git outgoing-all
 
     # Get the upstream branch name.
@@ -1455,7 +1472,7 @@ deploy-prod =
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
     # branche courante.
     unreleased = !git log --oneline $(git last-tag)...HEAD \
-                      && git last-tag
+                && git last-tag
 
     debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
 
@@ -1484,9 +1501,9 @@ deploy-prod =
 
     # git resync -> sync repository and rebase current branch.
     resync = !sh -c 'git checkout master \
-                         && git fetch \
-                         && git reset --hard $(git origin)/master \
-                         && git rebase master'
+                && git fetch \
+                && git reset --hard $(git origin)/master \
+                && git rebase master'
 
     # Show record of pending changes, letting you choose which patch hunks to commit.
     commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
@@ -1496,5 +1513,3 @@ deploy-prod =
 
     lost1 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA: %C(yellow)%h%C(reset)  %s' --stdin | awk '/SHA/ {sub(\"SHA: \", \"\"); print}'"
     lost2 = "!git fsck | awk '/dangling commit/ {print $3}' | git show --format='SHA1: %C(yellow)%h%Creset %f' --stdin | awk '/SHA1/ {sub(\"SHA1: \", \"\"); print}'"
-
-    zopa = !git log --graph --decorate --pretty=oneline --abbrev-commit --all $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
