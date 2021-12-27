@@ -732,26 +732,14 @@ bclean = "!f() { \
         }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
-    # Show commits that haven't made it to master yet.
-    ahead-of-master = !git log --oneline $(git origin)/master..HEAD
-
-    log-local = log --oneline $(git origin)..HEAD
-
-    show-branch-history = "!f() { \
-            git log HEAD --not master; \
-        }; f"
-# XXX We should get the name of the branch merge base
-
     # Usage: git missing [COMMIT_ISH]
     # Show the missing commits between this and another branch
     missing = "!f() { \
             printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short "${1:-master}".. \
-                | awk 'NR%2==0'; \
+            git log --date=short "${1:-master}"..; \
             printf \"\n\"; \
             printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short .."${1:-master}" \
-                | awk 'NR%2==0'; \
+            git log --date=short .."${1:-master}"; \
         }; f"
 
     # Find the point at which a branch forked from another branch

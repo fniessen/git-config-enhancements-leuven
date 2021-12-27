@@ -2892,45 +2892,6 @@ If either side is ~HEAD~, it may be omitted (e.g. ~master..~ compares ~master~ t
 
 ** Example comparisons
 
-#+begin_src conf
-    # Show commits that haven't made it to master yet.
-    ahead-of-master = !git log --oneline $(git origin)/master..HEAD
-#+end_src
-
-*** What did I do since I forked from the origin branch?
-
-#+begin_src conf
-    log-local = log --oneline $(git origin)..HEAD
-#+end_src
-
-#+begin_src conf
-    show-branch-history = "!f() { \
-            git log HEAD --not master; \
-        }; f"
-# XXX We should get the name of the branch merge base
-#+end_src
-
-Assuming that your branch was created off of master, then while in the branch
-(that is, you have the branch checked out):
-
-: git cherry -v master
-
-or
-
-: git log master..
-
-If you are not in the branch, then you can add the branch name to the "git log"
-command, like this:
-
-: git log master..BRANCH_NAME
-
-*** How to find all the commits made only on a specific branch
-
-Assuming that your branch was created off of ~develop~, then /while in the branch/
-(that is, you have the branch checked out):
-
-: git log --no-merges --graph develop..
-
 *** Show unmerged commits between two branches
 
 The alias ~missing~ (an idea borrowed from Bazaar) shows the unique commits in the
@@ -2941,14 +2902,35 @@ current branch and the specified branch.
     # Show the missing commits between this and another branch
     missing = "!f() { \
             printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short "${1:-master}".. \
-                | awk 'NR%2==0'; \
+            git log --date=short "${1:-master}"..; \
             printf \"\n\"; \
             printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-            git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short .."${1:-master}" \
-                | awk 'NR%2==0'; \
+            git log --date=short .."${1:-master}"; \
         }; f"
 #+end_src
+
+*How to find all the commits made only on a specific branch?*  Assuming that your
+branch was created off of ~master~, then /while on the specific branch/ (that is,
+you have that branch checked out):
+
+: git log --no-merges master..
+: git log HEAD --not master
+: git cherry -v master
+
+to show commits (that you've done since you forked) that haven't made it to
+~master~ yet.
+
+#+begin_example
++ 497034f2 Listener.new now accepts a hash of options
+- 2d0333ff Cache the absolute images path for growl messages
++ e4406858 Rename Listener#run to #start
+#+end_example
+
+The ~cherry~ command is useful to see which commits have been cherry-picked from
+a development branch to the stable branch, for instance. This command compares
+changes on the current (=feature=) branch to upstream (=master=) and indicates which
+are present on both with the ~-~ sign. Changes still missing from upstream are
+marked with ~+~.
 
 **** Branch point
 
@@ -2984,28 +2966,9 @@ merged from the remote branch.
 
 https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git
 
-*** See which changes from a branch are already present upstream
+*** How do I find a list of files committed to a Git branch (since branching)?
 
-While on =feature= branch:
-
-: git cherry -v master
-
-#+begin_example
-+ 497034f2 Listener.new now accepts a hash of options
-- 2d0333ff Cache the absolute images path for growl messages
-+ e4406858 Rename Listener#run to #start
-#+end_example
-
-The ~cherry~ command is useful to see which commits have been cherry-picked from
-a development branch to the stable branch, for instance. This command compares
-changes on the current (=feature=) branch to upstream (=master=) and indicates which
-are present on both with the ~-~ sign. Changes still missing from upstream are
-marked with ~+~.
-
-*** How do I find a list of files committed to a Git branch (since branching from master)?
-
-Show all the changed files in a Git branch *since it was forked from the =master=
-branch*:
+Show all the changed files in a Git branch *since it was forked*:
 
 #+begin_src conf
     # Usage: git missing-files [COMMIT_ISH]
