@@ -145,6 +145,12 @@ instead of:
     date = short
 #+end_src
 
+Print out the ref names of any commits that are shown.
+
+#+begin_src conf
+    decorate = short
+#+end_src
+
 ** Diff
 
 #+begin_src conf
@@ -1777,9 +1783,9 @@ of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-    findc1 = "log --decorate -i --all --grep"
+    findc1 = "log -i --all --grep"
     findc2 = "!f() { \
-            git log --decorate --grep=$1 -i --all; \
+            git log --grep=$1 -i --all; \
         }; f"
 #+end_src
 
@@ -1857,7 +1863,7 @@ Show the *last commit* whose *message matches a regexp*:
     # Usage: git search-for-author [PATTERN]
     # Show the log for an author (or my own user email).
     search-for-author = "!f() { \
-            git log --decorate -i --no-merges --all --author=${1-$(git config user.email)}; \
+            git log -i --no-merges --all --author=${1-$(git config user.email)}; \
         }; f"
 #+end_src
 
@@ -1899,7 +1905,7 @@ that commit!
 : git log --all -S "foo" --since="1 week ago"
 
 #+begin_src conf
-    whatwhen = log --decorate -p -S
+    whatwhen = log -p -S
 #+end_src
 
 Prettier ~whatchanged~ with full diffs based on text search:
@@ -1907,7 +1913,7 @@ Prettier ~whatchanged~ with full diffs based on text search:
 #+begin_src conf
     # Find commits by source code.
     search-for-commits-contents = "!f() { \
-            git log --decorate -S $1; \
+            git log -S $1; \
         }; f"
 # XXX Does not work for strings with spaces in them...
 #+end_src
@@ -3062,11 +3068,11 @@ To see real *timeline* of who is working on what and when:
     graph = log -50 --branches --tags --remotes --date-order --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --graph
 
     # Show log as a graph
-    glog = log --decorate --all --oneline --graph
+    glog = log --all --oneline --graph
 #+end_src
 
 #+begin_src conf
-    releases = log --decorate --no-merges --all --simplify-by-decoration --oneline --graph
+    releases = log --no-merges --all --simplify-by-decoration --oneline --graph
     # XXX Add short date in the output
 #+end_src
 
@@ -3848,8 +3854,8 @@ date".
 
 #+begin_src conf
     # Usage: git ls
-    # Print a summary of activity.
-    ls = log --decorate
+    # Print a summary of activity.  Alias of log.
+    ls = log
 #+end_src
 
 XXX Check out http://marcgg.com/blog/2015/08/04/git-first-parent-log/
@@ -3858,7 +3864,7 @@ List commits *showing changed files* (prettier and more concise version of
 ~whatchanged~):
 
 #+begin_src conf
-    ll = log --pretty=medium --abbrev-commit --decorate --stat
+    ll = log --pretty=medium --abbrev-commit --stat
 #+end_src
 
 #+begin_src conf
@@ -4149,7 +4155,7 @@ remote* that you do not --, the next time you do a merge.
 #+begin_src conf
     # Usage: git incoming
     # Show new commits found in the remote repository.
-    incoming = !(git remote update -p && git log --decorate ..@{u})
+    incoming = !(git remote update -p && git log ..@{u})
 
     # Alias of incoming.
     in = !git incoming
@@ -4796,7 +4802,7 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 #+begin_src conf
     # Usage: git outgoing-all
     # Show commits not found in the destination repository.
-    outgoing-all = log --branches --not --remotes --decorate
+    outgoing-all = log --branches --not --remotes
 
     # Alias of outgoing-all.
     out-all = !git outgoing-all
@@ -5250,7 +5256,7 @@ will ~reset~ the index.
 
 #+begin_src conf
     # Resurrection of lost commits.
-    zopa = !git log --decorate --all --pretty=oneline --abbrev-commit --graph \
+    zopa = !git log --all --pretty=oneline --abbrev-commit --graph \
                     $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
