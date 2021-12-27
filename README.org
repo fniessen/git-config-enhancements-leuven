@@ -2830,6 +2830,10 @@ Easily determine which changes:
 
 #+begin_note
 Diff using three-dot (~...~) notation.
+
+When you use three dots (...), ~git diff~ finds the merge-base between the left
+and right side commit SHAs and substitutes that in for the left-side SHA. The
+right-side SHA remains intact.
 #+end_note
 
 You can see:
@@ -3076,6 +3080,11 @@ Show authors of commits in the repository, /excluding merge commits/.
 #+begin_note
 The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
 #+end_note
+
+#+begin_src conf
+    whoischanging = !sh -c 'git shortlog HEAD..$(git origin)/$0'
+    whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
+#+end_src
 
 * Pull requests
 
@@ -3649,13 +3658,6 @@ clean and relevant commits, no experiments or fixing typos.
 
     whois = "!sh -c 'git log -i -1 --pretty=\"format::%an <%ae>\n\" --author=\"$1\"' -"
     whatis = show -s --pretty='tformat::%h (%s, %ad)' --date=short
-
-#WHAT WAS GOING ON, WHILE YOU WERE AWAY
-
-    anychanges = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/$1
-    anychangesonmaster = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/master
-    whoischanging = !sh -c 'git shortlog HEAD..$(git origin)/$0'
-    whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
 #+end_src
 
 #+begin_src conf
@@ -4125,6 +4127,13 @@ remote* that you do not --, the next time you do a merge.
 
     # Alias of incoming.
     in = !git incoming
+#+end_src
+
+#+begin_src conf
+#WHAT WAS GOING ON, WHILE YOU WERE AWAY
+
+    incoming2 = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/$1
+    incoming2onmaster = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/master
 #+end_src
 
 #+begin_src conf
@@ -4699,13 +4708,13 @@ current branch and the specified branch.
     # Usage: git missing [COMMIT_ISH]
     # Show the missing commits between this and another branch
     missing = "!f() { \
+            printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
             git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short "${1:-master}".. \
-                | awk 'NR%2==0' \
-                | sed -e '1 iOnly in HEAD:'; \
+                | awk 'NR%2==0'; \
             printf \"\n\"; \
+            printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
             git rev-list --pretty='format:%C(auto)%ad %h %s' --date=short .."${1:-master}" \
-                | awk 'NR%2==0' \
-                | sed -e '1 iOnly in other:'; \
+                | awk 'NR%2==0'; \
         }; f"
 #+end_src
 
@@ -4716,30 +4725,11 @@ this is the branch point, but it could also be a commit that was merged.
 
 #+begin_src conf
     # Find the point at which a branch forked from another branch
-    ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${1:-master}") <(git rev-list --first-parent "${2:-HEAD}") | head -1' -
+    ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' \
+                    <(git rev-list --first-parent "${1:-master}") \
+                    <(git rev-list --first-parent "${2:-HEAD}") \
+                | head -1' -
 #+end_src
-
-#+begin_src conf
-    # Find the point at which a branch forked from another branch
-    ancestor2 = !sh -c 'git rev-list --boundary "${1:-HEAD}"..."${2:-master}" | grep "^-" | cut -c2-'
-#+end_src
-
-When you use three dots (...), ~git diff~ finds the merge-base between the left
-and right side commit SHAs (as obtained from the names, or defaulting to =HEAD=)
-and substitutes that in for the left-side SHA. The right-side SHA (as resolved
-from the name) remains intact.
-
-#+begin_src conf
-    # Find the point at which a branch forked from another branch
-    # Best common ancestor (when it was branched off).
-    ancestor3 = "!f() { git show --summary $(git merge-base $(git origin)/$1 $(git current-branch)); }; f"
-
-    # Also:
-    # git merge-base --fork-point master
-    # git merge-base --all r1 r2
-#+end_src
-
-https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git
 
 The common ancestor is frequently used with ~diff~ to return all of the changes
 that your branch introduces, while excluding the changes that you have not
@@ -4747,9 +4737,20 @@ merged from the remote branch.
 
 #+begin_src conf
     # Since branch point.
-    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
     log-ancestor = !sh -c 'git log $(git ancestor)..'
+    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
 #+end_src
+
+#+begin_src conf
+    # Find the point at which a branch forked from another branch
+    # Best common ancestor (when it was branched off).
+    ancestor2 = !git merge-base $(git origin)/master $(git current-branch)
+
+    # Also:
+    # git merge-base --all COMMIT_1 COMMIT_2
+#+end_src
+
+https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git
 
 *** See which changes from a branch are already present upstream
 
