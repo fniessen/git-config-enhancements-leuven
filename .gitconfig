@@ -1203,17 +1203,6 @@ deploy-prod =
 
     f = !git fetch --all && git rebase $(git origin)/master
 
-    up-tmpname = "!f() { \
-            git remote update -p; \
-            git merge --ff-only @{u}; \
-        }; f"
-
-    # Rebasing non-linear changes (when the fast-forward merge is not possible).
-    upr = "!f() { \
-            git remote update -p; \
-            git rebase -p @{u}; \
-        }; f"
-
     # Get everything new.
     update = !git pull                     && git submodule update --init --recursive
     get    = !git pull --rebase            && git submodule update --init --recursive
@@ -1259,16 +1248,27 @@ deploy-prod =
     sync-branch = !git fetch -p \
                 && git merge $(git origin)/master
 
-     # Catch up those random feature branches you haven't had to touch in months.
-     catchup = !git fetch -p \
+    # Catch up those random feature branches you haven't had to touch in months.
+    catchup = !git fetch -p \
                 && git rebase $(git origin)/master
 
-    merge-to-master =  "!f() { \
-            BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
-            BRANCH_NAME=${BRANCH_NAME##refs/heads/}; \
+    up-tmpname = "!f() { \
+            git remote update -p; \
+            git merge --ff-only @{u}; \
+        }; f"
+
+    # Rebasing non-linear changes (when the fast-forward merge is not possible).
+    upr = "!f() { \
+            git remote update -p; \
+            git rebase -p @{u}; \
+        }; f"
+
+    merge-into-master =  "!f() { \
+            OLD_BRANCH=\"$(git symbolic-ref HEAD 2>/dev/null)\" || OLD_BRANCH=\"(unnamed branch)\"; \
+            OLD_BRANCH=${OLD_BRANCH##refs/heads/}; \
             git checkout master \
-                && git merge $BRANCH_NAME \
-                && git checkout $BRANCH_NAME; \
+                && git merge $OLD_BRANCH \
+                && git checkout $OLD_BRANCH; \
         };f"
 
     m = "!f() { \
@@ -1281,9 +1281,11 @@ deploy-prod =
         }; f"
 
     # Run merge test (before merge) to check for any conflicts beforehand.
-    mergetest = "!f() { git merge --no-commit --no-ff \"$1\"; \
-                        git merge --abort; \
-                        echo \"Merge aborted\"; }; f"
+    merge-test = "!f() { \
+            git merge --no-commit --no-ff \"$1\"; \
+            git merge --abort; \
+            echo \"Merge aborted\"; \
+        }; f"
 
     # Usage: git merge-dry-run BRANCH_NAME
     # Check how the merge of BRANCH_NAME into master will go
@@ -1338,7 +1340,9 @@ deploy-prod =
     # Shortcut for checkout.
     co = checkout
 
-    next = "!f() { git checkout $(git rev-list --topo-order HEAD..master | tail -1; }; f"
+    next = "!f() { \
+            git checkout $(git rev-list --topo-order HEAD..master | tail -1); \
+        }; f"
 
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch
@@ -1366,12 +1370,10 @@ deploy-prod =
     # Alias of outgoing-all.
     out-all = !git outgoing-all
 
-    # Get the upstream branch name.
-    upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
-
     upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
     local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 
+    # Usage: git sha1-tag COMMIT
     sha1-tag = "!f() { \
             git name-rev --name-only \"$@\"; \
         }; f"

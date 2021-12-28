@@ -4244,6 +4244,8 @@ See https://www.praqma.com/stories/git-autostash/.
 
 Really handy in projects that don't do merge commits.
 
+*** Git up all branches
+
 See [[http://aanandprasad.com/git-up/][git-up]] (no longer maintained), which is (roughly) equivalent of executing the following:
 
 : git stash
@@ -4260,34 +4262,7 @@ Use with care: the final stash application after a successful rebase might
 result in non-trivial conflicts.
 #+end_warning
 
-With *all versions* of Git, I recommend using ~git up~ instead of ~git pull~.
-
-#+begin_src conf
-    up-tmpname = "!f() { \
-            git remote update -p; \
-            git merge --ff-only @{u}; \
-        }; f"
-#+end_src
-
-It is pretty safe: it will abort the merge if it can't be done using
-fast-forward.  (In other words, if the local branch has diverged from the
-remote.)
-
-See https://stackoverflow.com/questions/15316601/in-what-cases-could-git-pull-be-harmful
-
-~remote update -p~ *fetches* all refs from all remotes, instead of just the needed
-one; ~merge~ then merges the appropriate *single branch*.
-
-#+begin_src conf
-    # Rebasing non-linear changes (when the fast-forward merge is not possible).
-    upr = "!f() { \
-            git remote update -p; \
-            git rebase -p @{u}; \
-        }; f"
-#+end_src
-
-... but read "you're not using git as it was intended" on
-https://news.ycombinator.com/item?id=2301765.
+*** Pull
 
 Before doing work (in a new branch), *ensure that the working tree is* *up-to-date*
 with the ~origin~ (pull and get latest for all submodules):
@@ -4419,28 +4394,56 @@ branch up* to all the latest changes on the main branch.
 #+end_src
 
 #+begin_src conf
-     # Catch up those random feature branches you haven't had to touch in months.
-     catchup = !git fetch -p \
+    # Catch up those random feature branches you haven't had to touch in months.
+    catchup = !git fetch -p \
                 && git rebase $(git origin)/master
 #+end_src
 
+With *all versions* of Git, I recommend using ~git up~ instead of ~git pull~.
+
 #+begin_src conf
-    merge-to-master =  "!f() { \
-            BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
-            BRANCH_NAME=${BRANCH_NAME##refs/heads/}; \
-            git checkout master \
-                && git merge $BRANCH_NAME \
-                && git checkout $BRANCH_NAME; \
-        };f"
+    up-tmpname = "!f() { \
+            git remote update -p; \
+            git merge --ff-only @{u}; \
+        }; f"
 #+end_src
 
-*** Undo the merge
+It is pretty safe: it will abort the merge if it can't be done using
+fast-forward.  (In other words, if the local branch has diverged from the
+remote.)
 
-If you tried a merge which resulted in complex conflicts and want to start over,
-you can recover with ~git merge --abort~.  It will allow you to *undo the merge*,
-even if it is a fast-forward merge.
+See https://stackoverflow.com/questions/15316601/in-what-cases-could-git-pull-be-harmful
+
+~remote update -p~ *fetches* all refs from all remotes, instead of just the needed
+one; ~merge~ then merges the appropriate *single branch*.
+
+#+begin_src conf
+    # Rebasing non-linear changes (when the fast-forward merge is not possible).
+    upr = "!f() { \
+            git remote update -p; \
+            git rebase -p @{u}; \
+        }; f"
+#+end_src
+
+... but read "you're not using Git as it was intended" on
+https://news.ycombinator.com/item?id=2301765.
 
 *** Merge current branch into another one
+
+Merge strategy:
+- Merge commit: git merge --no-ff
+- Squash:       git merge --squash
+- Fast forward: git merge --ff-only
+
+#+begin_src conf
+    merge-into-master =  "!f() { \
+            OLD_BRANCH=\"$(git symbolic-ref HEAD 2>/dev/null)\" || OLD_BRANCH=\"(unnamed branch)\"; \
+            OLD_BRANCH=${OLD_BRANCH##refs/heads/}; \
+            git checkout master \
+                && git merge $OLD_BRANCH \
+                && git checkout $OLD_BRANCH; \
+        };f"
+#+end_src
 
 On projects where we work with a staging or test branch, I regularly merge my
 work in progress into it so others can test it.
@@ -4465,6 +4468,12 @@ If you now type ~git m staging~ while on the ~feature~ branch, this will happen:
 5. Finally, it checks out the ~feature~ branch again.
 
 Such a timesaver!
+
+*** Undo the merge
+
+If you tried a merge which resulted in complex conflicts and want to start over,
+you can recover with ~git merge --abort~.  It will allow you to *undo the merge*,
+even if it is a fast-forward merge.
 
 *** Dry run (do not make changes)
 
@@ -4491,9 +4500,11 @@ You can do ~git merge --abort~ after seeing that there are conflicts.
 
 #+begin_src conf
     # Run merge test (before merge) to check for any conflicts beforehand.
-    mergetest = "!f() { git merge --no-commit --no-ff \"$1\"; \
-                        git merge --abort; \
-                        echo \"Merge aborted\"; }; f"
+    merge-test = "!f() { \
+            git merge --no-commit --no-ff \"$1\"; \
+            git merge --abort; \
+            echo \"Merge aborted\"; \
+        }; f"
 #+end_src
 
 #+begin_warning
@@ -4626,7 +4637,7 @@ Then, add the conflicted files.
 
 https://medium.com/gumgum-tech/git-and-git-flow-a-guide-871d46a0ebcb
 
-Alias configuration for our feature branches, like a simple git flow for feature
+Alias configuration for our feature branches, like a simple Git flow for feature
 stories, or hotfix patches, etc.
 
 Create a new feature branch:
@@ -4675,7 +4686,9 @@ Check out the next commit in the commit history -- quite useful for demos to
 jump across commits:
 
 #+begin_src conf
-    next = "!f() { git checkout $(git rev-list --topo-order HEAD..master | tail -1; }; f"
+    next = "!f() { \
+            git checkout $(git rev-list --topo-order HEAD..master | tail -1); \
+        }; f"
 #+end_src
 
 *** If you get the error "The following untracked working tree files would be overwritten by checkout"
@@ -4701,7 +4714,7 @@ example:
 
 Another is to throw away local changes using a *forced checkout*:
 
-: git checkout -f SOME_BRANCH
+: git checkout -f BRANCH_NAME
 
 *** Website and page hosting
 
@@ -4822,11 +4835,6 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 *** Upload your changes
 
 #+begin_src conf
-    # Get the upstream branch name.
-    upstream-name = !git for-each-ref --format='%(upstream:short)' $(git symbolic-ref -q HEAD)
-#+end_src
-
-#+begin_src conf
     upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
     local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 #+end_src
@@ -4834,6 +4842,7 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 ** PUBLISH - Find out if a change is part of a release
 
 #+begin_src conf
+    # Usage: git sha1-tag COMMIT
     sha1-tag = "!f() { \
             git name-rev --name-only \"$@\"; \
         }; f"
@@ -4855,7 +4864,7 @@ the v2.3 tag -- we can be certain that this change is part of v2.3, then.
 
 2. Run
 
-   : git format-patch COMMIT_REFERENCE
+   : git format-patch COMMIT_ISH
 
    to convert all commits since the referenced commit (not including it) into
    patch files.
