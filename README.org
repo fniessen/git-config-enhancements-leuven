@@ -833,7 +833,7 @@ Or, if you want to use RSA:
 Fetch URL: git@bitbucket.org-something:user/slug
 
 #+begin_src conf
-    # origin = !echo "${$(git config clone.defaultRemoteName):-origin}"
+    # origin = !echo "${$(git config --get clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
 #+end_src
 
@@ -1863,7 +1863,7 @@ Show the *last commit* whose *message matches a regexp*:
     # Usage: git search-for-author [PATTERN]
     # Show the log for an author (or my own user email).
     search-for-author = "!f() { \
-            git log -i --no-merges --all --author=${1-$(git config user.email)}; \
+            git log -i --no-merges --all --author=${1-$(git config --get user.email)}; \
         }; f"
 #+end_src
 
@@ -2070,10 +2070,10 @@ My new favorite alias lets you amend to a specific commit, *no* need to be the
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
 
     # Checkout the commit in question, and amend its message.
-    reword2 = "!f() { BRANCH=$(git current-branch); \
+    reword2 = "!f() { OLD_BRANCH=$(git current-branch); \
                       git checkout $1; \
                       git commit --amend; \
-                      git checkout $BRANCH; }; f"
+                      git checkout $OLD_BRANCH; }; f"
 #+end_src
 
 *** Undo changes to one (or more) file(s) in a commit -- instead of reverting the entire commit
@@ -3050,13 +3050,6 @@ To see real *timeline* of who is working on what and when:
 
 Directed Acyclic Graph:
 
-  # Use graphviz for display.
-  # This produces output that can be displayed using dotty, for example:
-  #   $ git graphviz HEAD~100..HEAD~60 | dotty /dev/stdin
-  #   $ git graphviz --first-parent master | dotty /dev/stdin
-
-See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
-
 #+begin_src conf
     graphviz = "!f() { \
             echo 'digraph git {' ; \
@@ -3065,6 +3058,15 @@ See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
             echo '}'; \
         }; f"
 #+end_src
+
+Use [[https://graphviz.org/][Graphviz]] for display.
+
+This produces output that can be displayed using ~dotty~, for example:
+
+: git graphviz HEAD~100..HEAD~60 | dotty /dev/stdin
+: git graphviz --first-parent master | dotty /dev/stdin
+
+See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
 
 * xContributors
 
@@ -3221,8 +3223,8 @@ If everything is OK, you can merge the pull request.
 #+begin_src conf
     # For GitHub.
     mpr = "!f() { \
-            declare CURRENT_BRANCH=\"$(git current-branch)\"; \
-            declare BRANCH_NAME=\"${2:-$CURRENT_BRANCH}\"; \
+            declare OLD_BRANCH=\"$(git current-branch)\"; \
+            declare BRANCH_NAME=\"${2:-$OLD_BRANCH}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
                 git fetch $(git origin) refs/pull/$1/head:pr/$1 \
                     && git checkout -B $BRANCH_NAME \
@@ -3552,7 +3554,7 @@ See also [[https://cran.r-project.org/web/packages/jsonlite/vignettes/json-apis.
 ** List My Issues (assigned to me)
 
 #+begin_src conf
-    issues-assigned-to-me = !git issues | grep "$(git config user.name)"
+    issues-assigned-to-me = !git issues | grep "$(git config --get user.name)"
 #+end_src
 
 ** List Issues I've created
@@ -4316,18 +4318,20 @@ Pull all:
 
 #+begin_src conf
     # Do a push/pull for just one branch.
-    push1 = "!git push $(git origin) $(git current-branch)"
-    pull1 = "!git pull $(git origin) $(git current-branch)"
+    push-1 = "!git push $(git origin) $(git current-branch)"
+    pull-1 = "!git pull $(git origin) $(git current-branch)"
 
     # Pull and push from the current branch.
-    sync = "!f() { pull1 && push1; }; f"
+    sync = "!f() { pull-1 && push-1; }; f"
+#+end_src
 
-    pull-all = !"OLD=$(git current-branch); \
-                 for B in $(git for-each-ref refs/heads --format='%(refname)'); do \
-                     git checkout ${B#refs/heads/}; \
+#+begin_src conf
+    pull-all = !"OLD_BRANCH=$(git current-branch); \
+                 for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
+                     git checkout ${BRANCH_NAME#refs/heads/}; \
                      git pull --ff-only; \
                  done; \
-                 git checkout $OLD"
+                 git checkout $OLD_BRANCH"
 #+end_src
 
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
@@ -4423,11 +4427,12 @@ applies all those changes together.
 Git merge ~master~ into feature branch:
 
 #+begin_src conf
-    merge-to-master =  "!f(){ BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
-                                  BRANCH_NAME=${branch_name##refs/heads/}; \
-                                  git checkout master \
-                                      && git merge $BRANCH_NAME \
-                                      && git checkout $BRANCH_NAME; \
+    merge-to-master =  "!f() { \
+            BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
+            BRANCH_NAME=${BRANCH_NAME##refs/heads/}; \
+            git checkout master \
+                && git merge $BRANCH_NAME \
+                && git checkout $BRANCH_NAME; \
         };f"
 
     merge-master = !git checkout master \
@@ -4449,12 +4454,12 @@ work in progress into it so others can test it.
 
 #+begin_src conf
     m = "!f() { \
-            local OLD=$(git current-branch); \
+            local OLD_BRANCH=$(git current-branch); \
             git checkout \"$1\" \
                 && git pull \
-                && git merge $OLD \
+                && git merge $OLD_BRANCH \
                 && git push \
-                && git checkout $OLD; \
+                && git checkout $OLD_BRANCH; \
         }; f"
 #+end_src
 
@@ -4633,15 +4638,15 @@ stories, or hotfix patches, etc.
 
 Create a new feature branch:
 
-: feature-start = '!BRANCH_NAME=$1; git checkout master; git pull; git create-branch "$BRANCH_NAME" master'
+: feature-start = '!OLD_BRANCH=$1; git checkout master; git pull; git create-branch "$OLD_BRANCH" master'
 
 Update the feature branch:
 
-: feature-pull = '!BRANCH_NAME=$(git current-branch); git checkout master; git pull; git checkout "$BRANCH_NAME"; git rebase master'
+: feature-pull = '!OLD_BRANCH=$(git current-branch); git checkout master; git pull; git checkout "$OLD_BRANCH"; git rebase master'
 
 Share the feature branch:
 
-: feature-push = '!BRANCH_NAME=$(git current-branch); git push -u $(git origin) "$BRANCH_NAME"'
+: feature-push = '!OLD_BRANCH=$(git current-branch); git push -u $(git origin) "$OLD_BRANCH"'
 
 If your team uses a different feature flow, you may want to skip including these
 aliases, or you may want to edit these aliases to match your team's feature flow.
@@ -5014,27 +5019,27 @@ Quickly see what you've done today (list commits that aren't merges, on *all
 branches*):
 
 #+begin_src conf
-    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-    today-all = log --since=midnight --no-merges --all
+    today = !git log --since=midnight --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 
-    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+
+    this-week = !git log --since='1 week ago' --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 #+end_src
 
 Show changes for a daily standup meeting:
 
 #+begin_src conf
     # Summarize your own changes since 24h, suitable for a daily standup meeting.
-    standup = "!git log --branches \
-                        --since=$(if [ "$(date +%a)" = "Mon" ]; then \
-                                      echo "friday"; \
-                                  else \
-                                      echo "yesterday"; \
-                                  fi) \
-                        --author=$(git config --get user.email) \
-                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
-                        --date=local"
+    standup = "!git log \
+                    --branches \
+                    --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
+                                  echo \"friday\"; \
+                              else \
+                                  echo \"yesterday\"; \
+                              fi) \
+                    --author=\"${1-$(git config --get user.name)}\" \
+                    --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
+                    --date=format:'%Y-%m-%d %a %H:%M'"
 # XXX git standup W donne un décompte avec une ligne trop peu !
 #+end_src
 
@@ -5053,7 +5058,7 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+end_src
 
 #+begin_src conf
-    export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
+    export-branch = !git format-patch --stdout $1 > ~/$(git current-branch-without-slash).diff
 #+end_src
 
 Save a repo (for example, ~HEAD~ or ~master~ -- or any other branch to archive, if
@@ -5086,10 +5091,10 @@ To see the contents of the zipped file (without extraction), use ~unzip -l FILE~
 
 #+begin_src conf
     # View raw commit.
-    email-patch = XXX git format-patch $(git current-branch).patch
+    email-patch = XXX git format-patch $(git current-branch-without-slash).patch
 
     # Since oldest ancestor...
-    plain-diff = !git branch-diff > $(git current-branch).diff
+    plain-diff = !git branch-diff > $(git current-branch-without-slash).diff
 #+end_src
 
 Patch = this

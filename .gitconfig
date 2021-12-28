@@ -187,7 +187,7 @@
 
     cl = clone --recursive
 
-    # origin = !echo "${$(git config clone.defaultRemoteName):-origin}"
+    # origin = !echo "${$(git config --get clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
 
     repo-owner = "!f() { \
@@ -468,7 +468,7 @@
     # Usage: git search-for-author [PATTERN]
     # Show the log for an author (or my own user email).
     search-for-author = "!f() { \
-            git log -i --no-merges --all --author=${1-$(git config user.email)}; \
+            git log -i --no-merges --all --author=${1-$(git config --get user.email)}; \
         }; f"
 
     whatwhen = log -p -S
@@ -507,10 +507,10 @@
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
 
     # Checkout the commit in question, and amend its message.
-    reword2 = "!f() { BRANCH=$(git current-branch); \
+    reword2 = "!f() { OLD_BRANCH=$(git current-branch); \
                       git checkout $1; \
                       git commit --amend; \
-                      git checkout $BRANCH; }; f"
+                      git checkout $OLD_BRANCH; }; f"
 
     # Usage: git uncommit
     # Remove the last commit.
@@ -822,8 +822,8 @@ bclean = "!f() { \
 
     # For GitHub.
     mpr = "!f() { \
-            declare CURRENT_BRANCH=\"$(git current-branch)\"; \
-            declare BRANCH_NAME=\"${2:-$CURRENT_BRANCH}\"; \
+            declare OLD_BRANCH=\"$(git current-branch)\"; \
+            declare BRANCH_NAME=\"${2:-$OLD_BRANCH}\"; \
             if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
                 git fetch $(git origin) refs/pull/$1/head:pr/$1 \
                     && git checkout -B $BRANCH_NAME \
@@ -922,7 +922,7 @@ deploy-prod =
 
     issues-open = !git issues | grep "open"
 
-    issues-assigned-to-me = !git issues | grep "$(git config user.name)"
+    issues-assigned-to-me = !git issues | grep "$(git config --get user.name)"
 
     issues-created-by-me = XXX
 
@@ -1227,18 +1227,18 @@ deploy-prod =
     update = !git pull --rebase --prune $@ && git submodule update --init --recursive
 
     # Do a push/pull for just one branch.
-    push1 = "!git push $(git origin) $(git current-branch)"
-    pull1 = "!git pull $(git origin) $(git current-branch)"
+    push-1 = "!git push $(git origin) $(git current-branch)"
+    pull-1 = "!git pull $(git origin) $(git current-branch)"
 
     # Pull and push from the current branch.
-    sync = "!f() { pull1 && push1; }; f"
+    sync = "!f() { pull-1 && push-1; }; f"
 
-    pull-all = !"OLD=$(git current-branch); \
-                 for B in $(git for-each-ref refs/heads --format='%(refname)'); do \
-                     git checkout ${B#refs/heads/}; \
+    pull-all = !"OLD_BRANCH=$(git current-branch); \
+                 for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
+                     git checkout ${BRANCH_NAME#refs/heads/}; \
                      git pull --ff-only; \
                  done; \
-                 git checkout $OLD"
+                 git checkout $OLD_BRANCH"
 
     # For the latest pull (even if there's nothing new).
     last-pulled = !stat -c %y $(git root)/.git/FETCH_HEAD \
@@ -1265,11 +1265,12 @@ deploy-prod =
     mm = !git fetch -p \
               && git merge $(git origin)/master
 
-    merge-to-master =  "!f(){ BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
-                                  BRANCH_NAME=${branch_name##refs/heads/}; \
-                                  git checkout master \
-                                      && git merge $BRANCH_NAME \
-                                      && git checkout $BRANCH_NAME; \
+    merge-to-master =  "!f() { \
+            BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
+            BRANCH_NAME=${BRANCH_NAME##refs/heads/}; \
+            git checkout master \
+                && git merge $BRANCH_NAME \
+                && git checkout $BRANCH_NAME; \
         };f"
 
     merge-master = !git checkout master \
@@ -1278,12 +1279,12 @@ deploy-prod =
         && git merge -
 
     m = "!f() { \
-            local OLD=$(git current-branch); \
+            local OLD_BRANCH=$(git current-branch); \
             git checkout \"$1\" \
                 && git pull \
-                && git merge $OLD \
+                && git merge $OLD_BRANCH \
                 && git push \
-                && git checkout $OLD; \
+                && git checkout $OLD_BRANCH; \
         }; f"
 
     # Run merge test (before merge) to check for any conflicts beforehand.
@@ -1407,23 +1408,23 @@ deploy-prod =
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 
-    today = log --since=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    today2 = !git log --all --since=00:00:00 --oneline --no-merges --author=${1-$(git config user.email)}
-    today-all = log --since=midnight --no-merges --all
+    today = !git log --since=midnight --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 
-    yesterday = log --since='1 day ago midnight' --until=midnight --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
-    this-week = log --since=1.weeks --author=\"$(git config user.name)\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+
+    this-week = !git log --since='1 week ago' --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
 
     # Summarize your own changes since 24h, suitable for a daily standup meeting.
-    standup = "!git log --branches \
-                        --since=$(if [ "$(date +%a)" = "Mon" ]; then \
-                                      echo "friday"; \
-                                  else \
-                                      echo "yesterday"; \
-                                  fi) \
-                        --author=$(git config --get user.email) \
-                        --format=format:'%C(green) %ad %C(yellow)%h %Creset %s %C(green bold)%d' \
-                        --date=local"
+    standup = "!git log \
+                    --branches \
+                    --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
+                                  echo \"friday\"; \
+                              else \
+                                  echo \"yesterday\"; \
+                              fi) \
+                    --author=\"${1-$(git config --get user.name)}\" \
+                    --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
+                    --date=format:'%Y-%m-%d %a %H:%M'"
 # XXX git standup W donne un décompte avec une ligne trop peu !
 
     current-tag = tag --points-at HEAD
@@ -1431,7 +1432,7 @@ deploy-prod =
             git archive --format=zip -o $(git current-tag).zip HEAD; \
         }; f"
 
-    export-branch = !git format-patch --stdout $1 > ~/$(git current-branch).diff
+    export-branch = !git format-patch --stdout $1 > ~/$(git current-branch-without-slash).diff
 
     export-zip = archive -o latest.zip
     export-tgz = archive -o latest.tar.gz -9
@@ -1445,10 +1446,10 @@ deploy-prod =
         }; f"
 
     # View raw commit.
-    email-patch = XXX git format-patch $(git current-branch).patch
+    email-patch = XXX git format-patch $(git current-branch-without-slash).patch
 
     # Since oldest ancestor...
-    plain-diff = !git branch-diff > $(git current-branch).diff
+    plain-diff = !git branch-diff > $(git current-branch-without-slash).diff
 
     patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
 
