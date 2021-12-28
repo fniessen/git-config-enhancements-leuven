@@ -1408,11 +1408,29 @@ deploy-prod =
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 
-    today = !git log --since=midnight --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    today = !git log \
+                --since=midnight \
+                --author=\"${1-$(git config --get user.name)}\" \
+                --no-merges \
+                --all \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'
 
-    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = !git log \
+                --since='1 day ago midnight' --until=midnight \
+                --author=\"${1-$(git config --get user.name)}\" \
+                --no-merges \
+                --all \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'
 
-    this-week = !git log --since='1 week ago' --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    this-week = !git log \
+                --since='1 week ago' \
+                --author=\"${1-$(git config --get user.name)}\" \
+                --no-merges \
+                --all \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'
 
     # Summarize your own changes since 24h, suitable for a daily standup meeting.
     standup = "!git log \

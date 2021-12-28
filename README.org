@@ -5019,11 +5019,29 @@ Quickly see what you've done today (list commits that aren't merges, on *all
 branches*):
 
 #+begin_src conf
-    today = !git log --since=midnight --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    today = !git log \
+                --since=midnight \
+                --author=\"${1-$(git config --get user.name)}\" \
+                --no-merges \
+                --all \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'
 
-    yesterday = !git log --since='1 day ago midnight' --until=midnight --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    yesterday = !git log \
+                --since='1 day ago midnight' --until=midnight \
+                --author=\"${1-$(git config --get user.name)}\" \
+                --no-merges \
+                --all \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'
 
-    this-week = !git log --since='1 week ago' --author=\"${1-$(git config --get user.name)}\" --no-merges --all --pretty='%C(green)%ad%C(auto) - %s' --date=format:'%Y-%m-%d %a %H:%M'
+    this-week = !git log \
+                --since='1 week ago' \
+                --author=\"${1-$(git config --get user.name)}\" \
+                --no-merges \
+                --all \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'
 #+end_src
 
 Show changes for a daily standup meeting:
