@@ -484,7 +484,7 @@
 
     browse-commits = "!f() { \
             URL=$(git config --get remote.$(git origin).url); \
-            cygstart ${URL/.git}/commits; \
+            xdg-open ${URL/.git}/commits; \
         }; f"
 
     # Append your staged changes to the LATEST commit (keeping the pre-existing
@@ -772,14 +772,6 @@ bclean = "!f() { \
 
     divergence = !git log --left-right --graph --cherry-pick --oneline $1...$(git origin)/$1
 
-    # Usage: git release VERSION
-    # Release a new version of your project.
-    release = "!f() { \
-            git tag -a v$1 -m \"Release version $1\" \
-                && git push $(git origin) --tags \
-                && git push $(git origin); \
-        }; f"
-
     # 50 most recent commits.
     # XXX this is a summary?
     graph = log -50 --branches --tags --remotes --date-order --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --graph
@@ -869,6 +861,23 @@ bclean = "!f() { \
 
     related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n 1 ' -"
 
+    # Usage: git release VERSION
+    # Release a new version of your project.
+    release = "!f() { \
+            git tag -a v$1 -m \"Release version $1\" \
+                && git push $(git origin) --tags \
+                && git push $(git origin); \
+        }; f"
+
+    # Check if any file in repo has whitespace errors
+    # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
+    check-whitespace = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
+    whitespace-violations = "!git diff --check $(git hash-object -t tree /dev/null)"
+
+    # Check if any file in repo has windows line endings
+    # Currently do not work as alias, works from comand line directly. There is a problem with \r
+    check-eol = grep --files-with-matches $'\\r' HEAD
+
 rsync-deploy =
 
 # Deploy a branch to review server (https://review-feature-1.example.com).
@@ -921,12 +930,21 @@ deploy-prod =
 
     browse-issues = "!f() { \
             URL=$(git config --get remote.$(git origin).url); \
-            cygstart ${URL/.git}/issues/$1; \
+            xdg-open ${URL/.git}/issues/$1; \
+        }; f"
+
+    # Jira tickets.
+    issues = "!f() { \
+            : git log; \
+            echo 'Printing issue keys'; \
+            git log --oneline $@ \
+                | egrep -o [A-Z]+-[0-9]+ \
+                | sort -u; \
         }; f"
 
     browse-wiki = "!f() { \
             URL=$(git config --get remote.$(git origin).url); \
-            cygstart ${URL/.git}/wiki; \
+            xdg-open ${URL/.git}/wiki; \
         }; f"
 
     # Put everything in the current repo in a Zip archive.
@@ -994,18 +1012,6 @@ deploy-prod =
 
     # Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
     cleanuplocal = !git remote prune $(git origin) && git gc && git clean -df
-
-    # Check if any file in repo has whitespace errors
-    # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
-    check-whitespace = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
-    whitespace-violations = "!git diff --check $(git hash-object -t tree /dev/null)"
-
-    # Check if any file in repo has windows line endings
-    # Currently do not work as alias, works from comand line directly. There is a problem with \r
-    check-eol = grep --files-with-matches $'\\r' HEAD
-
-    # Jira tickets (from: http://blogs.atlassian.com/2014/08/whats-new-git-2-1/)
-    issues = "!f() { : git log ; echo 'Printing issue keys'; git log --oneline $@ | egrep -o [A-Z]+-[0-9]+ | sort -u; }; f"
 
     st = status -s -b
 

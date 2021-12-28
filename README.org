@@ -145,7 +145,7 @@ instead of:
     date = short
 #+end_src
 
-Print out the ref names of any commits that are shown.
+Print out the ref names (tags or branches) of any commits that are shown.
 
 #+begin_src conf
     decorate = short
@@ -1941,13 +1941,13 @@ any *line* that was added, removed, or changed.
 #+begin_src conf
     browse-commits = "!f() { \
             URL=$(git config --get remote.$(git origin).url); \
-            cygstart ${URL/.git}/commits; \
+            xdg-open ${URL/.git}/commits; \
         }; f"
 #+end_src
 
 For Cygwin:
 
-: alias open='cygstart'
+: alias xdg-open='cygstart'
 
 ** Push
 
@@ -3018,40 +3018,6 @@ Available filters for ~--diff-filter~ are:
     divergence = !git log --left-right --graph --cherry-pick --oneline $1...$(git origin)/$1
 #+end_src
 
-* xReleases
-
-You can create a release to package software, along with release notes and links
-to binary files, for other people to use.
-
-Releases are based on *Git tags*: tags are used to mark *release* versions, with the
-*version number* as the *tag name*.
-
-We recommend naming tags that fit within [[https://semver.org/][semantic versioning]], i.e. having the
-form ~v<major>.<minor>.<patch>~:
-- *Major* release (from ~v0.8.1~ to ~v1.0.0~) for bug fixes and new features that
-  break backwards compatibility,
-- *Minor* release (from ~v0.8.1~ to ~v0.9.0~) for bug fixes and new features that
-  maintain backwards compatibility, and
-- *Patch* release (from ~v0.8.1~ to ~v0.8.2~) only for bug fixes.
-
-# https://stackoverflow.com/questions/21639437/git-flow-release-branches-and-tags-with-or-without-v-prefix
-
-#+begin_note
-It's common practice to prefix your version names with the letter ~v~.
-#+end_note
-
-Tag and push changes to the repository:
-
-#+begin_src conf
-    # Usage: git release VERSION
-    # Release a new version of your project.
-    release = "!f() { \
-            git tag -a v$1 -m \"Release version $1\" \
-                && git push $(git origin) --tags \
-                && git push $(git origin); \
-        }; f"
-#+end_src
-
 * xGraph
 
 Graphical history viewers
@@ -3404,13 +3370,61 @@ How do I get this PR out of the Phantom Zone
 Easy: Address the comments -> open a new PR (mention this one + short summary in the description).
 #+end_src
 
+* Releases
+
+You can create a release to package software, along with release notes and links
+to binary files, for other people to use.
+
+Releases are based on *Git tags*: tags are used to mark *release* versions, with the
+*version number* as the *tag name*.
+
+We recommend naming tags that fit within [[https://semver.org/][semantic versioning]], i.e. having the
+form ~v<major>.<minor>.<patch>~:
+
+- *Major* release (from ~v0.8.1~ to ~v1.0.0~) for bug fixes and new features that
+  break backwards compatibility,
+- *Minor* release (from ~v0.8.1~ to ~v0.9.0~) for bug fixes and new features that
+  maintain backwards compatibility, and
+- *Patch* release (from ~v0.8.1~ to ~v0.8.2~) only for bug fixes.
+
+# https://stackoverflow.com/questions/21639437/git-flow-release-branches-and-tags-with-or-without-v-prefix
+
+#+begin_note
+It's common practice to prefix your version names with the letter ~v~.
+#+end_note
+
+Tag and push changes to the repository:
+
+#+begin_src conf
+    # Usage: git release VERSION
+    # Release a new version of your project.
+    release = "!f() { \
+            git tag -a v$1 -m \"Release version $1\" \
+                && git push $(git origin) --tags \
+                && git push $(git origin); \
+        }; f"
+#+end_src
+
 * Pipelines
+
+Testing.
+
+#+begin_src conf
+    # Check if any file in repo has whitespace errors
+    # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
+    check-whitespace = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
+    whitespace-violations = "!git diff --check $(git hash-object -t tree /dev/null)"
+
+    # Check if any file in repo has windows line endings
+    # Currently do not work as alias, works from comand line directly. There is a problem with \r
+    check-eol = grep --files-with-matches $'\\r' HEAD
+#+end_src
+
+* Deployments (to different environments)
 
 #+begin_src conf
 rsync-deploy =
 #+end_src
-
-* Deployments (to different environments)
 
 (see structure of actions in BitBucket)
 
@@ -3560,7 +3574,18 @@ Show an existing issue specified by NUMBER.
 #+begin_src conf
     browse-issues = "!f() { \
             URL=$(git config --get remote.$(git origin).url); \
-            cygstart ${URL/.git}/issues/$1; \
+            xdg-open ${URL/.git}/issues/$1; \
+        }; f"
+#+end_src
+
+#+begin_src conf
+    # Jira tickets.
+    issues = "!f() { \
+            : git log; \
+            echo 'Printing issue keys'; \
+            git log --oneline $@ \
+                | egrep -o [A-Z]+-[0-9]+ \
+                | sort -u; \
         }; f"
 #+end_src
 
@@ -3569,7 +3594,7 @@ Show an existing issue specified by NUMBER.
 #+begin_src conf
     browse-wiki = "!f() { \
             URL=$(git config --get remote.$(git origin).url); \
-            cygstart ${URL/.git}/wiki; \
+            xdg-open ${URL/.git}/wiki; \
         }; f"
 #+end_src
 
@@ -3585,7 +3610,7 @@ Download repository, tag or branch.
 # XXX Test it with tag or branch.
 #+end_src
 
-* Settings
+* Repository settings
 
 ** SSH keys
 
@@ -3702,18 +3727,6 @@ clean and relevant commits, no experiments or fixing typos.
 
     # Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
     cleanuplocal = !git remote prune $(git origin) && git gc && git clean -df
-
-    # Check if any file in repo has whitespace errors
-    # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
-    check-whitespace = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
-    whitespace-violations = "!git diff --check $(git hash-object -t tree /dev/null)"
-
-    # Check if any file in repo has windows line endings
-    # Currently do not work as alias, works from comand line directly. There is a problem with \r
-    check-eol = grep --files-with-matches $'\\r' HEAD
-
-    # Jira tickets (from: http://blogs.atlassian.com/2014/08/whats-new-git-2-1/)
-    issues = "!f() { : git log ; echo 'Printing issue keys'; git log --oneline $@ | egrep -o [A-Z]+-[0-9]+ | sort -u; }; f"
 #+end_src
 
 ** SHOW - Check the status of your files
