@@ -633,11 +633,10 @@ bclean = "!f() { \
     #           egrep -v "(^\*|^\s*(master|main|develop)$)" | \
     #           xargs git delete-local-branch'
 
-    # Delete all branches that were safely merged into the master. All other are skipped (no worries).
+    # Delete all branches that were safely merged into the main branch. All other are skipped (no worries).
     # On osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation.
     cleanup = !git branch --merged=master \
-              | grep -Ev '^\\* \
-              | master$' \
+              | grep -Ev '^\\* | master$' \
               | xargs -r git delete-local-branch
 
     # Usage: git delete-remote-branch BRANCH
@@ -654,7 +653,8 @@ bclean = "!f() { \
         }; f"
 
     # Prune deleted branches from all remotes.
-    prune-all = !git remote | xargs -n 1 git remote prune
+    prune-all = !git remote \
+                | xargs -n 1 git remote prune
     # 'git remote prune' does not understand '--all'.
 
     # There's no way to tell git remote update to prune orphaned branches?
@@ -795,6 +795,8 @@ bclean = "!f() { \
 
     contributors-name  = shortlog -n -s --no-merges --
     contributors-email = shortlog -n -s -e --no-merges --
+
+    whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
 
     whoischanging = !sh -c 'git shortlog HEAD..$(git origin)/$0'
     whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
@@ -969,13 +971,6 @@ deploy-prod =
                 | xargs -I{} git -C {} print-reponame-then-run "$@"; \
         }; f"
 
-    # Useful for exploring Git.
-    type = cat-file -t
-    dump = cat-file -p
-
-     # Catch up those random feature branches you haven't had to touch in months.
-     catchup = !git fetch; git rebase $(git origin)/master
-
     exec = '!exec '
 
     # Show the diff between the latest commit and the current state
@@ -992,26 +987,16 @@ deploy-prod =
     # Interactive rebase with the given number of latest commits
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
 
-    # Starts an interactive rebase of all the commits you haven't pushed
+    # Start an interactive rebase of all the commits you haven't pushed
     # yet. Handy for collapsing a bunch of work-in-progress snapshots into
     # logical commits before pushing, without having to worry about accidentally
     # squashing a commit someone else has already referred to.
     work-in-progress = rebase -i @{u}
 
-#BASIC REPO INFORMATION
-
-    whois = "!sh -c 'git log -i -1 --pretty=\"format::%an <%ae>\n\" --author=\"$1\"' -"
-    whatis = show -s --pretty='tformat::%h (%s, %ad)'
-
 #IGNORING
 
     # fix .gitignore
-    fixgitignore = !git rm -r --cached . && git add . && git commit -m \"Just a .gitignore fix \"
-
-#OTHER
-
-    # Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
-    cleanuplocal = !git remote prune $(git origin) && git gc && git clean -df
+    fix-gitignore = !git rm -r --cached . && git add . && git commit -m \"Just a .gitignore fix \"
 
     st = status -s -b
 
@@ -1133,12 +1118,18 @@ deploy-prod =
     ls-ign  = ls-files --exclude-standard -o -i
     ls-ignored = ls-files --others --ignored --exclude-standard
 
-    ignore = "!f() { echo \"$1\" >> \"${GIT_PREFIX}.gitignore\"; }; f"
+    ignore = "!f() { \
+            echo \"$1\" >> \"${GIT_PREFIX}.gitignore\"; \
+        }; f"
     # ignore=!([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore
 # XXX What is GIT_PREFIX?
 
     # Ignore all untracked files by appending them to .gitignore:
-    ignore-untracked = "!git status | grep -P \"^\\t\" | grep -vF .gitignore | sed \"s/^\\t//\" >> .gitignore"
+    ignore-untracked = "!git status \
+                | grep -P \"^\\t\" \
+                | grep -vF .gitignore \
+                | sed \"s/^\\t//\" \
+                >> \"${GIT_PREFIX}.gitignore\""
 
     skip = update-index --assume-unchanged
     unskip = update-index --no-assume-unchanged
@@ -1154,19 +1145,21 @@ deploy-prod =
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
     skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
 
-  # Given a merge commit, find the span of commits that exist(ed).
-  # Not so useful in itself, but used by other aliases.
-  # Thanks to Rob Miller for the merge-span-* aliaes.
-  merge-span = !"f() { echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); }; f"
+    # Given a merge commit, find the span of commits that exist(ed).
+    # Not so useful in itself, but used by other aliases.
+    # Thanks to Rob Miller for the merge-span-* aliaes.
+    merge-span = !"f() { \
+            echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); \
+        }; f"
 
-  # Find the commits that were introduced by a merge
-  merge-span-log = "!git log $(git merge-span .. $1)"
+    # Find the commits that were introduced by a merge
+    merge-span-log = "!git log $(git merge-span .. $1)"
 
-  # Show the changes that were introduced by a merge
-  merge-span-diff = !"git diff $(git merge-span ... $1)"
+    # Show the changes that were introduced by a merge
+    merge-span-diff = !"git diff $(git merge-span ... $1)"
 
-  # Show the changes that were introduced by a merge, in your difftool
-  merge-span-difftool = !"git difftool $(git merge-span ... $1)"
+    # Show the changes that were introduced by a merge, in your difftool
+    merge-span-difftool = !"git difftool $(git merge-span ... $1)"
 
     # Information about the remote.
     remotes = remote
@@ -1265,6 +1258,10 @@ deploy-prod =
     # Merge remote master into the current branch.
     sync-branch = !git fetch -p \
                 && git merge $(git origin)/master
+
+     # Catch up those random feature branches you haven't had to touch in months.
+     catchup = !git fetch -p \
+                && git rebase $(git origin)/master
 
     merge-to-master =  "!f() { \
             BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
