@@ -1261,9 +1261,10 @@ deploy-prod =
 
     cvsmerge = merge --no-ff --log
 
+    # Usage: git sync-branch
     # Merge remote master into the current branch.
-    mm = !git fetch -p \
-              && git merge $(git origin)/master
+    sync-branch = !git fetch -p \
+                && git merge $(git origin)/master
 
     merge-to-master =  "!f() { \
             BRANCH_NAME=\"$(git symbolic-ref HEAD 2>/dev/null)\" || BRANCH_NAME=\"(unnamed branch)\"; \
@@ -1272,11 +1273,6 @@ deploy-prod =
                 && git merge $BRANCH_NAME \
                 && git checkout $BRANCH_NAME; \
         };f"
-
-    merge-master = !git checkout master \
-        && git pull \
-        && git checkout - \
-        && git merge -
 
     m = "!f() { \
             local OLD_BRANCH=$(git current-branch); \

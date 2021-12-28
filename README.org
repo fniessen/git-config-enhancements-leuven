@@ -4416,15 +4416,18 @@ applies all those changes together.
     cvsmerge = merge --no-ff --log
 #+end_src
 
-*** Merge master
+*** Sync branch (merge master into your branch)
+
+If a feature branch is behind the main branch, you can sync (merge) the branch
+with the main branch, to catch your branch up to all the latest changes on the
+main branch.
 
 #+begin_src conf
+    # Usage: git sync-branch
     # Merge remote master into the current branch.
-    mm = !git fetch -p \
-              && git merge $(git origin)/master
+    sync-branch = !git fetch -p \
+                && git merge $(git origin)/master
 #+end_src
-
-Git merge ~master~ into feature branch:
 
 #+begin_src conf
     merge-to-master =  "!f() { \
@@ -4434,11 +4437,6 @@ Git merge ~master~ into feature branch:
                 && git merge $BRANCH_NAME \
                 && git checkout $BRANCH_NAME; \
         };f"
-
-    merge-master = !git checkout master \
-        && git pull \
-        && git checkout - \
-        && git merge -
 #+end_src
 
 *** Undo the merge
