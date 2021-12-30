@@ -87,7 +87,9 @@ in the =.gitconfig= file located in the user home directory.
 Setting your user name and e-mail address is important because Git stores the
 committer and author of a change in every commit.
 
-#+begin_src conf
+#+begin_src conf :noweb yes
+# .gitconfig, Time-stamp: <<current-time()>>
+
 [user]
     # Tell Git about yourself.
     name = John Doe
@@ -3147,11 +3149,6 @@ The ~--~ signals the /end of options/, that the rest of the parameters are limit
     whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
 #+end_src
 
-#+begin_src conf
-    whoischanging = !sh -c 'git shortlog HEAD..$(git origin)/$0'
-    whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
-#+end_src
-
 * Pull requests
 
 A pull request (PR), sometimes called merge request, is a review request. You
@@ -4273,20 +4270,33 @@ remote* that you do not --, the next time you do a merge.
 #+begin_src conf
     # Usage: git incoming
     # Show new commits found in the remote repository.
-    incoming = !(git remote update -p && git log ..@{u})
+    incoming = !(git remote update -p \
+                && git log ..@{u})
+    # TODO: git fetch, instead?
 
     # Alias of 'incoming'.
     in = !git incoming
 #+end_src
 
+What was going on, while you were away?
+
 #+begin_src conf
-    # What was going on, while you were away
+    # Usage: git incoming-on-branch BRANCH_NAME
+    # Show new commits found in the remote repository.
     # Example: git incoming-on-branch master
-    incoming-on-branch = !sh -c 'git fetch' && git log HEAD..$(git origin)/$1
+    incoming-on-branch = !sh -c 'git fetch' \
+                && git log ..$(git origin)/$1
 #+end_src
 
 #+begin_src conf
-    incoming-files = !(git remote update -p && git log --stat ..@{u})
+    # Usage: git who-is-changing-branch BRANCH_NAME
+    who-is-changing-branch = !sh -c 'git shortlog HEAD..$(git origin)/$0'
+    # TODO: Add fetch?
+#+end_src
+
+#+begin_src conf
+    incoming-files = !(git remote update -p \
+                && git log --stat ..@{u})
 
     # Alias of 'incoming-files'.
     in-files = !git incoming-files

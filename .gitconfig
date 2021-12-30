@@ -1,3 +1,5 @@
+# .gitconfig, Time-stamp: 20211230.1213
+
 [user]
     # Tell Git about yourself.
     name = John Doe
@@ -794,9 +796,6 @@ bclean = "!f() { \
 
     whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
 
-    whoischanging = !sh -c 'git shortlog HEAD..$(git origin)/$0'
-    whoischangingmaster = !sh -c 'git shortlog HEAD..$(git origin)/master'
-
     pull-request-bb = "!f() { \
             USER_NAME=$1; \
             curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
@@ -1168,16 +1167,25 @@ deploy-prod =
 
     # Usage: git incoming
     # Show new commits found in the remote repository.
-    incoming = !(git remote update -p && git log ..@{u})
+    incoming = !(git remote update -p \
+                && git log ..@{u})
+    # TODO: git fetch, instead?
 
     # Alias of 'incoming'.
     in = !git incoming
 
-    # What was going on, while you were away
+    # Usage: git incoming-on-branch BRANCH_NAME
+    # Show new commits found in the remote repository.
     # Example: git incoming-on-branch master
-    incoming-on-branch = !sh -c 'git fetch' && git log HEAD..$(git origin)/$1
+    incoming-on-branch = !sh -c 'git fetch' \
+                && git log ..$(git origin)/$1
 
-    incoming-files = !(git remote update -p && git log --stat ..@{u})
+    # Usage: git who-is-changing-branch BRANCH_NAME
+    who-is-changing-branch = !sh -c 'git shortlog HEAD..$(git origin)/$0'
+    # TODO: Add fetch?
+
+    incoming-files = !(git remote update -p \
+                && git log --stat ..@{u})
 
     # Alias of 'incoming-files'.
     in-files = !git incoming-files
