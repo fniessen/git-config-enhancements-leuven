@@ -6,9 +6,6 @@
 [github]
     user = jdoe
 
-[include]
-    path = .gitconfig_local
-
 [core]
 
     # Do filesystem operations in parallel to hide latency (default since v2.1).
@@ -153,6 +150,7 @@
     cmd = meld "$LOCAL" "$REMOTE"
 
 [core]
+    # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
     editor = emacsclient
 
     # git-grep to ignore ^M.
@@ -213,7 +211,7 @@
     # List files matching the pattern.
     search-for-files = !git ls-tree -r --name-only HEAD | grep -i --color=auto
 
-    # Alias of search-for-files.
+    # Alias of 'search-for-files'.
     find-files = !git search-for-files
 
     search-for-files-all = "!f() { \
@@ -223,7 +221,7 @@
             done; \
         }; f"
 
-    # Alias of search-for-files-all.
+    # Alias of 'search-for-files-all'.
     find-files-all = !git search-for-files-all
 
     search-for-code = "grep -i --line-number --break --heading -C 1"
@@ -449,7 +447,7 @@
     search-for-commits = "!f() { \
             STR=\"git log --all-match\"; \
             for VAR in \"$@\"; do \
-                str=\"$STR --grep '$VAR'\"; \
+                STR=\"$STR --grep '$VAR'\"; \
             done; \
             eval $STR; \
         }; f"
@@ -487,20 +485,21 @@
             xdg-open ${URL/.git}/commits; \
         }; f"
 
-    # Append your staged changes to the LATEST commit (keeping the pre-existing
+    # Append your staged changes to the latest commit (keeping the pre-existing
     # commit message).
     recommit = commit -v --amend --reuse-message HEAD
 
     # Usage: git reword MSG
-    # Change LATEST commit message to what you type in.
+    # Change latest commit message to what you type in.
     reword = commit --amend -m
 
     # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
-    # Credit an author on the LATEST commit.
+    # Credit an author on the latest commit.
     credit = "!f() { \
             git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; \
         }; f"
 
+    # Edit history.
     recommit2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
                      git commit --fixup=$TARGET ${@:2} \
                          && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
@@ -754,12 +753,10 @@ bclean = "!f() { \
     log-ancestor = !sh -c 'git log $(git ancestor)..'
     diff-ancestor = !sh -c 'git diff $(git ancestor)..'
 
-    # Find the point at which a branch forked from another branch
+    # Find the point at which a branch forked from MASTER
     # Best common ancestor (when it was branched off).
     ancestor2 = !git merge-base $(git origin)/master $(git current-branch)
-
-    # Also:
-    # git merge-base --all COMMIT_1 COMMIT_2
+    ancestor3 = !git merge-base --all $(git origin)/master $(git current-branch)
 
     # Usage: git missing-files [COMMIT_ISH]
     # Show the changed files between this and another branch
@@ -779,8 +776,7 @@ bclean = "!f() { \
     # Show log as a graph
     glog = log --all --oneline --graph
 
-    releases = log --no-merges --all --simplify-by-decoration --oneline --graph
-    # XXX Add short date in the output
+    releases = log --no-merges --all --simplify-by-decoration --graph
 
     hist = log --graph
 
@@ -955,21 +951,34 @@ deploy-prod =
         }; f"
 # XXX Test it with tag or branch.
 
-    all = "!find . -type d -name .git -prune -execdir pwd ';' -execdir git $@ ';' #"
-
-    print-reponame-then-run = "!f() { \
+    print-repo-name-then-run = "!f() { \
             echo "======="; \
             basename $(git rev-parse --show-toplevel); \
             echo "======="; \
             git "$@"; \
+            echo; \
+            echo; \
         }; f"
 
     # Run commands for each repository in the current directory.
-    allr = "!f() { \
+    bulk = "!f() { \
             ls -R -d */.git \
                 | sed s,/.git,, \
-                | xargs -I{} git -C {} print-reponame-then-run "$@"; \
+                | xargs -I{} git -C {} print-repo-name-then-run "$@"; \
         }; f"
+
+    bulk-status = "!for D in $(find . -name \".git\"); do \
+                      echo \"\n*** Repository: $D ***\" \
+                          && git --git-dir=$D --work-tree=$D/.. status | grep -q \"is ahead of\"; \
+                    done"
+
+    # Usage: git bulk-pull
+    # Loop through all your directories and pull.
+    bulk-pull = !$HOME/bin/git-bulk-pull
+
+    # Usage: git bulk-push
+    # Loop through all your directories and push.
+    bulk-push = !$HOME/bin/git-bulk-push
 
     exec = '!exec '
 
@@ -981,9 +990,6 @@ deploy-prod =
            git diff-index --quiet HEAD -- || clear; \
            f"
 
-    # Pull in remote changes for the current repository and all its submodules
-    p = !"git pull; git submodule foreach git pull $(git origin) master"
-
     # Interactive rebase with the given number of latest commits
     ireb = "!r() { git rebase -i HEAD~$1; }; r"
 
@@ -992,11 +998,6 @@ deploy-prod =
     # logical commits before pushing, without having to worry about accidentally
     # squashing a commit someone else has already referred to.
     work-in-progress = rebase -i @{u}
-
-#IGNORING
-
-    # fix .gitignore
-    fix-gitignore = !git rm -r --cached . && git add . && git commit -m \"Just a .gitignore fix \"
 
     st = status -s -b
 
@@ -1098,11 +1099,6 @@ deploy-prod =
     archeology = blame -w -C -n
     whodoikill = blame -w -C -n
 
-    status-all = "!for D in $(find . -name \".git\"); do \
-                     echo \"\n*** Repository: $D ***\" \
-                     && git --git-dir=$D --work-tree=$D/.. status | grep -q \"is ahead of\"; \
-                   done"
-
     # List all tracked files.
     ls-tracked = ls-files -t
 
@@ -1131,16 +1127,21 @@ deploy-prod =
                 | sed \"s/^\\t//\" \
                 >> \"${GIT_PREFIX}.gitignore\""
 
+    # Fix .gitignore.
+    fix-gitignore = !git rm -r --cached . \
+                && git add . \
+                && git commit -m \"Fix .gitignore\"
+
+    # Ignore files only locally.
     skip = update-index --assume-unchanged
     unskip = update-index --no-assume-unchanged
 
-    # Ignore files only locally.
-    hide = update-index --assume-unchanged
-    unhide = update-index --no-assume-unchanged
+    skip-all = "!git status -s \
+                | awk {'print $2'} \
+                | xargs git skip"
 
-    skip-all = "!git status -s | awk {'print $2'} | xargs git skip"
-
-    unskip-all = "!git skipped | xargs git update-index --no-assume-unchanged"
+    unskip-all = "!git skipped \
+                | xargs git update-index --no-assume-unchanged"
 
     skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
     skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
@@ -1169,17 +1170,16 @@ deploy-prod =
     # Show new commits found in the remote repository.
     incoming = !(git remote update -p && git log ..@{u})
 
-    # Alias of incoming.
+    # Alias of 'incoming'.
     in = !git incoming
 
-#WHAT WAS GOING ON, WHILE YOU WERE AWAY
-
-    incoming2 = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/$1
-    incoming2onmaster = !sh -c 'git fetch' && git log --oneline HEAD..$(git origin)/master
+    # What was going on, while you were away
+    # Example: git incoming-on-branch master
+    incoming-on-branch = !sh -c 'git fetch' && git log HEAD..$(git origin)/$1
 
     incoming-files = !(git remote update -p && git log --stat ..@{u})
 
-    # Alias of incoming-files.
+    # Alias of 'incoming-files'.
     in-files = !git incoming-files
 
     in-what = diff --stat ...@{u}
@@ -1207,6 +1207,9 @@ deploy-prod =
     update = !git pull                     && git submodule update --init --recursive
     get    = !git pull --rebase            && git submodule update --init --recursive
     update = !git pull --rebase --prune $@ && git submodule update --init --recursive
+
+    # Pull in remote changes for the current repository and all its submodules
+    p = !"git pull; git submodule foreach git pull $(git origin) master"
 
     # Do a push/pull for just one branch.
     push-1 = "!git push $(git origin) $(git current-branch)"
@@ -1355,23 +1358,20 @@ deploy-prod =
     # Show commits not found in the remote branch.
     outgoing = log @{u}..
 
-    # Alias of outgoing.
+    # Alias of 'outgoing'.
     out = !git outgoing
 
     outgoing-files = log --stat @{u}..
 
-    # Alias of outgoing-files.
+    # Alias of 'outgoing-files'.
     out-files = !git outgoing-files
 
     # Usage: git outgoing-all
     # Show commits not found in the destination repository.
     outgoing-all = log --branches --not --remotes
 
-    # Alias of outgoing-all.
+    # Alias of 'outgoing-all'.
     out-all = !git outgoing-all
-
-    upstream = !git log --oneline --no-merges HEAD..${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}
-    local = !git log --oneline --no-merges ${1-$(git branch -lvv | perl -ne '/^\\*.*\\[(.*?)\\]/ and print "$1\n"')}..HEAD
 
     # Usage: git sha1-tag COMMIT
     sha1-tag = "!f() { \
@@ -1427,7 +1427,8 @@ deploy-prod =
                 --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
                 --date=format:'%Y-%m-%d %a %H:%M'
 
-    # Summarize your own changes since 24h, suitable for a daily standup meeting.
+    # Usage: git standup [AUTHOR]
+    # Summarize changes since 24h, suitable for a daily standup meeting.
     standup = "!git log \
                     --branches \
                     --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
@@ -1507,7 +1508,7 @@ deploy-prod =
     commit-interactive = !sh -c '(git add -p -- $@ && git commit) \
                 || git reset' --
 
-    # Alias of commit-interactive.
+    # Alias of 'commit-interactive'.
     record = !git commit-interactive
 
     lost = "!git fsck \
@@ -1518,3 +1519,6 @@ deploy-prod =
     # Resurrection of lost commits.
     zopa = !git log --all --pretty=oneline --abbrev-commit --graph \
                     $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
+
+[include]
+    path = .gitconfig_local
