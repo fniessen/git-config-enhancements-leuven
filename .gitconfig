@@ -1,7 +1,7 @@
-# .gitconfig, Time-stamp: 20211230.1213
+# .gitconfig, Time-stamp: 20211230.1217
 
 [user]
-    # Tell Git about yourself.
+    # Tell Git about yourself.  Override this in the file .gitconfig_local.
     name = John Doe
     email = john.doe@example.com
 
