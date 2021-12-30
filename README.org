@@ -4240,13 +4240,8 @@ List ignored files (*marked unchanged*):
 
 ** UPDATE - Pull
 
-Starting with Git 1.7.0, ~@{u}~ is shorthand for the *current* branch's *upstream*
-branch; e.g., ~origin/foo~ (or ~github/foo~, etc., since the remote doesn't have to
-be called ~origin~) if the checked out branch is ~foo~.
-
 #+begin_src conf
-    # Information about the remote.
-    remotes = remote
+    # Show a list of existing remotes (with URL).
     r = remote -v
 #+end_src
 
@@ -4267,18 +4262,25 @@ The ~incoming~ command returns a list of *incoming* commits for the *current
 branch* -- after a ~git fetch~, to fetch down *all the data* it has for the *current
 remote* that you do not --, the next time you do a merge.
 
+What was going on, while you were away?
+
 #+begin_src conf
     # Usage: git incoming
     # Show new commits found in the remote repository.
     incoming = !(git remote update -p \
                 && git log ..@{u})
     # TODO: git fetch, instead?
+    # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
     # Alias of 'incoming'.
     in = !git incoming
 #+end_src
 
-What was going on, while you were away?
+#+begin_tip
+Starting with Git 1.7.0, ~@{u}~ is shorthand for the *current* branch's *upstream*
+branch; e.g., ~origin/foo~ (or ~github/foo~, etc., since the remote doesn't have to
+be called ~origin~) if the checked out branch is ~foo~.
+#+end_tip
 
 #+begin_src conf
     # Usage: git incoming-on-branch BRANCH_NAME
