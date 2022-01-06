@@ -2432,24 +2432,19 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 #+end_src
 
 #+begin_src conf
-    be = branch --edit-description
-#+end_src
-
-#+begin_src conf
-    track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
-#+end_src
-
-#+begin_src conf
     # What branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general.
     show-origin = "!sh -c 'git fetch; \
                 for BRANCH_NAME in $(git branch -r | grep -v HEAD); do \
                     echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; \
             done | sort -r'"
+#+end_src
 
-    update-all-branches = !sh -c "for BRANCH_NAME in $(git branch -r); do \
-                git checkout $BRANCH_NAME; \
-                git pull; \
-            done"
+#+begin_src conf
+    be = branch --edit-description
+#+end_src
+
+#+begin_src conf
+    track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
 #+end_src
 
 *** Show my branches
@@ -2508,6 +2503,15 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
     master = !git checkout master
     main =  !git checkout main
     develop = checkout develop
+#+end_src
+
+** Update all branches
+
+#+begin_src conf
+    update-all-branches = !sh -c "for BRANCH_NAME in $(git branch -r); do \
+                git checkout $BRANCH_NAME; \
+                git pull; \
+            done"
 #+end_src
 
 ** Close a branch
@@ -2611,7 +2615,7 @@ for the distinction between "merged" and "fully merged" branches!
 Delete a *remote* branch:
 
 #+begin_src conf
-    # Usage: git delete-remote-branch BRANCH
+    # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
     delete-remote-branch = !git push $(git origin) --delete
 
@@ -2643,6 +2647,7 @@ actually prune them:
 : git remote prune $(git origin) --dry-run
 
 #+begin_src conf
+    # Usage: git prune-all
     # Prune deleted branches from all remotes.
     prune-all = !git remote \
                 | xargs -n 1 git remote prune
@@ -3056,16 +3061,6 @@ Available filters for ~--diff-filter~ are:
 - D :: Deleted
 - M :: Modified
 - R :: Renamed
-
-*** TODO Show the history difference between a local branch and its remote
-
-= git out?  (if I'm the only one pushing?)
-
-#+begin_src conf
-    divergence = "!f() { \
-            git log --cherry-pick --left-right --graph $1...$(git origin)/$1; \
-        }; f"
-#+end_src
 
 * xGraph
 
@@ -4976,6 +4971,17 @@ If you want to see all *unpushed* commits from *all branches*, do this:
     out-all = !git outgoing-all
 #+end_src
 
+*** Show the history difference between a local branch and its remote
+
+= git in + git out
+
+#+begin_src conf
+    # Usage: git divergence BRANCH_NAME
+    divergence = "!f() { \
+            git log --cherry-pick --left-right --graph $1...$(git origin)/$1; \
+        }; f"
+#+end_src
+
 ** PUBLISH - Find out if a change is part of a release
 
 #+begin_src conf
@@ -4986,8 +4992,8 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 #+end_src
 
 The ~name-rev~ command indicates the *position of a commit relative to tags* in the
-project. For example, ~v2.3~5~ means that this commit is located 5 commits *before*
-the v2.3 tag -- we can be certain that this change is part of v2.3, then.
+project.  For example, ~v2.3~5~ means that this commit is located 5 commits *before*
+the ~v2.3~ tag -- we can be certain that this change is part of v2.3, then.
 
 ** Create patches
 
@@ -5170,29 +5176,38 @@ Quickly see what you've done today (list commits that aren't merges, on *all
 branches*):
 
 #+begin_src conf
-    today = !git log \
+    # Usage: git today [AUTHOR]
+    today = "!f() { \
+            git log \
                 --since=midnight \
                 --author=\"${1-$(git config --get user.name)}\" \
                 --no-merges \
                 --all \
                 --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        }; f"
 
-    yesterday = !git log \
+    # Usage: git yesterday [AUTHOR]
+    yesterday = "!f() { \
+            git log \
                 --since='1 day ago midnight' --until=midnight \
                 --author=\"${1-$(git config --get user.name)}\" \
                 --no-merges \
                 --all \
                 --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        }; f"
 
-    this-week = !git log \
+    # Usage: git this-week [AUTHOR]
+    this-week = "!f() { \
+            git log \
                 --since='1 week ago' \
                 --author=\"${1-$(git config --get user.name)}\" \
                 --no-merges \
                 --all \
                 --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        }; f"
 #+end_src
 
 Show changes for a daily standup meeting:

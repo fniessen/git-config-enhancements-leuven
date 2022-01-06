@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20220106.1521
+# .gitconfig, Time-stamp: 20220106.1558
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -562,20 +562,15 @@
                 --sort=-committerdate refs/heads/ \
                 --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
 
-    be = branch --edit-description
-
-    track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
-
     # What branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general.
     show-origin = "!sh -c 'git fetch; \
                 for BRANCH_NAME in $(git branch -r | grep -v HEAD); do \
                     echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; \
             done | sort -r'"
 
-    update-all-branches = !sh -c "for BRANCH_NAME in $(git branch -r); do \
-                git checkout $BRANCH_NAME; \
-                git pull; \
-            done"
+    be = branch --edit-description
+
+    track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
 
     br-active = "!f() { \
             git branch --no-merged \
@@ -604,6 +599,11 @@
     master = !git checkout master
     main =  !git checkout main
     develop = checkout develop
+
+    update-all-branches = !sh -c "for BRANCH_NAME in $(git branch -r); do \
+                git checkout $BRANCH_NAME; \
+                git pull; \
+            done"
 
     # Delete a local branch.
     delete-local-branch = branch -d
@@ -634,7 +634,7 @@ bclean = "!f() { \
                 | grep -Ev '^\\* | master$' \
                 | xargs -r git delete-local-branch
 
-    # Usage: git delete-remote-branch BRANCH
+    # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
     delete-remote-branch = !git push $(git origin) --delete
 
@@ -647,6 +647,7 @@ bclean = "!f() { \
                 && git delete-remote-branch $1; \
         }; f"
 
+    # Usage: git prune-all
     # Prune deleted branches from all remotes.
     prune-all = !git remote \
                 | xargs -n 1 git remote prune
@@ -761,10 +762,6 @@ bclean = "!f() { \
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
             git diff --stat ${1:-master}...; \
-        }; f"
-
-    divergence = "!f() { \
-            git log --cherry-pick --left-right --graph $1...$(git origin)/$1; \
         }; f"
 
     # 50 most recent commits.
@@ -1413,6 +1410,11 @@ deploy-prod =
     # Alias of 'outgoing-all'.
     out-all = !git outgoing-all
 
+    # Usage: git divergence BRANCH_NAME
+    divergence = "!f() { \
+            git log --cherry-pick --left-right --graph $1...$(git origin)/$1; \
+        }; f"
+
     # Usage: git sha1-tag COMMIT
     sha1-tag = "!f() { \
             git name-rev --name-only \"$@\"; \
@@ -1450,29 +1452,38 @@ deploy-prod =
     unreleased = !git log $(git last-tag)...HEAD \
                 && git last-tag
 
-    today = !git log \
+    # Usage: git today [AUTHOR]
+    today = "!f() { \
+            git log \
                 --since=midnight \
                 --author=\"${1-$(git config --get user.name)}\" \
                 --no-merges \
                 --all \
                 --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        }; f"
 
-    yesterday = !git log \
+    # Usage: git yesterday [AUTHOR]
+    yesterday = "!f() { \
+            git log \
                 --since='1 day ago midnight' --until=midnight \
                 --author=\"${1-$(git config --get user.name)}\" \
                 --no-merges \
                 --all \
                 --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        }; f"
 
-    this-week = !git log \
+    # Usage: git this-week [AUTHOR]
+    this-week = "!f() { \
+            git log \
                 --since='1 week ago' \
                 --author=\"${1-$(git config --get user.name)}\" \
                 --no-merges \
                 --all \
                 --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        }; f"
 
     # Usage: git standup [AUTHOR]
     # Summarize changes since 24h, suitable for a daily standup meeting.
