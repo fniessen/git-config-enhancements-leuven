@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20220106.1558
+# .gitconfig, Time-stamp: 20220106.1602
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -1487,7 +1487,8 @@ deploy-prod =
 
     # Usage: git standup [AUTHOR]
     # Summarize changes since 24h, suitable for a daily standup meeting.
-    standup = "!git log \
+    standup = "!f() { \
+            git log \
                     --branches \
                     --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
                                   echo \"friday\"; \
@@ -1496,8 +1497,8 @@ deploy-prod =
                               fi) \
                     --author=\"${1-$(git config --get user.name)}\" \
                     --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
-                    --date=format:'%Y-%m-%d %a %H:%M'"
-# XXX git standup W donne un décompte avec une ligne trop peu !
+                    --date=format:'%Y-%m-%d %a %H:%M'; \
+        }; f"
 
     current-tag = tag --points-at HEAD
     zip = "!f() { \

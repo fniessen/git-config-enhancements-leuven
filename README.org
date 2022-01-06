@@ -5215,7 +5215,8 @@ Show changes for a daily standup meeting:
 #+begin_src conf
     # Usage: git standup [AUTHOR]
     # Summarize changes since 24h, suitable for a daily standup meeting.
-    standup = "!git log \
+    standup = "!f() { \
+            git log \
                     --branches \
                     --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
                                   echo \"friday\"; \
@@ -5224,9 +5225,11 @@ Show changes for a daily standup meeting:
                               fi) \
                     --author=\"${1-$(git config --get user.name)}\" \
                     --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
-                    --date=format:'%Y-%m-%d %a %H:%M'"
-# XXX git standup W donne un décompte avec une ligne trop peu !
+                    --date=format:'%Y-%m-%d %a %H:%M'; \
+        }; f"
 #+end_src
+
+TODO: git standup W donne un décompte avec une ligne trop peu !
 
 *** Release assets
 
