@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20211230.1227
+# .gitconfig, Time-stamp: 20220106.1521
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -7,6 +7,41 @@
 
 [github]
     user = jdoe
+
+[fetch]
+    prune = true
+
+[merge]
+    conflictstyle = diff3
+
+[merge]
+    tool = meld
+
+[mergetool "meld"]
+    cmd = meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
+    # cmd = meld --diff "$LOCAL" "$BASE" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
+    keepBackup = false
+
+[diff]
+    tool = meld
+
+[difftool]
+    prompt = false
+
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
+
+[core]
+    # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
+    editor = emacsclient
+
+    # git-grep to ignore ^M.
+    pager = tr -d '\\r' | less -REX
+
+    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    whitespace = cr-at-eol
+
+    pager = diff-so-fancy | LESS= less --tabs=4 -FRX
 
 [core]
 
@@ -57,15 +92,6 @@
 
     # Include summaries of merged commits in newly created merge commit messages.
     log = true
-
-    conflictstyle = diff3
-
-    tool = meld
-
-[mergetool "meld"]
-    cmd = meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
-    # cmd = meld --diff "$LOCAL" "$BASE" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
-    keepBackup = false
 
 [rebase]
     stat = true
@@ -140,34 +166,15 @@
     find = "[%C(yellow)%<|(20)%h%C(reset)] [%C(bold blue)%<(10)%cn%C(reset)]  %C(auto)%d %C(reset)  %s"
     graph = "%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset) %C(yellow)%d%C(reset)%n %C(white)%s%C(reset)%n %C(dim white)- %an <%ae> %C(reset) %C(dim white)(committer: %cn <%ce>)%C(reset)"
 
-[core]
-
-[diff]
-    tool = meld
-
-[difftool]
-    prompt = false
-
-[difftool "meld"]
-    cmd = meld "$LOCAL" "$REMOTE"
-
-[core]
-    # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
-    editor = emacsclient
-
-    # git-grep to ignore ^M.
-    pager = tr -d '\\r' | less -REX
-
-    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
-    whitespace = cr-at-eol
-
-    pager = diff-so-fancy | LESS= less --tabs=4 -FRX
-
 [alias]
 
     # Usage: git alias
     # Print the list of Git aliases.
-    alias = "!git config -l | grep alias | cut -c 7- | sort | sed 's/=/ = /'"
+    alias = "!git config -l \
+                | grep alias \
+                | cut -c 7- \
+                | sort \
+                | sed 's/=/ = /'"
 
     work-profile = config user.email \"john@work.com\"
 
@@ -177,13 +184,6 @@
                 && ( [ -n "$(ls)" ] || touch .gitignore ) \
                 && git add . \
                 && git commit -m \"Initial commit\"
-
-[alias]
-    # Proxy.
-    set-proxy = !git config --global http.proxy http://proxy-guest.example.com:8080 \
-                && git config --global https.proxy https://proxy-guest.example.com:8080
-    rmv-proxy = !git config --global --unset http.proxy \
-                && git config --global --unset https.proxy
 
     cl = clone --recursive
 
@@ -343,7 +343,7 @@
                 | xargs -L 1 git log --format=%at:%h -1 \
                 | sort \
                 | cut -f2 -d: \
-                | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
+                | xargs -L 1 git log --graph --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
         }; f"
 
     stashes = stash list --date=short
@@ -399,7 +399,9 @@
     changed-files = show --pretty="format:" --name-only -m
 
     download-email-patch = XXX git format-patch $(git current-branch).patch
-    download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
+    download-plain-diff = "!f() { \
+            git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff; \
+        }; f"
 
     showtool = "!f() { \
             REV=$(git rev-parse \"${*:-HEAD}\"); \
@@ -555,33 +557,25 @@
     branches = branch -a -vv
 
     # Show info for branches which have been checked out locally...
+    # (Sorted by date; can be useful for spring cleaning)
     br = for-each-ref \
                 --sort=-committerdate refs/heads/ \
-                --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
-
-    recent1 = for-each-ref \
-                --sort=committerdate refs/heads/ \
-                --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
-
-    recent2 = for-each-ref \
-                --sort=-committerdate refs/heads/ \
-                --format='%(authordate:short) %(color:red)%(objectname:short) %(color:yellow)%(refname:short)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
-
-    # Sort by date for branches; can be useful for spring cleaning
-    branches-by-date = for-each-ref \
-                --sort=-committerdate refs/heads/ \
-                --format='%(committerdate:short) %(refname:short)'
+                --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
 
     be = branch --edit-description
 
     track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
 
-    # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
-    showorigin = "!sh -c 'for BRANCH_NAME in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; done | sort -r'"
+    # What branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general.
+    show-origin = "!sh -c 'git fetch; \
+                for BRANCH_NAME in $(git branch -r | grep -v HEAD); do \
+                    echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; \
+            done | sort -r'"
 
-    # get remote branches
-    trackallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git branch --track $BRANCH_NAME; done"
-    updateallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git checkout $BRANCH_NAME ; git pull; done"
+    update-all-branches = !sh -c "for BRANCH_NAME in $(git branch -r); do \
+                git checkout $BRANCH_NAME; \
+                git pull; \
+            done"
 
     br-active = "!f() { \
             git branch --no-merged \
@@ -637,8 +631,8 @@ bclean = "!f() { \
     # Delete all branches that were safely merged into the main branch. All other are skipped (no worries).
     # On osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation.
     cleanup = !git branch --merged=master \
-              | grep -Ev '^\\* | master$' \
-              | xargs -r git delete-local-branch
+                | grep -Ev '^\\* | master$' \
+                | xargs -r git delete-local-branch
 
     # Usage: git delete-remote-branch BRANCH
     # Delete a remote branch.
@@ -769,14 +763,16 @@ bclean = "!f() { \
             git diff --stat ${1:-master}...; \
         }; f"
 
-    divergence = !git log --left-right --graph --cherry-pick --oneline $1...$(git origin)/$1
+    divergence = "!f() { \
+            git log --cherry-pick --left-right --graph $1...$(git origin)/$1; \
+        }; f"
 
     # 50 most recent commits.
     # XXX this is a summary?
     graph = log -50 --branches --tags --remotes --date-order --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --graph
 
     # Show log as a graph
-    glog = log --all --oneline --graph
+    glog = log --all --graph
 
     releases = log --no-merges --all --simplify-by-decoration --graph
 
@@ -856,7 +852,7 @@ bclean = "!f() { \
 
     pr-show = XXX <pr-number>
 
-    related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n 1 ' -"
+    related-pr-of-commit = "!sh -c 'git log --merges --ancestry-path $1..master | tail -n 1 ' -"
 
     # Usage: git release VERSION
     # Release a new version of your project.
@@ -865,6 +861,10 @@ bclean = "!f() { \
                 && git push $(git origin) --tags \
                 && git push $(git origin); \
         }; f"
+
+    # Usage: git manifest
+    # Print a list of version controlled files for the current revision.
+    manifest = ls-files
 
     # Check if any file in repo has whitespace errors
     # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
@@ -934,7 +934,7 @@ deploy-prod =
     issues = "!f() { \
             : git log; \
             echo 'Printing issue keys'; \
-            git log --oneline $@ \
+            git log $@ \
                 | egrep -o [A-Z]+-[0-9]+ \
                 | sort -u; \
         }; f"
@@ -966,9 +966,9 @@ deploy-prod =
                 | xargs -I{} git -C {} print-repo-name-then-run "$@"; \
         }; f"
 
-    bulk-status = "!for D in $(find . -name \".git\"); do \
-                      echo \"\n*** Repository: $D ***\" \
-                          && git --git-dir=$D --work-tree=$D/.. status | grep -q \"is ahead of\"; \
+    bulk-status = "!for DIR in $(find . -name \".git\"); do \
+                      echo \"\n*** Repository: $DIR ***\" \
+                          && git --git-dir=$DIR --work-tree=$DIR/.. status | grep -q \"is ahead of\"; \
                     done"
 
     # Usage: git bulk-pull
@@ -985,7 +985,7 @@ deploy-prod =
     d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
     # `git di $number' shows the diff between the state `$number' commits ago and the current state
-    di = !"f() { git diff --patch-with-stat HEAD~$1; }; \
+    di = "!f() { git diff --patch-with-stat HEAD~$1; }; \
            git diff-index --quiet HEAD -- || clear; \
            f"
 
@@ -1070,29 +1070,55 @@ deploy-prod =
                      -v -d -o -m -s -u
 
     # Usage: git last
-    # Return the last commit.
+    # Return the last commit on the current branch.
     last = log -1 --stat
 
+    # Usage: git lastn [N]
     # Show the last N commits on the current branch.
-    lastn = !git log --name-status -${1:-1}
+    lastn = "!f() { \
+            git show --name-only $(git rev-list -${1:-1} HEAD); \
+        }; f"
 
-    file-history = git show --oneline -s $(git rev-list HEAD -- 32-factures-creation.R)
-    file-history-f = "!f() { git show --oneline -s $(git rev-list --date-order HEAD -- $1); }; f"
-    file-history-sh = !sh -c 'git show --oneline -s $(git rev-list --date-order HEAD -- $1)'
+    # lastn2 = "!f() { \
+    #         git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
+    #     }; f"
 
-    file-history-follow = log --follow --date-order -C
+    # Usage: git file-history FILE
+    # Show commit history of a file (like BitBucket).
+    file-history = log
+    # file-history1 = log --
+    # file-history5 = "!f() { git show -s $(git rev-list --date-order HEAD -- $1); }; f"
+    # file-history6 = !sh -c 'git show -s $(git rev-list --date-order HEAD -- $0)'
 
-    related = !sh -c 'git log --follow --format=format:%H $1 \
-                          | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
-                          | sort \
-                          | uniq -c \
-                          | sort -b -n -r'
+    # Usage: git file-history-follow-no-merges FILE
+    # Show commit history of a file (with renames and copies, but without merge commits).
+    file-history-follow-no-merges = log --follow --date-order -C
 
-    related-files = git show --name-only $(git rev-list HEAD -- 32-factures-creation.R)
-    related-files-f = "!f() { git show --name-only $(git rev-list HEAD -- $1); }; f"
-    related-files-sh = !sh -c 'git show --name-only $(git rev-list HEAD -- $1)'
+    # Usage: git file-history-all FILE
+    # Show commit history of a file in all branches.
+    file-history-all = log --all
+    # file-history-all1 = log --all --
+    # file-history-all5 = "!f() { git show -s $(git rev-list --date-order --all HEAD -- $1); }; f"
+    # file-history-all6 = !sh -c 'git show -s $(git rev-list --date-order --all HEAD -- $0)'
 
-    file-last-modified = log -n 1 --follow --all --date-order -C
+    # Usage: git file-last-modified FILE
+    # Show when file was last modified.
+    file-last-modified = log -n 1 --all --date-order
+
+    # Usage: git related FILE
+    # Generate a list of which files changed together with a file.
+    related = "!f() { \
+            git show --name-only $(git rev-list HEAD -- $1); \
+        }; f"
+
+    # Usage: git related-files FILE
+    # Generate a list of which files changed together with a file.
+    related-files = !sh -c 'git log --format=format:%H $0 \
+                | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
+                | sort \
+                | uniq -c \
+                | sort -b -n -r \
+                | less'
 
     praise = blame -w
     archeology = blame -w -C -n
@@ -1142,24 +1168,33 @@ deploy-prod =
     unskip-all = "!git skipped \
                 | xargs git update-index --no-assume-unchanged"
 
-    skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
-    skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
+    skipped = "!git ls-files -v \
+                | grep '^h' \
+                | cut -c 3-"
+    skipped2-BAD-MAYBE = !git ls-files -v \
+                | grep '^[a-z]'
 
     # Given a merge commit, find the span of commits that exist(ed).
     # Not so useful in itself, but used by other aliases.
     # Thanks to Rob Miller for the merge-span-* aliaes.
-    merge-span = !"f() { \
+    merge-span = "!f() { \
             echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); \
         }; f"
 
     # Find the commits that were introduced by a merge
-    merge-span-log = "!git log $(git merge-span .. $1)"
+    merge-span-log = "!f() { \
+            git log $(git merge-span .. $1); \
+        }; f"
 
     # Show the changes that were introduced by a merge
-    merge-span-diff = !"git diff $(git merge-span ... $1)"
+    merge-span-diff = "!f() { \
+            git diff $(git merge-span ... $1); \
+        }; f"
 
     # Show the changes that were introduced by a merge, in your difftool
-    merge-span-difftool = !"git difftool $(git merge-span ... $1)"
+    merge-span-difftool = "!f() { \
+            git difftool $(git merge-span ... $1); \
+        }; f"
 
     # Show a list of existing remotes (with URL).
     r = remote -v
@@ -1185,14 +1220,12 @@ deploy-prod =
     # TODO: Add fetch?
 
     incoming-files = !(git remote update -p \
-                && git log --stat ..@{u})
+                && git diff --stat ...@{u})
 
     # Alias of 'incoming-files'.
     in-files = !git incoming-files
 
-    in-what = diff --stat ...@{u}
-
-    du = diff @{u} HEAD
+    incoming-diff = diff @{u} HEAD
     # diff with upstream branch
 
     pull = pull -v
@@ -1251,8 +1284,7 @@ deploy-prod =
 
     # Avoid a fast-forward commit.
     mnf = merge --no-ff
-
-    cvsmerge = merge --no-ff --log
+    mnf2 = merge --no-ff --log
 
     # Usage: git sync-branch
     # Merge remote master into the current branch.
@@ -1369,7 +1401,7 @@ deploy-prod =
     # Alias of 'outgoing'.
     out = !git outgoing
 
-    outgoing-files = log --stat @{u}..
+    outgoing-files = diff --stat @{u}...
 
     # Alias of 'outgoing-files'.
     out-files = !git outgoing-files
@@ -1407,9 +1439,16 @@ deploy-prod =
         }; f"
 
     # Detailed list of changes.
-    changelog1 = !git log --oneline --no-merges ${1-$(git last-tag)}..HEAD
+    changelog1 = "!f() { \
+            git log --no-merges ${1-$(git last-tag)}..HEAD; \
+        }; f"
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
+
+    # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
+    # branche courante.
+    unreleased = !git log $(git last-tag)...HEAD \
+                && git last-tag
 
     today = !git log \
                 --since=midnight \
@@ -1454,7 +1493,9 @@ deploy-prod =
             git archive --format=zip -o $(git current-tag).zip HEAD; \
         }; f"
 
-    export-branch = !git format-patch --stdout $1 > ~/$(git current-branch-without-slash).diff
+    export-branch = "!f() { \
+            git format-patch --stdout $1 > ~/$(git current-branch-without-slash).diff; \
+        }; f"
 
     export-zip = archive -o latest.zip
     export-tgz = archive -o latest.tar.gz -9
@@ -1474,11 +1515,6 @@ deploy-prod =
     plain-diff = !git branch-diff > $(git current-branch-without-slash).diff
 
     patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
-
-    # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
-    # branche courante.
-    unreleased = !git log --oneline $(git last-tag)...HEAD \
-                && git last-tag
 
     debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
 

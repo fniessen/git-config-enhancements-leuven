@@ -80,16 +80,20 @@ From [[https://xkcd.com/1597/][xkcd]].
 The following configures interesting global settings for Git. These are stored
 in the =.gitconfig= file located in the user home directory.
 
-* Global options
+* Preferences
+
+Customizing Git.
+
+#+begin_src conf :noweb yes
+# .gitconfig, Time-stamp: <<current-time()>>
+#+end_src
 
 ** User
 
 Setting your user name and e-mail address is important because Git stores the
 committer and author of a change in every commit.
 
-#+begin_src conf :noweb yes
-# .gitconfig, Time-stamp: <<current-time()>>
-
+#+begin_src conf
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
     name = John Doe
@@ -101,6 +105,293 @@ committer and author of a change in every commit.
 
 You should "override" the above with your personal details in the file
 =.gitconfig_local=.
+
+** Auto-Prune
+
+On *fetch* / pull, automatically remove local branches that no longer exist on the
+remote:
+
+#+begin_src conf
+[fetch]
+    prune = true
+#+end_src
+
+** Default Branch Name
+
+** External Merge Tool
+
+How to resolve merge conflicts in Git?  Try ~git mergetool~.
+
+#+begin_src conf
+[merge]
+    conflictstyle = diff3
+#+end_src
+
+- For small changes, ~git diff~ and ~vc-diff~ are perfect.
+- For medium changes, ~magit~ is perfect.
+- For large changes, [[https://www.deltawalker.com/][DeltaWalker]] (39.95 USD) is perfect.
+
+Firstly, here is what the parameters (used below) mean:
+
+- ~$LOCAL~ is the file in the *current branch* (e.g. ~master~).
+
+- ~$REMOTE~ is the file in the *branch being merged* (e.g. ~BRANCH_NAME~).
+
+- ~$MERGED~ is the *partially merged file* with the merge conflict information in
+  it.
+
+- ~$BASE~ is the *common ancestor* of ~$LOCAL~ and ~$REMOTE~, this is to say the file as
+  it was (before both changes) when the branch containing ~$REMOTE~ was originally
+  created.
+
+*** Emacs as a Git mergetool
+
+Ediff or Emerge?  Or Magit???
+
+#+begin_src conf :tangle no
+[merge]
+    tool = ediff
+
+[mergetool "ediff"]
+    cmd = emacsclient -c -a \"\"  --eval \"(ediff-merge-files-with-ancestor \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\" nil \\\"$MERGED\\\")\"
+    keepBackup = false
+#+end_src
+
+*** Meld as Git mergetool
+
+*How do I set up and use Meld as my git mergetool?*
+See https://stackoverflow.com/questions/34119866/setting-up-and-using-meld-as-your-git-difftool-and-mergetool.
+
+See ~auto-merge~ in
+https://stackoverflow.com/questions/11133290/git-merging-using-meld (first and
+second solution).
+
+Use [[https://meldmerge.org/][Meld]] as Git ~mergetool:~
+
+#+begin_src conf
+[merge]
+    tool = meld
+#+end_src
+
+I suggest you use either:
+
+#+begin_src conf :tangle no
+[mergetool "meld"]
+    cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
+    keepBackup = false
+#+end_src
+
+or:
+
+#+begin_src conf :tangle no
+[mergetool "meld"]
+    cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
+    keepBackup = false
+#+end_src
+
+The choice is whether to use ~$MERGED~ or ~$BASE~ in between ~$LOCAL~ and ~$REMOTE~.
+
+Either way, Meld will display 3 panes with:
+
+- ~$LOCAL~ in the left pane,
+- ~$REMOTE~ in the right pane and
+- either ~$MERGED~ or ~$BASE~ in the middle pane.
+
+In BOTH cases, *the middle pane is the file that you should edit to resolve the
+merge conflicts*.  The difference is just in which starting edit position you'd
+prefer:
+
+- ~$MERGED~ for the file which contains the partially merged file with the merge
+  conflict information or
+
+- ~$BASE~ for the shared commit ancestor of ~$LOCAL~ and ~$REMOTE~.
+
+#+begin_note
+Since both cmd lines can be useful, I keep them both in my =.gitconfig= file. Most
+of the time I use the ~$MERGED~ line and the ~$BASE~ line is commented out, but the
+commenting out can be swapped over if I want to use the ~$BASE~ line instead.
+#+end_note
+
+#+begin_src conf
+[mergetool "meld"]
+    cmd = meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
+    # cmd = meld --diff "$LOCAL" "$BASE" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
+    keepBackup = false
+#+end_src
+
+** External Diff Tool
+
+Use [[https://meldmerge.org/][Meld]] as Git ~difftool:~
+
+#+begin_src conf
+[diff]
+    tool = meld
+
+[difftool]
+    prompt = false
+
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
+#+end_src
+
+** External Editor
+
+You may edit your commit messages in your preferred external *text editor*.
+
+Supported editors include:
+- Atom
+- *Emacs*
+- IntelliJ
+- Notepad++
+- Sublime
+- VS Code
+
+#+begin_src conf
+[core]
+    # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
+    editor = emacsclient
+#+end_src
+
+** Delete ".orig" files
+
+Clean the byproducts of the merge conflict process:
+
+: find . -name "*.orig" -delete
+
+** Pager Support
+
+Some Git commands can produce a lot of output, and Git will attempt to use
+a pager to make those commands more pleasant.
+
+To set the pager that should be used, set the application variable ~pager~.
+
+*** Less
+
+#+begin_note
+When the ~LESS~ environment variable is unset, Git sets it to ~-FRSX~.  If the ~LESS~
+environment variable is set, Git does not change it at all.
+
+We use ~-R~ in the command itself to be sure to *interpret the color codes* when Git
+is run from /Windows/ Emacs (~C-x v l~), with /no/ value for the ~LESS~ /environment
+variable/.
+#+end_note
+
+#+begin_src conf
+    # git-grep to ignore ^M.
+    pager = tr -d '\\r' | less -REX
+#+end_src
+
+Stop viewing non-printable characters (for example, ISO Latin 1 accents in
+a UTF-8 terminal) in reverse video and hexadecimals: see ~LESSBINFMT~.
+
+Stop viewing ~^M~ symbols in diff:
+
+#+begin_src conf
+    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    whitespace = cr-at-eol
+#+end_src
+
+*** Diff-so-fancy extension
+
+Improve the ~git diff~ output using a tool like:
+- [[https://github.com/so-fancy/diff-so-fancy][diff-so-fancy]] or
+- [[https://github.com/dandavison/delta][delta]].
+
+#+begin_src conf
+    pager = diff-so-fancy | LESS= less --tabs=4 -FRX
+#+end_src
+
+~less~ options:
+- ~-F~ to exit immediately if the output is less than one screen,
+- ~-R~ for colors to persist, and
+- ~-X~ for not clearing the screen.
+
+#+begin_tip
+The diff-so-fancy ruler was 1 char too long.  It turned out I had an option in
+~$LESS~ that enabled the status column, and thus added a space at the beginning
+of every line.  I was able to resolve it by clearing the ~LESS~ environment
+variable in the ~core.pager~ config.
+
+Also, the diff-so-fancy ruler was not displayed in Unicode.  It turned out I had
+set ~LC_CTYPE~ to "".  I had to either unset ~LC_CTYPE~ entirely or set it to
+something with UTF-8 in it.
+
+See https://github.com/so-fancy/diff-so-fancy/issues/364.
+#+end_tip
+
+** AutoCRLF
+
+[[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use LF (~\n~) as a newline
+character in Git-handled repositories.
+
+- *Checkout Windows-style, commit Unix-style line endings*
+
+  Git will convert LF to CRLF when checking out text files onto your file
+  system.  When committing text files, CRLF will be converted to LF.  *For
+  cross-platform projects*, this is the *recommended setting on Windows*
+  (~core.autocrlf~ is set to ~true~) because it ensures that your repository can be
+  used on other platforms while retaining CRLF in your working tree.
+
+  #+begin_src conf :tangle no
+      # Configure Git to ensure line endings in files you checkout are correct
+      # for Windows.  For compatibility, line endings are converted to Unix
+      # style when you commit files.
+      autocrlf = true
+  #+end_src
+
+  This /turns all LF back into CRLF when writing out into the working tree/.
+
+- *Checkout as-is, commit Unix-style line endings*
+
+  Git will /not perform any conversion when checking out text files/.  When
+  committing text files, CRLF will be converted to LF.  *For cross-platform
+  projects*, this is the *recommended setting on Unix* (~core.autocrlf~ is set to
+  ~input~) to prevent CRLF from getting written into the repository.
+
+  #+begin_src conf :tangle no
+      # Configure Git to ensure line endings in files you checkout are correct
+      # for Linux and macOS.
+      autocrlf = input
+  #+end_src
+
+  When you read files back out of the object database and write them into the
+  working tree, they will still have LF to denote the end of line.
+
+- *Checkout as-is, commit as-is*
+
+  Git will not perform any conversions when checking out or committing text
+  files.  Choosing this option is *not recommended for cross-platform projects*
+  (~core.autocrlf~ is set to ~false~).
+
+  #+begin_src conf :tangle no
+      autocrlf = false
+  #+end_src
+
+  This is the default, but most people are encouraged to change this
+  immediately.
+
+  The result of using ~false~ is that Git doesn't ever mess with line endings on
+  your file. You can check in files with LF or CRLF or CR or some random mix of
+  those three and Git does not care. This can make diffs harder to read and
+  merges more difficult.
+
+** Proxy configuration
+
+#+begin_src conf :tangle no
+[http]
+    proxy = http://proxy-guest.example.com:8080
+#+end_src
+
+#+begin_src conf :tangle no
+[alias]
+    # Proxy.
+    set-proxy = !git config --global http.proxy http://proxy-guest.example.com:8080 \
+                && git config --global https.proxy https://proxy-guest.example.com:8080
+    rmv-proxy = !git config --global --unset http.proxy \
+                && git config --global --unset https.proxy
+#+end_src
+
+* XXX Global options
 
 ** Core
 
@@ -233,16 +524,6 @@ Git diff will use ~(i)ndex~, ~(w)ork tree~, ~(c)ommit~ and ~(o)bject~ instead of
     whitespace = nowarn
 #+end_src
 
-** Fetch
-
-Automatically delete local branches that have been removed from remote on
-fetch/pull:
-
-#+begin_src conf :tangle no
-[fetch]
-    prune = true
-#+end_src
-
 ** Status
 
 If you are using submodules, it might be useful to turn on the submodule summary.
@@ -315,101 +596,6 @@ with the /same name/.
     log = true
 #+end_src
 
-#+begin_src conf
-    conflictstyle = diff3
-#+end_src
-
-- For small changes, ~git diff~ and ~vc-diff~ are perfect.
-- For medium changes, ~magit~ is perfect.
-- For large changes, [[https://www.deltawalker.com/][DeltaWalker]] (39.95 USD) is perfect.
-
-How to resolve merge conflicts in Git?  Try ~git mergetool~.
-
-*** Emacs as a Git mergetool
-
-Ediff or Emerge?  Or Magit???
-
-#+begin_src conf :tangle no
-[merge]
-    tool = ediff
-
-[mergetool "ediff"]
-    cmd = emacsclient -c -a \"\"  --eval \"(ediff-merge-files-with-ancestor \\\"$LOCAL\\\" \\\"$REMOTE\\\" \\\"$BASE\\\" nil \\\"$MERGED\\\")\"
-    keepBackup = false
-#+end_src
-
-*** Meld as Git mergetool
-
-*How do I set up and use Meld as my git mergetool?*
-See https://stackoverflow.com/questions/34119866/setting-up-and-using-meld-as-your-git-difftool-and-mergetool.
-
-See ~auto-merge~ in
-https://stackoverflow.com/questions/11133290/git-merging-using-meld (first and
-second solution).
-
-#+begin_src conf
-    tool = meld
-#+end_src
-
-Firstly here is what the parameters mean:
-
-- ~$LOCAL~ is the file in the *current branch* (e.g. ~master~).
-
-- ~$REMOTE~ is the file in the *branch being merged* (e.g. ~BRANCH_NAME~).
-
-- ~$MERGED~ is the *partially merged file* with the merge conflict information in
-  it.
-
-- ~$BASE~ is the *common ancestor* of ~$LOCAL~ and ~$REMOTE~, this is to say the file as
-  it was (before both changes) when the branch containing ~$REMOTE~ was originally
-  created.
-
-I suggest you use either:
-
-#+begin_src conf :tangle no
-[mergetool "meld"]
-    cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
-    keepBackup = false
-#+end_src
-
-or:
-
-#+begin_src conf :tangle no
-[mergetool "meld"]
-    cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
-    keepBackup = false
-#+end_src
-
-The choice is whether to use ~$MERGED~ or ~$BASE~ in between ~$LOCAL~ and ~$REMOTE~.
-
-Either way, Meld will display 3 panes with:
-
-- ~$LOCAL~ in the left pane,
-- ~$REMOTE~ in the right pane and
-- either ~$MERGED~ or ~$BASE~ in the middle pane.
-
-In BOTH cases, *the middle pane is the file that you should edit to resolve the
-merge conflicts*.  The difference is just in which starting edit position you'd
-prefer:
-
-- ~$MERGED~ for the file which contains the partially merged file with the merge
-  conflict information or
-
-- ~$BASE~ for the shared commit ancestor of ~$LOCAL~ and ~$REMOTE~.
-
-#+begin_note
-Since both cmd lines can be useful, I keep them both in my =.gitconfig= file. Most
-of the time I use the ~$MERGED~ line and the ~$BASE~ line is commented out, but the
-commenting out can be swapped over if I want to use the ~$BASE~ line instead.
-#+end_note
-
-#+begin_src conf
-[mergetool "meld"]
-    cmd = meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
-    # cmd = meld --diff "$LOCAL" "$BASE" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
-    keepBackup = false
-#+end_src
-
 ** Rebase
 
 Set ~rebase.stat = true~, so the ~diffstat~ output is still shown when they pull.
@@ -472,6 +658,8 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
     commit = yellow bold
     whitespace = red reverse
 #+end_src
+
+Diff-so-fancy extension:
 
 #+begin_src conf
 [diff-so-fancy]
@@ -536,184 +724,6 @@ See
 - https://devhints.io/git-log-format and
 - https://git-scm.com/docs/pretty-formats (XXX)
 
-* ------------------------------------------------------------------------------
-
-* Preferences
-
-#+begin_src conf
-[core]
-#+end_src
-
-** General
-
-** Auto-Fetch
-
-** Auto-Prune
-
-** Default Branch Name
-
-** External Merge Tool
-
-** External Diff Tool
-
-Use [[https://meldmerge.org/][Meld]] as Git ~difftool:~
-
-#+begin_src conf
-[diff]
-    tool = meld
-
-[difftool]
-    prompt = false
-
-[difftool "meld"]
-    cmd = meld "$LOCAL" "$REMOTE"
-#+end_src
-
-** External Editor
-
-You may edit your commit messages in your preferred external *text editor*.
-
-Supported editors include:
-- Atom
-- *Emacs*
-- IntelliJ
-- Notepad++
-- Sublime
-- VS Code
-
-#+begin_src conf
-[core]
-    # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
-    editor = emacsclient
-#+end_src
-
-** Delete ".orig" files
-
-Clean the byproducts of the merge conflict process:
-
-: find . -name "*.orig" -delete
-
-** Pager Support
-
-Some Git commands can produce a lot of output, and Git will attempt to use
-a pager to make those commands more pleasant.
-
-To set the pager that should be used, set the application variable ~pager~.
-
-*** Less
-
-#+begin_note
-When the ~LESS~ environment variable is unset, Git sets it to ~FRSX~.  If the ~LESS~
-environment variable is set, Git does not change it at all.
-
-We use ~-R~ in the command itself to be sure to *interpret the color codes* when Git
-is run from /Windows/ Emacs (~C-x v l~), with /no/ value for the ~LESS~ /environment
-variable/.
-#+end_note
-
-#+begin_src conf
-    # git-grep to ignore ^M.
-    pager = tr -d '\\r' | less -REX
-#+end_src
-
-Stop viewing non-printable characters (for example, ISO Latin 1 accents in
-a UTF-8 terminal) in reverse video and hexadecimals: see ~LESSBINFMT~.
-
-Stop viewing ~^M~ symbols in diff:
-
-#+begin_src conf
-    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
-    whitespace = cr-at-eol
-#+end_src
-
-*** Diff-so-fancy extension
-
-Improve the ~git diff~ output using a tool like:
-- [[https://github.com/so-fancy/diff-so-fancy][diff-so-fancy]] or
-- [[https://github.com/dandavison/delta][delta]].
-
-#+begin_src conf
-    pager = diff-so-fancy | LESS= less --tabs=4 -FRX
-#+end_src
-
-~less~ options:
-- ~-F~ to exit immediately if the output is less than one screen,
-- ~-R~ for colors to persist, and
-- ~-X~ for not clearing the screen.
-
-#+begin_tip
-The diff-so-fancy ruler was 1 char too long.  It turned out I had an option in
-~$LESS~ that enabled the status column, and thus added a space at the beginning
-of every line.  I was able to resolve it by clearing the ~LESS~ environment
-variable in the ~core.pager~ config.
-
-Also, the diff-so-fancy ruler was not displayed in Unicode.  It turned out I had
-set ~LC_CTYPE~ to "".  I had to either unset ~LC_CTYPE~ entirely or set it to
-something with UTF-8 in it.
-
-See https://github.com/so-fancy/diff-so-fancy/issues/364.
-#+end_tip
-
-** AutoCRLF
-
-[[https://help.github.com/en/github/using-git/configuring-git-to-handle-line-endings][GitHub suggests]] that you should make sure to only use LF (~\n~) as a newline
-character in Git-handled repositories.
-
-- *Checkout Windows-style, commit Unix-style line endings*
-
-  Git will convert LF to CRLF when checking out text files onto your file
-  system.  When committing text files, CRLF will be converted to LF.  *For
-  cross-platform projects*, this is the *recommended setting on Windows*
-  (~core.autocrlf~ is set to ~true~) because it ensures that your repository can be
-  used on other platforms while retaining CRLF in your working tree.
-
-  #+begin_src conf :tangle no
-      # Configure Git to ensure line endings in files you checkout are correct
-      # for Windows.  For compatibility, line endings are converted to Unix
-      # style when you commit files.
-      autocrlf = true
-  #+end_src
-
-  This /turns all LF back into CRLF when writing out into the working tree/.
-
-- *Checkout as-is, commit Unix-style line endings*
-
-  Git will /not perform any conversion when checking out text files/.  When
-  committing text files, CRLF will be converted to LF.  *For cross-platform
-  projects*, this is the *recommended setting on Unix* (~core.autocrlf~ is set to
-  ~input~) to prevent CRLF from getting written into the repository.
-
-  #+begin_src conf :tangle no
-      # Configure Git to ensure line endings in files you checkout are correct
-      # for Linux and macOS.
-      autocrlf = input
-  #+end_src
-
-  When you read files back out of the object database and write them into the
-  working tree, they will still have LF to denote the end of line.
-
-- *Checkout as-is, commit as-is*
-
-  Git will not perform any conversions when checking out or committing text
-  files.  Choosing this option is *not recommended for cross-platform projects*
-  (~core.autocrlf~ is set to ~false~).
-
-  #+begin_src conf :tangle no
-      autocrlf = false
-  #+end_src
-
-  This is the default, but most people are encouraged to change this
-  immediately.
-
-  The result of using ~false~ is that Git doesn't ever mess with line endings on
-  your file. You can check in files with LF or CRLF or CR or some random mix of
-  those three and Git does not care. This can make diffs harder to read and
-  merges more difficult.
-
-** Use extended logging in activity log
-
-** Forget all Usernames and Passwords
-
 * Aliases
 
 If you forget your aliases and don't want to open =.gitconfig= just to check, type
@@ -724,7 +734,11 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 
     # Usage: git alias
     # Print the list of Git aliases.
-    alias = "!git config -l | grep alias | cut -c 7- | sort | sed 's/=/ = /'"
+    alias = "!git config -l \
+                | grep alias \
+                | cut -c 7- \
+                | sort \
+                | sed 's/=/ = /'"
 #+end_src
 
 * Repository
@@ -763,22 +777,6 @@ If you accidentally put the wrong tree under version control, simply delete the
 =.git= directory.
 
 : find . -name '.git' -exec rm -rf {} \;
-
-** Proxy configuration
-
-#+begin_src conf :tangle no
-[http]
-    proxy = http://proxy-guest.example.com:8080
-#+end_src
-
-#+begin_src conf
-[alias]
-    # Proxy.
-    set-proxy = !git config --global http.proxy http://proxy-guest.example.com:8080 \
-                && git config --global https.proxy https://proxy-guest.example.com:8080
-    rmv-proxy = !git config --global --unset http.proxy \
-                && git config --global --unset https.proxy
-#+end_src
 
 ** Clone an existing repository
 
@@ -1339,7 +1337,7 @@ user wants to have an updated repository.
                 | xargs -L 1 git log --format=%at:%h -1 \
                 | sort \
                 | cut -f2 -d: \
-                | xargs -L 1 git log --graph --oneline --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
+                | xargs -L 1 git log --graph --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
         }; f"
 #+end_src
 
@@ -1659,7 +1657,9 @@ List all the changed files *in a commit* (also in a /merge commit/):
 
 #+begin_src conf
     download-email-patch = XXX git format-patch $(git current-branch).patch
-    download-plain-diff = !git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff
+    download-plain-diff = "!f() { \
+            git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff; \
+        }; f"
 #+end_src
 
 ** Diff
@@ -1841,11 +1841,9 @@ function wrapper.  On the contrary, you can't add other options.
         }; f"
 #+end_src
 
-#+begin_src conf :tangle no
-curl -H "Accept: application/vnd.github.cloak-preview" \
-    https://api.github.com/search/commits\?q\=repo:fniessen/org-html-themes+local+css \
-    | jq '.items[] | {commit}'
-#+end_src
+: curl -H "Accept: application/vnd.github.cloak-preview" \
+:     https://api.github.com/search/commits\?q\=repo:fniessen/org-html-themes+local+css \
+:     | jq '.items[] | {commit}'
 
 Here's the alias which simply loops over each argument and calls ~git
 log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
@@ -2427,28 +2425,10 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 
 #+begin_src conf
     # Show info for branches which have been checked out locally...
+    # (Sorted by date; can be useful for spring cleaning)
     br = for-each-ref \
                 --sort=-committerdate refs/heads/ \
-                --format='  %(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
-#+end_src
-
-#+begin_src conf
-    recent1 = for-each-ref \
-                --sort=committerdate refs/heads/ \
-                --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
-#+end_src
-
-#+begin_src conf
-    recent2 = for-each-ref \
-                --sort=-committerdate refs/heads/ \
-                --format='%(authordate:short) %(color:red)%(objectname:short) %(color:yellow)%(refname:short)%(color:reset) (%(color:green)%(committerdate:relative)%(color:reset))'
-#+end_src
-
-#+begin_src conf
-    # Sort by date for branches; can be useful for spring cleaning
-    branches-by-date = for-each-ref \
-                --sort=-committerdate refs/heads/ \
-                --format='%(committerdate:short) %(refname:short)'
+                --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
 #+end_src
 
 #+begin_src conf
@@ -2460,12 +2440,16 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 #+end_src
 
 #+begin_src conf
-    # what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
-    showorigin = "!sh -c 'for BRANCH_NAME in $(git branch -r | grep -v HEAD); do echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; done | sort -r'"
+    # What branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general.
+    show-origin = "!sh -c 'git fetch; \
+                for BRANCH_NAME in $(git branch -r | grep -v HEAD); do \
+                    echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; \
+            done | sort -r'"
 
-    # get remote branches
-    trackallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git branch --track $BRANCH_NAME; done"
-    updateallbranches = !sh -c "for BRANCH_NAME in $(git branch -r); do git checkout $BRANCH_NAME ; git pull; done"
+    update-all-branches = !sh -c "for BRANCH_NAME in $(git branch -r); do \
+                git checkout $BRANCH_NAME; \
+                git pull; \
+            done"
 #+end_src
 
 *** Show my branches
@@ -2618,8 +2602,8 @@ for the distinction between "merged" and "fully merged" branches!
     # Delete all branches that were safely merged into the main branch. All other are skipped (no worries).
     # On osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation.
     cleanup = !git branch --merged=master \
-              | grep -Ev '^\\* | master$' \
-              | xargs -r git delete-local-branch
+                | grep -Ev '^\\* | master$' \
+                | xargs -r git delete-local-branch
 #+end_src
 
 *** Delete a remote branch
@@ -3006,7 +2990,7 @@ marked with ~+~.
 
 **** History of a branch: List all commits on only one side of the branches
 
-: git log --graph --left-right --cherry-pick --oneline master...BRANCH_NAME
+: git log --cherry-pick --left-right --graph master...BRANCH_NAME
 
 It is a list of commits reachable from ~BRANCH_NAME~ that are not reachable from
 ~master~. This gives you the information you want, but if and only if you have
@@ -3078,7 +3062,9 @@ Available filters for ~--diff-filter~ are:
 = git out?  (if I'm the only one pushing?)
 
 #+begin_src conf
-    divergence = !git log --left-right --graph --cherry-pick --oneline $1...$(git origin)/$1
+    divergence = "!f() { \
+            git log --cherry-pick --left-right --graph $1...$(git origin)/$1; \
+        }; f"
 #+end_src
 
 * xGraph
@@ -3097,7 +3083,7 @@ To see real *timeline* of who is working on what and when:
     graph = log -50 --branches --tags --remotes --date-order --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --graph
 
     # Show log as a graph
-    glog = log --all --oneline --graph
+    glog = log --all --graph
 #+end_src
 
 https://fossil-scm.org/home/help?cmd=leaves
@@ -3252,17 +3238,15 @@ will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out
 
 ** Push changes to a pull request
 
-#+begin_src shell :tangle no
-#!/bin/bash
-TMP_FILE=$(mktemp)
-REPO_SLUG=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
-PR_NUMBER=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
-curl -s https://api.github.com/repos/$REPO_SLUG/pulls/$PR_NUMBER > $TMP_FILE
-trap "{ rm -f $TMP_FILE; }" EXIT
-HEAD_REF=$(cat $TMP_FILE | jq -r '.head.ref')
-HEAD_SLUG=$(cat $TMP_FILE | jq -r '.head.repo.full_name')
-git push -f git@github.com:$HEAD_SLUG HEAD:$HEAD_REF
-#+end_src
+: #!/bin/bash
+: TMP_FILE=$(mktemp)
+: REPO_SLUG=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
+: PR_NUMBER=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
+: curl -s https://api.github.com/repos/$REPO_SLUG/pulls/$PR_NUMBER > $TMP_FILE
+: trap "{ rm -f $TMP_FILE; }" EXIT
+: HEAD_REF=$(cat $TMP_FILE | jq -r '.head.ref')
+: HEAD_SLUG=$(cat $TMP_FILE | jq -r '.head.repo.full_name')
+: git push -f git@github.com:$HEAD_SLUG HEAD:$HEAD_REF
 
 For more details on pushing changes to a PR, please see [[https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork][the official article]].
 
@@ -3385,7 +3369,7 @@ relevant: https://bitbucket.org/tpettersen/git-guilt
 Related pull request:
 
 #+begin_src conf
-    related-pr-of-commit = "! sh -c 'git log $1..master --ancestry-path --merges --oneline | tail -n 1 ' -"
+    related-pr-of-commit = "!sh -c 'git log --merges --ancestry-path $1..master | tail -n 1 ' -"
 #+end_src
 
 Example:
@@ -3468,6 +3452,12 @@ Tag and push changes to the repository:
                 && git push $(git origin) --tags \
                 && git push $(git origin); \
         }; f"
+#+end_src
+
+#+begin_src conf
+    # Usage: git manifest
+    # Print a list of version controlled files for the current revision.
+    manifest = ls-files
 #+end_src
 
 * Pipelines
@@ -3599,12 +3589,10 @@ See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
 
 Set color to red or green, depending on issue state.
 
-#+begin_src conf :tangle no
-# Works!  Need to put quotes around the URL!
-curl -u $USER_NAME -X GET 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
-    | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
-# curl -s -S
-#+end_src
+: # Works!  Need to put quotes around the URL!
+: curl -u $USER_NAME -X GET 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
+:     | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
+: # curl -s -S
 
 See also [[https://cran.r-project.org/web/packages/jsonlite/vignettes/json-apis.html][Fetching JSON data from Github REST API]].
 
@@ -3648,7 +3636,7 @@ Show an existing issue specified by NUMBER.
     issues = "!f() { \
             : git log; \
             echo 'Printing issue keys'; \
-            git log --oneline $@ \
+            git log $@ \
                 | egrep -o [A-Z]+-[0-9]+ \
                 | sort -u; \
         }; f"
@@ -3681,13 +3669,11 @@ Download repository, tag or branch.
 
 List the user's public SSH keys:
 
-#+begin_src shell :tangle no
-# For GitHub.
-curl -O https://github.com/fniessen.keys
+: # For GitHub.
+: curl -O https://github.com/fniessen.keys
 
-# For BitBucket.
-curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
-#+end_src
+: # For BitBucket.
+: curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
 
 * ------------------------------------------------------------------------------
 
@@ -3725,9 +3711,9 @@ http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
 
 #+begin_src conf
-    bulk-status = "!for D in $(find . -name \".git\"); do \
-                      echo \"\n*** Repository: $D ***\" \
-                          && git --git-dir=$D --work-tree=$D/.. status | grep -q \"is ahead of\"; \
+    bulk-status = "!for DIR in $(find . -name \".git\"); do \
+                      echo \"\n*** Repository: $DIR ***\" \
+                          && git --git-dir=$DIR --work-tree=$DIR/.. status | grep -q \"is ahead of\"; \
                     done"
 #+end_src
 
@@ -3761,7 +3747,7 @@ are always executed in the top-level directory.
     d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
 
     # `git di $number' shows the diff between the state `$number' commits ago and the current state
-    di = !"f() { git diff --patch-with-stat HEAD~$1; }; \
+    di = "!f() { git diff --patch-with-stat HEAD~$1; }; \
            git diff-index --quiet HEAD -- || clear; \
            f"
 #+end_src
@@ -3786,7 +3772,7 @@ clean and relevant commits, no experiments or fixing typos.
 
 ** SHOW - Check the status of your files
 
-Give the status in the *short-format* (preceded by a line showing the /branch name/
+Give the status in the *short format* (preceded by a line showing the /branch name/
 and /tracking info/).
 
 #+begin_src conf
@@ -3964,81 +3950,102 @@ List commits *showing changed files* (prettier and more concise version of
 
 #+begin_src conf
     # Usage: git last
-    # Return the last commit.
+    # Return the last commit on the current branch.
     last = log -1 --stat
 
+    # Usage: git lastn [N]
     # Show the last N commits on the current branch.
-    lastn = !git log --name-status -${1:-1}
+    lastn = "!f() { \
+            git show --name-only $(git rev-list -${1:-1} HEAD); \
+        }; f"
+
+    # lastn2 = "!f() { \
+    #         git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
+    #     }; f"
 #+end_src
 
-*** Show the history of a file
+XXX More information with lastn2 (for file renames), but missing newline after
+merge commits...
+
+*** Show the commit history of a file
 
 *List of commits* that modified the *specified file*:
 
 #+begin_src conf
-    file-history = git show --oneline -s $(git rev-list HEAD -- 32-factures-creation.R)
-    file-history-f = "!f() { git show --oneline -s $(git rev-list --date-order HEAD -- $1); }; f"
-    file-history-sh = !sh -c 'git show --oneline -s $(git rev-list --date-order HEAD -- $1)'
+    # Usage: git file-history FILE
+    # Show commit history of a file (like BitBucket).
+    file-history = log
+    # file-history1 = log --
+    # file-history5 = "!f() { git show -s $(git rev-list --date-order HEAD -- $1); }; f"
+    # file-history6 = !sh -c 'git show -s $(git rev-list --date-order HEAD -- $0)'
 #+end_src
 
+That also will *print the /right/ merge commits*, *like in BitBucket*.
 
+: curl -u USER_NAME 'https://api.bitbucket.org/2.0/repositories/REPO_OWNER/REPO_SLUG/filehistory/master/PATH/TO/FILE'
 
+This one will *follow renames and copies*:
 
+#+begin_src conf
+    # Usage: git file-history-follow-no-merges FILE
+    # Show commit history of a file (with renames and copies, but without merge commits).
+    file-history-follow-no-merges = log --follow --date-order -C
+#+end_src
 
-One potential issue is that ~--follow~ is a Horrible Hack that doesn't quite
-work. It's good enough for enough purposes that people use it, and it's good
-enough that nobody has bothered to fix it, but it misfires sometimes. Making it
-correct would take a lot of thinking, and maybe a lot of CPU time in ~git
-log~. (WRT the other question's comments, ~git rev-list~ doesn't have a ~--follow~,
-so this is one case where you must use ~git log~.)
+... but it *DOES NOT print merge commits*!
 
+And adding ~-m~ to show merge commits doesn't quite work -- it will show many,
+many, many /wrong/ (all?) merge commits.
+
+#+begin_note
 Merge commits in particular are very hard cases for ~git log --follow~, because
 they have two parents and one parent might have renamed the file. The rename
 detection and following code inside ~git log~ is a quick hack...
+#+end_note
 
-
-
-
-
-This one will follow renames and copies:
+Add ~--all~ to show commits of /all your branches/, not just from the current
+branch:
 
 #+begin_src conf
-    file-history-follow = log --follow --date-order -C
+    # Usage: git file-history-all FILE
+    # Show commit history of a file in all branches.
+    file-history-all = log --all
+    # file-history-all1 = log --all --
+    # file-history-all5 = "!f() { git show -s $(git rev-list --date-order --all HEAD -- $1); }; f"
+    # file-history-all6 = !sh -c 'git show -s $(git rev-list --date-order --all HEAD -- $0)'
 #+end_src
 
-#+begin_tip
-Add ~-m~ to show merge commits.  And add ~--all~ to show commits of /all your
-branches/, not just from the current branch.
-#+end_tip
-
-#+begin_src conf :tangle no
-curl 'https://api.bitbucket.org/2.0/repositories/mcpflow/pflow/filehistory/master/CHANGELOG.org'
-#+end_src
+Find the *most recent commit* (chronologically) that modified a file -- looking in
+/all/ known commits:
 
 #+begin_src conf
-    related = !sh -c 'git log --follow --format=format:%H $1 \
-                          | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
-                          | sort \
-                          | uniq -c \
-                          | sort -b -n -r'
+    # Usage: git file-last-modified FILE
+    # Show when file was last modified.
+    file-last-modified = log -n 1 --all --date-order
 #+end_src
 
 List commits affecting a specific path and then get all the files modified in
 each commit:
 
 #+begin_src conf
-    related-files = git show --name-only $(git rev-list HEAD -- 32-factures-creation.R)
-    related-files-f = "!f() { git show --name-only $(git rev-list HEAD -- $1); }; f"
-    related-files-sh = !sh -c 'git show --name-only $(git rev-list HEAD -- $1)'
+    # Usage: git related FILE
+    # Generate a list of which files changed together with a file.
+    related = "!f() { \
+            git show --name-only $(git rev-list HEAD -- $1); \
+        }; f"
 #+end_src
 
 (see https://stackoverflow.com/questions/42527378/git-get-the-list-of-files-that-have-been-modified-along-one-specific-file)
 
-Find the *most recent commit* (chronologically) that modified a file -- looking in
-all known commits:
-
 #+begin_src conf
-    file-last-modified = log -n 1 --follow --all --date-order -C
+    # Usage: git related-files FILE
+    # Generate a list of which files changed together with a file.
+    related-files = !sh -c 'git log --format=format:%H $0 \
+                | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
+                | sort \
+                | uniq -c \
+                | sort -b -n -r \
+                | less'
 #+end_src
 
 *** Inspect the commits for each edit
@@ -4214,8 +4221,11 @@ Unskip all the skipped files:
 List ignored files (*marked unchanged*):
 
 #+begin_src conf
-    skipped = "!git ls-files -v | grep '^h' | cut -c 3-"
-    skipped2-BAD-MAYBE = !git ls-files -v | grep '^[a-z]'
+    skipped = "!git ls-files -v \
+                | grep '^h' \
+                | cut -c 3-"
+    skipped2-BAD-MAYBE = !git ls-files -v \
+                | grep '^[a-z]'
 #+end_src
 
 ** Merge
@@ -4224,18 +4234,24 @@ List ignored files (*marked unchanged*):
     # Given a merge commit, find the span of commits that exist(ed).
     # Not so useful in itself, but used by other aliases.
     # Thanks to Rob Miller for the merge-span-* aliaes.
-    merge-span = !"f() { \
+    merge-span = "!f() { \
             echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); \
         }; f"
 
     # Find the commits that were introduced by a merge
-    merge-span-log = "!git log $(git merge-span .. $1)"
+    merge-span-log = "!f() { \
+            git log $(git merge-span .. $1); \
+        }; f"
 
     # Show the changes that were introduced by a merge
-    merge-span-diff = !"git diff $(git merge-span ... $1)"
+    merge-span-diff = "!f() { \
+            git diff $(git merge-span ... $1); \
+        }; f"
 
     # Show the changes that were introduced by a merge, in your difftool
-    merge-span-difftool = !"git difftool $(git merge-span ... $1)"
+    merge-span-difftool = "!f() { \
+            git difftool $(git merge-span ... $1); \
+        }; f"
 #+end_src
 
 ** UPDATE - Pull
@@ -4296,30 +4312,28 @@ be called ~origin~) if the checked out branch is ~foo~.
     # TODO: Add fetch?
 #+end_src
 
-#+begin_src conf
-    incoming-files = !(git remote update -p \
-                && git log --stat ..@{u})
-
-    # Alias of 'incoming-files'.
-    in-files = !git incoming-files
-#+end_src
-
-Show the changes between the last local commit and the *remote* branch:
-
 Show a *single diffstat* (number of added and deleted lines for *all changed
 files*):
 
 #+begin_src conf
-    in-what = diff --stat ...@{u}
+    incoming-files = !(git remote update -p \
+                && git diff --stat ...@{u})
 
-    du = diff @{u} HEAD
-    # diff with upstream branch
+    # Alias of 'incoming-files'.
+    in-files = !git incoming-files
 #+end_src
 
 #+begin_warning
 The upstream diff ~in-what~ will show the negative of unpushed (rebased) commits,
 if any, with the ~..~ notation --- not with the ~...~ notation!
 #+end_warning
+
+Show the changes between the last local commit and the *remote* branch:
+
+#+begin_src conf
+    incoming-diff = diff @{u} HEAD
+    # diff with upstream branch
+#+end_src
 
 *** Update with local modifications
 
@@ -4504,8 +4518,7 @@ applies all those changes together.
 
     # Avoid a fast-forward commit.
     mnf = merge --no-ff
-
-    cvsmerge = merge --no-ff --log
+    mnf2 = merge --no-ff --log
 #+end_src
 
 *** Sync branch (merge master into your branch)
@@ -4873,7 +4886,7 @@ git stash \
     && echo 'You can find your last changes in the stash!'
 #+end_src
 
-For Bitbucket:
+For BitBucket:
 https://marketplace.atlassian.com/apps/1212525/pages-for-bitbucket-server?hosting=server&tab=overview
 
 *** Recover a branch after its deletion in Git
@@ -4937,8 +4950,11 @@ The ~outgoing~ command returns a list of *unpushed* (outgoing) commits for the
     out = !git outgoing
 #+end_src
 
+TODO: Fix missing newline at the end...
+Hence, wrong count of lines (with shell alias "W")...
+
 #+begin_src conf
-    outgoing-files = log --stat @{u}..
+    outgoing-files = diff --stat @{u}...
 
     # Alias of 'outgoing-files'.
     out-files = !git outgoing-files
@@ -5072,7 +5088,7 @@ patches.
 
 : git ipatch mypatchfile
 
-*** Patch shortcuts
+*** Shell patch aliases
 
 #+begin_src shell :tangle no
 # Copy a patch URL to the clipboard, then run one of these commands to download
@@ -5121,9 +5137,21 @@ https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
 
 #+begin_src conf
     # Detailed list of changes.
-    changelog1 = !git log --oneline --no-merges ${1-$(git last-tag)}..HEAD
+    changelog1 = "!f() { \
+            git log --no-merges ${1-$(git last-tag)}..HEAD; \
+        }; f"
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
+#+end_src
+
+Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin
+de savoir ce qu'embarquera la « prochaine release » de mon projet.
+
+#+begin_src conf
+    # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
+    # branche courante.
+    unreleased = !git log $(git last-tag)...HEAD \
+                && git last-tag
 #+end_src
 
 XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries on mcpflow repo
@@ -5200,7 +5228,9 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+end_src
 
 #+begin_src conf
-    export-branch = !git format-patch --stdout $1 > ~/$(git current-branch-without-slash).diff
+    export-branch = "!f() { \
+            git format-patch --stdout $1 > ~/$(git current-branch-without-slash).diff; \
+        }; f"
 #+end_src
 
 Save a repo (for example, ~HEAD~ or ~master~ -- or any other branch to archive, if
@@ -5282,16 +5312,6 @@ be ~X.Y.Z~ (*without* prefix ~v~).  The advantages of ~X.Y.Z~ are that gitweb or
 can automatically offer a tarball or zip download of the form
 =packagename-$tag.tar.gz= (and it's quite established that a tarball should be
 named =package-X.Y.Z.tar.gz=).
-
-Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin
-de savoir ce qu'embarquera la « prochaine release » de mon projet.
-
-#+begin_src conf
-    # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
-    # branche courante.
-    unreleased = !git log --oneline $(git last-tag)...HEAD \
-                && git last-tag
-#+end_src
 
 ** Debugging
 
