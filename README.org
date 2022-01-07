@@ -1509,11 +1509,11 @@ user wants to have an updated repository.
 
 #+begin_src conf
     # checkpoint
-    cp = !git stash push -m "$(date +%F--%T)" \
+    checkpoint = !git stash push -m "$(date +%F--%T)" \
                 && git stash pop --index
 
     # checkpoint recover
-    cpr = "!f() { \
+    checkpoint-recover = "!f() { \
             git fsck \
                 | grep commit \
                 | cut -d' ' -f3 \

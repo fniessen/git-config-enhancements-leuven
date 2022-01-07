@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20220107.1230
+# .gitconfig, Time-stamp: 20220107.1234
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -394,11 +394,11 @@
                 && git stash apply "stash@{0}"
 
     # checkpoint
-    cp = !git stash push -m "$(date +%F--%T)" \
+    checkpoint = !git stash push -m "$(date +%F--%T)" \
                 && git stash pop --index
 
     # checkpoint recover
-    cpr = "!f() { \
+    checkpoint-recover = "!f() { \
             git fsck \
                 | grep commit \
                 | cut -d' ' -f3 \
