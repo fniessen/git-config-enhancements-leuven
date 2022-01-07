@@ -107,10 +107,6 @@ git log --branches --not --remotes
 
 The [[http://git-scm.com/book/en/Git-Branching-Rebasing][git-scm]] site below is a great resource for using Git.
 
-** Ref
-
-Only "ref" is primitive, "tag" and "branch" are derived from "ref".
-
 ** Understanding the Git Workflow
 
 > I thought this was an interesting read:
@@ -193,21 +189,6 @@ Well, I prefer merging instead, see above.
 
 - http://help.github.com/create-a-repo/
 - https://www.assembla.com/code/org-agenda-files/git/repo/instructions?empty=true
-
-** Record changes to the repository
-
-#+begin_src sh
-touch README.org
-git add README.org
-git commit -m 'First commit'
-#+end_src
-
-** Push to the repository
-
-#+begin_src sh
-git remote add origin git...<working-copy>.git
-git push origin master
-#+end_src
 
 * Git rebase
 
