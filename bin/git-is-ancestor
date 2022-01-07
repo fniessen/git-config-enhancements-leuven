@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? git-is-ancestor , Time-stamp: <2021-10-22 Fri 16:15>
-#? Copyright (C) 2021 Fabrice Niessen
+#? git-is-ancestor, Time-stamp: 20220107.1449
+#? Copyright (C) 2013-2022 Fabrice Niessen
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.

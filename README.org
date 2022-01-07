@@ -1942,7 +1942,7 @@ List all *tags* that contain a specific commit ID:
 
 ** Check if one commit is an ancestor of another
 
-#+begin_src sh :tangle bin/git-is-ancestor
+#+begin_src sh :tangle bin/git-is-ancestor :noweb yes
 #!/usr/bin/env bash
 
 #? git-is-ancestor, Time-stamp: <<current-time()>>
