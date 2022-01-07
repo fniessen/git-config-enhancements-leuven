@@ -726,12 +726,17 @@ See
 
 * Aliases
 
+Aliases are an easy way to create shortcuts for commonly-typed commands, or to
+set defaults for commands.
+
+#+begin_src conf
+[alias]
+#+end_src
+
 If you forget your aliases and don't want to open =.gitconfig= just to check, type
 ~git alias~.
 
 #+begin_src conf
-[alias]
-
     # Usage: git alias
     # Print the list of Git aliases.
     alias = "!git config -l \
@@ -1060,7 +1065,7 @@ If you decide that the changes you have made since the last commit ought to be
 thrown away, the alias to use is ~unmodify~;
 
 #+begin_src conf
-    # Usage: git unmodify TREE_ISH
+    # Usage: git unmodify TREE_ISH...
     # Undo local changes in the working copy at or within TREE_ISH.
     unmodify = checkout --
     undelete = checkout --
@@ -1094,6 +1099,191 @@ area).
 #+end_src
 
 ~unstage~ is the opposite of ~git add~.
+
+** Selecting files
+
+#+begin_src conf
+    added = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
+#+end_src
+
+#+begin_src conf
+    modified = !git diff --name-only --diff-filter=M
+#+end_src
+
+List untracked *files ignored* by a =.gitignore= statement somewhere.  This one is
+a MUST have:
+
+#+begin_src conf
+    ignored = ls-files --others --ignored --exclude-standard
+#+end_src
+
+List untracked files.
+
+#+begin_src conf
+    # List all untracked files.
+    untracked = ls-files --others --exclude-standard
+#+end_src
+
+#+begin_src conf
+    # List all tracked files.
+    tracked = ls-files -t
+#+end_src
+
+#+begin_src conf
+    # Usage: git deleted
+    # List files deleted in the working tree.
+    deleted = ls-files -d
+#+end_src
+
+How to restore a deleted file in a Git repository?
+
+: git deleted | xargs git checkout --
+
+#+begin_src conf
+    # List staged added, modified or deleted files.
+    staged = "!git status --porcelain -uno | grep -P '^[ADM]' | awk '{ print $2 }'"
+#+end_src
+
+*** Tell if a file is being tracked
+
+#+begin_src conf
+    is-tracked1 = "!f() { \
+            TRACKED=$(git ls-files $1); \
+            if [ -z \"$TRACKED\" ]; then \
+                echo 'File NOT tracked (or No such file)'; \
+            else \
+                echo 'File tracked'; \
+            fi; \
+        }; f"
+    is-tracked2 = "!f() { \
+            echo -n $1': '; \
+            if [ -f \"$1\" ]; then \
+                TRACKED=$(git ls-files $1); \
+                if [ -z \"$TRACKED\" ]; then \
+                    echo 'File NOT tracked'; \
+                else \
+                    echo 'File tracked'; \
+                fi; \
+            else \
+                echo 'No such file!'; \
+            fi; \
+        }; f"
+# does not work!?
+#+end_src
+
+#+begin_note
+~[[~ has fewer surprises and is generally safer to use. But it is not portable --
+it's a *Bashism*, POSIX doesn't specify what it does.
+
+For example, you can do
+
+: [[ -e $b ]]
+
+to test whether a file exists.
+
+But with ~[~, you have to quote ~$b~, because it splits the argument and expands
+things like ~"a*"~ (where ~[[~ takes it literally).
+
+: [ -e "$b" ]
+
+That has also to do with how ~[~ can be an external program and receives its
+argument just normally like every other program (although it can also be
+a builtin, but then it still has not this special handling).
+#+end_note
+
+** Ignoring files
+
+*** Add ignore entry to the repository
+
+- Ignore exact filename: filename
+- Ignore everything beneath: folder
+- Ignore all files with this extension: pattern
+- Ignore custom pattern: pattern
+
+#+begin_src conf :tangle no
+# Add any directories, files, or patterns you don't want to be tracked by
+# version control
+#+end_src
+
+Quickly add a file or directory to =.gitignore=:
+
+#+begin_src conf
+    ignore = "!f() { \
+            echo \"$1\" >> \"${GIT_PREFIX}.gitignore\"; \
+        }; f"
+    # ignore=!([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore
+# XXX What is GIT_PREFIX?
+
+    # Ignore all untracked files by appending them to .gitignore:
+    ignore-untracked = "!git status \
+                | grep -P \"^\\t\" \
+                | grep -vF .gitignore \
+                | sed \"s/^\\t//\" \
+                >> \"${GIT_PREFIX}.gitignore\""
+#+end_src
+
+*Note that adding the .gitignore and the file specification will have no effect
+on files that are already being tracked.* If you're already tracking these,
+you'll have to stop tracking them. (Right-click on the folder or file and select
+Stop Tracking.) You'll then see them change from having a green/clean or
+amber/changed icon to a red/removed icon. On your next commit the files will be
+removed from the repository and thereafter appear with a blue/ignored
+icon. Another contributor asked why Ignore was disabled for particular files and
+I believe it was because he was trying to ignore a file that was already being
+tracked. You can only ignore a file that has a blue question mark icon.
+
+#+begin_src conf
+    # Fix .gitignore.
+    fix-gitignore = !git rm -r --cached . \
+                && git add . \
+                && git commit -m \"Fix .gitignore\"
+#+end_src
+
+*** ~assume-unchanged~ command
+
+Ignore/unignore changes to *tracked file(s)* without =.gitignore=:
+
+#+begin_src conf
+    # Ignore files only locally.
+    skip = update-index --assume-unchanged
+    unskip = update-index --no-assume-unchanged
+#+end_src
+
+XXX Have a look at Git lock = skip-worktree
+
+It has to be configured for each project member individually.
+
+#+begin_warning
+As stated in [[http://stackoverflow.com/questions/23097368/git-ignore-vs-exclude-vs-assume-unchanged][git ignore vs. exclude vs. assume-unchanged]],
+~git-update-index --assume-unchanged~ was never meant to ignore changes to tracked
+files (*only to spare some stats*).  So do not suggest it as a means to achieve
+that.
+#+end_warning
+
+Skip all:
+
+#+begin_src conf
+    skip-all = "!git status -s \
+                | awk {'print $2'} \
+                | xargs git skip"
+#+end_src
+
+Unskip all the skipped files:
+
+#+begin_src conf
+    unskip-all = "!git skipped \
+                | xargs git update-index --no-assume-unchanged"
+#+end_src
+
+List ignored files (*marked unchanged*):
+
+#+begin_src conf
+    skipped = "!git ls-files -v \
+                | grep '^h' \
+                | cut -c 3-"
+    skipped2-BAD-MAYBE = !git ls-files -v \
+                | grep '^[a-z]'
+#+end_src
 
 ** Clean
 
@@ -1166,6 +1356,14 @@ you want, use ~git clean-tree-unknown-ignored-dry-run~.
 
     # Alias to clean-tree-unknown-ignored-dry-run.
     purge-all-dry-run = !git clean-tree-unknown-ignored-dry-run
+#+end_src
+
+**** Delete only ignored files
+
+Remove (only) ignored files that are still on the repository:
+
+#+begin_src shell :tangle bin/git-delete-ignored :shebang #!/usr/bin/env bash
+git ignored | xargs rm
 #+end_src
 
 *** Hg shelve untracked files
@@ -3917,33 +4115,6 @@ List commits *showing changed files* (prettier and more concise version of
 #+end_src
 
 #+begin_src conf
-    ls-modified  = "!git status --porcelain -uno | awk 'match($1, /M/) {print $2}'"
-    ls-added     = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
-#+end_src
-
-#+begin_src conf
-    # Usage: git deleted
-    # List files deleted in the working tree.
-    deleted   = "!git status --porcelain -uno | awk 'match($1, /D/) {print $2}'"
-#+end_src
-
-#+begin_src conf
-    ls-renamed   = "!git status --porcelain -uno | awk 'match($1, /R/) {print $2}'"
-    ls-copied    = "!git status --porcelain -uno | awk 'match($1, /C/) {print $2}'"
-    ls-updated   = "!git status --porcelain -uno | awk 'match($1, /U/) {print $2}'"
-    ls-staged    = "!git status --porcelain -uno | grep -P '^[MA]' | awk '{ print $2 }'"
-#+end_src
-
-#+begin_src conf
-    ls-del  = ls-files -d
-    ls-mod  = ls-files -m   # This will include deleted files also.
-    ls-new  = ls-files --exclude-standard -o
-    lsfiles = ls-files --exclude-per-directory=.gitignore \
-                     --exclude-from=.git/info/exclude \
-                     -v -d -o -m -s -u
-#+end_src
-
-#+begin_src conf
     # Usage: git last
     # Return the last commit on the current branch.
     last = log -1 --stat
@@ -3959,7 +4130,7 @@ List commits *showing changed files* (prettier and more concise version of
     #     }; f"
 #+end_src
 
-XXX More information with lastn2 (for file renames), but missing newline after
+TODO: More information with lastn2 (for file renames), but missing newline after
 merge commits...
 
 *** Show the commit history of a file
@@ -4074,153 +4245,6 @@ moved or copied the lines.
     praise = blame -w
     archeology = blame -w -C -n
     whodoikill = blame -w -C -n
-#+end_src
-
-** Ignoring files
-
-*** List untracked files
-
-Tell if a file is being tracked:
-
-#+begin_src conf
-    # List all tracked files.
-    ls-tracked = ls-files -t
-
-    tracked1 = "!f() { TRACKED=$(git ls-files $1); if [ -z \"$TRACKED\" ]; then echo 'File NOT tracked (or No such file)'; else echo 'File tracked'; fi; }; f"
-
-    tracked2 = "!f() { echo -n $1': '; if [ -f \"$1\" ]; then TRACKED=$(git ls-files $1); if [ -z \"$TRACKED\" ]; then echo 'File NOT tracked'; else echo 'File tracked'; fi; else echo 'No such file!'; fi; }; f"
-# does not work!?
-#+end_src
-
-#+begin_note
-~[[~ has fewer surprises and is generally safer to use. But it is not portable --
-it's a *Bashism*, POSIX doesn't specify what it does.
-
-For example, you can do
-
-: [[ -e $b ]]
-
-to test whether a file exists.
-
-But with ~[~, you have to quote ~$b~, because it splits the argument and expands
-things like ~"a*"~ (where ~[[~ takes it literally).
-
-: [ -e "$b" ]
-
-That has also to do with how ~[~ can be an external program and receives its
-argument just normally like every other program (although it can also be
-a builtin, but then it still has not this special handling).
-#+end_note
-
-List untracked *files ignored* by a =.gitignore= statement somewhere.
-
-#+begin_src conf
-    # List all untracked files.
-    ls-untracked = ls-files --others
-#+end_src
-
-#+begin_src conf
-    # this one is a MUST have
-    ls-ign  = ls-files --exclude-standard -o -i
-    ls-ignored = ls-files --others --ignored --exclude-standard
-#+end_src
-
-Remove ignored files that are still on the repository:
-
-#+begin_src shell :tangle bin/git-delete-ignored :shebang #!/usr/bin/env bash
-git ls-ignored | xargs rm
-#+end_src
-
-*** Add ignore entry to the repository
-
-- Ignore exact filename: filename
-- Ignore everything beneath: folder
-- Ignore all files with this extension: pattern
-- Ignore custom pattern: pattern
-
-#+begin_src conf :tangle no
-# Add any directories, files, or patterns you don't want to be tracked by
-# version control
-#+end_src
-
-Quickly add a file or directory to =.gitignore=:
-
-#+begin_src conf
-    ignore = "!f() { \
-            echo \"$1\" >> \"${GIT_PREFIX}.gitignore\"; \
-        }; f"
-    # ignore=!([ ! -e .gitignore ] && touch .gitignore) | echo $1 >>.gitignore
-# XXX What is GIT_PREFIX?
-
-    # Ignore all untracked files by appending them to .gitignore:
-    ignore-untracked = "!git status \
-                | grep -P \"^\\t\" \
-                | grep -vF .gitignore \
-                | sed \"s/^\\t//\" \
-                >> \"${GIT_PREFIX}.gitignore\""
-#+end_src
-
-*Note that adding the .gitignore and the file specification will have no effect
-on files that are already being tracked.* If you're already tracking these,
-you'll have to stop tracking them. (Right-click on the folder or file and select
-Stop Tracking.) You'll then see them change from having a green/clean or
-amber/changed icon to a red/removed icon. On your next commit the files will be
-removed from the repository and thereafter appear with a blue/ignored
-icon. Another contributor asked why Ignore was disabled for particular files and
-I believe it was because he was trying to ignore a file that was already being
-tracked. You can only ignore a file that has a blue question mark icon.
-
-#+begin_src conf
-    # Fix .gitignore.
-    fix-gitignore = !git rm -r --cached . \
-                && git add . \
-                && git commit -m \"Fix .gitignore\"
-#+end_src
-
-*** ~assume-unchanged~ command
-
-Ignore/unignore changes to *tracked file(s)* without =.gitignore=:
-
-#+begin_src conf
-    # Ignore files only locally.
-    skip = update-index --assume-unchanged
-    unskip = update-index --no-assume-unchanged
-#+end_src
-
-XXX Have a look at Git lock = skip-worktree
-
-It has to be configured for each project member individually.
-
-#+begin_warning
-As stated in [[http://stackoverflow.com/questions/23097368/git-ignore-vs-exclude-vs-assume-unchanged][git ignore vs. exclude vs. assume-unchanged]],
-~git-update-index --assume-unchanged~ was never meant to ignore changes to tracked
-files (*only to spare some stats*).  So do not suggest it as a means to achieve
-that.
-#+end_warning
-
-Skip all:
-
-#+begin_src conf
-    skip-all = "!git status -s \
-                | awk {'print $2'} \
-                | xargs git skip"
-#+end_src
-
-Unskip all the skipped files:
-
-#+begin_src conf
-    unskip-all = "!git skipped \
-                | xargs git update-index --no-assume-unchanged"
-#+end_src
-
-List ignored files (*marked unchanged*):
-
-#+begin_src conf
-    skipped = "!git ls-files -v \
-                | grep '^h' \
-                | cut -c 3-"
-    skipped2-BAD-MAYBE = !git ls-files -v \
-                | grep '^[a-z]'
 #+end_src
 
 ** Merge
