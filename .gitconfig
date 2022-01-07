@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20220107.1220
+# .gitconfig, Time-stamp: 20220107.1230
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -368,20 +368,10 @@
     # Alias to clean-tree-unknown-ignored-dry-run.
     purge-all-dry-run = !git clean-tree-unknown-ignored-dry-run
 
-    spush = stash push
+    stash-push = stash push
 
-    # Like sapply but shows it only.
-    sshow = "!f() { \
-            git stash show stash^{/$@} -p; \
-        }; f"
-
-    # Find stash with name like text.
-    sapply = "!f() { \
-            git stash apply stash^{/$@}; \
-        }; f"
-
-    # Like sapply but pops it off.
-    spop = "!f() { \
+    # Pop stash off with name like text.
+    stash-pop = "!f() { \
             git stash pop stash@{$(git stash-id $@)}; \
         }; f"
 
@@ -430,17 +420,27 @@
     # unshelving.
     unstash-preview = stash show -p
 
-    sshow = "!f() { \
+    # Show only stash with name like text.
+    stash-show = "!f() { \
+            git stash show stash^{/$@} -p; \
+        }; f"
+
+    stash-show = "!f() { \
             git stash show stash^{/$*} -p; \
         }; f"
 
-    sshno = stash show --name-only
+    stash-shno = stash show --name-only
 
     # Usage: git unstash-keep [STASH_ID]
     # Apply changes but don't delete them.
     unstash-keep = stash apply
 
-    sapply = "!f() { \
+    # Find stash with name like text.
+    stash-apply = "!f() { \
+            git stash apply stash^{/$@}; \
+        }; f"
+
+    stash-apply = "!f() { \
             git stash apply stash^{/$*}; \
         }; f"
 

@@ -1366,13 +1366,13 @@ Remove (only) ignored files that are still on the repository:
 git ignored | xargs rm
 #+end_src
 
-*** Hg shelve untracked files
+**** Hg shelve untracked files
 
-*** Hg ignore untracked files
+**** Hg ignore untracked files
 
-*** Hg remove untracked files
+**** Hg remove untracked files
 
-*** Forget all missing files
+**** Forget all missing files
 
 forget = select files that have been deleted
 https://stackoverflow.com/questions/2412239/how-to-do-mercurials-hg-remove-for-all-missing-files
@@ -1469,22 +1469,12 @@ This command is useful in saving all changes not ready to be committed and the
 user wants to have an updated repository.
 
 #+begin_src conf
-    spush = stash push
+    stash-push = stash push
 #+end_src
 
 #+begin_src conf
-    # Like sapply but shows it only.
-    sshow = "!f() { \
-            git stash show stash^{/$@} -p; \
-        }; f"
-
-    # Find stash with name like text.
-    sapply = "!f() { \
-            git stash apply stash^{/$@}; \
-        }; f"
-
-    # Like sapply but pops it off.
-    spop = "!f() { \
+    # Pop stash off with name like text.
+    stash-pop = "!f() { \
             git stash pop stash@{$(git stash-id $@)}; \
         }; f"
 
@@ -1557,7 +1547,12 @@ user wants to have an updated repository.
 https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
 
 #+begin_src conf
-    sshow = "!f() { \
+    # Show only stash with name like text.
+    stash-show = "!f() { \
+            git stash show stash^{/$@} -p; \
+        }; f"
+
+    stash-show = "!f() { \
             git stash show stash^{/$*} -p; \
         }; f"
 #+end_src
@@ -1577,7 +1572,7 @@ It helped me a lot in the past (cleaning stashes stack).
 *** Show name-only
 
 #+begin_src conf
-    sshno = stash show --name-only
+    stash-shno = stash show --name-only
 #+end_src
 
 *** Apply the stash only, don't delete it from the stash list
@@ -1595,7 +1590,12 @@ Git's other branch merging tools to put things back they way you want them.
 https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
 
 #+begin_src conf
-    sapply = "!f() { \
+    # Find stash with name like text.
+    stash-apply = "!f() { \
+            git stash apply stash^{/$@}; \
+        }; f"
+
+    stash-apply = "!f() { \
             git stash apply stash^{/$*}; \
         }; f"
 #+end_src
