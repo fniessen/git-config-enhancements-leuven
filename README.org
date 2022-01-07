@@ -1522,10 +1522,10 @@ user wants to have an updated repository.
                           && echo $HASH \
                           | xargs git rev-list --since=${1:-1day} -1; \
                   done \
-                | xargs -L 1 git log --format=%at:%h -1 \
+                | xargs -L 1 git log -1 --format=%at:%h \
                 | sort \
                 | cut -f2 -d: \
-                | xargs -L 1 git log --graph --format='%Cblue%h %Cgreen(%ar) %Creset%s' -3; \
+                | xargs -L 1 git log -3 --format='%Cblue%h %Cgreen(%ar) %Creset%s' --graph; \
         }; f"
 #+end_src
 
@@ -2078,7 +2078,7 @@ use:
 To find /commit/ that has *both* line matching first and line matching second
 somewhere, use the *AND* semantic:
 
-: git log --all-match --grep=FOO --grep=BAR
+: git log --grep=FOO --grep=BAR --all-match
 
 Show the *last commit* whose *message matches a regexp*:
 
@@ -2095,7 +2095,7 @@ Show the *last commit* whose *message matches a regexp*:
     # Usage: git search-for-author [PATTERN]
     # Show the log for an author (or my own user email).
     search-for-author = "!f() { \
-            git log -i --no-merges --all --author=${1-$(git config --get user.email)}; \
+            git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
         }; f"
 #+end_src
 
@@ -2134,7 +2134,7 @@ In other words, to find the following commit:
 you *need to search on 'CLOSED'*.  Searching on 'COMPLETED-V' would not bring back
 that commit!
 
-: git log --all -S "foo" --since="1 week ago"
+: git log --since="1 week ago" --all -S "foo"
 
 #+begin_src conf
     whatwhen = log -p -S
@@ -2165,8 +2165,8 @@ String contained in added/removed lines from Commit contents (Diff)
 With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
 any *line* that was added, removed, or changed.
 
-: git log --all -G "foo" --since="1 week ago"
-: git log --all -G "foo" --full-history --since="1 week ago"
+: git log --since="1 week ago" --all -G "foo"
+: git log --since="1 week ago" --all --full-history -G "foo"
 
 ** Open a repository in a web browser
 
@@ -2446,7 +2446,7 @@ think you are smart.
     # Bundle the last N commits into a single commit.
     squash = "!f() { \
             git reset --soft HEAD~$1 \
-                && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; \
+                && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
         }; f"
 #+end_src
 
@@ -3167,6 +3167,8 @@ current branch and the specified branch.
         }; f"
 #+end_src
 
+TODO: Remove hard-coded master
+
 *How to find all the commits made only on a specific branch?*  Assuming that your
 branch was created off of ~master~, then /while on the specific branch/ (that is,
 you have that branch checked out):
@@ -3294,6 +3296,7 @@ https://fossil-scm.org/home/help?cmd=leaves
 Directed Acyclic Graph:
 
 #+begin_src conf
+    # Draw Git revisions graph with graphviz.
     graphviz = "!f() { \
             echo 'digraph git {' ; \
             git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
@@ -3325,7 +3328,7 @@ The ~--~ signals the /end of options/, that the rest of the parameters are limit
 #+end_note
 
 #+begin_src conf
-    whois = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\n\" --author=\"$1\"' -"
+    whois = "!sh -c 'git log -1 --author=\"$1\" -i --pretty=\"format:%an <%ae>\n\"' -"
 #+end_src
 
 * Pull requests
@@ -3562,7 +3565,8 @@ relevant: https://bitbucket.org/tpettersen/git-guilt
 Related pull request:
 
 #+begin_src conf
-    related-pr-of-commit = "!sh -c 'git log --merges --ancestry-path $1..master | tail -n 1 ' -"
+    related-pr-of-commit = "!sh -c 'git log --merges --ancestry-path $1..master \
+                | tail -n 1 ' -"
 #+end_src
 
 Example:
@@ -4061,18 +4065,17 @@ I don't need to use the undo commands.
     precommit = diff --cached --diff-algorithm=minimal -w
 #+end_src
 
-#+begin_src conf
-    # Show log of new commits after you fetched, with stats, excluding merges
-    log-fresh = log ORIG_HEAD.. --stat --no-merges
-#+end_src
-
 *** When was this file last updated
 
 #+begin_src conf
     # When was this file last updated, on each local branch.
-    wwflu = "!f() { for b in $(git rev-parse --symbolic --branches); do \
-                        echo -e $(git log --format=%at:%ar -1 $b -- \"$1\")\\\\t$b; \
-                    done | sort -r | cut -f2 -d:; }; f"
+    wwflu = "!f() { \
+            for BRANCH_NAME in $(git rev-parse --symbolic --branches); do \
+                echo -e $(git log -1 --format=%at:%ar $BRANCH_NAME -- \"$1\")\\\\t$BRANCH_NAME; \
+            done \
+                | sort -r \
+                | cut -f2 -d:; \
+        }; f"
 #+end_src
 
 *** Add only modified changes (and ignore untracked files)
@@ -4254,7 +4257,7 @@ moved or copied the lines.
     # Not so useful in itself, but used by other aliases.
     # Thanks to Rob Miller for the merge-span-* aliaes.
     merge-span = "!f() { \
-            echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); \
+            echo $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f1)$1$(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f2); \
         }; f"
 
     # Find the commits that were introduced by a merge
@@ -4309,6 +4312,11 @@ What was going on, while you were away?
 
     # Alias of 'incoming'.
     in = !git incoming
+#+end_src
+
+#+begin_src conf
+    # Show log of new commits after you fetched, with stats, excluding merges
+    log-fresh = log --no-merges --stat ORIG_HEAD..
 #+end_src
 
 #+begin_tip
@@ -5166,9 +5174,10 @@ https://dev.to/chrissiemhrk/git-commit-message-5e21
 https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
 
 #+begin_src conf
+    # Usage: git changelog [FIRST_TAG_NAME] [LAST_TAG_NAME] XXX
     # Detailed list of changes.
     changelog1 = "!f() { \
-            git log --no-merges ${1-$(git last-tag)}..HEAD; \
+            git log --no-merges ${1-$(git last-tag)}..$2; \
         }; f"
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
@@ -5185,10 +5194,6 @@ de savoir ce qu'embarquera la « prochaine release » de mon projet.
 #+end_src
 
 XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries on mcpflow repo
-
-# Use it like this:
-#
-# : git changelog FIRST_TAG_NAME LAST_TAG_NAME
 
 See also
 - https://github.com/github-changelog-generator/github-changelog-generator
