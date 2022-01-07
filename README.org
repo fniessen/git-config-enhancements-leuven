@@ -1362,9 +1362,7 @@ you want, use ~git clean-tree-unknown-ignored-dry-run~.
 
 Remove (only) ignored files that are still on the repository:
 
-#+begin_src shell :tangle bin/git-delete-ignored :shebang #!/usr/bin/env bash
-git ignored | xargs rm
-#+end_src
+: git ignored | xargs rm
 
 **** Hg shelve untracked files
 
