@@ -2015,25 +2015,62 @@ of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-    findc1 = "log -i --all --grep"
-    findc2 = "!f() { \
-            git log --grep=$1 -i --all; \
+    # Error with 2 search strings!!!
+    search-for-commits-all-1 = "log -i --all --grep"
+#+end_src
+
+You may want to add history to search through the whole repository, by adding
+~rev-list~ to your ~git log~:
+
+#+begin_src conf
+    # Only one search string is read!
+    search-for-commits-all-2 = "!f() { \
+            git log --grep \"$1\" -i $(git rev-list --all); \
         }; f"
 #+end_src
 
-#+begin_tip
-If you only add options to one single ~git~ command, there is no benefit to the
-function wrapper.  On the contrary, you can't add other options.
-#+end_tip
+# #+begin_tip
+# If you only add options to one single ~git~ command, there is no benefit to the
+# function wrapper.  On the contrary, you can't add other options.
+# #+end_tip
+
+To find commits that match *either* of patterns (implicit *OR* semantic), you can
+use:
+
+: git log --grep=FOO --grep=BAR
+
+Here's the alias which simply loops over each argument and calls ~git
+log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
 
 #+begin_src conf
-    # Search for commits (Filter by commit message).
-    search-for-commits = "!f() { \
-            STR=\"git log --all-match\"; \
-            for VAR in \"$@\"; do \
-                STR=\"$STR --grep '$VAR'\"; \
+    # Usage: git search-for-commits-bitbucket-or PATTERN...
+    # Search for commits (Filter by message).
+    search-for-commits-or-bitbucket = "!f() { \
+            for l in \"$@\"; do \
+                git log --grep \"$l\" -i --color=always; \
+                printf \"\\n\"; \
+            done | sort -r; \
+        }; f"
+    # XXX Wrong sorting if all on the same date (wth "testing failure" on PFlow)
+    # XXX Add all, date short...
+#+end_src
+
+: testing failure
+
+To find /commit/ that has *both* line matching first and line matching second
+somewhere, use the *AND* semantic:
+
+: git log --grep=FOO --grep=BAR --all-match
+
+#+begin_src conf
+    # Usage: git search-for-commits-gitlab-and PATTERN...
+    # Search for commits (Filter by message).
+    search-for-commits-and-gitlab = "!f() { \
+            CMD=\"git log --all-match -i\"; \
+            for PATTERN in \"$@\"; do \
+                CMD=\"$CMD --grep '$PATTERN'\"; \
             done; \
-            eval $STR; \
+            eval $CMD; \
         }; f"
 #+end_src
 
@@ -2041,42 +2078,7 @@ function wrapper.  On the contrary, you can't add other options.
 :     https://api.github.com/search/commits\?q\=repo:fniessen/org-html-themes+local+css \
 :     | jq '.items[] | {commit}'
 
-Here's the alias which simply loops over each argument and calls ~git
-log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
-
-#+begin_src conf
-    search = "!f() { \
-            for l in \"$@\"; do \
-                git log --grep \"$l\"; \
-            done; \
-        }; f"
-# XXX Add i, all, date short...
-#+end_src
-
-
-
-
-
-You may want to add history to search through the whole repository, by adding
-~rev-list~ to your ~git log~:
-
-#+begin_src conf
-    search2 = "!f() { \
-            git log --grep \"$1\" $(git rev-list --all); \
-        }; f"
-#+end_src
-
 Add ~--name-status~ to show only names and status of *changed files*.
-
-To find commits that match *either* of patterns (implicit *OR* semantic), you can
-use:
-
-: git log --grep=FOO --grep=BAR
-
-To find /commit/ that has *both* line matching first and line matching second
-somewhere, use the *AND* semantic:
-
-: git log --grep=FOO --grep=BAR --all-match
 
 Show the *last commit* whose *message matches a regexp*:
 

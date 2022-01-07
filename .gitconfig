@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20220107.1442
+# .gitconfig, Time-stamp: 20220107.1651
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -519,29 +519,33 @@
     # Check if one commit is an ancestor of another.
     is-ancestor = !$HOME/bin/git-is-ancestor
 
-    findc1 = "log -i --all --grep"
-    findc2 = "!f() { \
-            git log --grep=$1 -i --all; \
+    # Error with 2 search strings!!!
+    search-for-commits-all-1 = "log -i --all --grep"
+
+    # Only one search string is read!
+    search-for-commits-all-2 = "!f() { \
+            git log --grep \"$1\" -i $(git rev-list --all); \
         }; f"
 
-    # Search for commits (Filter by commit message).
-    search-for-commits = "!f() { \
-            STR=\"git log --all-match\"; \
-            for VAR in \"$@\"; do \
-                STR=\"$STR --grep '$VAR'\"; \
-            done; \
-            eval $STR; \
-        }; f"
-
-    search = "!f() { \
+    # Usage: git search-for-commits-bitbucket-or PATTERN...
+    # Search for commits (Filter by message).
+    search-for-commits-or-bitbucket = "!f() { \
             for l in \"$@\"; do \
-                git log --grep \"$l\"; \
-            done; \
+                git log --grep \"$l\" -i --color=always; \
+                printf \"\\n\"; \
+            done | sort -r; \
         }; f"
-# XXX Add i, all, date short...
+    # XXX Wrong sorting if all on the same date (wth "testing failure" on PFlow)
+    # XXX Add all, date short...
 
-    search2 = "!f() { \
-            git log --grep \"$1\" $(git rev-list --all); \
+    # Usage: git search-for-commits-gitlab-and PATTERN...
+    # Search for commits (Filter by message).
+    search-for-commits-and-gitlab = "!f() { \
+            CMD=\"git log --all-match -i\"; \
+            for PATTERN in \"$@\"; do \
+                CMD=\"$CMD --grep '$PATTERN'\"; \
+            done; \
+            eval $CMD; \
         }; f"
 
     # Usage: git search-for-author [PATTERN]
