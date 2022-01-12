@@ -1052,7 +1052,7 @@ See also https://askubuntu.com/questions/1019678/find-multiple-word-patterns-in-
 See https://docs.gitlab.com/ee/topics/git/numerous_undo_possibilities_in_git/
 and http://gitimmersion.com/lab_14.html.
 
-**** Before you staged (in unstaged state)
+*** Before you staged (in unstaged state)
 
 *Undo* the local changes *in the working tree*: roll a file back to its last
 committed version, removing all the changes detected by Git.
@@ -1080,7 +1080,7 @@ command).
 
 When you grab a file from a previous time, it sits *in your index*, modified.
 
-**** Before you committed (in staged state)
+*** Before you committed (in staged state)
 
 If you accidentally include a file in the next commit (using ~git add~), you can
 use the ~unstage~ alias to tell Git to forget about it (remove it from the staging
@@ -1287,7 +1287,7 @@ List ignored files (*marked unchanged*):
 
 ** Clean
 
-**** Delete all untracked files
+*** Delete all untracked files
 
 To delete all files (and directories) unknown to Git, you can run ~git
 clean-tree-unknown~.  Only unknown files, not ignored files, are deleted.
@@ -1325,7 +1325,7 @@ case), you can do:
 : git commit -a -m "Saving my work, just in case"
 : git branch my-saved-work
 
-**** Delete all untracked files and also ignored files
+*** Delete all untracked files and also ignored files
 
 *PLAY WITH FIRE VERSION* which will wipe out all the *ignored and untracked* files
 and directories:
@@ -1358,19 +1358,19 @@ you want, use ~git clean-tree-unknown-ignored-dry-run~.
     purge-all-dry-run = !git clean-tree-unknown-ignored-dry-run
 #+end_src
 
-**** Delete only ignored files
+*** Delete only ignored files
 
 Remove (only) ignored files that are still on the repository:
 
 : git ignored | xargs rm
 
-**** Hg shelve untracked files
+*** Hg shelve untracked files
 
-**** Hg ignore untracked files
+*** Hg ignore untracked files
 
-**** Hg remove untracked files
+*** Hg remove untracked files
 
-**** Forget all missing files
+*** Forget all missing files
 
 forget = select files that have been deleted
 https://stackoverflow.com/questions/2412239/how-to-do-mercurials-hg-remove-for-all-missing-files
