@@ -979,12 +979,12 @@ https://help.github.com/en/github/searching-for-information-on-github/searching-
 *** Search code for exact matches
 
 #+begin_src conf
+    # Usage: git search-for-code PATTERN
+    # Search repository for lines matching a given pattern.
     search-for-code = "grep -i --line-number --break --heading -C 1"
 
-# ack = '-c color.grep.linenumber="bold yellow"
-#     -c color.grep.filename="bold green"
-#     -c color.grep.match="reverse yellow"
-#     grep --break --heading --line-number'
+    # Alias of 'search-for-code'.
+    ack = !git search-for-code
 #+end_src
 
 Find all instances of the specified string in code files *with a certain file

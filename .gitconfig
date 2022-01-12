@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20220107.1651
+# .gitconfig, Time-stamp: 20220112.1626
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -226,12 +226,12 @@
     # Alias of 'search-for-files-all'.
     find-files-all = !git search-for-files-all
 
+    # Usage: git search-for-code PATTERN
+    # Search repository for lines matching a given pattern.
     search-for-code = "grep -i --line-number --break --heading -C 1"
 
-# ack = '-c color.grep.linenumber="bold yellow"
-#     -c color.grep.filename="bold green"
-#     -c color.grep.match="reverse yellow"
-#     grep --break --heading --line-number'
+    # Alias of 'search-for-code'.
+    ack = !git search-for-code
 
     search-for-code-in-extension = "XXX"
 
