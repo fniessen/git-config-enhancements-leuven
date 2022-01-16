@@ -3939,16 +3939,6 @@ Define:
 so that you can do things like ~git exec make~.  This works because Shell aliases
 are always executed in the top-level directory.
 
-#+begin_src conf
-    # Show the diff between the latest commit and the current state
-    d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
-
-    # `git di $number' shows the diff between the state `$number' commits ago and the current state
-    di = "!f() { git diff --patch-with-stat HEAD~$1; }; \
-           git diff-index --quiet HEAD -- || clear; \
-           f"
-#+end_src
-
 Clean up your commits before publishing.  Before you push your commits to the
 repository, it's good to revise them.  You can run the git interactive rebase to
 squash your commits or modify commit messages.  The goal is to publish only
@@ -3995,28 +3985,31 @@ Staging for commit is typically done by ~git add~.
 
 ** SHOW - View your changes
 
-*** Changes between the working tree and the index (staged for the next commit)
-
-See also ~-b~ (~--ignore-space-change~): Ignore changes in amount of
-whitespace. This ignores whitespace at line end, and considers all other
-sequences of one or more whitespace characters to be equivalent.
-
-# permet d'ignorer les différences d'espaces et d'indentations
-git diff -b
-# permet d'ignorer les différences d'espaces et indentations au sein de la même ligne, mais indique les lignes vides ajoutées ou supprimées
-git diff -w
-
 #+begin_src conf
-    # Ignore whitespace changes.
-    wdiff = diff -b
-    wdiff = diff --word-diff
+    # Show the diff between the latest commit and the current state
+    d = !"git diff-index --quiet HEAD -- || clear; \
+            git --no-pager diff --patch-with-stat"
 
-    dw = diff --word-diff
+    # `git di $number' shows the diff between the state `$number' commits ago and the current state
+    di = "!f() { git diff --patch-with-stat HEAD~$1; }; \
+            git diff-index --quiet HEAD -- || clear; \
+            f"
 #+end_src
 
+*** Changes between the working tree and the index (staged for the next commit)
+
 #+begin_src conf
-    # Configure git-diff to produce the absolutely most minimal diff possible.
-    wdiff = diff -w --word-diff-regex=. --color-words -U0
+    # Ignore changes in amount of whitespace. This ignores whitespace at line
+    # end, and considers all other sequences of one or more whitespace
+    # characters to be equivalent.
+    # (Permet d'ignorer les différences d'espaces et d'indentations.)
+    wdiff1 = diff -b
+
+    # Ignore whitespace when comparing lines. This ignores differences even if
+    # one line has whitespace where the other line has none.
+    # (Permet d'ignorer les différences d'espaces et indentations au sein de la
+    # même ligne, mais indique les lignes vides ajoutées ou supprimées.)
+    wdiff2 = diff -w
 #+end_src
 
 #+begin_src conf
@@ -4025,9 +4018,11 @@ git diff -w
 
     # Diff word-wise.
     dw = diff --color-words
+#+end_src
 
-    # Diff character-wise.
-    dt = diff --word-diff-regex=.
+#+begin_src conf
+    # Configure git-diff to produce the absolutely most minimal diff possible.
+    dw-min = diff -w --word-diff-regex=. --color-words -U0
 #+end_src
 
 *** Changes between the working tree and the latest commit (HEAD)
@@ -4038,22 +4033,15 @@ git diff -w
 
 *** Changes between the index (staged for the next commit) and the latest commit (HEAD)
 
-Just before committing the *staged* changes, check what your commit changes:
+Just before committing the *staged* changes (about to be committed), check what
+your commit changes:
 
 #+begin_src conf
-    # Review staged changes (about to be committed).
-    dc = diff --cached
-#+end_src
+    # Diff staged line-wise.
+    df-staged = diff --cached
 
-#+begin_src conf
-    # Diff staged line-wise
-    ds = diff --cached
-
-    # Diff staged word-wise
-    dws = diff --color-words --cached
-
-    # Diff staged character-wise
-    dts = diff --word-diff-regex=. --cached
+    # Diff staged word-wise.
+    dw-staged = diff --color-words --cached
 #+end_src
 
 *** Precommit
