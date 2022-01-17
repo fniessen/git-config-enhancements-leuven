@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20220116.1730
+# .gitconfig, Time-stamp: 20220117.1056
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -1081,17 +1081,9 @@ deploy-prod =
             git diff-index --quiet HEAD -- || clear; \
             f"
 
-    # Ignore changes in amount of whitespace. This ignores whitespace at line
-    # end, and considers all other sequences of one or more whitespace
-    # characters to be equivalent.
-    # (Permet d'ignorer les différences d'espaces et d'indentations.)
-    wdiff1 = diff -b
-
-    # Ignore whitespace when comparing lines. This ignores differences even if
-    # one line has whitespace where the other line has none.
-    # (Permet d'ignorer les différences d'espaces et indentations au sein de la
-    # même ligne, mais indique les lignes vides ajoutées ou supprimées.)
-    wdiff2 = diff -w
+    # Ignore whitespace when comparing the same lines. This indicates empty
+    # lines added or deleted.
+    wdiff = diff -w
 
     # Diff line-wise.
     df = diff

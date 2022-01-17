@@ -3999,17 +3999,9 @@ Staging for commit is typically done by ~git add~.
 *** Changes between the working tree and the index (staged for the next commit)
 
 #+begin_src conf
-    # Ignore changes in amount of whitespace. This ignores whitespace at line
-    # end, and considers all other sequences of one or more whitespace
-    # characters to be equivalent.
-    # (Permet d'ignorer les différences d'espaces et d'indentations.)
-    wdiff1 = diff -b
-
-    # Ignore whitespace when comparing lines. This ignores differences even if
-    # one line has whitespace where the other line has none.
-    # (Permet d'ignorer les différences d'espaces et indentations au sein de la
-    # même ligne, mais indique les lignes vides ajoutées ou supprimées.)
-    wdiff2 = diff -w
+    # Ignore whitespace when comparing the same lines. This indicates empty
+    # lines added or deleted.
+    wdiff = diff -w
 #+end_src
 
 #+begin_src conf
