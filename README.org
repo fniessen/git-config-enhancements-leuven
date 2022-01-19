@@ -4000,7 +4000,7 @@ Staging for commit is typically done by ~git add~.
 #+begin_src conf
     # Ignore whitespace when comparing the same lines. This indicates empty
     # lines added or deleted.
-    wdiff = diff -w
+    diff-ignore-whitespace = diff -w
 #+end_src
 
 #+begin_src conf
@@ -4014,6 +4014,7 @@ Staging for commit is typically done by ~git add~.
 #+begin_src conf
     # Configure git-diff to produce the absolutely most minimal diff possible.
     dw-min = diff -w --word-diff-regex=. --color-words -U0
+    precommit0 = diff --diff-algorithm=minimal -w
 #+end_src
 
 *** Changes between the working tree and the latest commit (HEAD)
@@ -4041,7 +4042,7 @@ This is a key part of my workflow. I run this before every commit to make sure
 I don't need to use the undo commands.
 
 #+begin_src conf
-    precommit = diff --cached --diff-algorithm=minimal -w
+    precommit = diff --diff-algorithm=minimal -w --cached
 #+end_src
 
 *** When was this file last updated
@@ -4071,7 +4072,7 @@ You can do ~git add -u~ so that it will *stage* the modified and deleted files.
 You can also do ~git commit -a~ to *commit* only the modified and deleted files.
 
 #+begin_src conf
-    wip = commit -am "WIP"
+    wip = commit -a -m "WIP"
 #+end_src
 
 ** SHOW - View the commit history
@@ -4226,7 +4227,6 @@ moved or copied the lines.
 #+begin_src conf
     praise = blame -w
     archeology = blame -w -C -n
-    whodoikill = blame -w -C -n
 #+end_src
 
 ** Merge
@@ -4380,7 +4380,8 @@ XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
     up = !git fetch && git rebase --autostash FETCH_HEAD
     up= "!git fetch $(git origin) && git branch -v -a"
 
-    f = !git fetch --all && git rebase $(git origin)/master
+    f = !git fetch --all \
+            && git rebase $(git origin)/master
 #+end_src
 
 See https://www.praqma.com/stories/git-autostash/.
@@ -4766,7 +4767,9 @@ Then, add the conflicted files.
 
 #+begin_src conf
     # Create a feature branch.
-    feature = "!f() { git create-branch feature/$1 develop; }; f"
+    feature = "!f() { \
+            git create-branch feature/$1 develop; \
+        }; f"
     # XXX or feature-start?
 
     # Incorporate a finished feature on develop.
