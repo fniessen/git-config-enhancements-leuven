@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20220117.1056
+# .gitconfig, Time-stamp: 20220119.0935
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -226,16 +226,15 @@
     # Alias of 'search-for-files-all'.
     find-files-all = !git search-for-files-all
 
-    # Usage: git search-for-code PATTERN
-    # Search repository for lines matching a given pattern.
-    search-for-code = "grep -i --line-number --break --heading -C 1"
+    # Usage: git search-for-code PATTERN [TREE]
+    # Search repository (or the given tree) for lines matching a given pattern.
+    # `-I' = Don't match the pattern in binary files.
+    search-for-code = "grep -i -I --line-number --break --heading -C 1"
 
     # Alias of 'search-for-code'.
     ack = !git search-for-code
 
     search-for-code-in-extension = "XXX"
-
-    search-for-code-in-path = "XXX"
 
     # In all commits, not in all branches!!! Lots of duplicates!!!
     grep-all = "!f() { \
@@ -243,11 +242,9 @@
                 | xargs git grep $1; \
         }; f"
 
-    # `-I' = Don't match the pattern in binary files.
-    g = "grep -I"
-
-    # Name only.
-    gno = "grep -I --files-with-matches"
+    # Usage: git gno PATTERN [TREE]
+    # Show only the names of files that contain matches.
+    gno = "grep -i -I --name-only"
 
     # Usage: git unmodify TREE_ISH...
     # Undo local changes in the working copy at or within TREE_ISH.
@@ -500,11 +497,11 @@
     # Usage: git where REV
     # Print only refs which contain the commit.
     where = for-each-ref --format='%(refname)' --contains
-    where2 = for-each-ref --format="%(refname:short)" --points-at HEAD refs/heads
-    where3 = "!f() { \
+    where2 = "!f() { \
             git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
                 | sort -r; \
         }; f"
+    where3 = for-each-ref --format="%(refname:short)" --points-at HEAD refs/heads
 
     # Find branches containing commit.
     branches-that-contain = branch -a --contains
