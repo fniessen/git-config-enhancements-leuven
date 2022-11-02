@@ -118,6 +118,22 @@ remote:
 
 ** Default Branch Name
 
+Using ~master~ as the name for the initial branch.
+
+#+begin_src conf
+[init]
+    defaultBranch = master
+#+end_src
+
+This default branch name is subject to change. To configure the initial branch
+name to use in all of your new repositories, which will suppress this warning,
+call:
+
+Names commonly chosen instead of ~master~ are ~main~, ~trunk~ and ~development~. The
+just-created branch can be renamed via:
+
+: git branch -m NAME
+
 ** External Merge Tool
 
 How to resolve merge conflicts in Git?  Try ~git mergetool~.
@@ -2046,7 +2062,7 @@ log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
     # Search for commits (Filter by message).
     search-for-commits-or-bitbucket = "!f() { \
             for l in \"$@\"; do \
-                git log --grep \"$l\" -i --color=always; \
+                git log --grep \"$l\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
                 printf \"\\n\"; \
             done | sort -r; \
         }; f"
@@ -3240,7 +3256,7 @@ Show all the changed files in a Git branch *since it was forked*:
 
 #+begin_src conf
     # Usage: git missing-files [COMMIT_ISH]
-    # Show the changed files between this and another branch
+    # Show the changed files between this and (the fork point from) another branch
     # Examples:
     #   git missing-files             list changed files between this and master
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
@@ -4047,16 +4063,24 @@ I don't need to use the undo commands.
 
 *** When was this file last updated
 
+Before using this, please *update all local branches*, checking out each branch in
+succession.
+
+See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches][Can "git pull --all" update all my local branches?]].
+
 #+begin_src conf
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
             for BRANCH_NAME in $(git rev-parse --symbolic --branches); do \
-                echo -e $(git log -1 --format=%at:%ar $BRANCH_NAME -- \"$1\")\\\\t$BRANCH_NAME; \
+                echo -e \"$(git log --decorate=no -1 \
+                                    --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
+                                    --color=always $BRANCH_NAME -- \"$1\")  On branch $(tput bold)$BRANCH_NAME$(tput sgr0)\"; \
             done \
-                | sort -r \
-                | cut -f2 -d:; \
+                | sort -r; \
         }; f"
 #+end_src
+
+:               | cut -f2 -d:; \
 
 *** Add only modified changes (and ignore untracked files)
 
@@ -4366,6 +4390,8 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
 #+end_warning
 
 #+begin_src conf
+    # Usage: git pull-autostash
+    # Create a temporary stash before pulling, and apply it after the pull.
     pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] \
                 && git pull \
                 || git stash push -m "autostash" \

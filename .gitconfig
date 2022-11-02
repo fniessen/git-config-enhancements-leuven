@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20220119.0953
+# .gitconfig, Time-stamp: 20221102.1443
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -10,6 +10,9 @@
 
 [fetch]
     prune = true
+
+[init]
+    defaultBranch = master
 
 [merge]
     conflictstyle = diff3
@@ -528,7 +531,7 @@
     # Search for commits (Filter by message).
     search-for-commits-or-bitbucket = "!f() { \
             for l in \"$@\"; do \
-                git log --grep \"$l\" -i --color=always; \
+                git log --grep \"$l\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
                 printf \"\\n\"; \
             done | sort -r; \
         }; f"
@@ -834,7 +837,7 @@ bclean = "!f() { \
     ancestor3 = !git merge-base --all $(git origin)/master $(git current-branch)
 
     # Usage: git missing-files [COMMIT_ISH]
-    # Show the changed files between this and another branch
+    # Show the changed files between this and (the fork point from) another branch
     # Examples:
     #   git missing-files             list changed files between this and master
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
@@ -1103,10 +1106,11 @@ deploy-prod =
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
             for BRANCH_NAME in $(git rev-parse --symbolic --branches); do \
-                echo -e $(git log -1 --format=%at:%ar $BRANCH_NAME -- \"$1\")\\\\t$BRANCH_NAME; \
+                echo -e \"$(git log --decorate=no -1 \
+                                    --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
+                                    --color=always $BRANCH_NAME -- \"$1\")  On branch $(tput bold)$BRANCH_NAME$(tput sgr0)\"; \
             done \
-                | sort -r \
-                | cut -f2 -d:; \
+                | sort -r; \
         }; f"
 
     stage-modified-removed-files = add -u
@@ -1234,6 +1238,8 @@ deploy-prod =
 
     # up = "!git stash && git pull && git stash pop"
 
+    # Usage: git pull-autostash
+    # Create a temporary stash before pulling, and apply it after the pull.
     pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] \
                 && git pull \
                 || git stash push -m "autostash" \
