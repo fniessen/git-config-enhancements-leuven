@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? git-is-ancestor, Time-stamp: 20220107.1449
-#? Copyright (C) 2013-2022 Fabrice Niessen
+#? git-is-ancestor, Time-stamp: 20221102.1443
+#? Copyright (C) 2013-2023 Fabrice Niessen
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -22,19 +22,19 @@
 ##? Example:
 ##?   git-is-ancestor 71031cec HEAD determine if current branch contains the commit
 
-command -v docopts > /dev/null 2>&1 || { echo >&2 "docopts not found"; exit 2; }
+command -v docopts > /dev/null 2>&1 || { printf >&2 'docopts not found\n'; exit 2; }
 help=$(grep "^##?" "$0" | cut -c 5-)
 version=$(grep "^#?"  "$0" | cut -c 4-)
 parsed="$(docopts -h "$help" -V "$version" : "$@")"
 eval "$parsed"
 
 if $(git merge-base --is-ancestor $COMMIT_1 $COMMIT_2); then
-    echo "$COMMIT_1 is an ancestor of $COMMIT_2"
+    printf '%s is an ancestor of %s\n' "$COMMIT_1" "$COMMIT_2"
     exit 0
 elif $(git merge-base --is-ancestor $COMMIT_2 $COMMIT_1); then
-    echo "$COMMIT_2 is an ancestor of $COMMIT_1"
+    printf '%s is an ancestor of %s\n' "$COMMIT_2" "$COMMIT_1"
     exit 0
 else
-    echo "$COMMIT_1 and $COMMIT_2 are not related"
+    printf '%s and %s are not related\n' "$COMMIT_1" "$COMMIT_2"
     exit 1
 fi
