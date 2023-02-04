@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Automate the process of converting a Git repository's remote URL from SSH to HTTPS.
+# Convert Git remote URL from SSH to HTTPS.
 
 SITE=github.com
 # SITE=bitbucket.org
