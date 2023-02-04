@@ -14,13 +14,12 @@ fi
 printf 'Searching at most 5 levels of directories...\n'
 
 # Handle directories with spaces in the find command.
-find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##' |
-    while IFS=$'\n' read -r repo; do
-        printf 'Updating repository %s:\n' "${bold}$repo${reset}"
-        git -C "$repo" remote update --prune # Delete old branches.
-        git -C "$repo" merge --ff-only "@{u}" # Only merge the current branch.
-        printf '\n'
-    done
+while IFS=$'\n' read -r repo_path; do
+    printf 'Updating repository %s:\n' "${bold}$repo_path${reset}"
+    git -C "$repo_path" remote update --prune # Delete old branches.
+    git -C "$repo_path" merge --ff-only "@{u}" # Only merge the current branch.
+    printf '\n'
+done < <(find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##')
 
 
 # See https://stackoverflow.com/questions/17099564/make-a-shell-script-to-update-3-git-repos
