@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # Push the changes in all Git repositories in the current directory
+#
 # Usage:
-#   update-all-repos.sh
+#   git-push-all-repos
 
 bold=$(tput bold)
 reset=$(tput sgr0)
