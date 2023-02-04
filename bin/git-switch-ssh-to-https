@@ -1,13 +1,34 @@
 #!/usr/bin/env bash
 
-# Convert Git remote URL from SSH to HTTPS.
+#? git-switch-ssh-to-https, Time-stamp: 20221102.1443
+#? Copyright (C) 2013-2023 Fabrice Niessen
+#?
+#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+#? This is free software: you are free to change and redistribute it.
+#? There is NO WARRANTY, to the extent permitted by law.
 
-# Define the site to use (GitHub or Bitbucket).  Default to GitHub if no site is
-# specified.
-SITE=${1-github.com}
+##? Usage: git-switch-ssh-to-https [options] [SITE] [REMOTE]
+##?
+##? Convert Git remote URL from SSH to HTTPS.
+##?
+##? Arguments:
+##?   SITE                          site to use.  Default to github.com if no site is specified.
+##?   REMOTE                        remote to use.  Default to origin if no remote is specified.
+##?
+##? Options:
+##?   -h, --help                    display this help and exit
+##?   -V, --version                 display version information and exit
 
-# Define the remote to use.  Default to origin if no remote is specified.
-REMOTE=${2-origin}
+# Check if docopts command is available.
+command -v docopts > /dev/null 2>&1 || { printf >&2 'Error: docopts command not found.\n'; exit 2; }
+
+help=$(grep "^##?" "$0" | cut -c 5-)
+version=$(grep "^#?"  "$0" | cut -c 4-)
+parsed="$(docopts -h "$help" -V "$version" : "$@")"
+eval "$parsed"
+
+SITE=${SITE:-"github.com"}
+REMOTE=${REMOTE:-"origin"}
 
 # Get the current remote URL.
 OLD_URL=$(git remote -v | awk -v REMOTE="$REMOTE" '$1==REMOTE && $3=="(push)" {print $2}')
