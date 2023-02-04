@@ -18,9 +18,12 @@ while IFS=$'\n' read -r repo_path; do
     printf 'Updating repository %s:\n' "${bold}$repo_path${reset}"
     git -C "$repo_path" remote update --prune # Delete old branches.
     git -C "$repo_path" merge --ff-only "@{u}" # Only merge the current branch.
+    # TODO: Check if conflicts were encountered.
+    if [[ $? -ne 0 ]]; then
+        printf >&2 'Error occurred during merging. Check the repository logs.\n'
+    fi
     printf '\n'
 done < <(find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##')
-
 
 # See https://stackoverflow.com/questions/17099564/make-a-shell-script-to-update-3-git-repos
 # See https://medium.com/@codenameyau/updating-multiple-repos-with-one-command-9768c8cdfe46
