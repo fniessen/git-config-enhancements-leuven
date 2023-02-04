@@ -3931,18 +3931,18 @@ See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-co
                     done"
 #+end_src
 
-** Git-bulk-pull and git-bulk-push
+** git-pull-all-repos and git-push-all-repos
 
 #+begin_src conf
-    # Usage: git bulk-pull
-    # Loop through all your directories and pull.
-    bulk-pull = !$HOME/bin/git-bulk-pull
+    # Usage: git pull-all-repos
+    # Loop through all your subdirectories and pull.
+    pull-all-repos = !$HOME/bin/git-pull-all-repos
 #+end_src
 
 #+begin_src conf
-    # Usage: git bulk-push
-    # Loop through all your directories and push.
-    bulk-push = !$HOME/bin/git-bulk-push
+    # Usage: git push-all-repos
+    # Loop through all your subdirectories and push.
+    push-all-repos = !$HOME/bin/git-push-all-repos
 #+end_src
 
 * Sort out

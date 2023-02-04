@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20221102.1443
+# .gitconfig, Time-stamp: 20230204.1637
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -1051,13 +1051,13 @@ deploy-prod =
                           && git --git-dir=$DIR --work-tree=$DIR/.. status | grep -q \"is ahead of\"; \
                     done"
 
-    # Usage: git bulk-pull
-    # Loop through all your directories and pull.
-    bulk-pull = !$HOME/bin/git-bulk-pull
+    # Usage: git pull-all-repos
+    # Loop through all your subdirectories and pull.
+    pull-all-repos = !$HOME/bin/git-pull-all-repos
 
-    # Usage: git bulk-push
-    # Loop through all your directories and push.
-    bulk-push = !$HOME/bin/git-bulk-push
+    # Usage: git push-all-repos
+    # Loop through all your subdirectories and push.
+    push-all-repos = !$HOME/bin/git-push-all-repos
 
     exec = '!exec '
 
