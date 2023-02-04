@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
+# Push the changes in all Git repositories in the current directory
+# Usage:
+#   update-all-repos.sh
+
 bold=$(tput bold)
 reset=$(tput sgr0)
-
-# TODO Return the exit code of the underlying git invocations
-# TODO Test with branch that's not yet published (@{u} is not known...)
 
 printf "Searching at most 5 levels of directories...\n"
 
@@ -26,11 +27,6 @@ while IFS=$'\n' read -r repo_path; do
     printf "\n"
 done < <(find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##')
 
-## Returns errlvl 0 if $1 is a reachable git remote url
-# git-remote-url-reachable() {
-#     git ls-remote "$1" CHECK_GIT_REMOTE_URL_REACHABILITY >/dev/null 2>&1
-# }
-# Usage:
-# if git-remote-url-reachable "$url"; then
-#     ## code
-# fi
+# TODO Return the exit code of the underlying git invocations
+# TODO Test with branch that's not yet published (@{u} is not known...)
+# TODO Test if Git remote URL is reachable
