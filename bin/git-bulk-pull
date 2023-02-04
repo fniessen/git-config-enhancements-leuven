@@ -22,6 +22,11 @@ find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | se
         printf '\n'
     done
 
+
+# See https://stackoverflow.com/questions/17099564/make-a-shell-script-to-update-3-git-repos
+# See https://medium.com/@codenameyau/updating-multiple-repos-with-one-command-9768c8cdfe46
+
+
 # find . -name .git -type d \
 #     | xargs -n1 -P4 -I% git --git-dir=% --work-tree=%/.. remote update -p
 # Using -type d prevents execution for ".git" files inside submodules. Using -P4
@@ -29,8 +34,6 @@ find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | se
 # progress elsewhere if a single repository hangs). I prefer git remote update -p
 # instead of git pull so that I can deal with merge conflicts later or rebase
 # after I'm offline.
-
-
 
 
 # Git repositories all have HEAD, refs, objects and config entries.
