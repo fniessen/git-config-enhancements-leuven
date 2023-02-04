@@ -6,25 +6,25 @@ reset=$(tput sgr0)
 # TODO Return the exit code of the underlying git invocations
 # TODO Test with branch that's not yet published (@{u} is not known...)
 
-echo "Searching at most 5 levels of directories..."
+printf "Searching at most 5 levels of directories...\n"
 for repo in $(find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##'); do
-    echo "Repository ${bold}$repo${reset}:"
+    printf "Repository %s%s%s:\n" "$bold" "$repo" "$reset"
     if git -C "$repo" rev-parse --quiet --verify @{u} >/dev/null 2>&1; then
         if git -C "$repo" diff --quiet @{u} &>/dev/null; then
-            echo "No changes to push"
+            printf "No changes to push\n"
         else
-            echo "Changes found:"
+            printf "Changes found:\n"
             git -C "$repo" log --date=short @{u}..
             git -C "$repo" push
         fi
     else
         remote_url=$(git -C "$repo" config --get remote.origin.url)
-        echo "Error: remote repository '$remote_url' is not accessible or authentication failed"
+        printf >&2 "Error: remote repository '%s' is not accessible or authentication failed\n" "$remote_url"
     fi
-    echo
+    printf "\n"
 done
 
-# ## Returns errlvl 0 if $1 is a reachable git remote url
+## Returns errlvl 0 if $1 is a reachable git remote url
 # git-remote-url-reachable() {
 #     git ls-remote "$1" CHECK_GIT_REMOTE_URL_REACHABILITY >/dev/null 2>&1
 # }
