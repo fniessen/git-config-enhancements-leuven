@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Update Git repositories in all subdirectories of the current directory.
+
 # Check if tput command is available.
 if command -v tput > /dev/null; then
     bold=$(tput bold)
