@@ -1,16 +1,28 @@
 #!/usr/bin/env bash
 
-bold=$(tput bold)
-reset=$(tput sgr0)
-
-printf 'Update Git repositories in all subdirectories...\n'
-
-# Check and fix the permissions on ~/.ssh/config.
-if [[ $(stat -c %a ~/.ssh/config) != 600 ]]; then
-    printf 'Bad permissions on ~/.ssh/config. Fixing it...\n'
-    chmod 600 ~/.ssh/config
+# Check if tput command is available.
+if command -v tput > /dev/null; then
+    bold=$(tput bold)
+    reset=$(tput sgr0)
+else
+    bold=''
+    reset=''
 fi
 
+# Check if git command is available.
+command -v git > /dev/null 2>&1 || { printf >&2 'Error: git command not found.\n'; exit 2; }
+
+# Check and fix the permissions on ~/.ssh/config.
+if command -v stat > /dev/null; then
+    if [[ $(stat -c %a ~/.ssh/config) != 600 ]]; then
+        printf 'Bad permissions on ~/.ssh/config. Fixing it...\n'
+        chmod 600 ~/.ssh/config
+    fi
+else
+    printf >&2 'Error: stat command not found. Skipping permissions check on ~/.ssh/config.\n'
+fi
+
+printf 'Update Git repositories in all subdirectories...\n'
 printf 'Searching at most 5 levels of directories...\n'
 
 # Handle directories with spaces in the find command.
