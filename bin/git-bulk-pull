@@ -3,8 +3,10 @@
 bold=$(tput bold)
 reset=$(tput sgr0)
 
+printf 'Update Git repositories in all subdirectories...\n'
+
 if [[ $(stat -c %A ~/.ssh/config) != "-rw-------" ]]; then
-    echo "Bad permissions on ~/.ssh/config.  Fixing it..."
+    printf 'Bad permissions on ~/.ssh/config.  Fixing it...\n'
     chmod 600 ~/.ssh/config
 fi
 
@@ -15,15 +17,25 @@ fi
 printf '%s\n\n' "Searching at most 5 levels of directories..."
 
 # Handle directories with spaces in find command.
-find . -maxdepth 5 -name ".git" -type d | rev | cut -c 6- | rev | sed "s#^\./##" |
+find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##' |
     while IFS=$'\n' read -r repo; do
-        printf '%s\n' "Repository ${bold}$repo${reset}:"
-        # git -C "$repo" pull                 # Does not do anything if unstaged changes!
+        printf 'Repository %s:\n' "${bold}$repo${reset}"
         git -C "$repo" remote update --prune  # Delete old branches. Good!
         git -C "$repo" merge --ff-only "@{u}"
         # XXX Already up to date (or bad authentication in the previous command!?)
-        echo
+        printf '\n'
     done
+
+
+
+# find . -name .git -type d \
+#     | xargs -n1 -P4 -I% git --git-dir=% --work-tree=%/.. remote update -p
+# Using -type d prevents execution for ".git" files inside submodules. Using -P4
+# runs four fetches in parallel to speed things up a bit (and continues to make
+# progress elsewhere if a single repository hangs). I prefer git remote update -p
+# instead of git pull so that I can deal with merge conflicts later or rebase
+# after I'm offline.
+
 
 
 
