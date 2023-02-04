@@ -11,7 +11,7 @@ SITE=github.com
 REMOTE=${1-origin}
 
 # Get the old URL.
-OLD_URL=$(git remote -v | grep -m1 "^$REMOTE" | sed -Ene"s#.*(git@$SITE[^:]*:[^[:space:]]*).*#\1#p")
+OLD_URL=$(git remote -v | awk -v REMOTE="$REMOTE" '$1==REMOTE && $3=="(push)" {print $2}')
 
 # Check if the old URL is valid.
 if [[ -z "$OLD_URL" ]]; then
@@ -34,11 +34,7 @@ printf "REPO_SLUG: %s\n" "$REPO_SLUG"
 
 # Create the new URL.
 NEW_URL="https://$SITE/$REPO_OWNER/$REPO_SLUG.git"
-printf "Changing Repo URL from:\n"
-printf " '%s'\n" "$OLD_URL"
-printf " to:\n"
-printf " '%s'\n" "$NEW_URL"
-printf "\n"
+printf "Changing Repo URL from:\n '%s'\n to:\n '%s'\n\n" "$OLD_URL" "$NEW_URL"
 
 # Update the remote URL.
 CHANGE_CMD="git remote set-url $REMOTE $NEW_URL"
