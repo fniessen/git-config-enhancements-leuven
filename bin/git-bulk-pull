@@ -6,27 +6,21 @@ reset=$(tput sgr0)
 printf 'Update Git repositories in all subdirectories...\n'
 
 # Check and fix the permissions on ~/.ssh/config.
-if [[ $(stat -c %A ~/.ssh/config) != "-rw-------" ]]; then
+if [[ $(stat -c %a ~/.ssh/config) != 600 ]]; then
     printf 'Bad permissions on ~/.ssh/config. Fixing it...\n'
     chmod 600 ~/.ssh/config
 fi
 
-# Only merges current branch, apparently.
-
-# See https://stackoverflow.com/questions/17099564/make-a-shell-script-to-update-3-git-repos
-# See https://medium.com/@codenameyau/updating-multiple-repos-with-one-command-9768c8cdfe46
 printf 'Searching at most 5 levels of directories...\n'
 
 # Handle directories with spaces in the find command.
 find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##' |
     while IFS=$'\n' read -r repo; do
-        printf 'Repository %s:\n' "${bold}$repo${reset}"
-        git -C "$repo" remote update --prune  # Delete old branches. Good!
-        git -C "$repo" merge --ff-only "@{u}"
-        # XXX Already up to date (or bad authentication in the previous command!?)
+        printf 'Updating repository %s:\n' "${bold}$repo${reset}"
+        git -C "$repo" remote update --prune # Delete old branches.
+        git -C "$repo" merge --ff-only "@{u}" # Only merge the current branch.
         printf '\n'
     done
-
 
 # find . -name .git -type d \
 #     | xargs -n1 -P4 -I% git --git-dir=% --work-tree=%/.. remote update -p
