@@ -5,33 +5,34 @@
 # Thanks to @m14t
 
 SITE=github.com
-#SITE=bitbucket.org
+# SITE=bitbucket.org
 
-#origin or upstream
+# origin or upstream
 REMOTE=${1-origin}
 
+# Get the old URL.
 OLD_URL=$(git remote -v | grep -m1 "^$REMOTE" | sed -Ene"s#.*(git@$SITE[^:]*:[^[:space:]]*).*#\1#p")
+
+# Check if the old URL is valid.
 if [[ -z "$OLD_URL" ]]; then
-  echo "-- ERROR:  Could not identify Repo URL."
-  echo "   It is possible this repo is already using HTTPS instead of SSH."
-  exit
+    echo "Error: Could not identify Repo URL. It's possible that the repo is already using HTTPS instead of SSH."
+    exit
 fi
 echo "OLD_URL: ${OLD_URL}"
 
+# Get the repo owner and slug.
 REPO_OWNER=$(echo "$OLD_URL" | sed -Ene"s#git@$SITE[^:]*:([^/]*)/(.*).git#\1#p")
-if [[ -z "$REPO_OWNER" ]]; then
-  echo "-- ERROR:  Could not identify Repo Owner."
-  exit
+REPO_SLUG=$(echo "$OLD_URL" | sed -Ene"s#git@$SITE[^:]*:([^/]*)/(.*).git#\2#p")
+
+# Check if the repo owner and slug are valid.
+if [[ -z "$REPO_OWNER" ]] || [[ -z "$REPO_SLUG" ]]; then
+    echo "Error: Could not identify Repo Owner or Slug."
+    exit
 fi
 echo "REPO_OWNER: ${REPO_OWNER}"
-
-REPO_SLUG=$(echo "$OLD_URL" | sed -Ene"s#git@$SITE[^:]*:([^/]*)/(.*).git#\2#p")
-if [[ -z "$REPO_SLUG" ]]; then
-  echo "-- ERROR:  Could not identify Repo Slug."
-  exit
-fi
 echo "REPO_SLUG: ${REPO_SLUG}"
 
+# Create the new URL.
 NEW_URL="https://$SITE/$REPO_OWNER/$REPO_SLUG.git"
 echo "Changing Repo URL from "
 echo "  '$OLD_URL'"
@@ -39,6 +40,7 @@ echo "      to "
 echo "  '$NEW_URL'"
 echo ""
 
+# Update the remote URL.
 CHANGE_CMD="git remote set-url $REMOTE $NEW_URL"
 echo "$CHANGE_CMD"
 $CHANGE_CMD
