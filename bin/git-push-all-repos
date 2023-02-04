@@ -12,7 +12,7 @@ printf "Searching at most 5 levels of directories...\n"
 
 # Handle directories with spaces in the find command.
 while IFS=$'\n' read -r repo_path; do
-    printf 'Updating repository %s:\n' "${bold}$repo${reset}"
+    printf 'Updating repository %s:\n' "${bold}$repo_path${reset}"
     if git -C "$repo_path" rev-parse --quiet --verify @{u} >/dev/null 2>&1; then
         if git -C "$repo_path" diff --quiet @{u} &>/dev/null; then
             printf "No changes to push\n"
