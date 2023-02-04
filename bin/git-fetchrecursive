@@ -1,2 +1,2 @@
 #!/bin/bash
-find . -name .git -type d | sed "s/\(.*\)/pushd \"\1\"; git fetch; popd/" | sh
+find . -name .git -type d | xargs -I {} bash -c "pushd {} && git fetch && popd"
