@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Update Git repositories in all subdirectories of the current directory.
+# Pull the changes in all Git repositories of the current directory.
 
 # Check if tput command is available.
 if command -v tput > /dev/null; then
@@ -24,7 +24,7 @@ else
     printf >&2 'Error: stat command not found. Skipping permissions check on ~/.ssh/config.\n'
 fi
 
-printf 'Update Git repositories in all subdirectories...\n'
+printf 'Pull the changes in all Git repositories...\n'
 printf 'Searching at most 5 levels of directories...\n'
 
 # Handle directories with spaces in the find command.

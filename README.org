@@ -3935,13 +3935,13 @@ See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-co
 
 #+begin_src conf
     # Usage: git pull-all-repos
-    # Loop through all your subdirectories and pull.
+    # Pull the changes in all Git repositories of the current directory.
     pull-all-repos = !$HOME/bin/git-pull-all-repos
 #+end_src
 
 #+begin_src conf
     # Usage: git push-all-repos
-    # Loop through all your subdirectories and push.
+    # Push the changes in all Git repositories of the current directory.
     push-all-repos = !$HOME/bin/git-push-all-repos
 #+end_src
 

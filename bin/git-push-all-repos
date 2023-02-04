@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Push the changes in all Git repositories in the current directory
+# Push the changes in all Git repositories of the current directory.
 #
 # Usage:
 #   git-push-all-repos
@@ -8,6 +8,7 @@
 bold=$(tput bold)
 reset=$(tput sgr0)
 
+printf 'Push the changes in all Git repositories...\n'
 printf "Searching at most 5 levels of directories...\n"
 
 # Handle directories with spaces in the find command.
