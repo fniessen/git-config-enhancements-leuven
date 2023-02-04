@@ -1,8 +1,6 @@
-#!/bin/bash
-#-- Script to automate https://help.github.com/articles/why-is-git-always-asking-for-my-password
-# Forked from the original to do the opposite:  Switch ssh repo urls to https
-# Original here: https://gist.github.com/m14t/3056747
-# Thanks to @m14t
+#!/usr/bin/env bash
+
+# Automate the process of converting a Git repository's remote URL from SSH to HTTPS.
 
 SITE=github.com
 # SITE=bitbucket.org
@@ -10,29 +8,29 @@ SITE=github.com
 # origin or upstream
 REMOTE=${1-origin}
 
-# Get the old URL.
+# Get the current remote URL.
 OLD_URL=$(git remote -v | awk -v REMOTE="$REMOTE" '$1==REMOTE && $3=="(push)" {print $2}')
 
 # Check if the old URL is valid.
 if [[ -z "$OLD_URL" ]]; then
-    printf "Error: Could not identify Repo URL. It's possible that the repo is already using HTTPS instead of SSH.\n"
-    exit
+    printf >&2 "Error: Could not identify Repo URL. It's possible that the repo is already using HTTPS instead of SSH.\n"
+    exit 2
 fi
 printf "OLD_URL: %s\n" "$OLD_URL"
 
-# Get the repo owner and slug.
+# Get the repository owner and name.
 REPO_OWNER=$(echo "$OLD_URL" | sed -Ene"s#git@$SITE[^:]*:([^/]*)/(.*).git#\1#p")
 REPO_SLUG=$(echo "$OLD_URL" | sed -Ene"s#git@$SITE[^:]*:([^/]*)/(.*).git#\2#p")
 
-# Check if the repo owner and slug are valid.
+# Check if the repo owner and name are valid.
 if [[ -z "$REPO_OWNER" ]] || [[ -z "$REPO_SLUG" ]]; then
-    printf "Error: Could not identify Repo Owner or Slug.\n"
-    exit
+    printf >&2 "Error: Could not identify Repo Owner or Slug.\n"
+    exit 2
 fi
 printf "REPO_OWNER: %s\n" "$REPO_OWNER"
 printf "REPO_SLUG: %s\n" "$REPO_SLUG"
 
-# Create the new URL.
+# Create the new HTTPS URL.
 NEW_URL="https://$SITE/$REPO_OWNER/$REPO_SLUG.git"
 printf "Changing Repo URL from:\n '%s'\n to:\n '%s'\n\n" "$OLD_URL" "$NEW_URL"
 
@@ -40,5 +38,3 @@ printf "Changing Repo URL from:\n '%s'\n to:\n '%s'\n\n" "$OLD_URL" "$NEW_URL"
 CHANGE_CMD="git remote set-url $REMOTE $NEW_URL"
 printf "%s\n" "$CHANGE_CMD"
 $CHANGE_CMD
-
-printf "Success\n"
