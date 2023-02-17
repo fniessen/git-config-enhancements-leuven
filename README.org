@@ -94,6 +94,9 @@ Setting your user name and e-mail address is important because Git stores the
 committer and author of a change in every commit.
 
 #+begin_src conf
+[checkout]
+    preserveTimestamps = true
+
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
     name = John Doe
@@ -780,10 +783,13 @@ Then, in the working copy:
     # Usage: git init-repository
     # Create a repository.
     init-repository = !git init \
-                && ( [ -n "$(ls)" ] || touch .gitignore ) \
+                && (ls -1A | grep -q . || touch .gitignore) \
                 && git add . \
                 && git commit -m \"Initial commit\"
 #+end_src
+
+The command is checking whether the output of ~ls~ command is not empty, and if it
+is, it will create a =.gitignore= file.
 
 #+begin_tip
 Since Git doesn't add *empty directories*, if you want to keep them in the
@@ -836,6 +842,18 @@ occurs when a *self-signed certificate cannot be verified*.
 Please be advised disabling SSL verification globally *might be considered
 a security risk* and should be implemented only temporary.
 #+end_warning
+
+*** Clone to only the latest commit in the repository's history
+
+The ~--depth 1~ option is useful when you only need the latest version of
+a repository and don't need the entire history.
+
+This can be the case when:
+- you're cloning a large repository and only need the latest code to work with,
+  or
+- you're cloning a repository for temporary purposes, such as testing.
+
+It makes the clone operation faster and lighter.
 
 ** Create and add your SSH public key to a repository hosting service
 
@@ -4062,6 +4080,17 @@ I don't need to use the undo commands.
 #+begin_src conf
     precommit = diff --diff-algorithm=minimal -w --cached
 #+end_src
+
+*** When was this file first committed
+
+#+begin_src conf
+    first-commit = "!f() { \
+        date=$(git log --all --follow --pretty=format:%ci -- $1 | tail -n 1); \
+        echo \"$date\"; \
+    }; f"
+#+end_src
+
+XXX Does not work on renamed files
 
 *** When was this file last updated
 

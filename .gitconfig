@@ -1,4 +1,7 @@
-# .gitconfig, Time-stamp: 20230204.1637
+# .gitconfig, Time-stamp: 20230217.1037
+
+[checkout]
+    preserveTimestamps = true
 
 [user]
     # Tell Git about yourself.  Override this in the file .gitconfig_local.
@@ -184,7 +187,7 @@
     # Usage: git init-repository
     # Create a repository.
     init-repository = !git init \
-                && ( [ -n "$(ls)" ] || touch .gitignore ) \
+                && (ls -1A | grep -q . || touch .gitignore) \
                 && git add . \
                 && git commit -m \"Initial commit\"
 
@@ -1052,11 +1055,11 @@ deploy-prod =
                     done"
 
     # Usage: git pull-all-repos
-    # Loop through all your subdirectories and pull.
+    # Pull the changes in all Git repositories of the current directory.
     pull-all-repos = !$HOME/bin/git-pull-all-repos
 
     # Usage: git push-all-repos
-    # Loop through all your subdirectories and push.
+    # Push the changes in all Git repositories of the current directory.
     push-all-repos = !$HOME/bin/git-push-all-repos
 
     exec = '!exec '
@@ -1102,6 +1105,11 @@ deploy-prod =
     dw-staged = diff --color-words --cached
 
     precommit = diff --diff-algorithm=minimal -w --cached
+
+    first-commit = "!f() { \
+        date=$(git log --all --follow --pretty=format:%ci -- $1 | tail -n 1); \
+        echo \"$date\"; \
+    }; f"
 
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
