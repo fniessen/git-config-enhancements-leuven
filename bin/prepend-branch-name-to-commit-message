@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# prepare-commit-message:
 # Add the name of the current Git branch to the beginning of the commit message.
 
 # Customize which branches should be skipped when prepending commit message.
