@@ -8,15 +8,15 @@ else
 fi
 
 # Find all Git repositories under the current directory.
-find . -type d -name .git | sort | sed 's|\/\.git||' | while read -r git_dir; do
+find . -type d -name .git | sort | sed 's|\/\.git||' | while read -r repo_path; do
     (
-        cd "$git_dir" || exit 1
+        cd "$repo_path" || exit 1
         # Check if the repository has uncommitted changes.
         if isdirty=$(git status -s | grep "^.*"); then
             if $verbose; then
                 printf "\n"
             fi
-            printf "DIRTY: %s\n" "$git_dir"
+            printf "DIRTY: %s\n" "$repo_path"
             if $verbose; then
                 git status -s
             fi

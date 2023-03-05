@@ -3,10 +3,12 @@
 # Run "git gc" on all Git repositories in the current directory and its
 # subdirectories.
 
+# TODO: Option for 'git gc --aggressive'?
+
 # Find all .git directories in the current directory and its subdirectories.
-find . -iname '.git' -type d | while read -r gitdir; do
-    # Change to the directory and run git gc
-    pushd "$gitdir" >/dev/null || continue
+find . -iname '.git' -type d | while read -r git_dir; do
+    # Change to the directory and run 'git gc'.
+    pushd "$git_dir" >/dev/null || continue
     git gc
     popd >/dev/null || continue
 done
