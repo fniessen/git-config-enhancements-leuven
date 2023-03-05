@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# Add the name of the current Git branch to the beginning of the commit message.
+
+# Customize which branches should be skipped when prepending commit message.
+BRANCHES_TO_SKIP=(master develop test)
+
+if ! BRANCH_NAME=$(git symbolic-ref --short HEAD)
+then
+    echo "Error: Not in a git repository"
+    exit 1
+fi
+
+BRANCH_NAME="${BRANCH_NAME##*/}"
+if [[ "${BRANCHES_TO_SKIP[@]}" =~ (^|[[:space:]])"$BRANCH_NAME"($|[[:space:]]) ]]
+then
+    echo "Branch '$BRANCH_NAME' is in BRANCHES_TO_SKIP, skipping..."
+    exit 0
+fi
+
+if grep -qi "\[$BRANCH_NAME\]" "$1"; then
+    echo "Commit message already contains branch name, skipping..."
+    exit 0
+fi
+
+sed -i.bak -e "1s/^/[$BRANCH_NAME] /" "$1"
