@@ -1,17 +1,16 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-f() {
-    echo -n ${1}': ';
+# Check if a file is tracked in a Git repository.
 
-    if [[ -f ${1} ]];
-    then
-        tracked=$(git ls-files ${1});
-        if [[ -z ${tracked} ]];
-        then echo 'File NOT tracked';
-        else echo 'File tracked';
-        fi;
-    else echo 'No such file!';
-    fi;
-};
-
-f $1
+file_path=$1
+echo -n "$file_path: "
+if [[ -f "$file_path" ]]; then
+    tracked=$(git ls-files "$file_path" 2> /dev/null)
+    if [[ -z "$tracked" ]]; then
+        echo "Not tracked"
+    else
+        echo "Tracked"
+    fi
+else
+    echo "No such file"
+fi
