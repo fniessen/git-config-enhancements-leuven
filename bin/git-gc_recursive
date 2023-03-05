@@ -1,2 +1,12 @@
-#!/bin/bash
-find . -iname .git -type d | sed "s/\(.*\)/pushd \"\1\"; git gc; popd/" | sh
+#!/usr/bin/env bash
+
+# Run "git gc" on all Git repositories in the current directory and its
+# subdirectories.
+
+# Find all .git directories in the current directory and its subdirectories.
+find . -iname '.git' -type d | while read -r gitdir; do
+    # Change to the directory and run git gc
+    pushd "$gitdir" >/dev/null || continue
+    git gc
+    popd >/dev/null || continue
+done
