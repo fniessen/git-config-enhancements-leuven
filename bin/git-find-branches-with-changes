@@ -1,23 +1,29 @@
 #!/usr/bin/env bash
 
-file=$1
-base=${2:-master}
+# Find all Git branches that have changes affecting a specific file.
 
-b=$(tput bold) # Pretty print
-n=$(tput sgr0)
+if [[ ! -f "$1" ]]; then
+    echo "Usage: $0 <filename> [<base>]"
+    exit 1
+fi
 
-echo "Searching for branches with changes to $file related to the $base branch"
+filename="$1"
+base="${2:-master}"
+bold=$(tput bold)
+normal=$(tput sgr0)
 
-# We look through all the local branches using plumbing
+echo "Searching for branches with changes to $filename related to the $base branch"
+
+# We look through all the local branches using plumbing.
 for branch in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
     # We're establishing a shared ancestor between base and branch, to only find forward changes.
     merge_base=$(git merge-base $base $branch)
     # Check if there are any changes in a given path.
-    changes=$(git diff $merge_base..$branch --stat -- $file)
+    changes=$(git diff $merge_base..$branch --stat -- $filename)
 
     if [[ ! -z $changes ]]; then
-        echo "Branch: ${b}$branch${n} | Merge Base: $merge_base"
-        # Show change statistics pretty formatted
-        git diff $merge_base..$branch --stat -- $file
+        echo "Changes in branch ${bold}$branch${normal} | Merge Base: $merge_base"
+        # Show change statistics pretty formatted.
+        git diff $merge_base..$branch --stat -- $filename
     fi
 done
