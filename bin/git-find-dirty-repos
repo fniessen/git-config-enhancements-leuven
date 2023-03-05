@@ -4,7 +4,6 @@
 
 # Options:
 #   -v  verbose output
-#   -vv extra verbose output
 
 # Preserve the old input field separator.
 OLDIFS=$IFS
@@ -18,16 +17,13 @@ for gitprojpath in $(find . -type d -name .git | sort | sed 's|\/\.git||'); do
     pushd . >/dev/null || exit 1
 
     # Switch to the Git-enabled project directory.
-    if [[ $1 == '-v' ]]; then
-        echo "TESTING: $gitprojpath"
-    fi
     cd "$gitprojpath" || exit 1
 
     # Are there any changed files in the status output?
     isdirty=$(git status -s | grep "^.*")
     if [ -n "$isdirty" ]; then
         # Should output be verbose?
-        if [ "$1" = "-vv" ]; then
+        if [ "$1" = "-v" ]; then
             # Output the dirty status.
             echo "DIRTY:" $gitprojpath
             git status -s
