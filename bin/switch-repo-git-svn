@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+bold=$(tput bold)
+reset=$(tput sgr0)
+
+if [ ! -d .git ]; then
+    # No .git folder.
+    echo "Disable .svn folder... ${bold}Enable .git${reset} folder..."
+    mv .svn .svn-bak && mv .git-bak .git
+else
+    if [ ! -d .svn ]; then
+        # No .svn folder.
+        echo "Disable .git folder... ${bold}Enable .svn${reset} folder..."
+        mv .git .git-bak && mv .svn-bak .svn
+    fi
+fi
