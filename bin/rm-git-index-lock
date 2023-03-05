@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 # Go to the root of the Git repo.
-cd "$(git rev-parse --show-toplevel)"
+git rev-parse && cd "$(git rev-parse --show-toplevel)"
 
 # Check if the .git/index.lock file exists.
 if [ -f .git/index.lock ]; then
-  # If the file exists, delete it.
-  rm .git/index.lock
-  echo "Deleted .git/index.lock"
+    # If the file exists, delete it.
+    rm .git/index.lock
+    printf "Deleted .git/index.lock\n"
 else
-  # If the file does not exist, print a message.
-  echo ".git/index.lock does not exist"
+    # If the file does not exist, print a message.
+    printf >&2 ".git/index.lock does not exist\n"
 fi
