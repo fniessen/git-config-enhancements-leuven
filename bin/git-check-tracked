@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+f() {
+    echo -n ${1}': ';
+
+    if [[ -f ${1} ]];
+    then
+        tracked=$(git ls-files ${1});
+        if [[ -z ${tracked} ]];
+        then echo 'File NOT tracked';
+        else echo 'File tracked';
+        fi;
+    else echo 'No such file!';
+    fi;
+};
+
+f $1
