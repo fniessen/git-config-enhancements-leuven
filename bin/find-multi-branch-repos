@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Find Git repositories with more than one branch.
+
+for git_dir in $(find . -name .git -type d -prune); do
+    # Trim trailing "/.git"
+    repo_dir="${git_dir%/.git}"
+    # Check if the repository has more than one branch
+    branches=$(git -C "$repo_dir" for-each-ref --format='%(refname:short)' refs/heads/)
+    num_branches=$(echo "$branches" | wc -l)
+    if [[ "$num_branches" -gt 1 ]]; then
+        echo "Repository '$repo_dir' has $num_branches branches:"
+        echo "$branches"
+    fi
+done
