@@ -57,7 +57,7 @@ printf "Current remote repository URL:\n %s\n" "$OLD_URL"
 printf "New remote repository URL:\n %s\n\n" "$NEW_URL"
 
 # Ask for confirmation before updating the remote URL.
-read -p "Do you want to update the remote repository URL? (y/n) " -n 1 -r
+read -p "Do you want to update the remote repository URL? (y/N) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     # Update the remote URL.
