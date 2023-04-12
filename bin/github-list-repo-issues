@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Default GitHub username and personal access token.
+default_username="your_github_username"
+default_token="your_github_personal_access_token"
+
+# Get GitHub username and personal access token from command-line arguments, or
+# from a config file, or use default values.
+if [ "$#" -eq 2 ]; then
+    username="$1"
+    token="$2"
+elif [ -f "$HOME/.github_config" ]; then
+    source "$HOME/.github_config"
+elif [ -f ".github_config" ]; then
+    source ".github_config"
+else
+    echo "No GitHub username and personal access token found. Using default values." >&2
+    username="$default_username"
+    token="$default_token"
+fi
+
+# Make API request to list your public repositories.
+repos=$(curl -s -H "Authorization: token $token" "https://api.github.com/users/$username/repos?type=public&sort=updated")
+
+# Loop through each repository and get its number of issues.
+for repo in $(echo "${repos}" | jq -r '.[].name'); do
+    issues=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/issues" | jq '. | length')
+    echo "$repo: $issues issues"
+done
