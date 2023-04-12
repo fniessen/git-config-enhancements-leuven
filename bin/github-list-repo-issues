@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Check if jq is installed.
+if ! command -v jq &> /dev/null; then
+    printf >&2 "jq is not installed. Please install it before running this script.\n"
+    exit 2
+fi
+
 # Default GitHub username and personal access token.
 default_username="your_github_username"
 default_token="your_github_personal_access_token"
