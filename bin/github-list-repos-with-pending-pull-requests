@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Default GitHub username and personal access token.
+default_username="your_github_username"
+default_token="your_github_personal_access_token"
+
+# Check if jq is installed.
+if ! [ -x "$(command -v jq)" ]; then
+    printf >&2 "Error: jq is not installed. Please install it before running this script.\n"
+    exit 2
+fi
+
+# Get GitHub username and personal access token from command-line arguments, or
+# from a config file, or use default values.
+if [ "$#" -eq 2 ]; then
+    username="$1"
+    token="$2"
+elif [ -f "$HOME/.github_config" ]; then
+    source "$HOME/.github_config"
+elif [ -f ".github_config" ]; then
+    source ".github_config"
+else
+    printf >&2 "No GitHub username and personal access token found. Using default values.\n"
+    username="$default_username"
+    token="$default_token"
+fi
+
+# Make API request to list your repositories with pending pull requests.
+repos=$(curl -s -H "Authorization: token $token" "https://api.github.com/search/issues?q=is:pr+user:$username+state:open" | jq -r '.items[].repository_url' | uniq)
+
+# Loop through each repository and print its name.
+for repo_url in $repos; do
+    repo=$(basename "$repo_url")
+    printf "%s\n" "$repo"
+done
