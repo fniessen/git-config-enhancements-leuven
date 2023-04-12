@@ -14,7 +14,7 @@ elif [ -f "$HOME/.github_config" ]; then
 elif [ -f ".github_config" ]; then
     source ".github_config"
 else
-    echo "No GitHub username and personal access token found. Using default values." >&2
+    printf >&2 "No GitHub username and personal access token found. Using default values.\n"
     username="$default_username"
     token="$default_token"
 fi
@@ -25,5 +25,5 @@ repos=$(curl -s -H "Authorization: token $token" "https://api.github.com/users/$
 # Loop through each repository and get its number of issues.
 for repo in $(echo "${repos}" | jq -r '.[].name'); do
     issues=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/issues" | jq '. | length')
-    echo "$repo: $issues issues"
+    printf "%s: %s issues\n" "$repo" "$issues"
 done
