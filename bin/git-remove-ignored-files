@@ -2,9 +2,9 @@
 
 # Loop through each file in the Git repository that is covered by the ignore
 # patterns and exists on the filesystem, and remove them from the repository.
-git ls-files --others --ignored --exclude-standard | while read eachthing
+git ls-files --others --ignored --exclude-standard | while read ignored_file
 do
-    if [ -e "$eachthing" ]; then
-        git rm "$eachthing"
+    if [ -e "$ignored_file" ]; then
+        git rm "$ignored_file"
     fi
 done
