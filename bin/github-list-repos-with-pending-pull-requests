@@ -40,4 +40,8 @@ for repo in $repos; do
             printf "  #%d - %s\n" "$pr" "$title"
         done
     fi
+    # Add a blank line between each repo, except for the last one.
+    if [ "$repo" != "$(echo $repos | awk '{print $NF}')" ]; then
+        printf "\n"
+    fi
 done
