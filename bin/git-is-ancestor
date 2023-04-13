@@ -30,13 +30,14 @@ version=$(grep "^#?"  "$0" | cut -c 4-)
 parsed="$(docopts -h "$help" -V "$version" : "$@")"
 eval "$parsed"
 
-if $(git merge-base --is-ancestor $COMMIT_1 $COMMIT_2); then
+# Check if one commit is an ancestor of the other.
+if git merge-base --is-ancestor "$COMMIT_1" "$COMMIT_2"; then
     printf '%s is an ancestor of %s\n' "$COMMIT_1" "$COMMIT_2"
     exit 0
-elif $(git merge-base --is-ancestor $COMMIT_2 $COMMIT_1); then
+elif git merge-base --is-ancestor "$COMMIT_2" "$COMMIT_1"; then
     printf '%s is an ancestor of %s\n' "$COMMIT_2" "$COMMIT_1"
     exit 0
 else
     printf '%s and %s are not related\n' "$COMMIT_1" "$COMMIT_2"
-    exit 1
+    exit 2
 fi
