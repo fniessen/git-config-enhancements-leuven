@@ -28,10 +28,10 @@ fi
 # Make API request to list your public repositories.
 repos=$(curl -s -H "Authorization: token $token" "https://api.github.com/users/$username/repos?type=public&sort=updated")
 
-# Loop through each repository and get its number of open issues.
+# Loop through each repository and get its open issues.
 for repo in $(echo "${repos}" | jq -r '.[].name' | sort); do
-    issues=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/issues?state=open" | jq '. | length')
-    if [ "$issues" -ne 0 ]; then
-        printf "%s: %d open issues\n" "$repo" "$issues"
+    issues=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/issues?state=open" | jq -r '.[] | "- " + .title')
+    if [ "$issues" ]; then
+        printf "%s:\n%s\n\n" "$repo" "$issues"
     fi
 done
