@@ -5,7 +5,7 @@ default_username="your_github_username"
 default_token="your_github_personal_access_token"
 
 # Check if jq is installed.
-if ! [ -x "$(command -v jq)" ]; then
+if ! command -v jq &> /dev/null; then
     printf >&2 "Error: jq is not installed. Please install it before running this script.\n"
     exit 2
 fi
