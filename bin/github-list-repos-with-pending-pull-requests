@@ -26,11 +26,18 @@ else
 fi
 
 # Make API request to list your repositories with pending pull requests.
-repos=$(curl -s -H "Authorization: token $token" "https://api.github.com/search/issues?q=is:pr+user:$username+state:open" | jq -r '.items[].repository_url' | uniq)
+repos=$(curl -s -H "Authorization: token $token" "https://api.github.com/search/issues?q=is:pr+user:$username+state:open" | jq -r '.items[].repository_url | rtrimstr(".git") | split("/") | .[-1]' | uniq)
 
-# Loop through each repository and print its name and number of pending pull requests.
-for repo_url in $repos; do
-    repo=$(basename "$repo_url")
+# Loop through each repository and print its name, number of pending pull
+# requests, and titles of each pull request.
+for repo in $repos; do
     count=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/pulls?state=open" | jq '. | length')
     printf "%s: %d\n" "$repo" "$count"
+    if [ "$count" -gt 0 ]; then
+        prs=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/pulls?state=open" | jq -r '.[].number')
+        for pr in $prs; do
+            title=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/pulls/$pr" | jq -r '.title')
+            printf "  #%d - %s\n" "$pr" "$title"
+        done
+    fi
 done
