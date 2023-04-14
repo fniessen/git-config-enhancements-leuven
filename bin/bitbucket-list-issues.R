@@ -4,14 +4,14 @@ library(httr)
 library(jsonlite)
 
 ## Define BitBucket API endpoint and credentials.
-c.username.slug <- "mcpflow/pflow"
-c.base.url <- paste0("https://api.bitbucket.org/2.0/repositories/", c.username.slug, "/issues")
-c.username <- "mcpflow"
-c.pw <- "XXX"
+bitbucket_slug <- "mcpflow/pflow"
+bitbucket_issues_url <- paste0("https://api.bitbucket.org/2.0/repositories/", bitbucket_slug, "/issues")
+bitbucket_username <- "mcpflow"
+bitbucket_password <- "XXX"
 
 ## Define function to list issues.
 list_issues <- function() {
-  response <- httr::GET(c.base.url, authenticate(c.username, c.pw))
+  response <- httr::GET(bitbucket_issues_url, authenticate(bitbucket_username, bitbucket_password))
   httr::stop_for_status(response)
   issues_json <- content(response, encoding = "UTF-8")
   fromJSON(issues_json)                 # Parse the JSON response.
