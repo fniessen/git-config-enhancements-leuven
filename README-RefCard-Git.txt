@@ -7,91 +7,6 @@
 
 #+SETUPFILE: ~/org/theme-readtheorg.setup
 
-* Why Git?
-
-- speed, git log is locally done
-- I can commit several patches on top of the master, and see them separated
-  (with a log message)
-
-HEAD != branche, c'est juste où on est.
-
-** Avantages de Git (from Paul Gaborit)
-   [2014-05-07 Wed 09:52]
-
-Pour moi, Git a beaucoup d'avantages par rapport à RCS (même dans un contexte
-à un seul auteur). En voici quelques-uns : la gestion simple et le nommage
-explicite des branches, les révisions qui gèrent tous les fichiers d'un coup et
-non chaque fichier séparément, les signatures SHA (quasi-)impossible
-à corrompre, la possibilité de créer des clones complets du projet et de son
-historique (il n'y a pas de dépôt central), les performances même avec beaucoup
-de gros fichiers, la synchronisation très simple de dépôts entre machines via
-SSH (pas besoin d'un serveur), utiliser le même outil avec un, plusieurs ou
-beaucoup d'auteurs, la compression des fichiers internes...
-
-Même dans le cas particulier d'un seul auteur et d'un seul fichier
-(http://blog.endpoint.com/2009/12/rcs-vs-git-for-quick-versioning.html), les
-arguments fournis sont mauvais : la stabilité, la facilité d'utilisation, le
-nombre de fichiers créés.
-
-- La stabilité de Git n'est plus à prouver: il y a de très nombreux projets de
-  toutes tailles qui l'utilise à grande échelle sans aucun souci.
-
-- L'apparente facilité d'utilisation : c'est peut-être vrai dans le cas précis
-  d'un auteur et d'un fichier (encore que l'auteur reconnait que même dans ce
-  cas, ce n'est pas beaucoup plus simple avec RCS qu'avec Git). Mais même
-  à supposer que vous êtes sûr que vous serez toujours dans ce cas précis, pour
-  quelqu'un qui fait l'effort d'apprendre (La)TeX, ce n'est pas un bon
-  argument.
-
-- le nombre de fichiers créés : oui, effectivement, il y a plusieurs fichiers
-  créés dans le répertoire .git au lieu d'un seul dans le répertoire RCS. Mais
-  ils sont entièrement gérés par Git et Git sait très bien les compresser. Au
-  bout d'un certain temps (qui peut venir assez vite), tout cela prend moins de
-  place que RCS.
-
-* Doc pour démarrer avec Git
-
-http://www-cs-students.stanford.edu/~blynn/gitmagic/intl/fr/
-
-http://git-scm.com/book/fr/Git-et-les-autres-systèmes-Migrer-sur-Git
-
-http://blog.anvard.org/conversational-git/
-
-* Emacs
-
-** Git ediff
-   [2011-02-18 Fri]
-
-Inside emacs, install git.el (load-path add and require) and call ‘M-x
-git-status'. However, at this point it does not call git.cmd correctly, so
-that is why I created that interim git-mswin.el as mentioned above. Install
-git-mswin.el (load-path add and require) and retry the ‘M-x git-status'.
-
-You will be able to view the status of the directory in a pcvs/dired like
-fashion, diff/ediff and commit.
-
-From [[http://www.emacswiki.org/emacs/Git][EmacsWiki : Git]]
-
-** Org
-
-*** Git update Org
-
-#+begin_src sh
-git remote update
-git fetch --tags
-git checkout master
-git describe
-#+end_src
-
-**** Problem with bad tag found by git describe
-
-#+begin_src sh
-git describe --debug
-
-git log origin/master..HEAD
-git log --branches --not --remotes
-#+end_src
-
 * About Git
 
 - [[http://cheat.errtheblog.com/s/git][Git cheat sheet]]
@@ -185,11 +100,6 @@ master.
 
 Well, I prefer merging instead, see above.
 
-* Create a new Git repository
-
-- http://help.github.com/create-a-repo/
-- https://www.assembla.com/code/org-agenda-files/git/repo/instructions?empty=true
-
 * Git rebase
 
 http://www.jarrodspillers.com/2009/08/19/git-merge-vs-git-rebase-avoiding-rebase-hell/
@@ -231,21 +141,6 @@ matches any line that was added, removed, or changed.
 Find when some code was removed?  =git bisect= with a "test" script that greps
 for the code and returns "true" if the code exists and "false" if it does
 not.
-
-* Git show
-
-> The other result is that to see the diffs of the last commit, it is
-> much easier to use "git show" than the more obvious "git diff".
-
-"git diff <commit>" has historical, and useful, semantics.  IMHO,
-"git show <commit>" is a surprisingly elegant UI for what it does,
-considering that this is git. :-)
-
-You still need git diff for showing the changes in your work tree
-wrt. HEAD, or the index.  git show is about showing the contents of an
-object, be it a commit or a tree or a blob.
-
-Right.  Which is why I only use show after a commit before a push.
 
 * Git Bisect
 
@@ -666,18 +561,6 @@ few months), either people will think the project has stagnated, or everyone
 will switch to cloning from 'next', and then our work to maintain the
 integrity of 'master' won't mean a whole lot (which is what happened last
 time).  We need to keep all the branches relevant to the users who track them.
-
-* Submodule
-
-Bonne idée de mettre dans répertoire =subtree=, non ?
-
-#+begin_src shell
-  ## Add the utfcpp subtree to git
-  % git remote add -f subtree/utfcpp git-9UaJU3cA/F/QT0dZR+AlfA@public.gmane.org:svn2github/utfcpp.git
-  % git subtree add --prefix lib/utfcpp subtree/utfcpp master --squash
-  % du -sm lib/utfcpp
-  21      lib/utfcpp # Whoa!
-#+end_src
 
 * Switching from old git tree
 
