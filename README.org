@@ -21,6 +21,13 @@
 # - https://documentation.help/Bazaar-help/revisionspec-help.html
 # - https://www.mercurial-scm.org/wiki/GitConcepts#Command_equivalence_table
 
+Welcome to git-config-enhancements-leuven!  This repository contains a curated
+collection of configuration settings and aliases to enhance your Git workflow.
+Whether you're a beginner or a seasoned Git user, you'll find time-saving
+shortcuts and customization options to boost your productivity.  Browse the
+contents, try them out, and feel free to contribute your own enhancements. Let's
+make Git even better together!
+
 * Table of Contents                                                   :TOC_1_gh:
 - [[#foreword][Foreword]]
 - [[#overview][Overview]]
