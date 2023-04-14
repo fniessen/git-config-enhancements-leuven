@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Check if curl and json_pp are installed.
+if ! command -v curl &> /dev/null || ! command -v json_pp &> /dev/null; then
+    echo >&2 "Error: This script requires curl and json_pp to be installed."
+    exit 2
+fi
+
+# Define BitBucket API endpoint and credentials.
+bitbucket_slug="mcpflow/pflow"
+bitbucket_issues_url="https://api.bitbucket.org/2.0/repositories/$bitbucket_slug/issues"
+bitbucket_username="mcpflow"
+bitbucket_password="XXX"
+
+# Define function to list issues.
+list_issues() {
+    curl -u "$bitbucket_username:$bitbucket_password" "$bitbucket_issues_url" \
+        | json_pp
+}
+
+# Call the list_issues function.
+issues=$(list_issues)
+
+# Print the parsed JSON data.
+echo "$issues"
