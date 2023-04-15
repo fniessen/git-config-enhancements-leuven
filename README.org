@@ -478,12 +478,14 @@ instead of:
 
 #+begin_src conf
 [log]
+    # Display the date in a short format.
     date = short
 #+end_src
 
 Print out the ref names (tags or branches) of any commits that are shown.
 
 #+begin_src conf
+    # Display ref names (e.g. branch or tag names) in a short format.
     decorate = short
 #+end_src
 
@@ -491,7 +493,10 @@ Print out the ref names (tags or branches) of any commits that are shown.
 
 #+begin_src conf
 [diff]
+    # Treat file renames as copies.
     renames = copies
+
+    # Set the limit of similarity for considering a file rename.
     renameLimit = 30000
 #+end_src
 
@@ -534,6 +539,7 @@ With ~patience~ becomes:
 Same end result but much easier to read.
 
 #+begin_src conf
+    # Use the patience diff algorithm for generating patches.
     algorithm = patience
 #+end_src
 
@@ -541,14 +547,17 @@ Git diff will use ~(i)ndex~, ~(w)ork tree~, ~(c)ommit~ and ~(o)bject~ instead of
 / ~c~ / ~d~ as prefixes for patches:
 
 #+begin_src conf
+    # Include mnemonic prefixes in diff hunk headers.
     mnemonicprefix = true
 #+end_src
 
 #+begin_src conf
+    # Don't show any prefix in diff hunk headers.
     noprefix = true
 #+end_src
 
 #+begin_src conf
+    # Enable dimmed zebra coloring to highlight moved lines in a diff.
     colorMoved = dimmed_zebra
 #+end_src
 

@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230415.1250
+# .gitconfig, Time-stamp: 20230415.1307
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -76,20 +76,29 @@
     autocorrect = 1
 
 [log]
+    # Display the date in a short format.
     date = short
 
+    # Display ref names (e.g. branch or tag names) in a short format.
     decorate = short
 
 [diff]
+    # Treat file renames as copies.
     renames = copies
+
+    # Set the limit of similarity for considering a file rename.
     renameLimit = 30000
 
+    # Use the patience diff algorithm for generating patches.
     algorithm = patience
 
+    # Include mnemonic prefixes in diff hunk headers.
     mnemonicprefix = true
 
+    # Don't show any prefix in diff hunk headers.
     noprefix = true
 
+    # Enable dimmed zebra coloring to highlight moved lines in a diff.
     colorMoved = dimmed_zebra
 
 [apply]
