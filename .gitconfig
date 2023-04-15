@@ -1,40 +1,50 @@
-# .gitconfig, Time-stamp: 20230217.1037
+# .gitconfig, Time-stamp: 20230415.1250
 
 [checkout]
+    # Preserve timestamps of checked out files.
     preserveTimestamps = true
 
 [user]
-    # Tell Git about yourself.  Override this in the file .gitconfig_local.
+    # Override with your name and email in the file .gitconfig_local.
     name = John Doe
     email = john.doe@example.com
 
 [github]
+    # Override with your GitHub username in the file .gitconfig_local.
     user = jdoe
 
 [fetch]
+    # Remove remote-tracking references that no longer exist on the remote.
     prune = true
 
 [init]
+    # Set the default branch for new repositories to master.
     defaultBranch = master
 
 [merge]
+    # Show a three-way diff in case of conflicts.
     conflictstyle = diff3
 
 [merge]
+    # Use meld as the merge tool.
     tool = meld
 
 [mergetool "meld"]
+    # Run meld with the required arguments.
     cmd = meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
     # cmd = meld --diff "$LOCAL" "$BASE" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
+    # Don't keep backup files.
     keepBackup = false
 
 [diff]
     tool = meld
 
 [difftool]
+    # Set prompt to false to avoid asking for confirmation before launching the diff tool.
     prompt = false
 
 [difftool "meld"]
+    # Set the command to launch "meld" with the two input files as arguments.
     cmd = meld "$LOCAL" "$REMOTE"
 
 [core]

@@ -95,21 +95,25 @@ Customizing Git.
 # .gitconfig, Time-stamp: <<current-time()>>
 #+end_src
 
+#+begin_src conf
+[checkout]
+    # Preserve timestamps of checked out files.
+    preserveTimestamps = true
+#+end_src
+
 ** User
 
 Setting your user name and e-mail address is important because Git stores the
 committer and author of a change in every commit.
 
 #+begin_src conf
-[checkout]
-    preserveTimestamps = true
-
 [user]
-    # Tell Git about yourself.  Override this in the file .gitconfig_local.
+    # Override with your name and email in the file .gitconfig_local.
     name = John Doe
     email = john.doe@example.com
 
 [github]
+    # Override with your GitHub username in the file .gitconfig_local.
     user = jdoe
 #+end_src
 
@@ -123,6 +127,7 @@ remote:
 
 #+begin_src conf
 [fetch]
+    # Remove remote-tracking references that no longer exist on the remote.
     prune = true
 #+end_src
 
@@ -132,6 +137,7 @@ Using ~master~ as the name for the initial branch.
 
 #+begin_src conf
 [init]
+    # Set the default branch for new repositories to master.
     defaultBranch = master
 #+end_src
 
@@ -150,6 +156,7 @@ How to resolve merge conflicts in Git?  Try ~git mergetool~.
 
 #+begin_src conf
 [merge]
+    # Show a three-way diff in case of conflicts.
     conflictstyle = diff3
 #+end_src
 
@@ -196,6 +203,7 @@ Use [[https://meldmerge.org/][Meld]] as Git ~mergetool:~
 
 #+begin_src conf
 [merge]
+    # Use meld as the merge tool.
     tool = meld
 #+end_src
 
@@ -204,7 +212,6 @@ I suggest you use either:
 #+begin_src conf :tangle no
 [mergetool "meld"]
     cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
-    keepBackup = false
 #+end_src
 
 or:
@@ -212,7 +219,6 @@ or:
 #+begin_src conf :tangle no
 [mergetool "meld"]
     cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
-    keepBackup = false
 #+end_src
 
 The choice is whether to use ~$MERGED~ or ~$BASE~ in between ~$LOCAL~ and ~$REMOTE~.
@@ -240,8 +246,10 @@ commenting out can be swapped over if I want to use the ~$BASE~ line instead.
 
 #+begin_src conf
 [mergetool "meld"]
+    # Run meld with the required arguments.
     cmd = meld --diff "$LOCAL" "$MERGED" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
     # cmd = meld --diff "$LOCAL" "$BASE" "$REMOTE" --diff "$BASE" "$LOCAL" --diff "$BASE" "$REMOTE" --output "$MERGED"
+    # Don't keep backup files.
     keepBackup = false
 #+end_src
 
@@ -254,9 +262,11 @@ Use [[https://meldmerge.org/][Meld]] as Git ~difftool:~
     tool = meld
 
 [difftool]
+    # Set prompt to false to avoid asking for confirmation before launching the diff tool.
     prompt = false
 
 [difftool "meld"]
+    # Set the command to launch "meld" with the two input files as arguments.
     cmd = meld "$LOCAL" "$REMOTE"
 #+end_src
 
@@ -1981,51 +1991,6 @@ List all *tags* that contain a specific commit ID:
 #+end_src
 
 ** Check if one commit is an ancestor of another
-
-#+begin_src sh :tangle bin/git-is-ancestor :noweb yes
-#!/usr/bin/env bash
-
-#? git-is-ancestor, Time-stamp: 20221102.1443
-#? Copyright (C) 2013-2023 Fabrice Niessen
-#?
-#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
-#? This is free software: you are free to change and redistribute it.
-#? There is NO WARRANTY, to the extent permitted by law.
-
-##? Usage: git-is-ancestor [options] COMMIT_1 COMMIT_2
-##?
-##? Check if one commit is an ancestor of another.
-##?
-##? Arguments:
-##?   COMMIT_1                      commit (or tag) 1
-##?   COMMIT_2                      commit (or tag) 2
-##?
-##? Options:
-##?   -h, --help                    display this help and exit
-##?   -V, --version                 display version information and exit
-##?
-##? Example:
-##?   git-is-ancestor 71031cec HEAD determine if current branch contains the commit
-
-# Check if docopts command is available.
-command -v docopts > /dev/null 2>&1 || { printf >&2 'Error: docopts command not found.\n'; exit 2; }
-
-help=$(grep "^##?" "$0" | cut -c 5-)
-version=$(grep "^#?"  "$0" | cut -c 4-)
-parsed="$(docopts -h "$help" -V "$version" : "$@")"
-eval "$parsed"
-
-if $(git merge-base --is-ancestor $COMMIT_1 $COMMIT_2); then
-    printf '%s is an ancestor of %s\n' "$COMMIT_1" "$COMMIT_2"
-    exit 0
-elif $(git merge-base --is-ancestor $COMMIT_2 $COMMIT_1); then
-    printf '%s is an ancestor of %s\n' "$COMMIT_2" "$COMMIT_1"
-    exit 0
-else
-    printf '%s and %s are not related\n' "$COMMIT_1" "$COMMIT_2"
-    exit 1
-fi
-#+end_src
 
 #+begin_src conf
     # Usage: git is-ancestor COMMIT_1 COMMIT_2
