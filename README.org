@@ -1,8 +1,9 @@
-#+TITLE:     Awesome Git aliases and extra commands
+#+TITLE:     Awesome Git aliases and time-saving commands
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
-#+DESCRIPTION: Pretty format for `git log' and different helpful command aliases
-#+KEYWORDS:  git, log, pretty format, alias
+#+DESCRIPTION: Compilation of Git configuration settings and time-saving aliases
+#+KEYWORDS:  Git, configuration, aliases
+
 #+LANGUAGE:  en
 #+OPTIONS:   H:4 num:nil toc:nil
 
