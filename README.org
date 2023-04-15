@@ -1,7 +1,7 @@
 #+TITLE:     Awesome Git aliases and time-saving commands
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
-#+DESCRIPTION: Compilation of Git configuration settings and time-saving aliases
+#+DESCRIPTION: Git configs & aliases collection
 #+KEYWORDS:  Git, configuration, aliases
 
 #+LANGUAGE:  en
