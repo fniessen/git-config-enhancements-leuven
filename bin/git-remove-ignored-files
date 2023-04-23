@@ -4,6 +4,11 @@
 # patterns and exists on the filesystem, and remove them from the repository.
 ignored_files=$(git ls-files --others --ignored --exclude-standard)
 
+if [[ -z "$ignored_files" ]]; then
+    printf "No ignored files found.\n"
+    exit 0
+fi
+
 printf "The following ignored files will be deleted:\n%s\n" "$ignored_files"
 
 printf "Are you sure you want to delete these files? (y/N) "
