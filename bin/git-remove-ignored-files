@@ -12,7 +12,7 @@ read confirmation
 if [[ "$confirmation" == "y" ]]; then
     printf "%s\n" "$ignored_files" | while read ignored_file; do
         if [ -e "$ignored_file" ]; then
-            git rm "$ignored_file"
+            rm "$ignored_file"
         fi
     done
     printf "Ignored files have been deleted.\n"
