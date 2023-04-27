@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Get the list of all local branches.
+branches=$(git branch)
+
+# Loop through all local branches.
+for branch in $branches
+do
+    # Check if the branch name contains "-CLOSED".
+    if [[ $branch == *"-CLOSED"* ]]; then
+        # Check if the local branch is not ahead of the remote branch.
+        if [[ -z $(git rev-list origin/"$branch".."$branch") ]]; then
+            # Delete the branch.
+            if git branch -D "$branch" >/dev/null 2>&1; then
+                printf "Deleted local branch %s\n" "$branch"
+            else
+                printf "Failed to delete local branch %s\n" "$branch"
+            fi
+        fi
+    fi
+done
