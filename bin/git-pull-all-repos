@@ -25,17 +25,21 @@ else
 fi
 
 printf 'Pull the changes in all Git repositories...\n'
-printf 'Searching at most 5 levels of directories...\n'
+printf 'Searching at most 5 levels of directories...\n\n'
 
 # Handle directories with spaces in the find command.
 while IFS=$'\n' read -r repo_path; do
     printf 'Updating repository %s:\n' "${bold}$repo_path${reset}"
-    error_file=$(mktemp) # create a temporary file for storing errors
+    # Create a temporary file for storing errors.
+    error_file=$(mktemp)
+    # Delete old branches and only merge the current branch.
     if git -C "$repo_path" remote update --prune 2> "$error_file" && git -C "$repo_path" merge --ff-only "@{u}" 2> "$error_file"; then
-        rm "$error_file" # delete the error file if there are no errors
+        # No errors, so remove the error file.
+        rm "$error_file"
     else
-        printf >&2 'Error occurred during merging. Check the repository logs.\n'
-        cat "$error_file" >&2 # print the errors only if there are any
+        # There were errors, so print them and delete the error file.
+        cat "$error_file" >&2
+        rm "$error_file"
     fi
     printf '\n'
 done < <(find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##')
