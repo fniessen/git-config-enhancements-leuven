@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.1721
+# .gitconfig, Time-stamp: 20230428.1753
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -358,37 +358,26 @@
     skipped2-BAD-MAYBE = !git ls-files -v \
                 | grep '^[a-z]'
 
-    # Usage: git clean-tree-unknown
-    # Delete (only) untracked files and directories.
-    clean-tree-unknown = clean -d -f
+    # Usage: git clean-untracked
+    # Remove all untracked files and directories (that are not ignored by Git).
+    clean-untracked = clean -f -d -X
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
-    # Files and directories in .gitignore will be preserved.
 
-    # Alias to git clean-tree-unknown.
-    purge = !git clean-tree-unknown
+    # Usage: git clean-untracked-dry
+    # Show what files and directories would be removed by the clean-untracked
+    # alias without actually removing them.
+    clean-untracked-dry = clean -n -d -X
 
-    # Usage: git clean-tree-unknown-dry-run
-    # Show files to delete instead of deleting them.
-    clean-tree-unknown-dry-run = clean -d -n
+    # Usage: git clean-all
+    # Delete all untracked files and directories, including those that are
+    # ignored by Git.
+    clean-all = clean -f -d -x
+    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 
-    # Alias to clean-tree-unknown-dry-run.
-    purge-dry-run = !git clean-tree-unknown-dry-run
-
-    # Usage: git clean-tree-unknown-ignored
-    # Delete untracked files (and directories), and also ignored files.
-    clean-tree-unknown-ignored = clean -d -f -x
-    # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED,
-    # including those in .gitignore.
-
-    # Alias to clean-tree-unknown-ignored.
-    purge-all = !git clean-tree-unknown-ignored
-
-    # Usage: git clean-tree-unknown-ignored-dry-run
-    # Show files to delete instead of deleting them.
-    clean-tree-unknown-ignored-dry-run = clean -d -n -x
-
-    # Alias to clean-tree-unknown-ignored-dry-run.
-    purge-all-dry-run = !git clean-tree-unknown-ignored-dry-run
+    # Usage: git clean-all-dry
+    # Show what files and directories would be removed by the clean-all alias
+    # without actually removing them.
+    clean-all-dry = clean -n -d -x
 
     stash-push = stash push
 
