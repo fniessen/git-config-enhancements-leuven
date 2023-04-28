@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2316
+# .gitconfig, Time-stamp: 20230428.2324
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -606,17 +606,17 @@
             xdg-open ${URL/.git}/commits; \
         }; f"
 
-    # Append your staged changes to the latest commit (keeping the pre-existing
+    # Append the staged changes to the last commit (keeping the pre-existing
     # commit message).
     recommit = commit -v --amend --reuse-message HEAD
 
-    # Usage: git reword MSG
-    # Change latest commit message to what you type in.
-    reword = commit --amend -m
+    # Usage: git reword "NEW_COMMIT_MESSAGE"
+    # Amend the previous commit message.
+    amend = commit --amend -m
 
-    # Usage: git credit AUTHOR_NAME AUTHOR_EMAIL
-    # Credit an author on the latest commit.
-    credit = "!f() { \
+    # Usage: git amend-author NAME EMAIL
+    # Amend the last commit with a new author.
+    amend-author = "!f() { \
             git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; \
         }; f"
 
