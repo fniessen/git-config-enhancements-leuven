@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2251
+# .gitconfig, Time-stamp: 20230428.2313
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -580,19 +580,21 @@
             eval $CMD; \
         }; f"
 
-    # Usage: git search-for-author [PATTERN]
-    # Show the log for an author (or my own user email).
-    search-for-author = "!f() { \
+    # Usage: git author-commits [AUTHOR_EMAIL]
+    # Show commit history for a specific author.
+    author-commits = "!f() { \
             git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
         }; f"
 
+    # Usage: git whatwhen STRING
+    # Search for changes that introduced or removed a string.
     whatwhen = log -p -S
 
-    # Find commits by source code.
-    search-for-commits-contents = "!f() { \
-            git log -S $1; \
+    # Usage: git search-for-diff-contents STRING
+    # Search for commits that add or remove a specific string in the repository.
+    search-for-diff-contents = "!f() { \
+            git log -S \"$1\"; \
         }; f"
-# XXX Does not work for strings with spaces in them...
 
     grep4d = !sh -c 'git log -p -S'$1' $2' -
 # Not the best example, but: git grep4d CLOSED '*.java'
