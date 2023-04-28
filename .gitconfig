@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2324
+# .gitconfig, Time-stamp: 20230428.2339
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -688,9 +688,17 @@
                     echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; \
             done | sort -r'"
 
-    be = branch --edit-description
+    # Usage: git branch-desc BRANCH_NAME
+    # Edit the description of a branch.
+    branch-desc = "!f() { git branch --edit-description \"$1\"; }; f"
 
-    track = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
+    # Usage: git branch-upstream
+    # List local branches and their upstream branches.
+    branch-upstream = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
+
+    # Usage: git my-branches
+    # Show all local branches created by the current user.
+    my-branches = git for-each-ref --format='%(authorname) %(refname:short)' refs/heads | grep -E "^$(git config --get user.name)"
 
     br-active = "!f() { \
             git branch --no-merged \
