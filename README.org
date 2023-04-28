@@ -2345,7 +2345,7 @@ See « Undo 'git add' before commit ».
 
 #+begin_src conf
     # Usage: git uncommit
-    # Remove the last commit.
+    # Undo the most recent commit and keep the changes staged for commit again.
     uncommit = reset --soft HEAD~1
 #+end_src
 
@@ -2378,6 +2378,9 @@ Reset the previous commit, but *puts* all *the changes* from that commit *in the
 working tree*:
 
 #+begin_src conf
+    # Usage: git uncommit-unstage
+    # Undo the most recent commit and keep the changes made in the commit as
+    # unstaged changes in the working directory.
     uncommit-unstage = reset --mixed HEAD~1
 #+end_src
 
@@ -2395,14 +2398,13 @@ small commits to haste review process.
 **** Hard option -- Regenerate both the index and working tree
 
 Remove the last commit, *delete changes in your staging area and in your working
-directory*:
+directory* (resetting every file to its committed state):
 
 #+begin_src conf
-    # Erase any changes since your last commit (reset every file in your working
-    # directory to its committed state).
-    # Destroy the changes from the commit you want to undo.
+    # Usage: git undo
+    # Undo the most recent commit and delete any changes made to the code since
+    # then.
     undo = reset --hard HEAD~1
-    # Delete last commit.
 #+end_src
 
 If you reset work that you /never committed/, it is gone for good.  Too bad!  This
@@ -2453,18 +2455,32 @@ into your index), use:
 
 : git revert -n COMMIT
 
-*** Squash
+*** Merge multiple commits into a single commit
 
-Combine together a change done in several commits into one commit so that people
-think you are smart.
+Consolidate changes made in multiple commits into a single commit to present
+a polished and cohesive history, showcasing your attention to detail and
+effective skills -- so that people think you are smart.
 
 #+begin_src conf
-    # Usage: git squash N
-    # Bundle the last N commits into a single commit.
+    # Usage: git squash NUMBER_OF_COMMITS_TO_UNDO
+    # Create a new commit that undoes the changes introduced by a specified
+    # number of previous commits.
     squash = "!f() { \
             git reset --soft HEAD~$1 \
                 && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
         }; f"
+#+end_src
+
+#+begin_src conf :tangle no
+    # Squash changes made in multiple unpushed commits into a single commit for
+    # a polished and cohesive project history
+    squash-BUGGY = "!f() { \
+                [ $(git rev-list HEAD..origin/$(git rev-parse --abbrev-ref HEAD) --count) -eq 0 ] \
+                    && [ $1 -le $(git rev-list --count HEAD) ] \
+                    && git reset --soft HEAD~$1 \
+                    && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\" \
+                    || echo 'Error: Cannot squash already pushed commits or squash more commits than unpushed'; \
+            }; f"
 #+end_src
 
 https://bitbucket.org/blog/git-squash-commits-merging-bitbucket

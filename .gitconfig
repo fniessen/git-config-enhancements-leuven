@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230415.1307
+# .gitconfig, Time-stamp: 20230428.1706
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -619,19 +619,22 @@
                       git checkout $OLD_BRANCH; }; f"
 
     # Usage: git uncommit
-    # Remove the last commit.
+    # Undo the most recent commit and keep the changes staged for commit again.
     uncommit = reset --soft HEAD~1
 
+    # Usage: git uncommit-unstage
+    # Undo the most recent commit and keep the changes made in the commit as
+    # unstaged changes in the working directory.
     uncommit-unstage = reset --mixed HEAD~1
 
-    # Erase any changes since your last commit (reset every file in your working
-    # directory to its committed state).
-    # Destroy the changes from the commit you want to undo.
+    # Usage: git undo
+    # Undo the most recent commit and delete any changes made to the code since
+    # then.
     undo = reset --hard HEAD~1
-    # Delete last commit.
 
-    # Usage: git squash N
-    # Bundle the last N commits into a single commit.
+    # Usage: git squash NUMBER_OF_COMMITS_TO_UNDO
+    # Create a new commit that undoes the changes introduced by a specified
+    # number of previous commits.
     squash = "!f() { \
             git reset --soft HEAD~$1 \
                 && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
