@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.1833
+# .gitconfig, Time-stamp: 20230428.1906
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -278,10 +278,10 @@
     undelete = checkout --
     undo-changes = checkout --
 
-    # Usage: git unstage [FILE...]
-    # Undo a 'git add' before the next commit.
+    # Usage: git unstage [FILENAME...]
+    # Unstage the changes to a file that were previously added to the Git
+    # staging area.
     unstage = reset HEAD --
-    unadd = reset HEAD --
 
     added = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
 
@@ -1113,7 +1113,7 @@ deploy-prod =
 
     precommit = diff --diff-algorithm=minimal -w --cached
 
-    # Usage: git first-modified-date FILE
+    # Usage: git first-modified-date FILENAME
     # Show the date of the first modification of a file.
     first-modified-date = "!f() { \
         date=$(git log --all --follow --pretty=format:%ci -- $1 | tail -n 1); \
@@ -1154,35 +1154,31 @@ deploy-prod =
     #         git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
     #     }; f"
 
-    # Usage: git file-history FILE
-    # Show commit history of a file (like BitBucket).
-    file-history = log
-    # file-history1 = log --
-    # file-history5 = "!f() { git show -s $(git rev-list --date-order HEAD -- $1); }; f"
-    # file-history6 = !sh -c 'git show -s $(git rev-list --date-order HEAD -- $0)'
+    # Usage: git file-history FILENAME
+    # Show the commit history of a specific file.
+    file-history = log --
 
-    # Usage: git file-history-follow-no-merges FILE
-    # Show commit history of a file (with renames and copies, but without merge commits).
-    file-history-follow-no-merges = log --follow --date-order -C
+    # Usage: git file-history-follow-copy-without-merge-commits FILENAME
+    # Show commit history with file copies and renames.
+    file-history-follow-copy-without-merge-commits = log --follow --date-order -C
+    # ... BUT WITHOUT MERGE COMMITS
 
-    # Usage: git file-history-all FILE
-    # Show commit history of a file in all branches.
+    # Usage: git file-history-all FILENAME
+    # Show commit history for all branches.
     file-history-all = log --all
-    # file-history-all1 = log --all --
-    # file-history-all5 = "!f() { git show -s $(git rev-list --date-order --all HEAD -- $1); }; f"
-    # file-history-all6 = !sh -c 'git show -s $(git rev-list --date-order --all HEAD -- $0)'
 
-    # Usage: git file-last-modified FILE
-    # Show when file was last modified.
+    # Usage: git file-last-modified FILENAME
+    # Show the most recent commit across all branches in date order.
     file-last-modified = log -n 1 --all --date-order
 
-    # Usage: git related FILE
-    # Generate a list of which files changed together with a file.
+    # Usage: git related FILENAME
+    # Show all commits that modified a specific file, including the commit
+    # message and file list.
     related = "!f() { \
             git show --name-only $(git rev-list HEAD -- $1); \
         }; f"
 
-    # Usage: git related-files FILE
+    # Usage: git related-files FILENAME
     # Generate a list of which files changed together with a file.
     related-files = !sh -c 'git log --format=format:%H $0 \
                 | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
@@ -1591,10 +1587,9 @@ deploy-prod =
                 && git reset --hard $(git origin)/master \
                 && git rebase master'
 
-    # Usage: git commit-interactive [FILE...]
-    # Show record of pending changes, letting you choose which patch hunks to commit.
-    commit-interactive = !sh -c '(git add -p -- $@ && git commit) \
-                || git reset' --
+    # Usage: git commit-interactive FILENAME...
+    # Interactively stage changes and commit, or abort.
+    commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 
     # Alias of 'commit-interactive'.
     record = !git commit-interactive

@@ -1154,10 +1154,10 @@ area).
 : (foo.html left on disk, but excluded from the next commit)
 
 #+begin_src conf
-    # Usage: git unstage [FILE...]
-    # Undo a 'git add' before the next commit.
+    # Usage: git unstage [FILENAME...]
+    # Unstage the changes to a file that were previously added to the Git
+    # staging area.
     unstage = reset HEAD --
-    unadd = reset HEAD --
 #+end_src
 
 ~unstage~ is the opposite of ~git add~.
@@ -4071,7 +4071,7 @@ I don't need to use the undo commands.
 *** When was this file first committed
 
 #+begin_src conf
-    # Usage: git first-modified-date FILE
+    # Usage: git first-modified-date FILENAME
     # Show the date of the first modification of a file.
     first-modified-date = "!f() { \
         date=$(git log --all --follow --pretty=format:%ci -- $1 | tail -n 1); \
@@ -4171,12 +4171,9 @@ merge commits...
 *List of commits* that modified the *specified file*:
 
 #+begin_src conf
-    # Usage: git file-history FILE
-    # Show commit history of a file (like BitBucket).
-    file-history = log
-    # file-history1 = log --
-    # file-history5 = "!f() { git show -s $(git rev-list --date-order HEAD -- $1); }; f"
-    # file-history6 = !sh -c 'git show -s $(git rev-list --date-order HEAD -- $0)'
+    # Usage: git file-history FILENAME
+    # Show the commit history of a specific file.
+    file-history = log --
 #+end_src
 
 That also will *print the /right/ merge commits*, *like in BitBucket*.
@@ -4186,9 +4183,10 @@ That also will *print the /right/ merge commits*, *like in BitBucket*.
 This one will *follow renames and copies*:
 
 #+begin_src conf
-    # Usage: git file-history-follow-no-merges FILE
-    # Show commit history of a file (with renames and copies, but without merge commits).
-    file-history-follow-no-merges = log --follow --date-order -C
+    # Usage: git file-history-follow-copy-without-merge-commits FILENAME
+    # Show commit history with file copies and renames.
+    file-history-follow-copy-without-merge-commits = log --follow --date-order -C
+    # ... BUT WITHOUT MERGE COMMITS
 #+end_src
 
 ... but it *DOES NOT print merge commits*!
@@ -4206,20 +4204,17 @@ Add ~--all~ to show commits of /all your branches/, not just from the current
 branch:
 
 #+begin_src conf
-    # Usage: git file-history-all FILE
-    # Show commit history of a file in all branches.
+    # Usage: git file-history-all FILENAME
+    # Show commit history for all branches.
     file-history-all = log --all
-    # file-history-all1 = log --all --
-    # file-history-all5 = "!f() { git show -s $(git rev-list --date-order --all HEAD -- $1); }; f"
-    # file-history-all6 = !sh -c 'git show -s $(git rev-list --date-order --all HEAD -- $0)'
 #+end_src
 
 Find the *most recent commit* (chronologically) that modified a file -- looking in
 /all/ known commits:
 
 #+begin_src conf
-    # Usage: git file-last-modified FILE
-    # Show when file was last modified.
+    # Usage: git file-last-modified FILENAME
+    # Show the most recent commit across all branches in date order.
     file-last-modified = log -n 1 --all --date-order
 #+end_src
 
@@ -4227,8 +4222,9 @@ List commits affecting a specific path and then get all the files modified in
 each commit:
 
 #+begin_src conf
-    # Usage: git related FILE
-    # Generate a list of which files changed together with a file.
+    # Usage: git related FILENAME
+    # Show all commits that modified a specific file, including the commit
+    # message and file list.
     related = "!f() { \
             git show --name-only $(git rev-list HEAD -- $1); \
         }; f"
@@ -4237,7 +4233,7 @@ each commit:
 (see https://stackoverflow.com/questions/42527378/git-get-the-list-of-files-that-have-been-modified-along-one-specific-file)
 
 #+begin_src conf
-    # Usage: git related-files FILE
+    # Usage: git related-files FILENAME
     # Generate a list of which files changed together with a file.
     related-files = !sh -c 'git log --format=format:%H $0 \
                 | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
@@ -5485,10 +5481,9 @@ Let's do a slightly different command: ~resync~
 Ask interactively which patch hunk to commit, and then do the commit:
 
 #+begin_src conf
-    # Usage: git commit-interactive [FILE...]
-    # Show record of pending changes, letting you choose which patch hunks to commit.
-    commit-interactive = !sh -c '(git add -p -- $@ && git commit) \
-                || git reset' --
+    # Usage: git commit-interactive FILENAME...
+    # Interactively stage changes and commit, or abort.
+    commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 
     # Alias of 'commit-interactive'.
     record = !git commit-interactive
