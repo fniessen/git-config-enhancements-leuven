@@ -4200,6 +4200,12 @@ they have two parents and one parent might have renamed the file. The rename
 detection and following code inside ~git log~ is a quick hack...
 #+end_note
 
+#+begin_src conf
+    # Usage: git file-history-follow-copy FILENAME
+    # Show commit history of a file, including copies, renames, and merges.
+    file-history-follow-copy = log --follow --date-order -C --find-renames --merges
+#+end_src
+
 Add ~--all~ to show commits of /all your branches/, not just from the current
 branch:
 
