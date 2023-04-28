@@ -285,8 +285,9 @@ Supported editors include:
 
 #+begin_src conf
 [core]
-    # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
+    # Set Emacsclient as the default editor.
     editor = emacsclient
+    # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
 #+end_src
 
 ** Delete ".orig" files
@@ -314,7 +315,8 @@ variable/.
 #+end_note
 
 #+begin_src conf
-    # git-grep to ignore ^M.
+    # Set Git pager to ignore ^M and use less with custom flags.
+    # (git-grep to ignore ^M)
     pager = tr -d '\\r' | less -REX
 #+end_src
 
@@ -324,8 +326,9 @@ a UTF-8 terminal) in reverse video and hexadecimals: see ~LESSBINFMT~.
 Stop viewing ~^M~ symbols in diff:
 
 #+begin_src conf
-    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    # Set whitespace configuration to only warn about carriage return at the end of the line.
     whitespace = cr-at-eol
+    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
 #+end_src
 
 *** Diff-so-fancy extension
@@ -335,6 +338,7 @@ Improve the ~git diff~ output using a tool like:
 - [[https://github.com/dandavison/delta][delta]].
 
 #+begin_src conf
+    # Set Git pager to use less with custom flags and diff-so-fancy.
     pager = diff-so-fancy | LESS= less --tabs=4 -FRX
 #+end_src
 
@@ -439,7 +443,7 @@ character in Git-handled repositories.
 Performance:
 
 #+begin_src conf
-    # Do filesystem operations in parallel to hide latency (default since v2.1).
+    # Enable parallel filesystem operations.
     preloadindex = true
 #+end_src
 
@@ -447,8 +451,7 @@ Performance:
 memory for certain operations.  This provides a significant performance boost.
 
 #+begin_src conf
-    # Enable file system caching.  Also, fix UAC issues so you don't need to run
-    # Git as administrator (default since v2.8).
+    # Enable file system caching to avoid UAC issues.
     fscache = true
 #+end_src
 
@@ -456,7 +459,7 @@ Clean up reflog?
 
 #+begin_src conf
 [gc]
-    # Minimize the number of files in .git/.
+    # Optimize for repositories with many files.
     auto = 256
 #+end_src
 
@@ -464,6 +467,7 @@ Clean up reflog?
 
 #+begin_src conf
 [help]
+    # Enable autocorrect for mistyped commands.
     autocorrect = 1
 #+end_src
 
@@ -479,14 +483,14 @@ instead of:
 
 #+begin_src conf
 [log]
-    # Display the date in a short format.
+    # Use short date format for log messages.
     date = short
 #+end_src
 
 Print out the ref names (tags or branches) of any commits that are shown.
 
 #+begin_src conf
-    # Display ref names (e.g. branch or tag names) in a short format.
+    # Use short format for ref names (e.g. branch or tag names).
     decorate = short
 #+end_src
 

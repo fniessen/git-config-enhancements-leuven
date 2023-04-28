@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230429.0003
+# .gitconfig, Time-stamp: 20230429.0012
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -48,38 +48,42 @@
     cmd = meld "$LOCAL" "$REMOTE"
 
 [core]
-    # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
+    # Set Emacsclient as the default editor.
     editor = emacsclient
+    # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
 
-    # git-grep to ignore ^M.
+    # Set Git pager to ignore ^M and use less with custom flags.
+    # (git-grep to ignore ^M)
     pager = tr -d '\\r' | less -REX
 
-    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
+    # Set whitespace configuration to only warn about carriage return at the end of the line.
     whitespace = cr-at-eol
+    # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
 
+    # Set Git pager to use less with custom flags and diff-so-fancy.
     pager = diff-so-fancy | LESS= less --tabs=4 -FRX
 
 [core]
 
-    # Do filesystem operations in parallel to hide latency (default since v2.1).
+    # Enable parallel filesystem operations.
     preloadindex = true
 
-    # Enable file system caching.  Also, fix UAC issues so you don't need to run
-    # Git as administrator (default since v2.8).
+    # Enable file system caching to avoid UAC issues.
     fscache = true
 
 [gc]
-    # Minimize the number of files in .git/.
+    # Optimize for repositories with many files.
     auto = 256
 
 [help]
+    # Enable autocorrect for mistyped commands.
     autocorrect = 1
 
 [log]
-    # Display the date in a short format.
+    # Use short date format for log messages.
     date = short
 
-    # Display ref names (e.g. branch or tag names) in a short format.
+    # Use short format for ref names (e.g. branch or tag names).
     decorate = short
 
 [diff]
