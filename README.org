@@ -552,18 +552,16 @@ Git diff will use ~(i)ndex~, ~(w)ork tree~, ~(c)ommit~ and ~(o)bject~ instead of
 / ~c~ / ~d~ as prefixes for patches:
 
 #+begin_src conf
+[diff "zebra"]
+    # Use dimmed zebra coloring to highlight moved lines in a diff.
+    colorMoved = dimmed_zebra
+
+[diff "header"]
     # Include mnemonic prefixes in diff hunk headers.
     mnemonicprefix = true
-#+end_src
 
-#+begin_src conf
     # Don't show any prefix in diff hunk headers.
     noprefix = true
-#+end_src
-
-#+begin_src conf
-    # Enable dimmed zebra coloring to highlight moved lines in a diff.
-    colorMoved = dimmed_zebra
 #+end_src
 
 ** Apply

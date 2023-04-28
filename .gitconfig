@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230429.0012
+# .gitconfig, Time-stamp: 20230429.0018
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -96,14 +96,16 @@
     # Use the patience diff algorithm for generating patches.
     algorithm = patience
 
+[diff "zebra"]
+    # Use dimmed zebra coloring to highlight moved lines in a diff.
+    colorMoved = dimmed_zebra
+
+[diff "header"]
     # Include mnemonic prefixes in diff hunk headers.
     mnemonicprefix = true
 
     # Don't show any prefix in diff hunk headers.
     noprefix = true
-
-    # Enable dimmed zebra coloring to highlight moved lines in a diff.
-    colorMoved = dimmed_zebra
 
 [apply]
     # Don't detect whitespace errors when applying a patch.
