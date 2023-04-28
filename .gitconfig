@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2213
+# .gitconfig, Time-stamp: 20230428.2238
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -472,7 +472,8 @@
     # Delete changes without applying them.
     unstash-delete-only = stash drop
 
-    # Shortcut for commit.
+    # Usage: git ci -m "MESSAGE"
+    # Alias for "git commit".
     ci = commit
 
 [commit]
@@ -480,31 +481,41 @@
 
 [alias]
 
-    # Usage: git commit-hash [COMMIT_ISH]
+    # Usage: git last-commit-hash
+    # Show abbreviated hash of the last commit.
     # Examples:
-    #   git commit-hash               find hash of last commit
-    #   git commit-hash develop       find hash of last commit in develop
-    commit-hash = log -1 --pretty=format:'%h'
+    #   git last-commit-hash          find hash of last commit
+    #   git last-commit-hash develop  find hash of last commit in develop
+    last-commit-hash = log -1 --pretty=format:'%h'
 
     # Usage: git changed-files [COMMIT]
+    # Show all files modified in each commit, including merge commits.
     # Examples:
     #   git changed-files             list files modified in last commit
     #   git changed-files bada55      list files modified in this commit
     changed-files = show --pretty="format:" --name-only -m
 
     download-email-patch = XXX git format-patch $(git current-branch).patch
-    download-plain-diff = "!f() { \
+
+    # Usage: git download-commit-plain-diff [COMMIT]
+    # Create a diff file for the changes in a commit or range of commits.
+    download-commit-plain-diff = "!f() { \
             git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff; \
         }; f"
 
-    showtool = "!f() { \
+    # Usage: git difftool-rev [REVISION]
+    # Launch a diff tool for a specific revision or branch.
+    difftool-rev = "!f() { \
             REV=$(git rev-parse \"${*:-HEAD}\"); \
             git difftool $REV~1 $REV; \
         }; f"
 
-    diff-file-last-commit = "!f() { \
+    # Usage: git file-diff-last-modification FILENAME
+    # Show the diff of the last commit that modified a specific file using
+    # a diff tool.
+    file-diff-last-modification = "!f() { \
             PROJECT_ROOT_DIR=$(git root); \
-            echo finding full file path of $1 in $PROJECT_ROOT_DIR; \
+            echo Finding full file path of $1 in $PROJECT_ROOT_DIR; \
             FILEPATH=$(find $PROJECT_ROOT_DIR -type f -name $1); \
             echo full file path $FILEPATH; \
             LAST_MODIFIED_COMMIT_HASH=$(git rev-list -1 HEAD $FILEPATH); \
@@ -512,7 +523,9 @@
             git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
         }; f"
 
-    diffall = difftool -t meld --dir-diff
+    # Usage: git dir-diff
+    # Open Meld with directory comparison for all modified files.
+    dir-diff = difftool -t meld --dir-diff
 
     # Usage: git where REV
     # Print only refs which contain the commit.
