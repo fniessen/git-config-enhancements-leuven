@@ -138,8 +138,8 @@ Using ~master~ as the name for the initial branch.
 
 #+begin_src conf
 [init]
-    # Set the default branch for new repositories to master.
-    defaultBranch = master
+    # Set the default branch for new repositories to main.
+    defaultBranch = main
 #+end_src
 
 This default branch name is subject to change. To configure the initial branch
