@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2339
+# .gitconfig, Time-stamp: 20230428.2349
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -673,20 +673,22 @@
     # (Create a copy of the current branch on the remote "origin", and set it to
     # track the upstream branch)
 
-    # List local and remote branches.
+    # Usage: git branches
+    # Show all branches with their corresponding upstream branches and commit hashes.
     branches = branch -a -vv
 
-    # Show info for branches which have been checked out locally...
-    # (Sorted by date; can be useful for spring cleaning)
+    # Usage: git br
+    # Show detailed information about all local branches, sorted by commit date.
     br = for-each-ref \
                 --sort=-committerdate refs/heads/ \
                 --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
 
-    # What branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general.
-    show-origin = "!sh -c 'git fetch; \
-                for BRANCH_NAME in $(git branch -r | grep -v HEAD); do \
-                    echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; \
-            done | sort -r'"
+    # Usage: git remote-branches
+    # List all remote branches sorted by most recent commit.
+    remote-branches = "!sh -c 'git fetch; \
+                       for BRANCH_NAME in $(git branch -r | grep -v HEAD); do \
+                           echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; \
+                       done | sort -r'"
 
     # Usage: git branch-desc BRANCH_NAME
     # Edit the description of a branch.
