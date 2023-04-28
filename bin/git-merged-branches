@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Define ANSI color codes.
+BOLD=$(tput bold)
+RESET=$(tput sgr0)
+
+# Fetch any changes from the remote repository.
+git fetch --prune
+
+# Get the name of the current branch.
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Get a list of all branches that have been merged into the current branch.
+merged_branches=$(git branch --merged "$current_branch" --color=always)
+
+# Print out the list of merged branches with the current branch name in bold.
+
+printf "The following branches have been merged into the %s%s%s branch:\n" "$BOLD" "$current_branch" "$RESET"
+printf "%s\n" "$merged_branches"
