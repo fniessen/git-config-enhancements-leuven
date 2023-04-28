@@ -1126,9 +1126,11 @@ thrown away, the alias to use is ~unmodify~;
 
 #+begin_src conf
     # Usage: git unmodify TREE_ISH...
-    # Undo local changes in the working copy at or within TREE_ISH.
+    # Undo changes made to the working directory of the current branch by
+    # overwriting them with the last committed version.
     unmodify = checkout --
     undelete = checkout --
+    undo-changes = checkout --
 #+end_src
 
 #+begin_note
