@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2146
+# .gitconfig, Time-stamp: 20230428.2213
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -257,8 +257,7 @@
     find-files-all = !git search-for-files-all
 
     # Usage: git search-for-code PATTERN [TREE]
-    # Search repository (or the given tree) for lines matching a given pattern.
-    # `-I' = Don't match the pattern in binary files.
+    # Search for a string in files, ignoring binary files and highlighting matches.
     search-for-code = "grep -i -I --line-number --break --heading -C 1"
 
     # Alias of 'search-for-code'.
@@ -266,14 +265,14 @@
 
     search-for-code-in-extension = "XXX"
 
-    # In all commits, not in all branches!!! Lots of duplicates!!!
-    grep-all = "!f() { \
-            git rev-list --all \
-                | xargs git grep $1; \
-        }; f"
+    # Usage: git git-search <search-term>
+    # Search for a string in all Git-tracked files.
+    grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
+    # IN ALL COMMITS, NOT IN ALL BRANCHES???!!! LOTS OF DUPLICATES!!!
 
     # Usage: git gno PATTERN [TREE]
-    # Show only the names of files that contain matches.
+    # Search for a pattern in all tracked filenames, ignoring case and binary
+    # files.
     gno = "grep -i -I --name-only"
 
     # Usage: git unmodify TREE_ISH...
@@ -288,24 +287,32 @@
     # staging area.
     unstage = reset HEAD --
 
-    added = "!git status --porcelain -uno | awk 'match($1, /A/) {print $2}'"
+    # Usage: git added-files
+    # Show files that have been added but not yet committed.
+    added-files = !git status --porcelain -uno | awk 'match($1, /A/) {print $2}'
 
-    modified = !git diff --name-only --diff-filter=M
+    # Usage: git modified-files
+    # List all files modified in the working tree.
+    modified-files = !git diff --name-only --diff-filter=M
 
     ignored = ls-files --others --ignored --exclude-standard
 
-    # List all untracked files.
-    untracked = ls-files --others --exclude-standard
+    # Usage: git untracked-files
+    # List untracked files in the repository.
+    untracked-files = ls-files --others --exclude-standard
+    untracked-files2 = !git status --porcelain -uno | awk 'match($1, /\\?/) {print $2}'
 
-    # List all tracked files.
-    tracked = ls-files -t
+    # Usage: git tracked-files
+    # List all tracked files in the repository, sorted by last modification time.
+    tracked-files = ls-files -t
 
-    # Usage: git deleted
-    # List files deleted in the working tree.
-    deleted = ls-files -d
+    # Usage: git deleted-files
+    # Show deleted files in the working directory.
+    deleted-files = ls-files -d
 
-    # List staged added, modified or deleted files.
-    staged = "!git status --porcelain -uno | grep -P '^[ADM]' | awk '{ print $2 }'"
+    # Usage: git staged-files
+    # Show a list of staged added, modified or deleted files.
+    staged-files = !git status --porcelain -uno | grep -P '^[ADM]' | awk '{ print $2 }'
 
     # Usage: git file-status FILENAME
     # Check the status of a file (tracked, not tracked, or does not exist).
