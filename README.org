@@ -808,7 +808,7 @@ Then, in the working copy:
 
 #+begin_src conf
     # Usage: git init-repository
-    # Create a repository.
+    # Initialize a new Git repository with an initial commit.
     init-repository = !git init \
                 && (ls -1A | grep -q . || touch .gitignore) \
                 && git add . \
