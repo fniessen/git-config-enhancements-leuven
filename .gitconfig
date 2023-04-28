@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.1706
+# .gitconfig, Time-stamp: 20230428.1721
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1087,7 +1087,7 @@ deploy-prod =
     exec = '!exec '
 
     # Interactive rebase with the given number of latest commits
-    ireb = "!r() { git rebase -i HEAD~$1; }; r"
+    ireb = "!f() { git rebase -i HEAD~$1; }; f"
 
     # Start an interactive rebase of all the commits you haven't pushed
     # yet. Handy for collapsing a bunch of work-in-progress snapshots into
@@ -1095,6 +1095,8 @@ deploy-prod =
     # squashing a commit someone else has already referred to.
     work-in-progress = rebase -i @{u}
 
+    # Usage: git st
+    # Display the current status of the repository with branch names.
     st = status -s -b
 
     # Show the diff between the latest commit and the current state
@@ -1128,7 +1130,9 @@ deploy-prod =
 
     precommit = diff --diff-algorithm=minimal -w --cached
 
-    first-commit = "!f() { \
+    # Usage: git first-modified-date FILE
+    # Show the date of the first modification of a file.
+    first-modified-date = "!f() { \
         date=$(git log --all --follow --pretty=format:%ci -- $1 | tail -n 1); \
         echo \"$date\"; \
     }; f"

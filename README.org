@@ -3979,7 +3979,7 @@ clean and relevant commits, no experiments or fixing typos.
 
 #+begin_src conf
     # Interactive rebase with the given number of latest commits
-    ireb = "!r() { git rebase -i HEAD~$1; }; r"
+    ireb = "!f() { git rebase -i HEAD~$1; }; f"
 #+end_src
 
 #+begin_src conf
@@ -3996,6 +3996,8 @@ Give the status in the *short format* (preceded by a line showing the /branch na
 and /tracking info/).
 
 #+begin_src conf
+    # Usage: git st
+    # Display the current status of the repository with branch names.
     st = status -s -b
 #+end_src
 
@@ -4082,13 +4084,21 @@ I don't need to use the undo commands.
 *** When was this file first committed
 
 #+begin_src conf
-    first-commit = "!f() { \
+    # Usage: git first-modified-date FILE
+    # Show the date of the first modification of a file.
+    first-modified-date = "!f() { \
         date=$(git log --all --follow --pretty=format:%ci -- $1 | tail -n 1); \
         echo \"$date\"; \
     }; f"
 #+end_src
 
-XXX Does not work on renamed files
+XXX The above alias does not work on renamed files...
+
+#+begin_src conf :tangle no
+    first-modified-date-FIX = "!f() { \
+        git log --follow --format=%ai -- $1 | tail -1; \
+    }; f"
+    #+end_src
 
 *** When was this file last updated
 
