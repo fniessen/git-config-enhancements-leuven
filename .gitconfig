@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2134
+# .gitconfig, Time-stamp: 20230428.2146
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -233,18 +233,19 @@
                 | sed 's#.git$##'; \
         }; f"
 
-    # Usage: git serve
-    # Fire up a builtin local webserver (for browsing and sharing repository over HTTP).
-    serve = "daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/"
-    serve = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
+    # Usage: git start-daemon
+    # Start a Git daemon server for remote repository access.
+    start-daemon = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
 
     # Usage: git search-for-files PATTERN
-    # List files matching the pattern.
+    # List all files in the current branch matching a case-insensitive search pattern.
     search-for-files = !git ls-tree -r --name-only HEAD | grep -i --color=auto
 
     # Alias of 'search-for-files'.
     find-files = !git search-for-files
 
+    # Usage: git search-for-files-all PATTERN
+    # Search for a file in all branches.
     search-for-files-all = "!f() { \
             for BRANCH in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
                 printf \"\n$(tput bold)$BRANCH:$(tput sgr0)\n\"; \
