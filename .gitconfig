@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2349
+# .gitconfig, Time-stamp: 20230428.2358
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -668,10 +668,12 @@
         }; f"
 
     # Usage: git publish
-    # Push current branch to remote server.
-    publish = !git push -u $(git origin) $(git current-branch)
-    # (Create a copy of the current branch on the remote "origin", and set it to
-    # track the upstream branch)
+    # Push the current branch to the upstream branch with the same name.
+    push-upstream = !git push -u $(git origin) $(git current-branch)
+    # push-upstream = !git push -u $(git remote show origin | grep 'Fetch URL' | cut -d':' -f2- | sed 's/\.git$//') $(git rev-parse --abbrev-ref HEAD)
+
+    # Alias of 'push-upstream'.
+    publish = !git push-upstream
 
     # Usage: git branches
     # Show all branches with their corresponding upstream branches and commit hashes.
