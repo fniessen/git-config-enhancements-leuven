@@ -1209,28 +1209,20 @@ How to restore a deleted file in a Git repository?
 *** Tell if a file is being tracked
 
 #+begin_src conf
-    is-tracked1 = "!f() { \
-            TRACKED=$(git ls-files $1); \
-            if [ -z \"$TRACKED\" ]; then \
-                echo 'File NOT tracked (or No such file)'; \
+    # Usage: git file-status FILENAME
+    # Check the status of a file (tracked, not tracked, or does not exist).
+    file-status = "!f() { \
+        printf \"$1: \"; \
+        if [ -e \"$1\" ]; then \
+            if git ls-files --error-unmatch \"$1\" >/dev/null 2>&1; then \
+                echo \"tracked\"; \
             else \
-                echo 'File tracked'; \
+                echo \"not tracked\"; \
             fi; \
-        }; f"
-    is-tracked2 = "!f() { \
-            echo -n $1': '; \
-            if [ -f \"$1\" ]; then \
-                TRACKED=$(git ls-files $1); \
-                if [ -z \"$TRACKED\" ]; then \
-                    echo 'File NOT tracked'; \
-                else \
-                    echo 'File tracked'; \
-                fi; \
-            else \
-                echo 'No such file!'; \
-            fi; \
-        }; f"
-# does not work!?
+        else \
+            echo \"does not exist\"; \
+        fi; \
+    }; f"
 #+end_src
 
 #+begin_note
