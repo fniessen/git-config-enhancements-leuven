@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.1927
+# .gitconfig, Time-stamp: 20230428.2134
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -224,6 +224,8 @@
                 | sed 's#.git$##'; \
         }; f"
 
+    # Usage: git repo-slug
+    # Get the name of the remote repository.
     repo-slug = "!f() { \
             git remote show $(git origin) -n \
                 | grep 'Fetch URL:' \
