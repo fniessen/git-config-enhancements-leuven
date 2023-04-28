@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.1916
+# .gitconfig, Time-stamp: 20230428.1919
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -193,13 +193,13 @@
 
 [alias]
 
-    # Usage: git alias
-    # Print the list of Git aliases.
-    alias = "!git config -l \
-                | grep alias \
-                | cut -c 7- \
-                | sort \
-                | sed 's/=/ = /'"
+    # Usage: git aliases
+    # List all Git aliases in alphabetical order.
+    aliases = "!git config -l \
+                  | grep alias \
+                  | cut -c 7- \
+                  | sort \
+                  | sed 's/=/ = /'"
 
     work-profile = config user.email \"john@work.com\"
 
