@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.1923
+# .gitconfig, Time-stamp: 20230428.1927
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -215,6 +215,8 @@
     # origin = !echo "${$(git config --get clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
 
+    # Usage: git repo-owner
+    # Get the owner of the remote Git repository.
     repo-owner = "!f() { \
             git remote show $(git origin) -n \
                 | grep 'Fetch URL:' \

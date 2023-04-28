@@ -913,6 +913,8 @@ Fetch URL: git@bitbucket.org-something:user/slug
 #+end_src
 
 #+begin_src conf
+    # Usage: git repo-owner
+    # Get the owner of the remote Git repository.
     repo-owner = "!f() { \
             git remote show $(git origin) -n \
                 | grep 'Fetch URL:' \
