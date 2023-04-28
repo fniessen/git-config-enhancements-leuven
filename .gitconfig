@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2238
+# .gitconfig, Time-stamp: 20230428.2251
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -557,8 +557,9 @@
             git log --grep \"$1\" -i $(git rev-list --all); \
         }; f"
 
-    # Usage: git search-for-commits-bitbucket-or PATTERN...
-    # Search for commits (Filter by message).
+    # Usage: git search-for-commits-bitbucket-or KEYWORD...
+    # Search for commit messages that match one or more search patterns (Filter
+    # by message).
     search-for-commits-or-bitbucket = "!f() { \
             for l in \"$@\"; do \
                 git log --grep \"$l\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
@@ -569,7 +570,8 @@
     # XXX Add all, date short...
 
     # Usage: git search-for-commits-gitlab-and PATTERN...
-    # Search for commits (Filter by message).
+    # Search for commits that match one or more search patterns in commit
+    # messages OR DIFF CONTENTS??? (Filter by message).
     search-for-commits-and-gitlab = "!f() { \
             CMD=\"git log --all-match -i\"; \
             for PATTERN in \"$@\"; do \
