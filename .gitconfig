@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230428.2313
+# .gitconfig, Time-stamp: 20230428.2316
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -596,8 +596,10 @@
             git log -S \"$1\"; \
         }; f"
 
-    grep4d = !sh -c 'git log -p -S'$1' $2' -
-# Not the best example, but: git grep4d CLOSED '*.java'
+    # Usage: git grep4d STRING FILENAME
+    # Show commits that add or remove a specific string in a file.
+    # Example: git grep4d CLOSED '*.java'
+    grep4d = "!sh -c 'git log -p -S \"$1\" \"$2\"' -"
 
     browse-commits = "!f() { \
             URL=$(git config --get remote.$(git origin).url); \

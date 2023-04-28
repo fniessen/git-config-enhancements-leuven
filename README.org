@@ -2184,8 +2184,10 @@ Prettier ~whatchanged~ with full diffs based on text search:
 #+end_src
 
 #+begin_src conf
-    grep4d = !sh -c 'git log -p -S'$1' $2' -
-# Not the best example, but: git grep4d CLOSED '*.java'
+    # Usage: git grep4d STRING FILENAME
+    # Show commits that add or remove a specific string in a file.
+    # Example: git grep4d CLOSED '*.java'
+    grep4d = "!sh -c 'git log -p -S \"$1\" \"$2\"' -"
 #+end_src
 
 By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
