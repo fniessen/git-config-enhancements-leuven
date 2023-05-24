@@ -1,67 +1,17 @@
 #!/usr/bin/env bash
 
-# Pull the changes in all Git repositories of the current directory.
+# Pull the latest changes for each Git repository found in the current directory.
 
-# Check if tput command is available.
-if command -v tput > /dev/null; then
-    bold=$(tput bold)
-    reset=$(tput sgr0)
-else
-    bold=''
-    reset=''
-fi
+# Find all Git repositories recursively.
+repos=$(find . -type d -name ".git")
 
-# Check if git command is available.
-command -v git > /dev/null 2>&1 || { printf >&2 'Error: git command not found.\n'; exit 2; }
-
-# Check and fix the permissions on ~/.ssh/config.
-if command -v stat > /dev/null; then
-    if [[ $(stat -c %a ~/.ssh/config) != 600 ]]; then
-        printf 'Bad permissions on ~/.ssh/config. Fixing it...\n'
-        chmod 600 ~/.ssh/config
-    fi
-else
-    printf >&2 'Error: stat command not found. Skipping permissions check on ~/.ssh/config.\n'
-fi
-
-printf 'Pull the changes in all Git repositories...\n'
-printf 'Searching at most 5 levels of directories...\n\n'
-
-# Handle directories with spaces in the find command.
-while IFS=$'\n' read -r repo_path; do
-    printf 'Updating repository %s:\n' "${bold}$repo_path${reset}"
-    # Create a temporary file for storing errors.
-    error_file=$(mktemp)
-    # Delete old branches and only merge the current branch.
-    if git -C "$repo_path" remote update --prune 2> "$error_file" && git -C "$repo_path" merge --ff-only "@{u}" 2> "$error_file"; then
-        # No errors, so remove the error file.
-        rm "$error_file"
+# Pull the latest changes for each repository.
+for repo in $repos; do
+    repo_dir=$(dirname "$repo")
+    echo -e "\nPulling latest changes for repository in $(tput bold)${repo_dir##*/}$(tput sgr0)..."
+    if ! output=$(git -C "$repo_dir" pull 2>&1); then
+        echo "$(tput setaf 1)$output$(tput sgr0)"
     else
-        # There were errors, so print them and delete the error file.
-        cat "$error_file" >&2
-        rm "$error_file"
+        echo "$(tput setaf 2)$output$(tput sgr0)"
     fi
-    printf '\n'
-done < <(find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##')
-
-# See https://stackoverflow.com/questions/17099564/make-a-shell-script-to-update-3-git-repos
-# See https://medium.com/@codenameyau/updating-multiple-repos-with-one-command-9768c8cdfe46
-
-
-# find . -name .git -type d \
-#     | xargs -n1 -P4 -I% git --git-dir=% --work-tree=%/.. remote update -p
-# Using -type d prevents execution for ".git" files inside submodules. Using -P4
-# runs four fetches in parallel to speed things up a bit (and continues to make
-# progress elsewhere if a single repository hangs). I prefer git remote update -p
-# instead of git pull so that I can deal with merge conflicts later or rebase
-# after I'm offline.
-
-
-# Git repositories all have HEAD, refs, objects and config entries.
-# on GNU/anything,
-#
-# find -name HEAD -execdir test -e refs -a -e objects -a -e config \; -printf %h\\n
-#
-# Just checking for .git will miss many bare repos and all submodules.
-#
-# this should be the accepted answer: only solution that also works for bare repos also
+done
