@@ -1,39 +1,17 @@
 #!/usr/bin/env bash
 
-# Push the changes in all Git repositories of the current directory.
-#
-# Usage:
-#   git-push-all-repos
+# Push the latest changes for each Git repository found in the current directory.
 
-bold=$(tput bold)
-reset=$(tput sgr0)
+# Find all Git repositories recursively.
+repos=$(find . -type d -name ".git")
 
-printf 'Push the changes in all Git repositories...\n'
-printf "Searching at most 5 levels of directories...\n"
-
-# Handle directories with spaces in the find command.
-while IFS=$'\n' read -r repo_path; do
-    printf 'Updating repository %s:\n' "${bold}$repo_path${reset}"
-    remote_url=$(git -C "$repo_path" config --get remote.origin.url)
-    if git -C "$repo_path" rev-parse --quiet --verify @{u} >/dev/null 2>&1; then
-        if git -C "$repo_path" diff --quiet @{u} &>/dev/null; then
-            printf "No changes to push\n"
-        else
-            printf "Changes found:\n"
-            git -C "$repo_path" log --date=short @{u}..
-            # Make sure push is successful before continuing to next repo.
-            if git -C "$repo_path" push; then
-                printf "Push to %s was successful\n" "$remote_url"
-            else
-                printf >&2 "Error: Push to %s failed\n" "$remote_url"
-            fi
-        fi
+# Push the latest changes for each repository.
+for repo in $repos; do
+    repo_dir=$(dirname "$repo")
+    echo -e "\nPushing latest changes for repository in $(tput bold)${repo_dir##*/}$(tput sgr0)..."
+    if ! output=$(git -C "$repo_dir" push 2>&1); then
+        echo "$(tput setaf 1)$output$(tput sgr0)"
     else
-        printf >&2 "Error: remote repository '%s' is not accessible or authentication failed\n" "$remote_url"
+        echo "$(tput setaf 2)$output$(tput sgr0)"
     fi
-    printf "\n"
-done < <(find . -maxdepth 5 -name '.git' -type d -print0 | xargs -0 -I {} dirname {} | sed 's#^./##')
-
-# TODO Return the exit code of the underlying git invocations
-# TODO Test with branch that's not yet published (@{u} is not known...)
-# TODO Test if Git remote URL is reachable
+done
