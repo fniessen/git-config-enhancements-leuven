@@ -83,6 +83,8 @@ make Git even better together!
 
 From [[https://xkcd.com/1597/][xkcd]].
 
+See also [[https://girliemac.com/blog/2017/12/26/git-purr/][Git Commands Explained with Cats!]]
+
 * Overview
 
 The following configures interesting global settings for Git. These are stored
@@ -936,14 +938,13 @@ Fetch URL: git@bitbucket.org-something:user/slug
         }; f"
 #+end_src
 
-# Updating git aliases for different *default branch* names (~master~, ~main~, etc.):
-#
-# #+begin_src conf
-#     ## git remote show $(git origin) | grep "HEAD branch" | cut -d' ' -f5
-#     default-branch = !git symbolic-ref refs/remotes/$(git origin)/HEAD | sed 's@^refs/remotes/$(git origin)/@@'
-# #+end_src
-#
-# This method can return incorrect results...
+XXX Updating git aliases for different *default branch* names (~master~, ~main~, etc.):
+
+#+begin_src conf
+    # Usage: git default-branch
+    # Get the name of the default branch (main or master).
+    default-branch = "!sh -c 'if [ -f $(git rev-parse --git-dir)/refs/heads/main ]; then echo main; else echo master; fi'"
+#+end_src
 
 : git branch | grep -o -m1 "\b\(master\|main\)\b"
 See https://stackoverflow.com/questions/65703168/how-to-get-the-default-for-the-master-branch-in-git
@@ -1169,6 +1170,10 @@ area).
 ~unstage~ is the opposite of ~git add~.
 
 ** Selecting files
+
+#+begin_src conf
+    staged = diff --cached --name-only
+#+end_src
 
 #+begin_src conf
     # Usage: git added-files
@@ -1958,6 +1963,16 @@ Diff the last commit for a given file:
             echo last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
             git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
         }; f"
+
+    file-diff-last-modification2 = "!f() { \
+            PROJECT_ROOT_DIR=$(git rev-parse --show-toplevel); \
+            echo Finding full file path of $1 in $PROJECT_ROOT_DIR; \
+            FILEPATH=$(git ls-files --full-name -- $1); \
+            echo Full file path $FILEPATH; \
+            LAST_MODIFIED_COMMIT_HASH=$(git log -1 --pretty=format:%H -- $FILEPATH); \
+            echo Last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
+            git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
+        }; f"
 #+end_src
 
 Usage (no matter where you are in the repo):
@@ -2711,7 +2726,7 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 #+begin_src conf
     # Usage: git my-branches
     # Show all local branches created by the current user.
-    my-branches = git for-each-ref --format='%(authorname) %(refname:short)' refs/heads | grep -E "^$(git config --get user.name)"
+    my-branches = !git for-each-ref --format='%(authorname) %(refname:short)' refs/heads | grep -E \"^$(git config --get user.name)\"
 #+end_src
 
 *** Show active branches
@@ -2812,7 +2827,7 @@ You could also use ~-D~, which is an alias for ~--delete --force~, which deletes
 branch "irrespective of its merged status."
 #+end_note
 
-*** Delete the merged branches
+*** Delete local branches that have been merged
 
 ~delete-local-merged-branches~ *removes* (in bulk) *all* the *local branches* that have
 been *merged to the current branch* that you are in.
@@ -2820,8 +2835,9 @@ been *merged to the current branch* that you are in.
 XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
 
 #+begin_src conf
-bclean = "!f() { \
-        DEFAULT=$(git default); \
+    # Delete local branches that have been merged into the default branch.
+    bclean = "!f() { \
+        DEFAULT=$(git default-branch); \
         git branch --merged ${1-$DEFAULT} \
             | grep -v " ${1-$DEFAULT}$" \
             | xargs git delete-local-branch; \
@@ -2853,9 +2869,9 @@ that are not reachable from any of:
 In other words, when you might lose commits.
 
 #+begin_tip
-In the event that you accidentally delete ~master~, get it back with:
+In the event that you accidentally delete ~main~, get it back with:
 
-: git create-branch master $(git origin)/master
+: git create-branch main $(git origin)/main
 #+end_tip
 
 See http://haacked.com/archive/2014/07/28/github-flow-aliases/.
@@ -2885,7 +2901,7 @@ Delete a *remote* branch:
     delete-remote-branch = !git push $(git origin) --delete
 
     # Usage: git unpublish
-    # Delete current branch on remote server.
+    # Delete the current branch from the remote repository.
     unpublish = !git delete-remote-branch $(git current-branch)
 #+end_src
 
@@ -3227,10 +3243,10 @@ current branch and the specified branch.
     # Show the missing commits between this and another branch
     missing = "!f() { \
             printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-            git log "${1:-master}"..; \
+            git log "${1:-$(git default-branch)}"..; \
             printf \"\n\"; \
             printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-            git log .."${1:-master}"; \
+            git log .."${1:-$(git default-branch)}"; \
         }; f"
 #+end_src
 

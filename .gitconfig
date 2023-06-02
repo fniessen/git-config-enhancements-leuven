@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230429.0018
+# .gitconfig, Time-stamp: 20230602.1309
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -239,6 +239,10 @@
                 | sed 's#.git$##'; \
         }; f"
 
+    # Usage: git default-branch
+    # Get the name of the default branch (main or master).
+    default-branch = "!sh -c 'if [ -f $(git rev-parse --git-dir)/refs/heads/main ]; then echo main; else echo master; fi'"
+
     # Usage: git start-daemon
     # Start a Git daemon server for remote repository access.
     start-daemon = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
@@ -292,6 +296,8 @@
     # Unstage the changes to a file that were previously added to the Git
     # staging area.
     unstage = reset HEAD --
+
+    staged = diff --cached --name-only
 
     # Usage: git added-files
     # Show files that have been added but not yet committed.
@@ -529,6 +535,16 @@
             git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
         }; f"
 
+    file-diff-last-modification2 = "!f() { \
+            PROJECT_ROOT_DIR=$(git rev-parse --show-toplevel); \
+            echo Finding full file path of $1 in $PROJECT_ROOT_DIR; \
+            FILEPATH=$(git ls-files --full-name -- $1); \
+            echo Full file path $FILEPATH; \
+            LAST_MODIFIED_COMMIT_HASH=$(git log -1 --pretty=format:%H -- $FILEPATH); \
+            echo Last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
+            git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
+        }; f"
+
     # Usage: git dir-diff
     # Open Meld with directory comparison for all modified files.
     dir-diff = difftool -t meld --dir-diff
@@ -708,7 +724,7 @@
 
     # Usage: git my-branches
     # Show all local branches created by the current user.
-    my-branches = git for-each-ref --format='%(authorname) %(refname:short)' refs/heads | grep -E "^$(git config --get user.name)"
+    my-branches = !git for-each-ref --format='%(authorname) %(refname:short)' refs/heads | grep -E \"^$(git config --get user.name)\"
 
     br-active = "!f() { \
             git branch --no-merged \
@@ -746,8 +762,9 @@
     # Delete a local branch.
     delete-local-branch = branch -d
 
-bclean = "!f() { \
-        DEFAULT=$(git default); \
+    # Delete local branches that have been merged into the default branch.
+    bclean = "!f() { \
+        DEFAULT=$(git default-branch); \
         git branch --merged ${1-$DEFAULT} \
             | grep -v " ${1-$DEFAULT}$" \
             | xargs git delete-local-branch; \
@@ -777,7 +794,7 @@ bclean = "!f() { \
     delete-remote-branch = !git push $(git origin) --delete
 
     # Usage: git unpublish
-    # Delete current branch on remote server.
+    # Delete the current branch from the remote repository.
     unpublish = !git delete-remote-branch $(git current-branch)
 
     delete-branch = "!f() { \
@@ -872,10 +889,10 @@ bclean = "!f() { \
     # Show the missing commits between this and another branch
     missing = "!f() { \
             printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-            git log "${1:-master}"..; \
+            git log "${1:-$(git default-branch)}"..; \
             printf \"\n\"; \
             printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-            git log .."${1:-master}"; \
+            git log .."${1:-$(git default-branch)}"; \
         }; f"
 
     # Find the point at which a branch forked from another branch
