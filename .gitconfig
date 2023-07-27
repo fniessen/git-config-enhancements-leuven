@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230602.1309
+# .gitconfig, Time-stamp: 20230623.1620
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -608,12 +608,12 @@
             git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
         }; f"
 
-    # Usage: git whatwhen STRING
-    # Search for changes that introduced or removed a string.
-    whatwhen = log -p -S
+    # Usage: git log-search-patch SEARCH_TERM
+    # Search for changes that introduced or removed a term.
+    log-search-patch = log -p -S
 
-    # Usage: git search-for-diff-contents STRING
-    # Search for commits that add or remove a specific string in the repository.
+    # Usage: git search-for-diff-contents SEARCH_TERM
+    # Search for commits that add or remove a specific term in the repository.
     search-for-diff-contents = "!f() { \
             git log -S \"$1\"; \
         }; f"
