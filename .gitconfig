@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230623.1620
+# .gitconfig, Time-stamp: 20230802.1106
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -608,20 +608,20 @@
             git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
         }; f"
 
-    # Usage: git log-search-patch SEARCH_TERM
-    # Search for changes that introduced or removed a term.
-    log-search-patch = log -p -S
-
     # Usage: git search-for-diff-contents SEARCH_TERM
-    # Search for commits that add or remove a specific term in the repository.
+    # Search for commits that add or remove a specific term in the repository's diff contents.
     search-for-diff-contents = "!f() { \
             git log -S \"$1\"; \
         }; f"
 
-    # Usage: git grep4d STRING FILENAME
+    # Usage: git search-changes-for-term SEARCH_TERM
+    # Search for changes that introduced or removed a specific term in the repository.
+    search-changes-for-term = log -p -S
+
+    # Usage: git show-commits-for-string STRING FILENAME
     # Show commits that add or remove a specific string in a file.
-    # Example: git grep4d CLOSED '*.java'
-    grep4d = "!sh -c 'git log -p -S \"$1\" \"$2\"' -"
+    # Example: git show-commits-for-string CLOSED '*.java'
+    show-commits-for-string = "!sh -c 'git log -p -S \"$1\" \"$2\"' -"
 
     browse-commits = "!f() { \
             URL=$(git config --get remote.$(git origin).url); \
@@ -1197,8 +1197,6 @@ deploy-prod =
         }; f"
 
     stage-modified-removed-files = add -u
-
-    wip = commit -a -m "WIP"
 
     # Usage: git ls
     # Print a summary of activity.  Alias of log.

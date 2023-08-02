@@ -4183,17 +4183,16 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
 Ideally your =.gitignore= should prevent the untracked (and ignored) files from
 being shown in status, added using ~git add~ etc.  So correct your =.gitignore=.
 
-You can do ~git add -u~ so that it will *stage* the modified and deleted files.
+To *stage* the modified and deleted files *for commit*, use the ~git add -u~ command:
 
 #+begin_src conf
     stage-modified-removed-files = add -u
 #+end_src
 
-You can also do ~git commit -a~ to *commit* only the modified and deleted files.
+The ~-u~ flag tells Git to update the index with the modifications and deletions,
+effectively staging the changes.
 
-#+begin_src conf
-    wip = commit -a -m "WIP"
-#+end_src
+Then, *commit* the changes.
 
 ** SHOW - View the commit history
 
