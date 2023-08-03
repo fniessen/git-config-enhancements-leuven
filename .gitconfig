@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230802.1106
+# .gitconfig, Time-stamp: 20230803.1454
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -764,9 +764,9 @@
 
     # Delete local branches that have been merged into the default branch.
     bclean = "!f() { \
-        DEFAULT=$(git default-branch); \
-        git branch --merged ${1-$DEFAULT} \
-            | grep -v " ${1-$DEFAULT}$" \
+        DEFAULT_BRANCH=$(git default-branch || echo 'main'); \
+        git branch --merged ${1-$DEFAULT_BRANCH} \
+            | grep -v " ${1-$DEFAULT_BRANCH}$" \
             | xargs git delete-local-branch; \
     }; f"
 
@@ -916,7 +916,7 @@
     #   git missing-files             list changed files between this and master
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
-            git diff --stat ${1:-master}...; \
+            git diff --stat ${1:-$(git default-branch)}...; \
         }; f"
 
     # 50 most recent commits.

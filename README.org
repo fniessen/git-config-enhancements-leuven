@@ -2844,9 +2844,9 @@ XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
 #+begin_src conf
     # Delete local branches that have been merged into the default branch.
     bclean = "!f() { \
-        DEFAULT=$(git default-branch); \
-        git branch --merged ${1-$DEFAULT} \
-            | grep -v " ${1-$DEFAULT}$" \
+        DEFAULT_BRANCH=$(git default-branch || echo 'main'); \
+        git branch --merged ${1-$DEFAULT_BRANCH} \
+            | grep -v " ${1-$DEFAULT_BRANCH}$" \
             | xargs git delete-local-branch; \
     }; f"
 #+end_src
@@ -3336,7 +3336,7 @@ Show all the changed files in a Git branch *since it was forked*:
     #   git missing-files             list changed files between this and master
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
-            git diff --stat ${1:-master}...; \
+            git diff --stat ${1:-$(git default-branch)}...; \
         }; f"
 #+end_src
 
