@@ -943,7 +943,10 @@ XXX Updating git aliases for different *default branch* names (~master~, ~main~,
 #+begin_src conf
     # Usage: git default-branch
     # Get the name of the default branch (main or master).
-    default-branch = "!sh -c 'if [ -f $(git rev-parse --git-dir)/refs/heads/main ]; then echo main; else echo master; fi'"
+    default-branch = "!sh -c 'if [ -f $(git rev-parse --git-dir)/refs/heads/main ]; \
+                                  then echo main; \
+                                  else echo master; \
+                              fi'"
 #+end_src
 
 : git branch | grep -o -m1 "\b\(master\|main\)\b"

@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230803.1454
+# .gitconfig, Time-stamp: 20230803.1457
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -241,7 +241,10 @@
 
     # Usage: git default-branch
     # Get the name of the default branch (main or master).
-    default-branch = "!sh -c 'if [ -f $(git rev-parse --git-dir)/refs/heads/main ]; then echo main; else echo master; fi'"
+    default-branch = "!sh -c 'if [ -f $(git rev-parse --git-dir)/refs/heads/main ]; \
+                                  then echo main; \
+                                  else echo master; \
+                              fi'"
 
     # Usage: git start-daemon
     # Start a Git daemon server for remote repository access.
