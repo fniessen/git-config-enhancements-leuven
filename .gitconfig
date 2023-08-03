@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230803.1457
+# .gitconfig, Time-stamp: 20230803.1529
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -242,8 +242,8 @@
     # Usage: git default-branch
     # Get the name of the default branch (main or master).
     default-branch = "!sh -c 'if [ -f $(git rev-parse --git-dir)/refs/heads/main ]; \
-                                  then echo main; \
-                                  else echo master; \
+                                  then echo 'main'; \
+                                  else echo 'master'; \
                               fi'"
 
     # Usage: git start-daemon
@@ -786,11 +786,13 @@
     #           egrep -v "(^\*|^\s*(master|main|develop)$)" | \
     #           xargs git delete-local-branch'
 
-    # Delete all branches that were safely merged into the main branch. All other are skipped (no worries).
-    # On osx xargs does not have -r argument, so it fail. If you remove -r, it will run at least once, making this not safe operation.
-    cleanup = !git branch --merged=master \
-                | grep -Ev '^\\* | master$' \
-                | xargs -r git delete-local-branch
+    # Delete branches safely merged into the main branch, skipping main and *
+    # (current) branches.
+    cleanup-branches = !git branch --merged $(git default-branch) \
+                            | grep -vE '^\\* | $(git default-branch)$' \
+                            | xargs -r git delete-local-branch
+    # On OSX, 'xargs' does not have '-r' argument, so it fail. If you remove
+    # '-r', it will run at least once, making this not safe operation.
 
     # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
@@ -898,20 +900,14 @@
             git log .."${1:-$(git default-branch)}"; \
         }; f"
 
-    # Find the point at which a branch forked from another branch
-    ancestor = !zsh -c 'diff --old-line-format='' --new-line-format='' \
-                    <(git rev-list --first-parent "${1:-master}") \
-                    <(git rev-list --first-parent "${2:-HEAD}") \
-                | head -1' -
+    # Find the point at which a branch forked from another branch (when it was branched off).
+    # Find the most recent common ancestor between the current branch and the default branch.
+    ancestor = !git merge-base ${1:-$(git default-branch)} \
+                               ${2:-$(git current-branch)}
 
     # Since branch point.
     log-ancestor = !sh -c 'git log $(git ancestor)..'
     diff-ancestor = !sh -c 'git diff $(git ancestor)..'
-
-    # Find the point at which a branch forked from MASTER
-    # Best common ancestor (when it was branched off).
-    ancestor2 = !git merge-base $(git origin)/master $(git current-branch)
-    ancestor3 = !git merge-base --all $(git origin)/master $(git current-branch)
 
     # Usage: git missing-files [COMMIT_ISH]
     # Show the changed files between this and (the fork point from) another branch
