@@ -3309,6 +3309,7 @@ was merged.
     # Find the most recent common ancestor between the current branch and the default branch.
     ancestor = !git merge-base ${1:-$(git default-branch)} \
                                ${2:-$(git current-branch)}
+    # BUG: Does not work between 2 specific branches -- well without arguments
 #+end_src
 
 https://stackoverflow.com/questions/1527234/finding-a-branch-point-with-git
