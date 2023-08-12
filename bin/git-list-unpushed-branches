@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# BUG: doees not work correctly!
+
+# Get a list of all local branches.
+branches=$(git branch)
+
+# Loop through each branch.
+for branch in $branches; do
+    # Check if the branch has been merged
+    if git branch --merged | grep -q "^  $branch$"; then
+        # Skip merged branches
+        continue
+    fi
+
+    # Check if the branch exists on the remote.
+    if git ls-remote --exit-code --heads origin $branch >/dev/null 2>&1; then
+        # Branch exists on remote, skip.
+        continue
+    fi
+
+    # Check if the branch has been deleted from the remote.
+    deleted=$(git ls-remote --exit-code --heads origin :refs/heads/$branch >/dev/null 2>&1; echo $?)
+    if [ $deleted -eq 0 ]; then
+        # Branch has been deleted from remote, skip.
+        continue
+    fi
+
+    # If we made it here, the branch has not been pushed to the remote.
+    printf '%s\n' "$branch"
+done
