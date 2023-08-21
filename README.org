@@ -4630,15 +4630,8 @@ applies all those changes together.
 : Merge branch 'BRANCH_NAME' into master
 
 #+begin_src conf
-    # Will only try to "merge" if your current HEAD commit is in the branch
-    # you're merging in.  This will allow you to merge some commits whilst being
-    # sure you won't get conflicts.
-    mff = merge --ff-only
-    mff = merge --ff-only @{u}
-
     # Avoid a fast-forward commit.
-    mnf = merge --no-ff
-    mnf2 = merge --no-ff --log
+    mnf = merge --no-ff --log
 #+end_src
 
 *** Sync branch (merge master into your branch)
@@ -4660,13 +4653,18 @@ branch up* to all the latest changes on the main branch.
                 && git rebase $(git origin)/master
 #+end_src
 
-With *all versions* of Git, I recommend using ~git up~ instead of ~git pull~.
+With *all versions* of Git, I recommend using ~git sync-ff-upstream~ instead of
+~git pull~.
 
 #+begin_src conf
-    up-tmpname = "!f() { \
+    # Usage: git sync-ff-upstream
+    # Update local branch with fast-forward from upstream.
+    sync-ff-upstream = "!f() { \
             git remote update -p; \
             git merge --ff-only @{u}; \
         }; f"
+    # (Keep your local branch in sync with the remote branch without creating
+    # merge commits.)
 #+end_src
 
 It is pretty safe: it will abort the merge if it can't be done using

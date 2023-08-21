@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1429
+# .gitconfig, Time-stamp: 20230821.1449
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1369,15 +1369,8 @@ deploy-prod =
     last-updated = !stat -c %y $(git root)/.git/refs/heads/$(git current-branch) \
                         | cut -d'.' -f1
 
-    # Will only try to "merge" if your current HEAD commit is in the branch
-    # you're merging in.  This will allow you to merge some commits whilst being
-    # sure you won't get conflicts.
-    mff = merge --ff-only
-    mff = merge --ff-only @{u}
-
     # Avoid a fast-forward commit.
-    mnf = merge --no-ff
-    mnf2 = merge --no-ff --log
+    mnf = merge --no-ff --log
 
     # Usage: git sync-branch
     # Merge remote master into the current branch.
@@ -1388,10 +1381,14 @@ deploy-prod =
     catchup = !git fetch -p \
                 && git rebase $(git origin)/master
 
-    up-tmpname = "!f() { \
+    # Usage: git sync-ff-upstream
+    # Update local branch with fast-forward from upstream.
+    sync-ff-upstream = "!f() { \
             git remote update -p; \
             git merge --ff-only @{u}; \
         }; f"
+    # (Keep your local branch in sync with the remote branch without creating
+    # merge commits.)
 
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
     upr = "!f() { \
