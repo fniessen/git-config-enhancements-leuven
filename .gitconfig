@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1728
+# .gitconfig, Time-stamp: 20230821.1737
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1127,6 +1127,7 @@ deploy-prod =
     # Push the changes in all Git repositories of the current directory.
     push-all-repos = !$HOME/bin/git-push-all-repos
 
+    # Execute shell command and show output.
     exec = '!exec '
 
     # Interactive rebase with the given number of latest commits
@@ -1617,6 +1618,7 @@ deploy-prod =
 
     patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
 
+    # Enable comprehensive debugging output.
     debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
 
     cp = cherry-pick -x
@@ -1660,8 +1662,8 @@ deploy-prod =
                 | git show --format='SHA-1: %C(yellow)%h%C(reset)  %s' --stdin \
                 | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
 
-    # Resurrection of lost commits.
-    zopa = !git log --all --pretty=oneline --abbrev-commit --graph \
+    # Show a graph of the commit history, including dangling commits (not reachable by any reference).
+    dangling-graph-log = !git log --all --pretty=oneline --abbrev-commit --graph \
                     $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 
 [include]

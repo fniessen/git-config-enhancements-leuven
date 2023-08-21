@@ -3990,6 +3990,7 @@ See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-co
 Define:
 
 #+begin_src conf
+    # Execute shell command and show output.
     exec = '!exec '
 #+end_src
 
@@ -5442,6 +5443,7 @@ named =package-X.Y.Z.tar.gz=).
 Sometimes it's nice to see what is going on under the hood. Try this alias:
 
 #+begin_src conf
+    # Enable comprehensive debugging output.
     debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
 #+end_src
 
@@ -5465,9 +5467,9 @@ Basic shortcuts.
 #+end_src
 
 This command has some useful parameters:
-- -e to edit git message
-- -x to add a line "Cherry-picked commit" in the commit message
-- --no-commit or -n to apply the commit changes in the unstaged area (unstead of
+- ~-e~ to edit git message
+- ~-x~ to add a line "Cherry-picked commit" in the commit message
+- ~--no-commit~ or ~-n~ to apply the commit changes in the unstaged area (unstead of
   creating a commit in the branch)
 
 #+begin_src conf
@@ -5557,9 +5559,11 @@ will ~reset~ the index.
                 | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
 #+end_src
 
+Resurrection of lost commits:
+
 #+begin_src conf
-    # Resurrection of lost commits.
-    zopa = !git log --all --pretty=oneline --abbrev-commit --graph \
+    # Show a graph of the commit history, including dangling commits (not reachable by any reference).
+    dangling-graph-log = !git log --all --pretty=oneline --abbrev-commit --graph \
                     $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
 #+end_src
 
