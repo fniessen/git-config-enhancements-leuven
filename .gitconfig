@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1802
+# .gitconfig, Time-stamp: 20230821.1819
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1348,19 +1348,25 @@ deploy-prod =
     # Pull in remote changes for the current repository and all its submodules
     p = !"git pull; git submodule foreach git pull $(git origin) master"
 
-    # Do a push/pull for just one branch.
-    push-1 = "!git push $(git origin) $(git current-branch)"
-    pull-1 = "!git pull $(git origin) $(git current-branch)"
+    # Push the current branch to its remote counterpart.
+    push-current = "!git push $(git origin) $(git current-branch)"
 
-    # Pull and push from the current branch.
-    sync = "!f() { pull-1 && push-1; }; f"
+    # Pull the latest changes for the current branch from its remote counterpart.
+    pull-current = "!git pull $(git origin) $(git current-branch)"
 
-    pull-all = !"OLD_BRANCH=$(git current-branch); \
-                 for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
-                     git checkout ${BRANCH_NAME#refs/heads/}; \
-                     git pull --ff-only; \
-                 done; \
-                 git checkout $OLD_BRANCH"
+    # Pull and push the latest changes for the current branch.
+    sync-current = "!f() { pull-current && push-current; }; f"
+
+    # Update repository by pulling changes from remote and pushing local commits.
+    pull-and-push = !git pull && git push
+
+    # Update all local branches by pulling their latest changes.
+    update-all-branches = !"OLD_BRANCH=$(git current-branch); \
+                           for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
+                               git checkout ${BRANCH_NAME#refs/heads/} && \
+                               git pull --ff-only; \
+                           done; \
+                           git checkout $OLD_BRANCH"
 
     # For the latest pull (even if there's nothing new).
     last-pulled = !stat -c %y $(git root)/.git/FETCH_HEAD \
@@ -1644,19 +1650,10 @@ deploy-prod =
     root = rev-parse --show-toplevel
     root-relative = rev-parse --show-prefix
 
-    # Pull then push current branch.
-    sync = !git pull \
-                && git push
-
-    sync = !git update \
-                && git checkout master \
-                && git pull \
-                && git commit @{-1}
-
-    # git resync -> sync repository and rebase current branch.
-    resync = !sh -c 'git checkout master \
+    # Synchronize and rebase local master with the latest changes from the remote master branch.
+    sync-rebase-master = !sh -c 'git checkout master \
                 && git fetch \
-                && git reset --hard $(git origin)/master \
+                && git reset --hard $(git config --get remote.origin.url)/master \
                 && git rebase master'
 
     # Usage: git commit-interactive FILENAME...

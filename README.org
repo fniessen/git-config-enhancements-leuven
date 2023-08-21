@@ -4522,24 +4522,32 @@ with the ~origin~ (pull and get latest for all submodules):
 
 *** Update all local branches
 
-Pull all:
-
 #+begin_src conf
-    # Do a push/pull for just one branch.
-    push-1 = "!git push $(git origin) $(git current-branch)"
-    pull-1 = "!git pull $(git origin) $(git current-branch)"
+    # Push the current branch to its remote counterpart.
+    push-current = "!git push $(git origin) $(git current-branch)"
 
-    # Pull and push from the current branch.
-    sync = "!f() { pull-1 && push-1; }; f"
+    # Pull the latest changes for the current branch from its remote counterpart.
+    pull-current = "!git pull $(git origin) $(git current-branch)"
+
+    # Pull and push the latest changes for the current branch.
+    sync-current = "!f() { pull-current && push-current; }; f"
 #+end_src
 
 #+begin_src conf
-    pull-all = !"OLD_BRANCH=$(git current-branch); \
-                 for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
-                     git checkout ${BRANCH_NAME#refs/heads/}; \
-                     git pull --ff-only; \
-                 done; \
-                 git checkout $OLD_BRANCH"
+    # Update repository by pulling changes from remote and pushing local commits.
+    pull-and-push = !git pull && git push
+#+end_src
+
+Pull all branches:
+
+#+begin_src conf
+    # Update all local branches by pulling their latest changes.
+    update-all-branches = !"OLD_BRANCH=$(git current-branch); \
+                           for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
+                               git checkout ${BRANCH_NAME#refs/heads/} && \
+                               git pull --ff-only; \
+                           done; \
+                           git checkout $OLD_BRANCH"
 #+end_src
 
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
@@ -5502,28 +5510,13 @@ Fetch Git objects from upstream and update local branches.
 - If the local branch contains unpushed work, warn about it;
 - If the branch seems merged and its upstream branch was deleted, delete it.
 
-#+begin_src conf
-    # Pull then push current branch.
-    sync = !git pull \
-                && git push
-#+end_src
+** Sync
 
 #+begin_src conf
-    sync = !git update \
-                && git checkout master \
-                && git pull \
-                && git commit @{-1}
-#+end_src
-
-That's rather basic -- it doesn't actually rebase my branch that I'm on.
-
-Let's do a slightly different command: ~resync~
-
-#+begin_src conf
-    # git resync -> sync repository and rebase current branch.
-    resync = !sh -c 'git checkout master \
+    # Synchronize and rebase local master with the latest changes from the remote master branch.
+    sync-rebase-master = !sh -c 'git checkout master \
                 && git fetch \
-                && git reset --hard $(git origin)/master \
+                && git reset --hard $(git config --get remote.origin.url)/master \
                 && git rebase master'
 #+end_src
 
