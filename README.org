@@ -1288,19 +1288,21 @@ I believe it was because he was trying to ignore a file that was already being
 tracked. You can only ignore a file that has a blue question mark icon.
 
 #+begin_src conf
-    # Fix .gitignore.
-    fix-gitignore = !git rm -r --cached . \
+    # Refresh the tracking of ignored files based on .gitignore rules.
+    refresh-ignore = !git rm -r --cached . \
                 && git add . \
-                && git commit -m \"Fix .gitignore\"
+                && git commit -m "Refresh ignored files"
 #+end_src
 
 *** ~assume-unchanged~ command
 
-Ignore/unignore changes to *tracked file(s)* without =.gitignore=:
+Ignore/unignore changes to *tracked file(s)* only locally, without =.gitignore=:
 
 #+begin_src conf
-    # Ignore files only locally.
+    # Mark a file as unchanged and hide it from the Git status.
     skip = update-index --assume-unchanged
+
+    # Revert the hidden status of a file, allowing it to be tracked again by Git.
     unskip = update-index --no-assume-unchanged
 #+end_src
 
@@ -1318,6 +1320,7 @@ that.
 Skip all:
 
 #+begin_src conf
+    # Mark all changed files as unchanged and hides them from the Git status.
     skip-all = "!git status -s \
                 | awk {'print $2'} \
                 | xargs git skip"
@@ -1326,6 +1329,7 @@ Skip all:
 Unskip all the skipped files:
 
 #+begin_src conf
+    # Revert the hidden status of all files, allowing them to be tracked again by Git.
     unskip-all = "!git skipped \
                 | xargs git update-index --no-assume-unchanged"
 #+end_src
@@ -1333,11 +1337,10 @@ Unskip all the skipped files:
 List ignored files (*marked unchanged*):
 
 #+begin_src conf
+    # List files marked as "assume unchanged" in the Git repository.
     skipped = "!git ls-files -v \
                 | grep '^h' \
                 | cut -c 3-"
-    skipped2-BAD-MAYBE = !git ls-files -v \
-                | grep '^[a-z]'
 #+end_src
 
 ** Clean
@@ -1515,33 +1518,22 @@ This command is useful in saving all changes not ready to be committed and the
 user wants to have an updated repository.
 
 #+begin_src conf
+    # Usage: git stash-push
+    # Stash changes in the working directory for later retrieval.
     stash-push = stash push
 #+end_src
 
 #+begin_src conf
-    # Pop stash off with name like text.
-    stash-pop = "!f() { \
-            git stash pop stash@{$(git stash-id $@)}; \
-        }; f"
-
-    # Only accepts single word, no quotations.
-    stash-id = "!f() { \
-            git stash list \
-                | grep $@ \
-                | head -n 1 \
-                | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
-        }; f"
-#+end_src
-
-#+begin_src conf
-    # "Add" modified files, deleted files, and new untracked files.
+    # Usage: git stash-all
+    # Stage all changes and untracked files, then creates a stash.
     stash-all = !git add -A \
                 && git stash
 #+end_src
 
 #+begin_src conf
-    # Hide all files, including untracked files (faster than using --all).
-    hide = stash push --include-untracked
+    # Usage: git stash-untracked
+    # Stash changes, including untracked files, for later retrieval.
+    stash-untracked = stash push --include-untracked
 #+end_src
 
 *** Take named stash
@@ -1549,45 +1541,53 @@ user wants to have an updated repository.
 "WIP:"
 
 #+begin_src conf
+    # Usage: git snapshot
+    # Create a snapshot stash with a timestamp and immediately apply it.
     snapshot = !git stash push -m "snapshot-$(date +%Y%m%d_%H%M)" \
                 && git stash apply "stash@{0}"
 #+end_src
 
 #+begin_src conf
-    # checkpoint
+    # Usage: git checkpoint
+    # Create a new temporary stash with a timestamp and restore staged changes.
     checkpoint = !git stash push -m "$(date +%F--%T)" \
                 && git stash pop --index
 
-    # checkpoint recover
+    # Usage: git checkpoint-recover [TIME_INTERVAL]
+    # Display a formatted log of recent version changes with timestamps and commit messages.
+    # Example: git checkpoint-recover 1week
     checkpoint-recover = "!f() { \
-            git fsck \
-                | grep commit \
-                | cut -d' ' -f3 \
-                | while read HASH; do \
-                      git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null \
-                          && echo $HASH \
-                          | xargs git rev-list --since=${1:-1day} -1; \
-                  done \
-                | xargs -L 1 git log -1 --format=%at:%h \
-                | sort \
-                | cut -f2 -d: \
-                | xargs -L 1 git log -3 --format='%Cblue%h %Cgreen(%ar) %Creset%s' --graph; \
-        }; f"
+        git fsck \
+            | grep commit \
+            | cut -d' ' -f3 \
+            | while read HASH; do \
+                  git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null \
+                      && echo $HASH \
+                      | xargs git rev-list --since=${1:-1day} -1; \
+              done \
+            | xargs -L 1 git log -1 --format=%at:%h \
+            | sort \
+            | cut -f2 -d: \
+            | xargs -L 1 git log -3 --format='%Cblue%h %Cgreen(%ar) %Creset%s' --graph; \
+    }; f"
 #+end_src
 
 *** Show a list of all stashes
 
 #+begin_src conf
+    # Usage: git stashes
+    # List stashes with their short creation dates.
     stashes = stash list --date=short
 #+end_src
 
 *** Show the stash
 
 #+begin_src conf
-    # Usage: git unstash-preview
+    # Usage: git stash-view
+    # Show the changes introduced by the latest stash in a unified diff format.
+    stash-view = stash show -p
     # Instead of unshelving the changes, show the diff that would result from
     # unshelving.
-    unstash-preview = stash show -p
 #+end_src
 
 https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
@@ -1595,12 +1595,12 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
 #+begin_src conf
     # Show only stash with name like text.
     stash-show = "!f() { \
-            git stash show stash^{/$@} -p; \
-        }; f"
+        git stash show stash^{/$@} -p; \
+    }; f"
 
     stash-show = "!f() { \
-            git stash show stash^{/$*} -p; \
-        }; f"
+        git stash show stash^{/$*} -p; \
+    }; f"
 #+end_src
 
 One very useful feature one may consider is to list contents of all local
@@ -1628,9 +1628,16 @@ you were.  But if that doesn't work, for whatever reason, you can use any of
 Git's other branch merging tools to put things back they way you want them.
 
 #+begin_src conf
-    # Usage: git unstash-keep [STASH_ID]
+    # Usage: git stash-apply [STASH_INDEX]
+    # Apply a specific stash to the working directory.
+    stash-apply = "!f() { \
+        if [ -z \"$1\" ]; then \
+            git stash apply; \
+        else \
+            git stash apply stash@{$1}; \
+        fi \
+    }; f"
     # Apply changes but don't delete them.
-    unstash-keep = stash apply
 #+end_src
 
 https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by-name-in-git:
@@ -1638,29 +1645,55 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
 #+begin_src conf
     # Find stash with name like text.
     stash-apply = "!f() { \
-            git stash apply stash^{/$@}; \
-        }; f"
+        git stash apply stash^{/$@}; \
+    }; f"
 
     stash-apply = "!f() { \
-            git stash apply stash^{/$*}; \
-        }; f"
+        git stash apply stash^{/$*}; \
+    }; f"
 #+end_src
 
 #+begin_src conf
-    stash-unapply = !git stash show -p --no-textconv --binary \
+    # Revert the changes introduced by the most recent stash.
+    stash-revert = !git stash show -p --no-textconv --binary \
                 | git apply -R
 #+end_src
 
 *** Restore shelved changes
+
+#+begin_src conf
+    # Usage: git find-stash-id [SEARCH_STRING]
+    # Find the stash ID by searching stash descriptions for a specific string.
+    find-stash-id = "!f() { \
+        git stash list \
+            | grep $@ \
+            | head -n 1 \
+            | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
+    }; f"
+    # Only accepts single word, no quotations.
+
+    # Usage: git pop-stash [STASH_INDEX_OR_ID]
+    # Appliy and remove the specified stash by index or ID.
+    stash-pop = "!f() { \
+        git stash pop stash@{$(git find-stash-id $@)}; \
+    }; f"
+#+end_src
 
 ~git unstash~ removes the most recent stash or any stash specified and applies
 changes as a merge.  If merge fails, the stash is not removed from the list and
 must be removed manually.
 
 #+begin_src conf
-    # Usage: git unstash [STASH_ID]
-    # Apply changes and remove them from the shelf.
-    unstash = stash pop
+    # Usage: git unstash [STASH_INDEX]
+    # Apply the most recent stash and removes it from the stash stack.
+    # Apply and remove a specific stash from the stash stack.
+    unstash = "!f() { \
+        if [ -z \"$1\" ]; then \
+            git stash pop; \
+        else \
+            git stash pop stash@{$1}; \
+        fi \
+    }; f"
 #+end_src
 
 #+begin_warning
@@ -1672,14 +1705,20 @@ conflicts, Git will not remove it (but it will still apply it)!
 *** Drop the stash
 
 #+begin_src conf
-    # Usage: git unstash-delete-only [STASH_ID]
-    # Delete changes without applying them.
-    unstash-delete-only = stash drop
+    # Usage: git stash-remove [STASH_INDEX]
+    # Remove a specific stash from the stash stack without applying changes.
+    stash-remove = stash drop
 #+end_src
 
 *** Clear
 
-: git stash clear
+#+begin_src conf
+    # Usage: git stash-clear
+    # Remove all stashes from the stash stack.
+    stash-clear = "!git stash list \
+                   | cut -d: -f1 \
+                   | xargs -r -I {} git stash-remove {}"
+#+end_src
 
 *** Workflows
 
