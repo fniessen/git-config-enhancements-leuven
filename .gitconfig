@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1846
+# .gitconfig, Time-stamp: 20230821.1902
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -545,24 +545,16 @@
     # Open Meld with directory comparison for all modified files.
     dir-diff = difftool -t meld --dir-diff
 
-    # Usage: git where COMMIT_HASH
+    # Usage: git find-branches-containing COMMIT_HASH
     # List references that contain a specific commit hash.
-    where = for-each-ref --format='%(refname)' --contains
-
-    # Display commit information and the references containing a specific commit.
-    where2 = "!f() { \
-            git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
-                | sort -r; \
-        }; f"
+    find-branches-containing = branch -a --contains
 
     # List local branches that point to the current HEAD commit.
-    where3 = for-each-ref --format="%(refname:short)" --points-at HEAD refs/heads
+    where2 = for-each-ref --format="%(refname:short)" --points-at HEAD refs/heads
 
-    # Find branches containing commit.
-    branches-that-contain = branch -a --contains
-
+    # Usage: git find-tags-containing COMMIT_HASH
     # Find tags containing commit.
-    tags-that-contain = "!f() { \
+    find-tags-containing = "!f() { \
             git tag -l --contains $1 \
                 | sort -r; \
         }; f"
