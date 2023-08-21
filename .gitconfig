@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1412
+# .gitconfig, Time-stamp: 20230821.1429
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -326,20 +326,19 @@
 
     # Usage: git staged-files
     # Show a list of staged added, modified or deleted files.
-    staged-files = !git status --porcelain -uno | grep -P '^[ADM]' | awk '{ print $2 }'
+    staged-files = !git diff --name-only --cached
 
-    # Usage: git file-status FILENAME
+    # Usage: git check-file-status FILENAME
     # Check the status of a file (tracked, not tracked, or does not exist).
-    file-status = "!f() { \
-        printf \"$1: \"; \
+    check-file-status = "!f() { \
         if [ -e \"$1\" ]; then \
             if git ls-files --error-unmatch \"$1\" >/dev/null 2>&1; then \
-                echo \"tracked\"; \
+                printf \"$1: tracked\\n\"; \
             else \
-                echo \"not tracked\"; \
+                printf \"$1: not tracked\\n\"; \
             fi; \
         else \
-            echo \"does not exist\"; \
+            printf \"$1: does not exist\\n\"; \
         fi; \
     }; f"
 
