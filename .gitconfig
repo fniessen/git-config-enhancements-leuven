@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1403
+# .gitconfig, Time-stamp: 20230821.1412
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -315,7 +315,6 @@
     # Usage: git untracked-files
     # List untracked files in the repository.
     untracked-files = ls-files --others --exclude-standard
-    untracked-files2 = !git status --porcelain -uno | awk 'match($1, /\\?/) {print $2}'
 
     # Usage: git tracked-files
     # List all tracked files in the repository, sorted by last modification time.

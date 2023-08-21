@@ -1203,7 +1203,6 @@ List untracked files.
     # Usage: git untracked-files
     # List untracked files in the repository.
     untracked-files = ls-files --others --exclude-standard
-    untracked-files2 = !git status --porcelain -uno | awk 'match($1, /\\?/) {print $2}'
 #+end_src
 
 #+begin_src conf
