@@ -4046,12 +4046,18 @@ Staging for commit is typically done by ~git add~.
 ** SHOW - View your changes
 
 #+begin_src conf
-    # Show the diff between the latest commit and the current state
-    d = !"git diff-index --quiet HEAD -- || clear; \
+    # Usage: git diff-latest [FILE]
+    # Show differences between the latest commit and the current working state.
+    # Examples:
+    #     git diff-latest           # Show differences for all files
+    #     git diff-latest file.txt  # Show differences only for "file.txt"
+    diff-latest = !"git diff-index --quiet HEAD -- || clear; \
             git --no-pager diff --patch-with-stat"
 
-    # `git di $number' shows the diff between the state `$number' commits ago and the current state
-    di = "!f() { git diff --patch-with-stat HEAD~$1; }; \
+    # Usage: git diff-commits NUMBER
+    # Show differences between the state `$number' commits ago and the current working state.
+    # Example: git diff-commits 2
+    diff-commits = "!f() { git diff --patch-with-stat HEAD~$1; }; \
             git diff-index --quiet HEAD -- || clear; \
             f"
 #+end_src
