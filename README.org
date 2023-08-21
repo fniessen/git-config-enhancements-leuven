@@ -5067,7 +5067,7 @@ The ~outgoing~ command returns a list of *unpushed* (outgoing) commits for the
 
 #+begin_src conf
     # Usage: git outgoing
-    # Show commits not found in the remote branch.
+    # Show (unpushed) commits not found in the remote branch.
     outgoing = log @{u}..
 
     # Alias of 'outgoing'.

@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1355
+# .gitconfig, Time-stamp: 20230821.1403
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1492,7 +1492,7 @@ deploy-prod =
     sbs = show-branch --sha1-name
 
     # Usage: git outgoing
-    # Show commits not found in the remote branch.
+    # Show (unpushed) commits not found in the remote branch.
     outgoing = log @{u}..
 
     # Alias of 'outgoing'.
