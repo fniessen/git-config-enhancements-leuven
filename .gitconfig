@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1714
+# .gitconfig, Time-stamp: 20230821.1723
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1119,17 +1119,12 @@ deploy-prod =
                 | xargs -I{} git -C {} print-repo-info "$@"; \
         }; f"
 
-    all-repos-status = "!for DIR in $(find . -name \".git\"); do \
-                      echo \"\n*** Repository: $DIR ***\" \
-                          && git --git-dir=$DIR --work-tree=$DIR/.. status | grep -q \"is ahead of\"; \
-                    done"
-
-
-    all-repos-status2 = "!f() { \
+    all-repos-status = "!f() { \
         for dir in $(find . -name \".git\"); do \
             repo_dir=$(dirname $dir); \
-            echo \"\n*** Repository: $repo_dir ***\"; \
-            git -C $repo_dir status | grep -q \"is ahead of\"; \
+            echo \"$repo_dir:\"; \
+            git -C $repo_dir status | grep \"is ahead of\"; \
+            printf '\\n'; \
         done; \
     }; f"
 

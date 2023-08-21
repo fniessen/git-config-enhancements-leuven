@@ -3957,7 +3957,7 @@ repositories that contain pending changes.
     # Run commands for each repository in the current directory.
     all-repos = "!f() { \
             ls -R -d */.git \
-                | sed s,/.git,, \
+                | sed s#/.git## \
                 | xargs -I{} git -C {} print-repo-info "$@"; \
         }; f"
 #+end_src
@@ -3970,10 +3970,14 @@ http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
 
 #+begin_src conf
-    bulk-status = "!for DIR in $(find . -name \".git\"); do \
-                      echo \"\n*** Repository: $DIR ***\" \
-                          && git --git-dir=$DIR --work-tree=$DIR/.. status | grep -q \"is ahead of\"; \
-                    done"
+    all-repos-status = "!f() { \
+        for dir in $(find . -name \".git\"); do \
+            repo_dir=$(dirname $dir); \
+            echo \"$repo_dir:\"; \
+            git -C $repo_dir status | grep \"is ahead of\"; \
+            printf '\\n'; \
+        done; \
+    }; f"
 #+end_src
 
 ** git-pull-all-repos and git-push-all-repos
