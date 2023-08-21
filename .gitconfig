@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1723
+# .gitconfig, Time-stamp: 20230821.1728
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1118,15 +1118,6 @@ deploy-prod =
                 | sed s#/.git## \
                 | xargs -I{} git -C {} print-repo-info "$@"; \
         }; f"
-
-    all-repos-status = "!f() { \
-        for dir in $(find . -name \".git\"); do \
-            repo_dir=$(dirname $dir); \
-            echo \"$repo_dir:\"; \
-            git -C $repo_dir status | grep \"is ahead of\"; \
-            printf '\\n'; \
-        done; \
-    }; f"
 
     # Usage: git pull-all-repos
     # Pull the changes in all Git repositories of the current directory.
