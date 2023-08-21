@@ -1175,18 +1175,20 @@ area).
 ** Selecting files
 
 #+begin_src conf
+    # Usage: git staged
+    # List files that are staged (added to the index) and ready to be committed.
     staged = diff --cached --name-only
 #+end_src
 
 #+begin_src conf
     # Usage: git added-files
-    # Show files that have been added but not yet committed.
+    # List files that have been added but not yet committed.
     added-files = !git diff --name-only --cached --diff-filter=A
 #+end_src
 
 #+begin_src conf
     # Usage: git modified-files
-    # List all files modified in the working tree.
+    # List files that have been modified in the working tree.
     modified-files = !git diff --name-only --diff-filter=M
     #+end_src
 
@@ -1194,6 +1196,8 @@ List untracked *files ignored* by a =.gitignore= statement somewhere.  This one 
 a MUST have:
 
 #+begin_src conf
+    # Usage: git ignored
+    # List files that are ignored according to your '.gitignore' rules.
     ignored = ls-files --others --ignored --exclude-standard
 #+end_src
 
@@ -1201,7 +1205,7 @@ List untracked files.
 
 #+begin_src conf
     # Usage: git untracked-files
-    # List untracked files in the repository.
+    # List files thare are not tracked by Git.
     untracked-files = ls-files --others --exclude-standard
 #+end_src
 
@@ -1213,7 +1217,7 @@ List untracked files.
 
 #+begin_src conf
     # Usage: git deleted-files
-    # Show deleted files in the working directory.
+    # List files that have been deleted in the working directory.
     deleted-files = ls-files -d
 #+end_src
 
@@ -1223,7 +1227,7 @@ How to restore a deleted file in a Git repository?
 
 #+begin_src conf
     # Usage: git staged-files
-    # Show a list of staged added, modified or deleted files.
+    # List files that are staged (added, modified, or deleted) and ready to be committed.
     staged-files = !git diff --name-only --cached
 #+end_src
 
@@ -1882,16 +1886,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                                            |
-|----------+--------------------------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                                          |
-| fix      | A bug fix                                                                                              |
+| Label    | Description                                                            |
+|----------+------------------------------------------------------------------------|
+| feat     | A new feature                                                          |
+| fix      | A bug fix                                                              |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                                              |
-| perf     | A code change that improves performance                                                                |
-| test     | Adding missing or correcting existing tests                                                            |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
-| doc      | Documentation only changes                                                                             |
+| refactor | A code change that neither fixes a bug nor adds a feature              |
+| perf     | A code change that improves performance                                |
+| test     | Adding missing or correcting existing tests                            |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
+| doc      | Documentation only changes                                             |
 
 ** Get a commit hash
 
