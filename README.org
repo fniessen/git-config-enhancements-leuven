@@ -3935,11 +3935,13 @@ List the user's public SSH keys:
 
 * Run on All repositories
 
-The biggest use I get out of this alias is making sure I have everything
-committed. Sometimes I'll work on a project and then forget about it for
-a little while without committing. When I want to double-check that I'm not
-forgetting anything, I run ~git bulk-command status --short~ to quickly scan which
-repos have uncommitted changes that I need to take care of.
+The alias ~all-repos~ proves especially useful in ensuring that all my work is
+committed.
+
+There are instances when I work on a project, only to set it aside temporarily
+without committing the changes. To ensure that I haven't overlooked any
+uncommitted work, I rely on ~git all-repos status --short~ to rapidly assess
+repositories that contain pending changes.
 
 #+begin_src conf
     # Print repository name, execute command, and separate output.
@@ -3953,7 +3955,7 @@ repos have uncommitted changes that I need to take care of.
         }; f"
 
     # Run commands for each repository in the current directory.
-    bulk-command = "!f() { \
+    all-repos = "!f() { \
             ls -R -d */.git \
                 | sed s,/.git,, \
                 | xargs -I{} git -C {} print-repo-info "$@"; \
