@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.2313
+# .gitconfig, Time-stamp: 20230821.2317
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -351,11 +351,6 @@
                 | grep -vF .gitignore \
                 | sed \"s/^\\t//\" \
                 >> \"${GIT_PREFIX}.gitignore\""
-
-    # Refresh the tracking of ignored files based on .gitignore rules.
-    refresh-ignore = !git rm -r --cached . \
-                && git add . \
-                && git commit -m "Refresh ignored files"
 
     # Mark a file as unchanged and hide it from the Git status.
     skip = update-index --assume-unchanged

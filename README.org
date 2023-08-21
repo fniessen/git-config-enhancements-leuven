@@ -1253,10 +1253,8 @@ a builtin, but then it still has not this special handling).
 - Ignore all files with this extension: pattern
 - Ignore custom pattern: pattern
 
-#+begin_src conf :tangle no
-# Add any directories, files, or patterns you don't want to be tracked by
-# version control
-#+end_src
+Add any directories, files, or patterns you don't want to be tracked by version
+control.
 
 Quickly add a file or directory to =.gitignore=:
 
@@ -1279,20 +1277,7 @@ Quickly add a file or directory to =.gitignore=:
 
 *Note that adding the .gitignore and the file specification will have no effect
 on files that are already being tracked.* If you're already tracking these,
-you'll have to stop tracking them. (Right-click on the folder or file and select
-Stop Tracking.) You'll then see them change from having a green/clean or
-amber/changed icon to a red/removed icon. On your next commit the files will be
-removed from the repository and thereafter appear with a blue/ignored
-icon. Another contributor asked why Ignore was disabled for particular files and
-I believe it was because he was trying to ignore a file that was already being
-tracked. You can only ignore a file that has a blue question mark icon.
-
-#+begin_src conf
-    # Refresh the tracking of ignored files based on .gitignore rules.
-    refresh-ignore = !git rm -r --cached . \
-                && git add . \
-                && git commit -m "Refresh ignored files"
-#+end_src
+you'll have to stop tracking them.
 
 *** ~assume-unchanged~ command
 
