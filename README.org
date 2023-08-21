@@ -4081,7 +4081,9 @@ Staging for commit is typically done by ~git add~.
 #+begin_src conf
     # Configure git-diff to produce the absolutely most minimal diff possible.
     dw-min = diff -w --word-diff-regex=. --color-words -U0
-    precommit0 = diff --diff-algorithm=minimal -w
+
+    # Show minimal differences in changes between working directory and the most recent commit, ignoring whitespace.
+    wdiff = diff --diff-algorithm=minimal -w
 #+end_src
 
 *** Changes between the working tree and the latest commit (HEAD)
@@ -4093,7 +4095,7 @@ Staging for commit is typically done by ~git add~.
 *** Changes between the index (staged for the next commit) and the latest commit (HEAD)
 
 Just before committing the *staged* changes (about to be committed), check what
-your commit changes:
+your commit changes (to make sure you don't need to use the undo commands):
 
 #+begin_src conf
     # Diff staged line-wise.
@@ -4101,15 +4103,9 @@ your commit changes:
 
     # Diff staged word-wise.
     dw-staged = diff --color-words --cached
-#+end_src
 
-*** Precommit
-
-This is a key part of my workflow. I run this before every commit to make sure
-I don't need to use the undo commands.
-
-#+begin_src conf
-    precommit = diff --diff-algorithm=minimal -w --cached
+    # Show minimal differences in changes between staged changes and the most recent commit, ignoring whitespace.
+    swdiff = diff --diff-algorithm=minimal -w --cached
 #+end_src
 
 *** When was this file first committed

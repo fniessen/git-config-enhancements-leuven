@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1754
+# .gitconfig, Time-stamp: 20230821.1802
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1170,7 +1170,9 @@ deploy-prod =
 
     # Configure git-diff to produce the absolutely most minimal diff possible.
     dw-min = diff -w --word-diff-regex=. --color-words -U0
-    precommit0 = diff --diff-algorithm=minimal -w
+
+    # Show minimal differences in changes between working directory and the most recent commit, ignoring whitespace.
+    wdiff = diff --diff-algorithm=minimal -w
 
     # Diff staged line-wise.
     df-staged = diff --cached
@@ -1178,7 +1180,8 @@ deploy-prod =
     # Diff staged word-wise.
     dw-staged = diff --color-words --cached
 
-    precommit = diff --diff-algorithm=minimal -w --cached
+    # Show minimal differences in changes between staged changes and the most recent commit, ignoring whitespace.
+    swdiff = diff --diff-algorithm=minimal -w --cached
 
     # Usage: git first-modified-date FILENAME
     # Show the date of the first modification of a file.
