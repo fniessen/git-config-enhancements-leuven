@@ -920,21 +920,21 @@ Fetch URL: git@bitbucket.org-something:user/slug
     # Usage: git repo-owner
     # Get the owner of the remote Git repository.
     repo-owner = "!f() { \
-            git remote show $(git config --get remote.origin.url) -n \
-                | grep 'Fetch URL:' \
-                | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
-                | sed 's#\\.git$##'; \
-        }; f"
+        git remote show $(git config --get remote.origin.url) -n \
+            | grep 'Fetch URL:' \
+            | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
+            | sed 's#\\.git$##'; \
+    }; f"
 #+end_src
 
 #+begin_src conf
     # Usage: git repo-slug
     # Get the name of the remote repository.
     repo-slug = "!f() { \
-            git remote show $(git config --get remote.origin.url) -n \
-                | awk -F/ '/Fetch URL:/{print $NF}' \
-                | sed 's#\\.git$##'; \
-        }; f"
+        git remote show $(git config --get remote.origin.url) -n \
+            | awk -F/ '/Fetch URL:/{print $NF}' \
+            | sed 's#\\.git$##'; \
+    }; f"
 #+end_src
 
 XXX Updating git aliases for different *default branch* names (~master~, ~main~, etc.):
@@ -962,14 +962,15 @@ https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
 
 *** Create a new repository in GitHub
 
-*Private* or *public* repository?
+By default, the GitHub API creates a repository as *public*.
 
 #+begin_src conf :tangle no
+    # Usage: git create-repository-gh OWNER REPO_NAME
     create-repository-gh = "!f() { \
-            REPO_OWNER=$1; \
-            REPO_SLUG=$2; \
-            curl -u \"$1\" https://api.github.com/user/repos -d \"{\"name\":\"$2\"}\"; \
-        }; f"
+        REPO_OWNER=\"$1\"; \
+        REPO_SLUG=\"$2\"; \
+        curl -u \"$REPO_OWNER\" https://api.github.com/user/repos -d \"{\\\"name\\\":\\\"$REPO_SLUG\\\"}\"; \
+    }; f"
 #+end_src
 
 * Instructions
@@ -1011,11 +1012,11 @@ Search files in all branches.
     # Usage: git search-for-files-all PATTERN
     # Search for a file in all branches.
     search-for-files-all = "!f() { \
-            for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
-                printf \"\n$(tput bold)$BRANCH_NAME:$(tput sgr0)\n\"; \
-                git ls-tree -r --name-only $BRANCH_NAME | nl -bn -w3 | grep --color=auto \"$1\"; \
-            done; \
-        }; f"
+        for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
+            printf \"\n$(tput bold)$BRANCH_NAME:$(tput sgr0)\n\"; \
+            git ls-tree -r --name-only $BRANCH_NAME | nl -bn -w3 | grep --color=auto \"$1\"; \
+        done; \
+    }; f"
 
     # Alias of 'search-for-files-all'.
     find-files-all = !git search-for-files-all
@@ -5315,36 +5316,36 @@ branches*):
 #+begin_src conf
     # Usage: git today [AUTHOR]
     today = "!f() { \
-            git log \
-                --since=midnight \
-                --author=\"${1-$(git config --get user.name)}\" \
-                --no-merges \
-                --all \
-                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-        }; f"
+        git log \
+            --since=midnight \
+            --author=\"${1-$(git config --get user.name)}\" \
+            --no-merges \
+            --all \
+            --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+            --date=format:'%Y-%m-%d %a %H:%M'; \
+    }; f"
 
     # Usage: git yesterday [AUTHOR]
     yesterday = "!f() { \
-            git log \
-                --since='1 day ago midnight' --until=midnight \
-                --author=\"${1-$(git config --get user.name)}\" \
-                --no-merges \
-                --all \
-                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-        }; f"
+        git log \
+            --since='1 day ago midnight' --until=midnight \
+            --author=\"${1-$(git config --get user.name)}\" \
+            --no-merges \
+            --all \
+            --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+            --date=format:'%Y-%m-%d %a %H:%M'; \
+    }; f"
 
     # Usage: git this-week [AUTHOR]
     this-week = "!f() { \
-            git log \
-                --since='1 week ago' \
-                --author=\"${1-$(git config --get user.name)}\" \
-                --no-merges \
-                --all \
-                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-        }; f"
+        git log \
+            --since='1 week ago' \
+            --author=\"${1-$(git config --get user.name)}\" \
+            --no-merges \
+            --all \
+            --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+            --date=format:'%Y-%m-%d %a %H:%M'; \
+    }; f"
 #+end_src
 
 Show changes for a daily standup meeting:
@@ -5353,17 +5354,17 @@ Show changes for a daily standup meeting:
     # Usage: git standup [AUTHOR]
     # Summarize changes since 24h, suitable for a daily standup meeting.
     standup = "!f() { \
-            git log \
-                    --branches \
-                    --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
-                                  echo \"friday\"; \
-                              else \
-                                  echo \"yesterday\"; \
-                              fi) \
-                    --author=\"${1-$(git config --get user.name)}\" \
-                    --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
-                    --date=format:'%Y-%m-%d %a %H:%M'; \
-        }; f"
+        git log \
+                --branches \
+                --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
+                              echo \"friday\"; \
+                          else \
+                              echo \"yesterday\"; \
+                          fi) \
+                --author=\"${1-$(git config --get user.name)}\" \
+                --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+    }; f"
 #+end_src
 
 TODO: git standup W donne un décompte avec une ligne trop peu !
@@ -5378,8 +5379,8 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+begin_src conf
     current-tag = tag --points-at HEAD
     zip = "!f() { \
-            git archive --format=zip -o $(git current-tag).zip HEAD; \
-        }; f"
+        git archive --format=zip -o $(git current-tag).zip HEAD; \
+    }; f"
 #+end_src
 
 #+begin_src conf
