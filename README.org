@@ -2511,20 +2511,13 @@ effective skills -- so that people think you are smart.
     # Create a new commit that undoes the changes introduced by a specified
     # number of previous commits.
     squash = "!f() { \
-            git reset --soft HEAD~$1 \
-                && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
-        }; f"
-#+end_src
-
-#+begin_src conf :tangle no
-    # Squash changes made in multiple unpushed commits into a single commit for
-    # a polished and cohesive project history
-    squash-BUGGY = "!f() { \
-                [ $(git rev-list HEAD..origin/$(git rev-parse --abbrev-ref HEAD) --count) -eq 0 ] \
-                    && [ $1 -le $(git rev-list --count HEAD) ] \
-                    && git reset --soft HEAD~$1 \
-                    && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\" \
-                    || echo 'Error: Cannot squash already pushed commits or squash more commits than unpushed'; \
+                local num_unpushed=$(git rev-list @{u}..HEAD --count); \
+                if [ $1 -le $num_unpushed ]; then \
+                    git reset --soft HEAD~$1 \
+                        && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
+                else \
+                    printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\\n\" $1 $num_unpushed; \
+                fi \
             }; f"
 #+end_src
 

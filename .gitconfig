@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230803.1529
+# .gitconfig, Time-stamp: 20230821.1355
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -675,9 +675,14 @@
     # Create a new commit that undoes the changes introduced by a specified
     # number of previous commits.
     squash = "!f() { \
-            git reset --soft HEAD~$1 \
-                && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
-        }; f"
+                local num_unpushed=$(git rev-list @{u}..HEAD --count); \
+                if [ $1 -le $num_unpushed ]; then \
+                    git reset --soft HEAD~$1 \
+                        && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
+                else \
+                    printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\\n\" $1 $num_unpushed; \
+                fi \
+            }; f"
 
     create-branch = checkout -b
 
@@ -904,6 +909,7 @@
     # Find the most recent common ancestor between the current branch and the default branch.
     ancestor = !git merge-base ${1:-$(git default-branch)} \
                                ${2:-$(git current-branch)}
+    # BUG: Does not work between 2 specific branches -- well without arguments
 
     # Since branch point.
     log-ancestor = !sh -c 'git log $(git ancestor)..'
