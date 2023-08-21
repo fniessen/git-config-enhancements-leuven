@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1559
+# .gitconfig, Time-stamp: 20230821.1601
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1103,20 +1103,19 @@ deploy-prod =
 # XXX Test it with tag or branch.
 
     # Print repository name, execute command, and separate output.
-    print-repo-name-then-run = "!f() { \
+    print-repo-info = "!f() { \
             echo "======="; \
             basename $(git rev-parse --show-toplevel); \
             echo "======="; \
             git "$@"; \
             echo; \
-            echo; \
         }; f"
 
     # Run commands for each repository in the current directory.
-    bulk = "!f() { \
+    bulk-command = "!f() { \
             ls -R -d */.git \
                 | sed s,/.git,, \
-                | xargs -I{} git -C {} print-repo-name-then-run "$@"; \
+                | xargs -I{} git -C {} print-repo-info "$@"; \
         }; f"
 
     bulk-status = "!for DIR in $(find . -name \".git\"); do \
