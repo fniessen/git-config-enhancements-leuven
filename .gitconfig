@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1517
+# .gitconfig, Time-stamp: 20230821.1521
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -245,10 +245,6 @@
                                   then echo 'main'; \
                                   else echo 'master'; \
                               fi'"
-
-    # Usage: git start-daemon
-    # Start a Git daemon server for remote repository access.
-    start-daemon = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
 
     # Usage: git search-for-files PATTERN
     # List all files in the current branch matching a case-insensitive search pattern.

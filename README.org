@@ -973,24 +973,6 @@ https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
         }; f"
 #+end_src
 
-** Download repository
-
-Easily launch a temporary one-off Git server from any local repository, to
-enable a peer-to-peer Git workflow.
-
-#+begin_src conf
-    # Usage: git start-daemon
-    # Start a Git daemon server for remote repository access.
-    start-daemon = "-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose"
-#+end_src
-
-1. Run ~git start-daemon~. "Ready to rumble," it will report. Git is bad-ass.
-2. Find out your IP address. Say it's 192.168.1.123.
-3. Say "hey Jane, I'm not ready/able to push these commits up to origin, but you
-   can fetch my commits into your clone by running git fetch
-   git://192.168.1.123/"
-4. Press C-c when you don't want to serve that repo any longer.
-
 * Instructions
 
 Start working with your repository.
