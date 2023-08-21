@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1449
+# .gitconfig, Time-stamp: 20230821.1501
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -304,7 +304,7 @@
 
     # Usage: git added-files
     # Show files that have been added but not yet committed.
-    added-files = !git status --porcelain -uno | awk 'match($1, /A/) {print $2}'
+    added-files = !git diff --name-only --cached --diff-filter=A
 
     # Usage: git modified-files
     # List all files modified in the working tree.
@@ -1323,12 +1323,14 @@ deploy-prod =
     # up = "!git stash && git pull && git stash pop"
 
     # Usage: git pull-autostash
-    # Create a temporary stash before pulling, and apply it after the pull.
-    pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] \
-                && git pull \
-                || git stash push -m "autostash" \
-                && git pull \
-                && git stash pop
+    # Auto-stash changes, pull, and restore stashed changes.
+    pull-autostash = "!f() { \
+                       if [ -n \"$(git status --porcelain -uno)\" ]; then \
+                           git stash push -m \"autostash\"; \
+                       fi; \
+                       git pull; \
+                       git stash pop; \
+                   }; f"
 
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD

@@ -1181,7 +1181,7 @@ area).
 #+begin_src conf
     # Usage: git added-files
     # Show files that have been added but not yet committed.
-    added-files = !git status --porcelain -uno | awk 'match($1, /A/) {print $2}'
+    added-files = !git diff --name-only --cached --diff-filter=A
 #+end_src
 
 #+begin_src conf
@@ -4478,12 +4478,14 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
 
 #+begin_src conf
     # Usage: git pull-autostash
-    # Create a temporary stash before pulling, and apply it after the pull.
-    pull-autostash = ![ -z \"$(git status --porcelain -uno)\" ] \
-                && git pull \
-                || git stash push -m "autostash" \
-                && git pull \
-                && git stash pop
+    # Auto-stash changes, pull, and restore stashed changes.
+    pull-autostash = "!f() { \
+                       if [ -n \"$(git status --porcelain -uno)\" ]; then \
+                           git stash push -m \"autostash\"; \
+                       fi; \
+                       git pull; \
+                       git stash pop; \
+                   }; f"
 #+end_src
 
 XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
