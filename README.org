@@ -3967,18 +3967,9 @@ http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
 
 ** SHOW - find all "unpushed" commits for all projects in a directory
 
-See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
+: git all-repos outgoing
 
-#+begin_src conf
-    all-repos-status = "!f() { \
-        for dir in $(find . -name \".git\"); do \
-            repo_dir=$(dirname $dir); \
-            echo \"$repo_dir:\"; \
-            git -C $repo_dir status | grep \"is ahead of\"; \
-            printf '\\n'; \
-        done; \
-    }; f"
-#+end_src
+See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
 
 ** git-pull-all-repos and git-push-all-repos
 
