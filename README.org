@@ -920,10 +920,10 @@ Fetch URL: git@bitbucket.org-something:user/slug
     # Usage: git repo-owner
     # Get the owner of the remote Git repository.
     repo-owner = "!f() { \
-            git remote show $(git origin) -n \
+            git remote show $(git config --get remote.origin.url) -n \
                 | grep 'Fetch URL:' \
                 | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
-                | sed 's#.git$##'; \
+                | sed 's#\\.git$##'; \
         }; f"
 #+end_src
 
@@ -931,10 +931,9 @@ Fetch URL: git@bitbucket.org-something:user/slug
     # Usage: git repo-slug
     # Get the name of the remote repository.
     repo-slug = "!f() { \
-            git remote show $(git origin) -n \
-                | grep 'Fetch URL:' \
-                | sed -E 's#^.*/(.*)$#\\1#' \
-                | sed 's#.git$##'; \
+            git remote show $(git config --get remote.origin.url) -n \
+                | awk -F/ '/Fetch URL:/{print $NF}' \
+                | sed 's#\\.git$##'; \
         }; f"
 #+end_src
 
@@ -3943,6 +3942,7 @@ forgetting anything, I run ~git bulk status --short~ to quickly scan which repos
 have uncommitted changes that I need to take care of.
 
 #+begin_src conf
+    # Print repository name, execute command, and separate output.
     print-repo-name-then-run = "!f() { \
             echo "======="; \
             basename $(git rev-parse --show-toplevel); \

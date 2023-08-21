@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1521
+# .gitconfig, Time-stamp: 20230821.1559
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -224,19 +224,18 @@
     # Usage: git repo-owner
     # Get the owner of the remote Git repository.
     repo-owner = "!f() { \
-            git remote show $(git origin) -n \
+            git remote show $(git config --get remote.origin.url) -n \
                 | grep 'Fetch URL:' \
                 | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
-                | sed 's#.git$##'; \
+                | sed 's#\\.git$##'; \
         }; f"
 
     # Usage: git repo-slug
     # Get the name of the remote repository.
     repo-slug = "!f() { \
-            git remote show $(git origin) -n \
-                | grep 'Fetch URL:' \
-                | sed -E 's#^.*/(.*)$#\\1#' \
-                | sed 's#.git$##'; \
+            git remote show $(git config --get remote.origin.url) -n \
+                | awk -F/ '/Fetch URL:/{print $NF}' \
+                | sed 's#\\.git$##'; \
         }; f"
 
     # Usage: git default-branch
@@ -1103,6 +1102,7 @@ deploy-prod =
         }; f"
 # XXX Test it with tag or branch.
 
+    # Print repository name, execute command, and separate output.
     print-repo-name-then-run = "!f() { \
             echo "======="; \
             basename $(git rev-parse --show-toplevel); \
