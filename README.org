@@ -1011,9 +1011,9 @@ Search files in all branches.
     # Usage: git search-for-files-all PATTERN
     # Search for a file in all branches.
     search-for-files-all = "!f() { \
-            for BRANCH in $(git for-each-ref --format=\"%(refname)\" refs/heads); do \
-                printf \"\n$(tput bold)$BRANCH:$(tput sgr0)\n\"; \
-                git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
+            for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
+                printf \"\n$(tput bold)$BRANCH_NAME:$(tput sgr0)\n\"; \
+                git ls-tree -r --name-only $BRANCH_NAME | nl -bn -w3 | grep --color=auto \"$1\"; \
             done; \
         }; f"
 
@@ -1978,13 +1978,19 @@ https://github.com/wmanley/git-meld:
 List all the *branches and tags* that contain a specific commit.
 
 #+begin_src conf
-    # Usage: git where REV
-    # Print only refs which contain the commit.
+    # Usage: git where COMMIT_HASH
+    # List references that contain a specific commit hash.
     where = for-each-ref --format='%(refname)' --contains
+
+    # Display commit information and the references containing a specific commit.
     where2 = "!f() { \
             git for-each-ref --format='%(committerdate:iso) %09 %(authorname) %09 %(refname:short)' --contains $1 \
                 | sort -r; \
         }; f"
+#+end_src
+
+#+begin_src conf
+    # List local branches that point to the current HEAD commit.
     where3 = for-each-ref --format="%(refname:short)" --points-at HEAD refs/heads
 #+end_src
 
@@ -2675,8 +2681,8 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 #+begin_src conf
     # Usage: git br
     # Show detailed information about all local branches, sorted by commit date.
-    br = for-each-ref \
-                --sort=-committerdate refs/heads/ \
+    br = for-each-ref refs/heads \
+                --sort=-committerdate \
                 --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
 #+end_src
 
@@ -4544,8 +4550,11 @@ Pull all branches:
     # Update all local branches by pulling their latest changes.
     update-all-branches = !"OLD_BRANCH=$(git current-branch); \
                            for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
-                               git checkout ${BRANCH_NAME#refs/heads/} && \
-                               git pull --ff-only; \
+                               CURRENT_BRANCH=${BRANCH_NAME#refs/heads/}; \
+                               if [ \"$CURRENT_BRANCH\" != \"$OLD_BRANCH\" ]; then \
+                                   git checkout $CURRENT_BRANCH && \
+                                   git pull --ff-only; \
+                               fi; \
                            done; \
                            git checkout $OLD_BRANCH"
 #+end_src
