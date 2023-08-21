@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.1601
+# .gitconfig, Time-stamp: 20230821.1617
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1104,11 +1104,12 @@ deploy-prod =
 
     # Print repository name, execute command, and separate output.
     print-repo-info = "!f() { \
-            echo "======="; \
+            printf '\\033[1m'; \
             basename $(git rev-parse --show-toplevel); \
-            echo "======="; \
+            printf '\\033[0m'; \
             git "$@"; \
-            echo; \
+            printf '\\n'; \
+            printf '\\n'; \
         }; f"
 
     # Run commands for each repository in the current directory.
