@@ -3575,7 +3575,7 @@ If everything is OK, you can merge the pull request.
     # Example:
     #   git merge-pr $(git origin) 5
     merge-pr = "!sh -c '\
-        USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
+        USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL:\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
         USER=$(echo $USER_AND_REPO | cut -d\" \" -f1); \
         REPO=$(echo $USER_AND_REPO | cut -d\" \" -f2); \
         TMP_FILE=$(mktemp); \
@@ -4516,12 +4516,11 @@ will do nothing, and then ~stash pop~ will unstash some random stuff from before
 XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
 
 #+begin_src conf
-    up = pull --rebase --autostash
-    up = !git fetch && git rebase --autostash FETCH_HEAD
-    up= "!git fetch $(git origin) && git branch -v -a"
+    # Pull with rebase and auto-stash, updating your local branch with remote changes.
+    up-rebase = pull --rebase --autostash
 
-    f = !git fetch --all \
-            && git rebase $(git origin)/master
+    # Update remote-tracking branches comprehensively, then rebase your current branch using fetched changes.
+    up-rebase2 = !git remote update -p && git rebase --autostash FETCH_HEAD
 #+end_src
 
 See https://www.praqma.com/stories/git-autostash/.
@@ -4674,24 +4673,40 @@ applies all those changes together.
     mnf = merge --no-ff --log
 #+end_src
 
-*** Sync branch (merge master into your branch)
+*** Update your current local branch with changes from the remote main
+
+Sync branch (merge master into your branch).
+
+**** Merging
 
 If a feature branch hasn't been touched in months, and is behind the main
-branch, you can sync (merge) the branch with the main branch, to *catch your
-branch up* to all the latest changes on the main branch.
+branch, you can sync (merge) the branch with the ~main~ branch, to *catch your
+branch up* to all the latest changes on the ~main~ branch.
 
 #+begin_src conf
-    # Usage: git sync-branch
-    # Merge remote master into the current branch.
-    sync-branch = !git fetch -p \
-                && git merge $(git origin)/master
+    # Usage: git sync-main-merge
+    # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
+    sync-main-merge = !git remote update -p \
+                && git merge $(git origin)/$(git default-branch)
 #+end_src
 
+Ouptuts:
+
+- *Branch synced:* 'branch_name' successfully synced with 'main'
+- *Unable to sync branch:* You can't merge until you resolve all merge conflicts.
+
+**** Rebasing
+
 #+begin_src conf
+    # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
+    sync-main-rebase = !git remote update -p \
+                && git rebase $(git origin)/$(git default-branch)
     # Catch up those random feature branches you haven't had to touch in months.
-    catchup = !git fetch -p \
-                && git rebase $(git origin)/master
 #+end_src
+
+*** Update your local branch with remote changes
+
+**** Fast-forward merging
 
 With *all versions* of Git, I recommend using ~git sync-ff-upstream~ instead of
 ~git pull~.
@@ -4699,7 +4714,7 @@ With *all versions* of Git, I recommend using ~git sync-ff-upstream~ instead of
 #+begin_src conf
     # Usage: git sync-ff-upstream
     # Update local branch with fast-forward from upstream.
-    sync-ff-upstream = "!f() { \
+    sync-upstream-ff = "!f() { \
         git remote update -p; \
         git merge --ff-only @{u}; \
     }; f"
@@ -4713,15 +4728,18 @@ remote.)
 
 See https://stackoverflow.com/questions/15316601/in-what-cases-could-git-pull-be-harmful
 
+**** Rebasing
+
 ~remote update -p~ *fetches* all refs from all remotes, instead of just the needed
 one; ~merge~ then merges the appropriate *single branch*.
 
 #+begin_src conf
-    # Rebasing non-linear changes (when the fast-forward merge is not possible).
-    upr = "!f() { \
+    # Update remote-tracking branches and rebase the current local branch onto the upstream branch it tracks.
+    sync-upstream-rebase = "!f() { \
         git remote update -p; \
         git rebase -p @{u}; \
     }; f"
+    # Rebasing non-linear changes (when the fast-forward merge is not possible).
 #+end_src
 
 ... but read "you're not using Git as it was intended" on
@@ -5559,16 +5577,6 @@ Fetch Git objects from upstream and update local branches.
 - If the local branch is outdated, fast-forward it;
 - If the local branch contains unpushed work, warn about it;
 - If the branch seems merged and its upstream branch was deleted, delete it.
-
-** Sync
-
-#+begin_src conf
-    # Synchronize and rebase local master with the latest changes from the remote master branch.
-    sync-rebase-master = !sh -c 'git checkout master \
-                && git fetch \
-                && git reset --hard $(git config --get remote.origin.url)/master \
-                && git rebase master'
-#+end_src
 
 ** Cherry-pick style recording
 

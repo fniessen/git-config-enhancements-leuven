@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230822.0944
+# .gitconfig, Time-stamp: 20230822.1136
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1025,7 +1025,7 @@
     # Example:
     #   git merge-pr $(git origin) 5
     merge-pr = "!sh -c '\
-        USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
+        USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL:\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
         USER=$(echo $USER_AND_REPO | cut -d\" \" -f1); \
         REPO=$(echo $USER_AND_REPO | cut -d\" \" -f2); \
         TMP_FILE=$(mktemp); \
@@ -1380,12 +1380,11 @@ deploy-prod =
         git stash pop; \
     }; f"
 
-    up = pull --rebase --autostash
-    up = !git fetch && git rebase --autostash FETCH_HEAD
-    up= "!git fetch $(git origin) && git branch -v -a"
+    # Pull with rebase and auto-stash, updating your local branch with remote changes.
+    up-rebase = pull --rebase --autostash
 
-    f = !git fetch --all \
-            && git rebase $(git origin)/master
+    # Update remote-tracking branches comprehensively, then rebase your current branch using fetched changes.
+    up-rebase2 = !git remote update -p && git rebase --autostash FETCH_HEAD
 
     # Get everything new.
     update = !git pull                     && git submodule update --init --recursive
@@ -1433,29 +1432,31 @@ deploy-prod =
     # Avoid a fast-forward commit.
     mnf = merge --no-ff --log
 
-    # Usage: git sync-branch
-    # Merge remote master into the current branch.
-    sync-branch = !git fetch -p \
-                && git merge $(git origin)/master
+    # Usage: git sync-main-merge
+    # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
+    sync-main-merge = !git remote update -p \
+                && git merge $(git origin)/$(git default-branch)
 
+    # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
+    sync-main-rebase = !git remote update -p \
+                && git rebase $(git origin)/$(git default-branch)
     # Catch up those random feature branches you haven't had to touch in months.
-    catchup = !git fetch -p \
-                && git rebase $(git origin)/master
 
     # Usage: git sync-ff-upstream
     # Update local branch with fast-forward from upstream.
-    sync-ff-upstream = "!f() { \
+    sync-upstream-ff = "!f() { \
         git remote update -p; \
         git merge --ff-only @{u}; \
     }; f"
     # (Keep your local branch in sync with the remote branch without creating
     # merge commits.)
 
-    # Rebasing non-linear changes (when the fast-forward merge is not possible).
-    upr = "!f() { \
+    # Update remote-tracking branches and rebase the current local branch onto the upstream branch it tracks.
+    sync-upstream-rebase = "!f() { \
         git remote update -p; \
         git rebase -p @{u}; \
     }; f"
+    # Rebasing non-linear changes (when the fast-forward merge is not possible).
 
     merge-into-master =  "!f() { \
             OLD_BRANCH=\"$(git symbolic-ref HEAD 2>/dev/null)\" || OLD_BRANCH=\"(unnamed branch)\"; \
@@ -1701,12 +1702,6 @@ deploy-prod =
 
     root = rev-parse --show-toplevel
     root-relative = rev-parse --show-prefix
-
-    # Synchronize and rebase local master with the latest changes from the remote master branch.
-    sync-rebase-master = !sh -c 'git checkout master \
-                && git fetch \
-                && git reset --hard $(git config --get remote.origin.url)/master \
-                && git rebase master'
 
     # Usage: git commit-interactive FILENAME...
     # Interactively stage changes and commit, or abort.
