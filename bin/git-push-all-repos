@@ -20,7 +20,9 @@ for repo in $repos; do
     # Display modified files in yellow bold.
     modified_files=$(git -C "$repo_dir" modified-files)
     if [ -n "$modified_files" ]; then
-        echo "$(tput setaf 3)$(tput bold)Modified files:$(tput sgr0)"
-        echo "$(tput setaf 3)$(tput bold)$modified_files$(tput sgr0)"
+        echo -e "$(tput setaf 3)$(tput bold)Modified files:$(tput sgr0)"
+        while IFS= read -r line; do
+            echo -e "$(tput setaf 3)$(tput bold)    $line$(tput sgr0)"
+        done <<< "$modified_files"
     fi
 done
