@@ -775,7 +775,7 @@ manual, the rest automatic.  So all patches have seen testing against
 _some_ version of LilyPond.
 
 When committing any commit, it is committed to a branch called
-"staging".  NO HUMAN COMMITS TO MASTER.  staging is picked up regularly
+"staging".  *NO HUMAN COMMITS TO MASTER.*  staging is picked up regularly
 by an automated process, compiled, regtest-checked (without visual
 comparison), documentation and translations built (includes all the web
 sites).  If compilation completes successfully, the result is pushed to
@@ -805,109 +805,3 @@ are not really sure your change is good and want to save others from
 having to recommit and/or substitute a rebased version of staging with
 your bad commits removed.
 
-** O
-
-(I'm not sure what you're asking.  HTH)  It depends on the purpose of
-the tests.
-
-- If the purpose of the tests is to ensure that *released* code is
-  "clean", then you only need to test the merge version.  No problem,
-  rebase and test when you feel like it. :-)
-
-- If the purpose of the tests is to ensure that each revision in the
-  DAG is "clean" (eg, in order to make bisect as accurate as
-  possible), then it substantially reduces time and annoyance for the
-  the developer to test each change in the feature branch then *merge*
-  and test the merge commit.  This case basically comes down to a
-  vote between the "pretty DAG" folks and the TDD crowd.[1]
-
-- If the purpose of the tests is to ensure that each commit in the DAG
-  is "clean" in the context of the latest revision before yours, then
-  it makes sense to rebase and test each revision in the rebased
-  branch.  You only do as much testing on the feature branch as gives
-  you confidence you won't have to do much debugging and repair for
-  rebased commits.  In this case there is no conflict between rebasing
-  and thorough testing.
-
-Personally, I'm kinda OCD and tend toward Type C most of the time.
-(I've also read and understand the git documentation.  You see my
-problem, I think. :-)  I find bisect very useful on occasion, so would
-rule out Type A if at all possible.  But I find Type B plausible, and
-think it's a matter of taste.
-
-Footnotes:
-[1]  However, some people think a mainline with only merge commits on
-it is pretty, and they just oppose rebasing on principle.
-
-** O
-
-> >> > If that's not true, how do I tell which commits in the linear list
-> >> > shown by "git log" were made on master, and which were committed to
-> >> > emacs-24 and later merged?
-> >>
-> >> By looking from which branch they are reachable.
-> >
-> > How do I do that?
->
-> If "git merge-base A B" outputs (the SHA1 of) B then you know that B is
-> reachable by A.  Another way to visualize this is to use "git
-> show-branch A B".
-
-Yes, OK.  Thanks.  I think "git log --graph" and "C-x v L" are also
-fine.
-
-My point was that just "git log" does not provide that info, although
-(unlike bzr) it does by default show the commits from merged branches.
-
-* Push
-
-> If I've understood correctly, "the date that a change was applied to the
-> Emacs repository on Savannah" is not something that is recorded.
-> Neither of the two dates that git does record correspond to that
-> (neither of those dates seems especially useful to me).
-
-If a single commit is made on a release branch or on master and
-immediately pushed, then both its Author and Committer dates are
-reasonably close to the push.
-
-If a feature branch is rebased to the current state of a release
-branch or master and then immediately pushed, then the Committer date
-of each commit that changed during rebase is reasonably close to the
-push.
-
-If a feature branch is merged into a release branch or master and the
-merge is immediately pushed, then both dates of the merge commit are
-reasonably close to the push.
-
-The only case when you don’t know the date some commit was pushed is
-if it is one in a long series of commits which was pushed as a
-fast-forward:
-
-A:
-o---o origin/master
-     \
-      o---o---o---o master
-
-$ git push origin master
-
-B:
-o---o---o---o---o---o origin/master, master
-
-
-To avoid this situation, you can adopt a convention that pushes to
-release branches and master SHOULD be either single commits made or
-non-trivially rebased immediately before the push, or explicit merges
-of other branches.
-
-
-To get from local state A to the desired pre-push state, one does
-
-$ git branch my-feature
-$ git reset --hard origin/master
-$ git merge --no-ff my-feature
-$ git push origin master
-$ git branch -d my-feature
-
-o---o---------------o origin/master, master
-     \             /
-      o---o---o---o
