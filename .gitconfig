@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230822.1330
+# .gitconfig, Time-stamp: 20230822.1341
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -792,8 +792,8 @@
             | grep -v '\\*'; \
     }; f"
 
-    master = !git checkout master
-    main =  !git checkout main
+    main = checkout main
+    master = checkout master
     develop = checkout develop
 
     # Usage: git sync-main-merge
@@ -804,11 +804,8 @@
     # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
     sync-main-rebase = !git remote update -p \
                 && git rebase $(git origin)/$(git default-branch)
-    # Catch up those random feature branches you haven't had to touch in months.
 
     pull = pull -v
-
-    # up = "!git stash && git pull && git stash pop"
 
     # Usage: git pull-autostash
     # Auto-stash changes, pull, and restore stashed changes.

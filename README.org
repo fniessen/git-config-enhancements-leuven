@@ -2792,8 +2792,8 @@ https://help.github.com/articles/viewing-branches-in-your-repository/).
 Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common branches*]] (useful if you have feature branches):
 
 #+begin_src conf
-    master = !git checkout master
-    main =  !git checkout main
+    main = checkout main
+    master = checkout master
     develop = checkout develop
 #+end_src
 
@@ -2827,7 +2827,6 @@ Ouptuts:
     # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
     sync-main-rebase = !git remote update -p \
                 && git rebase $(git origin)/$(git default-branch)
-    # Catch up those random feature branches you haven't had to touch in months.
 #+end_src
 
 *** Update your local branch with changes from the remote branch
@@ -2845,13 +2844,13 @@ sense.
 Git's fix is to ask you to commit (or stash) before you pull (which is fetch
 followed by merge).
 
-#+begin_src conf
-    # up = "!git stash && git pull && git stash pop"
-#+end_src
-
 #+begin_warning
-The follwaboveoing approach is *unsafe*: if there's nothing to stash, the first command
-will do nothing, and then ~stash pop~ will unstash some random stuff from before.
+The following approach:
+
+: up = "!git stash && git pull && git stash pop"
+
+is *unsafe*: if there's nothing to stash, the first command will do nothing, and
+then ~stash pop~ will unstash some random stuff from before.
 #+end_warning
 
 #+begin_src conf
