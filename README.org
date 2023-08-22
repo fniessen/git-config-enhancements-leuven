@@ -4530,41 +4530,41 @@ result in non-trivial conflicts.
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
 (+ interesting comments about *rebase vs merge during a pull*!)
 
-#+begin_src shell :tangle bin/git-up-all :shebang #!/usr/bin/env bash
-REMOTES="$@";
-if [ -z "$REMOTES" ]; then
-    REMOTES=$(git remote);
+#+begin_src shell :tangle bin/git-update-local-branches :shebang #!/usr/bin/env bash
+remotes="$@";
+if [ -z "$remotes" ]; then
+    remotes=$(git remote);
 fi
-REMOTES=$(echo "$REMOTES" | xargs -n 1 echo)
+remotes=$(echo "$remotes" | xargs -n 1 echo)
 
 CLB=$(git branch -l | awk '/^\*/{print $2}');
 
-echo "$REMOTES" | while read REMOTE; do
-    git remote update -p $REMOTE
+echo "$remotes" | while read remote; do
+    git remote update --prune $remote
     echo
-    git remote show $REMOTE -n \
+    git remote show $remote -n \
         | awk '/merges with remote/ {print $5" "$1}' \
         | while read LINE; do
-              RB=$(echo "$LINE" | cut -f1 -d" ");
-              ARB="refs/remotes/$REMOTE/$RB";
-              LB=$(echo "$LINE" | cut -f2 -d" ");
+              RB=$(echo "$LINE" | awk '{print $1}')
+              ARB="refs/remotes/$remote/$RB";
+              LB=$(echo "$LINE" | awk '{print $2}')
               ALB="refs/heads/$LB";
-              NBEHIND=$(( $(git rev-list --count $ALB..$ARB 2> /dev/null) + 0));
-              NAHEAD=$(( $(git rev-list --count $ARB..$ALB 2> /dev/null) + 0));
+              NBEHIND=$(( $(git rev-list --count "$ALB..$ARB" 2>/dev/null) + 0 ))
+              NAHEAD=$(( $(git rev-list --count "$ARB..$ALB" 2>/dev/null) + 0 ))
               if [ "$NBEHIND" -gt 0 ]; then
                   if [ "$NAHEAD" -gt 0 ]; then
-                      echo -e "[$LB \tis $NBEHIND commit(s) behind and $NAHEAD commit(s) ahead of $REMOTE/$RB.]  Not possible to fast-forward, aborting.";
+                      echo -e "[$LB is $NBEHIND commit(s) behind and $NAHEAD commit(s) ahead of $remote/$RB.]  Not possible to fast-forward, aborting."
                   elif [ "$LB" = "$CLB" ]; then
-                      echo -e "[$LB \tis $NBEHIND commit(s) behind of $REMOTE/$RB.  Fast-forwarding merge...]";
+                      echo -e "[$LB is $NBEHIND commit(s) behind of $remote/$RB.  Fast-forwarding merge...]";
                       # git merge --quiet $ARB;
-                      git merge --ff-only --verbose $ARB;
+                      git merge --ff-only --verbose "$ARB"
                   else
-                      echo -e "[$LB \tis $NBEHIND commit(s) behind of $REMOTE/$RB.  Resetting local branch to remote...]";
+                      echo -e "[$LB is $NBEHIND commit(s) behind of $remote/$RB.  Resetting local branch to remote...]";
                       # git branch -l -f $LB -t $ARB > /dev/null;
-                      git branch -l -f $LB -t $ARB;
+                      git branch -l -f "$LB" -t "$ARB"
                   fi
               else
-                  echo -e "$LB \tAlready up to date.";
+                  echo -e "$LB is already up to date."
               fi
               echo
           done
@@ -4681,14 +4681,15 @@ followed by merge).
 #+end_src
 
 #+begin_warning
-The above approach is *unsafe*: if there's nothing to stash, the first command
+The follwaboveoing approach is *unsafe*: if there's nothing to stash, the first command
 will do nothing, and then ~stash pop~ will unstash some random stuff from before.
 #+end_warning
 
 #+begin_src conf
     # Usage: git pull-autostash
     # Auto-stash changes, pull, and restore stashed changes.
-    pull-autostash = "!f() { \
+    pull-autostash = pull --autostash
+    pull-autostash2 = "!f() { \
         if [ -n \"$(git status --porcelain -uno)\" ]; then \
             git stash push -m \"autostash\"; \
         fi; \
