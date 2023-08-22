@@ -4704,7 +4704,7 @@ Ouptuts:
     # Catch up those random feature branches you haven't had to touch in months.
 #+end_src
 
-*** Update your local branch with remote changes
+*** Update your local branch with changes from the remote branch
 
 **** Fast-forward merging
 
