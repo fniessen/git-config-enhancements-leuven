@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230822.1531
+# .gitconfig, Time-stamp: 20230822.2221
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -809,7 +809,7 @@
 
     # Usage: git pull-autostash
     # Auto-stash changes, pull, and restore stashed changes.
-    pull-autostash = pull --autostash
+    pull-autostash = pull --rebase --autostash
     pull-autostash2 = "!f() { \
         if [ -n \"$(git status --porcelain -uno)\" ]; then \
             git stash push -m \"autostash\"; \

@@ -2858,7 +2858,7 @@ then ~stash pop~ will unstash some random stuff from before.
 #+begin_src conf
     # Usage: git pull-autostash
     # Auto-stash changes, pull, and restore stashed changes.
-    pull-autostash = pull --autostash
+    pull-autostash = pull --rebase --autostash
     pull-autostash2 = "!f() { \
         if [ -n \"$(git status --porcelain -uno)\" ]; then \
             git stash push -m \"autostash\"; \
@@ -3498,6 +3498,42 @@ Show all the changed files in a Git branch *since it was forked*:
         git diff --stat ${1:-$(git default-branch)}...; \
     }; f"
 #+end_src
+
+XXX
+
+#+begin_src shell :tangle no
+for file in $(git missing-files | awk '{print $1}'); do
+    if [ -f "$file" ]; then
+        echo "Results in $file:"
+        grep "DI" "$file"
+        echo
+    fi
+done
+#+end_src
+
+#+begin_src shell :tangle no
+grep_in_command_results() {
+    local cmd="$1"
+    local pattern="$2"
+    local files=$(eval "$cmd" | awk '{print $1}')
+
+    echo cmd: $cmd
+    echo pattern: $pattern
+    echo files: $files
+
+    for file in $files; do
+        if [ -f "$file" ]; then
+            echo "Results in $file:"
+            grep "$pattern" "$file"
+        fi
+    done
+}
+#+end_src
+
+does not work because the output of 'git status' is different when redirected to
+a file or to a pipe!
+
+XXX
 
 See the added / copied / deleted / modified / renamed files in a branch:
 
