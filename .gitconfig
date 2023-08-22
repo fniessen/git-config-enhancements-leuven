@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230822.1341
+# .gitconfig, Time-stamp: 20230822.1531
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -513,9 +513,9 @@
     # Remove a specific stash from the stash stack without applying changes.
     stash-remove = stash drop
 
-    # Usage: git stash-clear
+    # Usage: git stashes-clear
     # Remove all stashes from the stash stack.
-    stash-clear = "!git stash list \
+    stashes-clear = "!git stash list \
                    | cut -d: -f1 \
                    | xargs -r -I {} git stash-remove {}"
 

@@ -1569,6 +1569,8 @@ user wants to have an updated repository.
     stashes = stash list --date=short
 #+end_src
 
+: {0}: On feature/2023-08-04-request-notification: autostash
+
 *** Show the stash
 
 #+begin_src conf
@@ -1702,9 +1704,9 @@ conflicts, Git will not remove it (but it will still apply it)!
 *** Clear
 
 #+begin_src conf
-    # Usage: git stash-clear
+    # Usage: git stashes-clear
     # Remove all stashes from the stash stack.
-    stash-clear = "!git stash list \
+    stashes-clear = "!git stash list \
                    | cut -d: -f1 \
                    | xargs -r -I {} git stash-remove {}"
 #+end_src
