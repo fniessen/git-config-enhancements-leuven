@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230822.1136
+# .gitconfig, Time-stamp: 20230822.1218
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1366,6 +1366,71 @@ deploy-prod =
     incoming-diff = diff @{u} HEAD
     # diff with upstream branch
 
+    # Get everything new.
+    update = !git pull                     && git submodule update --init --recursive
+    get    = !git pull --rebase            && git submodule update --init --recursive
+    update = !git pull --rebase --prune $@ && git submodule update --init --recursive
+
+    # Pull in remote changes for the current repository and all its submodules
+    p = !"git pull; git submodule foreach git pull $(git origin) master"
+
+    # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
+    sync-all-branches = "!f() { \
+        local old_branch=$(git current-branch); \
+        for branch_ref in $(git for-each-ref refs/heads --format='%(refname)'); do \
+            local branch_name=${branch_ref#refs/heads/}; \
+            if [ \"$branch_name\" != \"$old_branch\" ]; then \
+                git checkout $branch_name && \
+                git pull --ff-only; \
+            fi; \
+        done; \
+        git checkout $old_branch; \
+    }; f"
+
+    # Retrieve the timestamp of the most recent pull operation, regardless of changes being present.
+    latest-pull-time = "!f() { \
+        local fetch_head_time=$(stat -c %y $(git root)/.git/FETCH_HEAD | cut -d'.' -f1); \
+        printf \"Latest pull time: %s\\n\" \"$fetch_head_time\"; \
+    }; f"
+    # For the latest pull (even if there's nothing new).
+
+    # Retrieve the timestamp of the last update to your current branch from the remote master branch, considering changes received.
+    latest-update-time = "!f() { \
+        local current_branch=$(git current-branch); \
+        local update_time=$(stat -c %y $(git root)/.git/refs/heads/$current_branch | cut -d'.' -f1); \
+        printf \"Latest update time for branch '%s': %s\\n\" \"$current_branch\" \"$update_time\"; \
+    }; f"
+    # For the latest pull resulting in changes coming in from the remote master
+    # branch (the timestamp won't change when git pull reports there are no
+    # changes).
+
+    # Pull the latest changes for the current branch from its remote counterpart.
+    pull-current = "!git pull $(git origin) $(git current-branch)"
+
+    # Push the current branch to its remote counterpart.
+    push-current = "!git push $(git origin) $(git current-branch)"
+
+    # Pull and push the latest changes for the current branch.
+    pull-and-push--current = "!f() { \
+        pull-current && push-current; \
+    }; f"
+
+    # Update repository by pulling changes from remote and pushing local commits.
+    pull-and-push = !git pull && git push
+
+    # Avoid a fast-forward commit.
+    mnf = merge --no-ff --log
+
+    # Usage: git sync-main-merge
+    # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
+    sync-main-merge = !git remote update -p \
+                && git merge $(git origin)/$(git default-branch)
+
+    # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
+    sync-main-rebase = !git remote update -p \
+                && git rebase $(git origin)/$(git default-branch)
+    # Catch up those random feature branches you haven't had to touch in months.
+
     pull = pull -v
 
     # up = "!git stash && git pull && git stash pop"
@@ -1385,62 +1450,6 @@ deploy-prod =
 
     # Update remote-tracking branches comprehensively, then rebase your current branch using fetched changes.
     up-rebase2 = !git remote update -p && git rebase --autostash FETCH_HEAD
-
-    # Get everything new.
-    update = !git pull                     && git submodule update --init --recursive
-    get    = !git pull --rebase            && git submodule update --init --recursive
-    update = !git pull --rebase --prune $@ && git submodule update --init --recursive
-
-    # Pull in remote changes for the current repository and all its submodules
-    p = !"git pull; git submodule foreach git pull $(git origin) master"
-
-    # Push the current branch to its remote counterpart.
-    push-current = "!git push $(git origin) $(git current-branch)"
-
-    # Pull the latest changes for the current branch from its remote counterpart.
-    pull-current = "!git pull $(git origin) $(git current-branch)"
-
-    # Pull and push the latest changes for the current branch.
-    sync-current = "!f() { \
-        pull-current && push-current; \
-    }; f"
-
-    # Update repository by pulling changes from remote and pushing local commits.
-    pull-and-push = !git pull && git push
-
-    # Update all local branches by pulling their latest changes.
-    update-all-branches = !"OLD_BRANCH=$(git current-branch); \
-                           for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
-                               CURRENT_BRANCH=${BRANCH_NAME#refs/heads/}; \
-                               if [ \"$CURRENT_BRANCH\" != \"$OLD_BRANCH\" ]; then \
-                                   git checkout $CURRENT_BRANCH && \
-                                   git pull --ff-only; \
-                               fi; \
-                           done; \
-                           git checkout $OLD_BRANCH"
-
-    # For the latest pull (even if there's nothing new).
-    last-pulled = !stat -c %y $(git root)/.git/FETCH_HEAD \
-                       | cut -d'.' -f1
-
-    # For the latest pull resulting in changes coming in from the remote master
-    # branch (the timestamp won't change when git pull reports there are no
-    # changes).
-    last-updated = !stat -c %y $(git root)/.git/refs/heads/$(git current-branch) \
-                        | cut -d'.' -f1
-
-    # Avoid a fast-forward commit.
-    mnf = merge --no-ff --log
-
-    # Usage: git sync-main-merge
-    # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
-    sync-main-merge = !git remote update -p \
-                && git merge $(git origin)/$(git default-branch)
-
-    # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
-    sync-main-rebase = !git remote update -p \
-                && git rebase $(git origin)/$(git default-branch)
-    # Catch up those random feature branches you haven't had to touch in months.
 
     # Usage: git sync-ff-upstream
     # Update local branch with fast-forward from upstream.

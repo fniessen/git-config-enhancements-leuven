@@ -4477,7 +4477,191 @@ Show the changes between the last local commit and the *remote* branch:
     # diff with upstream branch
 #+end_src
 
-*** Update with local modifications
+*** Pull
+
+Before doing work (in a new branch), *ensure that the working tree is* *up-to-date*
+with the ~origin~ (pull and get latest for all submodules):
+
+#+begin_src conf
+    # Get everything new.
+    update = !git pull                     && git submodule update --init --recursive
+    get    = !git pull --rebase            && git submodule update --init --recursive
+    update = !git pull --rebase --prune $@ && git submodule update --init --recursive
+
+    # Pull in remote changes for the current repository and all its submodules
+    p = !"git pull; git submodule foreach git pull $(git origin) master"
+#+end_src
+
+[[https://gist.github.com/gitaarik/8735255][Git Submodules basic explanation]]
+
+*** Synchronize all local branches with their corresponding remote branches
+
+See [[http://aanandprasad.com/git-up/][git-up]] (no longer maintained), which is (roughly) equivalent of executing the following:
+
+: git stash
+: git fetch --all
+: [foreach branch_name]
+:     git rebase --rebase-merges <branch_name> <remote>/<branch_name>
+:     git merge --ff-only <branch_name>
+: [end foreach]
+: git checkout <old_branch>
+: git stash pop
+
+#+begin_warning
+Use with care: the final stash application after a successful rebase might
+result in non-trivial conflicts.
+#+end_warning
+
+#+begin_src conf
+    # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
+    sync-all-branches = "!f() { \
+        local old_branch=$(git current-branch); \
+        for branch_ref in $(git for-each-ref refs/heads --format='%(refname)'); do \
+            local branch_name=${branch_ref#refs/heads/}; \
+            if [ \"$branch_name\" != \"$old_branch\" ]; then \
+                git checkout $branch_name && \
+                git pull --ff-only; \
+            fi; \
+        done; \
+        git checkout $old_branch; \
+    }; f"
+#+end_src
+
+See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
+(+ interesting comments about *rebase vs merge during a pull*!)
+
+#+begin_src shell :tangle bin/git-up-all :shebang #!/usr/bin/env bash
+REMOTES="$@";
+if [ -z "$REMOTES" ]; then
+    REMOTES=$(git remote);
+fi
+REMOTES=$(echo "$REMOTES" | xargs -n 1 echo)
+
+CLB=$(git branch -l | awk '/^\*/{print $2}');
+
+echo "$REMOTES" | while read REMOTE; do
+    git remote update -p $REMOTE
+    echo
+    git remote show $REMOTE -n \
+        | awk '/merges with remote/ {print $5" "$1}' \
+        | while read LINE; do
+              RB=$(echo "$LINE" | cut -f1 -d" ");
+              ARB="refs/remotes/$REMOTE/$RB";
+              LB=$(echo "$LINE" | cut -f2 -d" ");
+              ALB="refs/heads/$LB";
+              NBEHIND=$(( $(git rev-list --count $ALB..$ARB 2> /dev/null) + 0));
+              NAHEAD=$(( $(git rev-list --count $ARB..$ALB 2> /dev/null) + 0));
+              if [ "$NBEHIND" -gt 0 ]; then
+                  if [ "$NAHEAD" -gt 0 ]; then
+                      echo -e "[$LB \tis $NBEHIND commit(s) behind and $NAHEAD commit(s) ahead of $REMOTE/$RB.]  Not possible to fast-forward, aborting.";
+                  elif [ "$LB" = "$CLB" ]; then
+                      echo -e "[$LB \tis $NBEHIND commit(s) behind of $REMOTE/$RB.  Fast-forwarding merge...]";
+                      # git merge --quiet $ARB;
+                      git merge --ff-only --verbose $ARB;
+                  else
+                      echo -e "[$LB \tis $NBEHIND commit(s) behind of $REMOTE/$RB.  Resetting local branch to remote...]";
+                      # git branch -l -f $LB -t $ARB > /dev/null;
+                      git branch -l -f $LB -t $ARB;
+                  fi
+              else
+                  echo -e "$LB \tAlready up to date.";
+              fi
+              echo
+          done
+done
+#+end_src
+
+This script handles more than just basic synchronization; it involves comparing
+local and remote branches, performing fast-forward merges, and potentially
+resetting local branches.
+
+*** Get timestamp of last pull
+
+#+begin_src conf
+    # Retrieve the timestamp of the most recent pull operation, regardless of changes being present.
+    latest-pull-time = "!f() { \
+        local fetch_head_time=$(stat -c %y $(git root)/.git/FETCH_HEAD | cut -d'.' -f1); \
+        printf \"Latest pull time: %s\\n\" \"$fetch_head_time\"; \
+    }; f"
+    # For the latest pull (even if there's nothing new).
+
+    # Retrieve the timestamp of the last update to your current branch from the remote master branch, considering changes received.
+    latest-update-time = "!f() { \
+        local current_branch=$(git current-branch); \
+        local update_time=$(stat -c %y $(git root)/.git/refs/heads/$current_branch | cut -d'.' -f1); \
+        printf \"Latest update time for branch '%s': %s\\n\" \"$current_branch\" \"$update_time\"; \
+    }; f"
+    # For the latest pull resulting in changes coming in from the remote master
+    # branch (the timestamp won't change when git pull reports there are no
+    # changes).
+#+end_src
+
+*** Pull and push
+
+#+begin_src conf
+    # Pull the latest changes for the current branch from its remote counterpart.
+    pull-current = "!git pull $(git origin) $(git current-branch)"
+
+    # Push the current branch to its remote counterpart.
+    push-current = "!git push $(git origin) $(git current-branch)"
+
+    # Pull and push the latest changes for the current branch.
+    pull-and-push--current = "!f() { \
+        pull-current && push-current; \
+    }; f"
+#+end_src
+
+#+begin_src conf
+    # Update repository by pulling changes from remote and pushing local commits.
+    pull-and-push = !git pull && git push
+#+end_src
+
+** UPDATE - Merge
+
+Merging means to *bring the contents of another branch* (possibly from an external
+repository) *into the current branch*. [...]  Merging is performed by an automatic
+process that identifies changes made since the branches diverged, and then
+applies all those changes together.
+
+: Merge branch 'BRANCH_NAME' into master
+
+#+begin_src conf
+    # Avoid a fast-forward commit.
+    mnf = merge --no-ff --log
+#+end_src
+
+*** Update your current local branch with changes from the remote main
+
+Sync branch (merge master into your branch).
+
+**** Merging
+
+If a feature branch hasn't been touched in months, and is behind the main
+branch, you can sync (merge) the branch with the ~main~ branch, to *catch your
+branch up* to all the latest changes on the ~main~ branch.
+
+#+begin_src conf
+    # Usage: git sync-main-merge
+    # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
+    sync-main-merge = !git remote update -p \
+                && git merge $(git origin)/$(git default-branch)
+#+end_src
+
+Ouptuts:
+
+- *Branch synced:* 'branch_name' successfully synced with 'main'
+- *Unable to sync branch:* You can't merge until you resolve all merge conflicts.
+
+**** Rebasing
+
+#+begin_src conf
+    # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
+    sync-main-rebase = !git remote update -p \
+                && git rebase $(git origin)/$(git default-branch)
+    # Catch up those random feature branches you haven't had to touch in months.
+#+end_src
+
+*** Update your local branch with changes from the remote branch
 
 #+begin_src conf
     pull = pull -v
@@ -4528,181 +4712,6 @@ See https://www.praqma.com/stories/git-autostash/.
 : git rebase -i --autosquash --autostash
 
 Really handy in projects that don't do merge commits.
-
-*** Git up all branches
-
-See [[http://aanandprasad.com/git-up/][git-up]] (no longer maintained), which is (roughly) equivalent of executing the following:
-
-: git stash
-: git fetch --all
-: [foreach branch]
-:     git rebase --rebase-merges <branch> <remote>/<branch>
-:     git merge --ff-only <branch>
-: [end foreach]
-: git checkout <prev_branch>
-: git stash pop
-
-#+begin_warning
-Use with care: the final stash application after a successful rebase might
-result in non-trivial conflicts.
-#+end_warning
-
-*** Pull
-
-Before doing work (in a new branch), *ensure that the working tree is* *up-to-date*
-with the ~origin~ (pull and get latest for all submodules):
-
-#+begin_src conf
-    # Get everything new.
-    update = !git pull                     && git submodule update --init --recursive
-    get    = !git pull --rebase            && git submodule update --init --recursive
-    update = !git pull --rebase --prune $@ && git submodule update --init --recursive
-
-    # Pull in remote changes for the current repository and all its submodules
-    p = !"git pull; git submodule foreach git pull $(git origin) master"
-#+end_src
-
-[[https://gist.github.com/gitaarik/8735255][Git Submodules basic explanation]]
-
-*** Update all local branches
-
-#+begin_src conf
-    # Push the current branch to its remote counterpart.
-    push-current = "!git push $(git origin) $(git current-branch)"
-
-    # Pull the latest changes for the current branch from its remote counterpart.
-    pull-current = "!git pull $(git origin) $(git current-branch)"
-
-    # Pull and push the latest changes for the current branch.
-    sync-current = "!f() { \
-        pull-current && push-current; \
-    }; f"
-#+end_src
-
-#+begin_src conf
-    # Update repository by pulling changes from remote and pushing local commits.
-    pull-and-push = !git pull && git push
-#+end_src
-
-Pull all branches:
-
-#+begin_src conf
-    # Update all local branches by pulling their latest changes.
-    update-all-branches = !"OLD_BRANCH=$(git current-branch); \
-                           for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
-                               CURRENT_BRANCH=${BRANCH_NAME#refs/heads/}; \
-                               if [ \"$CURRENT_BRANCH\" != \"$OLD_BRANCH\" ]; then \
-                                   git checkout $CURRENT_BRANCH && \
-                                   git pull --ff-only; \
-                               fi; \
-                           done; \
-                           git checkout $OLD_BRANCH"
-#+end_src
-
-See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
-(+ interesting comments about *rebase vs merge during a pull*!)
-
-#+begin_src shell :tangle bin/git-up-all :shebang #!/usr/bin/env bash
-REMOTES="$@";
-if [ -z "$REMOTES" ]; then
-    REMOTES=$(git remote);
-fi
-REMOTES=$(echo "$REMOTES" | xargs -n 1 echo)
-
-CLB=$(git branch -l | awk '/^\*/{print $2}');
-
-echo "$REMOTES" | while read REMOTE; do
-    git remote update --prune $REMOTE
-    echo
-    git remote show $REMOTE -n \
-        | awk '/merges with remote/ {print $5" "$1}' \
-        | while read LINE; do
-              RB=$(echo "$LINE" | cut -f1 -d" ");
-              ARB="refs/remotes/$REMOTE/$RB";
-              LB=$(echo "$LINE" | cut -f2 -d" ");
-              ALB="refs/heads/$LB";
-              NBEHIND=$(( $(git rev-list --count $ALB..$ARB 2> /dev/null) + 0));
-              NAHEAD=$(( $(git rev-list --count $ARB..$ALB 2> /dev/null) + 0));
-              if [ "$NBEHIND" -gt 0 ]; then
-                  if [ "$NAHEAD" -gt 0 ]; then
-                      echo -e "[$LB \tis $NBEHIND commit(s) behind and $NAHEAD commit(s) ahead of $REMOTE/$RB.]  Not possible to fast-forward, aborting.";
-                  elif [ "$LB" = "$CLB" ]; then
-                      echo -e "[$LB \tis $NBEHIND commit(s) behind of $REMOTE/$RB.  Fast-forwarding merge...]";
-                      # git merge --quiet $ARB;
-                      git merge --ff-only --verbose $ARB;
-                  else
-                      echo -e "[$LB \tis $NBEHIND commit(s) behind of $REMOTE/$RB.  Resetting local branch to remote...]";
-                      # git branch -l -f $LB -t $ARB > /dev/null;
-                      git branch -l -f $LB -t $ARB;
-                  fi
-              else
-                  echo -e "$LB \tAlready up to date.";
-              fi
-              echo
-          done
-done
-#+end_src
-
-XXX Is this ~sync~?
-
-*** Get timestamp of last pull
-
-#+begin_src conf
-    # For the latest pull (even if there's nothing new).
-    last-pulled = !stat -c %y $(git root)/.git/FETCH_HEAD \
-                       | cut -d'.' -f1
-
-    # For the latest pull resulting in changes coming in from the remote master
-    # branch (the timestamp won't change when git pull reports there are no
-    # changes).
-    last-updated = !stat -c %y $(git root)/.git/refs/heads/$(git current-branch) \
-                        | cut -d'.' -f1
-#+end_src
-
-** UPDATE - Merge
-
-Merging means to *bring the contents of another branch* (possibly from an external
-repository) *into the current branch*. [...]  Merging is performed by an automatic
-process that identifies changes made since the branches diverged, and then
-applies all those changes together.
-
-: Merge branch 'BRANCH_NAME' into master
-
-#+begin_src conf
-    # Avoid a fast-forward commit.
-    mnf = merge --no-ff --log
-#+end_src
-
-*** Update your current local branch with changes from the remote main
-
-Sync branch (merge master into your branch).
-
-**** Merging
-
-If a feature branch hasn't been touched in months, and is behind the main
-branch, you can sync (merge) the branch with the ~main~ branch, to *catch your
-branch up* to all the latest changes on the ~main~ branch.
-
-#+begin_src conf
-    # Usage: git sync-main-merge
-    # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
-    sync-main-merge = !git remote update -p \
-                && git merge $(git origin)/$(git default-branch)
-#+end_src
-
-Ouptuts:
-
-- *Branch synced:* 'branch_name' successfully synced with 'main'
-- *Unable to sync branch:* You can't merge until you resolve all merge conflicts.
-
-**** Rebasing
-
-#+begin_src conf
-    # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
-    sync-main-rebase = !git remote update -p \
-                && git rebase $(git origin)/$(git default-branch)
-    # Catch up those random feature branches you haven't had to touch in months.
-#+end_src
 
 *** Update your local branch with changes from the remote branch
 

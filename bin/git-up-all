@@ -8,7 +8,7 @@ REMOTES=$(echo "$REMOTES" | xargs -n 1 echo)
 CLB=$(git branch -l | awk '/^\*/{print $2}');
 
 echo "$REMOTES" | while read REMOTE; do
-    git remote update --prune $REMOTE
+    git remote update -p $REMOTE
     echo
     git remote show $REMOTE -n \
         | awk '/merges with remote/ {print $5" "$1}' \
