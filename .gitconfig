@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230822.0932
+# .gitconfig, Time-stamp: 20230822.0944
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -275,7 +275,10 @@
 
     # Usage: git git-search <search-term>
     # Search for a string in all Git-tracked files.
-    grep-all = "!f() { git rev-list --all | xargs git grep $1; }; f"
+    grep-all = "!f() { \
+        git rev-list --all \
+          | xargs git grep $1; \
+    }; f"
     # IN ALL COMMITS, NOT IN ALL BRANCHES???!!! LOTS OF DUPLICATES!!!
 
     # Usage: git gno PATTERN [TREE]
@@ -544,38 +547,38 @@
     # Usage: git download-commit-plain-diff [COMMIT]
     # Create a diff file for the changes in a commit or range of commits.
     download-commit-plain-diff = "!f() { \
-            git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff; \
-        }; f"
+        git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff; \
+    }; f"
 
     # Usage: git difftool-rev [REVISION]
     # Launch a diff tool for a specific revision or branch.
     difftool-rev = "!f() { \
-            REV=$(git rev-parse \"${*:-HEAD}\"); \
-            git difftool $REV~1 $REV; \
-        }; f"
+        REV=$(git rev-parse \"${*:-HEAD}\"); \
+        git difftool $REV~1 $REV; \
+    }; f"
 
     # Usage: git file-diff-last-modification FILENAME
     # Show the diff of the last commit that modified a specific file using
     # a diff tool.
     file-diff-last-modification = "!f() { \
-            PROJECT_ROOT_DIR=$(git root); \
-            echo Finding full file path of $1 in $PROJECT_ROOT_DIR; \
-            FILEPATH=$(find $PROJECT_ROOT_DIR -type f -name $1); \
-            echo full file path $FILEPATH; \
-            LAST_MODIFIED_COMMIT_HASH=$(git rev-list -1 HEAD $FILEPATH); \
-            echo last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
-            git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
-        }; f"
+        PROJECT_ROOT_DIR=$(git root); \
+        echo Finding full file path of $1 in $PROJECT_ROOT_DIR; \
+        FILEPATH=$(find $PROJECT_ROOT_DIR -type f -name $1); \
+        echo full file path $FILEPATH; \
+        LAST_MODIFIED_COMMIT_HASH=$(git rev-list -1 HEAD $FILEPATH); \
+        echo last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
+        git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
+    }; f"
 
     file-diff-last-modification2 = "!f() { \
-            PROJECT_ROOT_DIR=$(git rev-parse --show-toplevel); \
-            echo Finding full file path of $1 in $PROJECT_ROOT_DIR; \
-            FILEPATH=$(git ls-files --full-name -- $1); \
-            echo Full file path $FILEPATH; \
-            LAST_MODIFIED_COMMIT_HASH=$(git log -1 --pretty=format:%H -- $FILEPATH); \
-            echo Last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
-            git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
-        }; f"
+        PROJECT_ROOT_DIR=$(git rev-parse --show-toplevel); \
+        echo Finding full file path of $1 in $PROJECT_ROOT_DIR; \
+        FILEPATH=$(git ls-files --full-name -- $1); \
+        echo Full file path $FILEPATH; \
+        LAST_MODIFIED_COMMIT_HASH=$(git log -1 --pretty=format:%H -- $FILEPATH); \
+        echo Last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
+        git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
+    }; f"
 
     # Usage: git dir-diff
     # Open Meld with directory comparison for all modified files.
@@ -591,9 +594,9 @@
     # Usage: git find-tags-containing COMMIT_HASH
     # Find tags containing commit.
     find-tags-containing = "!f() { \
-            git tag -l --contains $1 \
-                | sort -r; \
-        }; f"
+        git tag -l --contains $1 \
+            | sort -r; \
+    }; f"
 
     # Usage: git is-ancestor COMMIT_1 COMMIT_2
     # Check if one commit is an ancestor of another.
@@ -604,18 +607,18 @@
 
     # Only one search string is read!
     search-for-commits-all-2 = "!f() { \
-            git log --grep \"$1\" -i $(git rev-list --all); \
-        }; f"
+        git log --grep \"$1\" -i $(git rev-list --all); \
+    }; f"
 
     # Usage: git search-for-commits-bitbucket-or KEYWORD...
     # Search for commit messages that match one or more search patterns (Filter
     # by message).
     search-for-commits-or-bitbucket = "!f() { \
-            for l in \"$@\"; do \
-                git log --grep \"$l\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
-                printf \"\\n\"; \
-            done | sort -r; \
-        }; f"
+        for l in \"$@\"; do \
+            git log --grep \"$l\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
+            printf \"\\n\"; \
+        done | sort -r; \
+    }; f"
     # XXX Wrong sorting if all on the same date (wth "testing failure" on PFlow)
     # XXX Add all, date short...
 
@@ -623,24 +626,24 @@
     # Search for commits that match one or more search patterns in commit
     # messages OR DIFF CONTENTS??? (Filter by message).
     search-for-commits-and-gitlab = "!f() { \
-            CMD=\"git log --all-match -i\"; \
-            for PATTERN in \"$@\"; do \
-                CMD=\"$CMD --grep '$PATTERN'\"; \
-            done; \
-            eval $CMD; \
-        }; f"
+        CMD=\"git log --all-match -i\"; \
+        for PATTERN in \"$@\"; do \
+            CMD=\"$CMD --grep '$PATTERN'\"; \
+        done; \
+        eval $CMD; \
+    }; f"
 
     # Usage: git author-commits [AUTHOR_EMAIL]
     # Show commit history for a specific author.
     author-commits = "!f() { \
-            git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
-        }; f"
+        git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
+    }; f"
 
     # Usage: git search-for-diff-contents SEARCH_TERM
     # Search for commits that add or remove a specific term in the repository's diff contents.
     search-for-diff-contents = "!f() { \
-            git log -S \"$1\"; \
-        }; f"
+        git log -S \"$1\"; \
+    }; f"
 
     # Usage: git search-changes-for-term SEARCH_TERM
     # Search for changes that introduced or removed a specific term in the repository.
@@ -652,9 +655,9 @@
     show-commits-for-string = "!sh -c 'git log -p -S \"$1\" \"$2\"' -"
 
     browse-commits = "!f() { \
-            URL=$(git config --get remote.$(git origin).url); \
-            xdg-open ${URL/.git}/commits; \
-        }; f"
+        URL=$(git config --get remote.$(git origin).url); \
+        xdg-open ${URL/.git}/commits; \
+    }; f"
 
     # Append the staged changes to the last commit (keeping the pre-existing
     # commit message).
@@ -667,20 +670,24 @@
     # Usage: git amend-author NAME EMAIL
     # Amend the last commit with a new author.
     amend-author = "!f() { \
-            git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; \
-        }; f"
+        git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; \
+    }; f"
 
     # Edit history.
-    recommit2 = "!f() { TARGET=$(git rev-parse \"$1\"); \
-                     git commit --fixup=$TARGET ${@:2} \
-                         && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; }; f"
+    recommit2 = "!f() { \
+        TARGET=$(git rev-parse \"$1\"); \
+        git commit --fixup=$TARGET ${@:2} \
+            && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; \
+    }; f"
     # See https://blog.filippo.io/git-fixup-amending-an-older-commit/
 
     # Checkout the commit in question, and amend its message.
-    reword2 = "!f() { OLD_BRANCH=$(git current-branch); \
-                      git checkout $1; \
-                      git commit --amend; \
-                      git checkout $OLD_BRANCH; }; f"
+    reword2 = "!f() { \
+        OLD_BRANCH=$(git current-branch); \
+        git checkout $1; \
+        git commit --amend; \
+        git checkout $OLD_BRANCH; \
+    }; f"
 
     # Usage: git uncommit
     # Undo the most recent commit and keep the changes staged for commit again.
@@ -700,14 +707,14 @@
     # Create a new commit that undoes the changes introduced by a specified
     # number of previous commits.
     squash = "!f() { \
-                local num_unpushed=$(git rev-list @{u}..HEAD --count); \
-                if [ $1 -le $num_unpushed ]; then \
-                    git reset --soft HEAD~$1 \
-                        && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
-                else \
-                    printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\\n\" $1 $num_unpushed; \
-                fi \
-            }; f"
+        local num_unpushed=$(git rev-list @{u}..HEAD --count); \
+        if [ $1 -le $num_unpushed ]; then \
+            git reset --soft HEAD~$1 \
+                && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
+        else \
+            printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\\n\" $1 $num_unpushed; \
+        fi \
+    }; f"
 
     create-branch = checkout -b
 
@@ -718,9 +725,9 @@
     # Usage: git current-branch-without-slash
     # Show the current branch name (without slash).
     current-branch-without-slash = "!f() { \
-            git current-branch \
-                | tr '/' '-'; \
-        }; f"
+        git current-branch \
+            | tr '/' '-'; \
+    }; f"
 
     # Usage: git publish
     # Push the current branch to the upstream branch with the same name.
@@ -749,7 +756,9 @@
 
     # Usage: git branch-desc BRANCH_NAME
     # Edit the description of a branch.
-    branch-desc = "!f() { git branch --edit-description \"$1\"; }; f"
+    branch-desc = "!f() { \
+        git branch --edit-description \"$1\"; \
+    }; f"
 
     # Usage: git branch-upstream
     # List local branches and their upstream branches.
@@ -760,28 +769,28 @@
     my-branches = !git for-each-ref --format='%(authorname) %(refname:short)' refs/heads | grep -E \"^$(git config --get user.name)\"
 
     br-active = "!f() { \
-            git branch --no-merged \
-                | grep -v '\\*'; \
-        }; f"
+        git branch --no-merged \
+            | grep -v '\\*'; \
+    }; f"
 
     # Usage: git branches-active
     # Show only branches that are unmerged.
     branches-active = "!f() { \
-            git branch -a -vv --no-merged \
-                | grep -v '\\*'; \
-        }; f"
+        git branch -a -vv --no-merged \
+            | grep -v '\\*'; \
+    }; f"
 
     br-merged = "!f() { \
-            git branch --merged \
-                | grep -v '\\*'; \
-        }; f"
+        git branch --merged \
+            | grep -v '\\*'; \
+    }; f"
 
     # Usage: git branches-merged
     # Show only branches that are merged.
     branches-merged = "!f() { \
-            git branch -a -vv --merged \
-                | grep -v '\\*'; \
-        }; f"
+        git branch -a -vv --merged \
+            | grep -v '\\*'; \
+    }; f"
 
     master = !git checkout master
     main =  !git checkout main
@@ -805,11 +814,11 @@
 
     # Delete fully merged branches.
     delete-local-merged-branches = "!f() { \
-            git branch --no-color --merged \
-                | grep -v '\\*' \
-                | egrep -v \"(master|main|develop)\" \
-                | xargs -n 1 git delete-local-branch; \
-        }; f"
+        git branch --no-color --merged \
+            | grep -v '\\*' \
+            | egrep -v \"(master|main|develop)\" \
+            | xargs -n 1 git delete-local-branch; \
+    }; f"
 
     # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
     # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
@@ -833,9 +842,9 @@
     unpublish = !git delete-remote-branch $(git current-branch)
 
     delete-branch = "!f() { \
-            git delete-local-branch $1 \
-                && git delete-remote-branch $1; \
-        }; f"
+        git delete-local-branch $1 \
+            && git delete-remote-branch $1; \
+    }; f"
 
     # Usage: git prune-all
     # Prune deleted branches from all remotes.
@@ -846,21 +855,21 @@
     # There's no way to tell git remote update to prune orphaned branches?
 
     prune-local-branches = "!f() { \
-            git branch -vv \
-                | grep ': gone]' \
-                | awk '{print $1}' \
-                | xargs git delete-local-branch; \
-        }; f"
+        git branch -vv \
+            | grep ': gone]' \
+            | awk '{print $1}' \
+            | xargs git delete-local-branch; \
+    }; f"
 
     rename-local-branch = branch -m
 
     # Usage: git rename-branch OLD_BRANCH_NAME NEW_BRANCH_NAME
     # Rename both a local and remote branch.
     rename-branch = "!f() { \
-            git rename-local-branch $1 $2 \
-                && git push --set-upstream $(git origin) $2 \
-                && git delete-remote-branch $1; \
-        }; f"
+        git rename-local-branch $1 $2 \
+            && git push --set-upstream $(git origin) $2 \
+            && git delete-remote-branch $1; \
+    }; f"
 
     tag-with-date = !sh -c 'git tag $(date "+%Y.%m.%d_%H.%M")_"$0"'
 
@@ -885,50 +894,50 @@
     # Usage: git rename-tag OLD_TAG_NAME NEW_TAG_NAME
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { \
-            git tag $2 $1; \
-            git tag -d $1; \
-            git push $(git origin) $2; \
-            git push $(git origin) :refs/tags/$1; \
-        }; f"
+        git tag $2 $1; \
+        git tag -d $1; \
+        git push $(git origin) $2; \
+        git push $(git origin) :refs/tags/$1; \
+    }; f"
 
     # Delete local and remote tags.
     delete-tag = "!f() { \
-            [ -z $1 ] \
-                && echo \"No tags given as an argument!\" \
-                || (git tag -l $1 | \
-                    xargs -I % echo \"git tag -d % \
-                                   && git push --delete $(git origin) %\" | \
-                    sh); \
-        }; f"
+        [ -z $1 ] \
+            && echo \"No tags given as an argument!\" \
+            || (git tag -l $1 | \
+                xargs -I % echo \"git tag -d % \
+                               && git push --delete $(git origin) %\" | \
+                sh); \
+    }; f"
 
     # Usage: git compare-commits REV_BASE REV_COMPARE
     compare-commits = "!f() { \
-            git log $1...$2; \
-        }; f"
+        git log $1...$2; \
+    }; f"
 
     # Usage: git compare-changed-files REV_BASE REV_COMPARE
     # Show changed files between two commits.
     compare-changed-files = "!f() { \
-            git diff --stat $1...$2; \
-        }; f"
+        git diff --stat $1...$2; \
+    }; f"
 
     # Usage: git compare REV_BASE REV_COMPARE
     #      = git diff REV_BASE...REV_COMPARE
     # Example: git compare master@{1day} master
     compare = "!f() { \
-            git diff $1...$2; \
-        }; f"
+        git diff $1...$2; \
+    }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
     # Usage: git missing [COMMIT_ISH]
     # Show the missing commits between this and another branch
     missing = "!f() { \
-            printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-            git log "${1:-$(git default-branch)}"..; \
-            printf \"\n\"; \
-            printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-            git log .."${1:-$(git default-branch)}"; \
-        }; f"
+        printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
+        git log "${1:-$(git default-branch)}"..; \
+        printf \"\n\"; \
+        printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
+        git log .."${1:-$(git default-branch)}"; \
+    }; f"
 
     # Find the point at which a branch forked from another branch (when it was branched off).
     # Find the most recent common ancestor between the current branch and the default branch.
@@ -946,8 +955,8 @@
     #   git missing-files             list changed files between this and master
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
-            git diff --stat ${1:-$(git default-branch)}...; \
-        }; f"
+        git diff --stat ${1:-$(git default-branch)}...; \
+    }; f"
 
     # 50 most recent commits.
     # XXX this is a summary?
@@ -964,11 +973,11 @@
 
     # Draw Git revisions graph with graphviz.
     graphviz = "!f() { \
-            echo 'digraph git {' ; \
-            git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
-                | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
-            echo '}'; \
-        }; f"
+        echo 'digraph git {' ; \
+        git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
+            | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
+        echo '}'; \
+    }; f"
 
     contributors-name  = shortlog -n -s --no-merges --
     contributors-email = shortlog -n -s -e --no-merges --
@@ -976,39 +985,39 @@
     whois = "!sh -c 'git log -1 --author=\"$1\" -i --pretty=\"format:%an <%ae>\n\"' -"
 
     pull-request-bb = "!f() { \
-            USER_NAME=$1; \
-            curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
-        }; f"
+        USER_NAME=$1; \
+        curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
+    }; f"
 
     pr-list = XXX
 
     # For GitHub.
     pr-checkout-gh = "!f() { \
-            git fetch $(git origin) pull/$1/head:pr/$1 \
-                && git checkout pr/$1; \
-        }; f"
+        git fetch $(git origin) pull/$1/head:pr/$1 \
+            && git checkout pr/$1; \
+    }; f"
     # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
 
     # For GitLab.
     pr-checkout-gl = "!f() { \
-            git fetch $(git origin) merge-requests/$1/head:pr/$1 \
-                && git checkout pr/$1; \
-        }; f"
+        git fetch $(git origin) merge-requests/$1/head:pr/$1 \
+            && git checkout pr/$1; \
+    }; f"
     # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
 
     # For GitHub.
     mpr = "!f() { \
-            declare OLD_BRANCH=\"$(git current-branch)\"; \
-            declare BRANCH_NAME=\"${2:-$OLD_BRANCH}\"; \
-            if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
-                git fetch $(git origin) refs/pull/$1/head:pr/$1 \
-                    && git checkout -B $BRANCH_NAME \
-                    && git rebase $BRANCH_NAME pr/$1 \
-                    && git checkout -B $BRANCH_NAME \
-                    && git merge --ff-only pr/$1 \
-                    && git delete-local-branch pr/$1; \
-            fi \
-        }; f"
+        declare OLD_BRANCH=\"$(git current-branch)\"; \
+        declare BRANCH_NAME=\"${2:-$OLD_BRANCH}\"; \
+        if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
+            git fetch $(git origin) refs/pull/$1/head:pr/$1 \
+                && git checkout -B $BRANCH_NAME \
+                && git rebase $BRANCH_NAME pr/$1 \
+                && git checkout -B $BRANCH_NAME \
+                && git merge --ff-only pr/$1 \
+                && git delete-local-branch pr/$1; \
+        fi \
+    }; f"
 
     # Merge given pull request into the current branch.
     # The commit message will have the same for as if done using the
@@ -1030,8 +1039,8 @@
         ' -"
 
     pr-clean = "!f() { \
-            git delete-local-branch pr/$1; \
-        }; f"
+        git delete-local-branch pr/$1; \
+    }; f"
 
     pr-show = XXX <pr-number>
 
@@ -1041,10 +1050,10 @@
     # Usage: git release VERSION
     # Release a new version of your project.
     release = "!f() { \
-            git tag -a v$1 -m \"Release version $1\" \
-                && git push $(git origin) --tags \
-                && git push $(git origin); \
-        }; f"
+        git tag -a v$1 -m \"Release version $1\" \
+            && git push $(git origin) --tags \
+            && git push $(git origin); \
+    }; f"
 
     # Usage: git manifest
     # Print a list of version controlled files for the current revision.
@@ -1128,32 +1137,32 @@ deploy-prod =
     }; f"
 
     browse-wiki = "!f() { \
-            URL=$(git config --get remote.$(git origin).url); \
-            xdg-open ${URL/.git}/wiki; \
-        }; f"
+        URL=$(git config --get remote.$(git origin).url); \
+        xdg-open ${URL/.git}/wiki; \
+    }; f"
 
     # Put everything in the current repo in a Zip archive.
     download-repository = "!f() { \
-            git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; \
-        }; f"
+        git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; \
+    }; f"
 # XXX Test it with tag or branch.
 
     # Print repository name, execute command, and separate output.
     print-repo-info = "!f() { \
-            printf '\\033[1m'; \
-            basename $(git rev-parse --show-toplevel); \
-            printf '\\033[0m'; \
-            git "$@"; \
-            printf '\\n'; \
-            printf '\\n'; \
-        }; f"
+        printf '\\033[1m'; \
+        basename $(git rev-parse --show-toplevel); \
+        printf '\\033[0m'; \
+        git "$@"; \
+        printf '\\n'; \
+        printf '\\n'; \
+    }; f"
 
     # Run commands for each repository in the current directory.
     all-repos = "!f() { \
-            ls -R -d */.git \
-                | sed s#/.git## \
-                | xargs -I{} git -C {} print-repo-info "$@"; \
-        }; f"
+        ls -R -d */.git \
+            | sed s#/.git## \
+            | xargs -I{} git -C {} print-repo-info "$@"; \
+    }; f"
 
     # Usage: git pull-all-repos
     # Pull the changes in all Git repositories of the current directory.
@@ -1167,7 +1176,9 @@ deploy-prod =
     exec = '!exec '
 
     # Interactive rebase with the given number of latest commits
-    ireb = "!f() { git rebase -i HEAD~$1; }; f"
+    ireb = "!f() { \
+        git rebase -i HEAD~$1; \
+    }; f"
 
     # Start an interactive rebase of all the commits you haven't pushed
     # yet. Handy for collapsing a bunch of work-in-progress snapshots into
@@ -1228,13 +1239,13 @@ deploy-prod =
 
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
-            for BRANCH_NAME in $(git rev-parse --symbolic --branches); do \
-                echo -e \"$(git log --decorate=no -1 \
-                                    --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
-                                    --color=always $BRANCH_NAME -- \"$1\")  On branch $(tput bold)$BRANCH_NAME$(tput sgr0)\"; \
-            done \
-                | sort -r; \
-        }; f"
+        for BRANCH_NAME in $(git rev-parse --symbolic --branches); do \
+            echo -e \"$(git log --decorate=no -1 \
+                                --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
+                                --color=always $BRANCH_NAME -- \"$1\")  On branch $(tput bold)$BRANCH_NAME$(tput sgr0)\"; \
+        done \
+            | sort -r; \
+    }; f"
 
     stage-modified-removed-files = add -u
 
@@ -1251,12 +1262,12 @@ deploy-prod =
     # Usage: git lastn [N]
     # Show the last N commits on the current branch.
     lastn = "!f() { \
-            git show --name-only $(git rev-list -${1:-1} HEAD); \
-        }; f"
+        git show --name-only $(git rev-list -${1:-1} HEAD); \
+    }; f"
 
     # lastn2 = "!f() { \
-    #         git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
-    #     }; f"
+    #     git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
+    # }; f"
 
     # Usage: git file-history FILENAME
     # Show the commit history of a specific file.
@@ -1283,8 +1294,8 @@ deploy-prod =
     # Show all commits that modified a specific file, including the commit
     # message and file list.
     related = "!f() { \
-            git show --name-only $(git rev-list HEAD -- $1); \
-        }; f"
+        git show --name-only $(git rev-list HEAD -- $1); \
+    }; f"
 
     # Usage: git related-files FILENAME
     # Generate a list of which files changed together with a file.
@@ -1302,23 +1313,23 @@ deploy-prod =
     # Not so useful in itself, but used by other aliases.
     # Thanks to Rob Miller for the merge-span-* aliaes.
     merge-span = "!f() { \
-            echo $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f1)$1$(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f2); \
-        }; f"
+        echo $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f1)$1$(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f2); \
+    }; f"
 
     # Find the commits that were introduced by a merge
     merge-span-log = "!f() { \
-            git log $(git merge-span .. $1); \
-        }; f"
+        git log $(git merge-span .. $1); \
+    }; f"
 
     # Show the changes that were introduced by a merge
     merge-span-diff = "!f() { \
-            git diff $(git merge-span ... $1); \
-        }; f"
+        git diff $(git merge-span ... $1); \
+    }; f"
 
     # Show the changes that were introduced by a merge, in your difftool
     merge-span-difftool = "!f() { \
-            git difftool $(git merge-span ... $1); \
-        }; f"
+        git difftool $(git merge-span ... $1); \
+    }; f"
 
     # Show a list of existing remotes (with URL).
     r = remote -v
@@ -1362,12 +1373,12 @@ deploy-prod =
     # Usage: git pull-autostash
     # Auto-stash changes, pull, and restore stashed changes.
     pull-autostash = "!f() { \
-                       if [ -n \"$(git status --porcelain -uno)\" ]; then \
-                           git stash push -m \"autostash\"; \
-                       fi; \
-                       git pull; \
-                       git stash pop; \
-                   }; f"
+        if [ -n \"$(git status --porcelain -uno)\" ]; then \
+            git stash push -m \"autostash\"; \
+        fi; \
+        git pull; \
+        git stash pop; \
+    }; f"
 
     up = pull --rebase --autostash
     up = !git fetch && git rebase --autostash FETCH_HEAD
@@ -1391,7 +1402,9 @@ deploy-prod =
     pull-current = "!git pull $(git origin) $(git current-branch)"
 
     # Pull and push the latest changes for the current branch.
-    sync-current = "!f() { pull-current && push-current; }; f"
+    sync-current = "!f() { \
+        pull-current && push-current; \
+    }; f"
 
     # Update repository by pulling changes from remote and pushing local commits.
     pull-and-push = !git pull && git push
@@ -1432,17 +1445,17 @@ deploy-prod =
     # Usage: git sync-ff-upstream
     # Update local branch with fast-forward from upstream.
     sync-ff-upstream = "!f() { \
-            git remote update -p; \
-            git merge --ff-only @{u}; \
-        }; f"
+        git remote update -p; \
+        git merge --ff-only @{u}; \
+    }; f"
     # (Keep your local branch in sync with the remote branch without creating
     # merge commits.)
 
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
     upr = "!f() { \
-            git remote update -p; \
-            git rebase -p @{u}; \
-        }; f"
+        git remote update -p; \
+        git rebase -p @{u}; \
+    }; f"
 
     merge-into-master =  "!f() { \
             OLD_BRANCH=\"$(git symbolic-ref HEAD 2>/dev/null)\" || OLD_BRANCH=\"(unnamed branch)\"; \
@@ -1453,46 +1466,46 @@ deploy-prod =
         };f"
 
     m = "!f() { \
-            local OLD_BRANCH=$(git current-branch); \
-            git checkout \"$1\" \
-                && git pull \
-                && git merge $OLD_BRANCH \
-                && git push \
-                && git checkout $OLD_BRANCH; \
-        }; f"
+        local OLD_BRANCH=$(git current-branch); \
+        git checkout \"$1\" \
+            && git pull \
+            && git merge $OLD_BRANCH \
+            && git push \
+            && git checkout $OLD_BRANCH; \
+    }; f"
 
     # Run merge test (before merge) to check for any conflicts beforehand.
     merge-test = "!f() { \
-            git merge --no-commit --no-ff \"$1\"; \
-            git merge --abort; \
-            echo \"Merge aborted\"; \
-        }; f"
+        git merge --no-commit --no-ff \"$1\"; \
+        git merge --abort; \
+        echo \"Merge aborted\"; \
+    }; f"
 
     # Usage: git merge-dry-run BRANCH_NAME
     # Check how the merge of BRANCH_NAME into master will go
     merge-dry-run = "!f() { \
-            grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) \
-                && echo 'Merge conflicts!' \
-                || echo 'This branch can be automatically merged.'; \
-        }; f"
-# DOESN'T work for git fetch & git merge
+        grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) \
+            && echo 'Merge conflicts!' \
+            || echo 'This branch can be automatically merged.'; \
+    }; f"
+# XXX DOESN'T work for git fetch & git merge
 
     # Extract the "changed in both" lines as well as the conflicting parts.
     merge-dry-run-conflicts = "!f() { \
-            git merge-tree $(git merge-base $1 $2) $1 $2 \
-                | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' \
-                | cdiff; \
-        }; f"
+        git merge-tree $(git merge-base $1 $2) $1 $2 \
+            | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' \
+            | cdiff; \
+    }; f"
 
     ours = "!f() { \
-            git checkout --ours $@ \
-                && git add $@; \
-        }; f"
+        git checkout --ours $@ \
+            && git add $@; \
+    }; f"
 
     theirs = "!f() { \
-            git checkout --theirs $@ \
-                && git add $@; \
-        }; f"
+        git checkout --theirs $@ \
+            && git add $@; \
+    }; f"
 
     # Usage: git conflicts
     # List files with conflicts.
@@ -1504,16 +1517,16 @@ deploy-prod =
 
     # Create a feature branch.
     feature = "!f() { \
-            git create-branch feature/$1 develop; \
-        }; f"
+        git create-branch feature/$1 develop; \
+    }; f"
     # XXX or feature-start?
 
     # Incorporate a finished feature on develop.
     feature-finish = "!f() { \
-            git checkout develop; \
-            git merge --no-ff feature/$1 \
-                && git delete-local-branch feature/$1; \
-        }; f"
+        git checkout develop; \
+        git merge --no-ff feature/$1 \
+            && git delete-local-branch feature/$1; \
+    }; f"
 
     # XXX Also bug and refactor.
 
@@ -1524,8 +1537,8 @@ deploy-prod =
     co = checkout
 
     next = "!f() { \
-            git checkout $(git rev-list --topo-order HEAD..master | tail -1); \
-        }; f"
+        git checkout $(git rev-list --topo-order HEAD..master | tail -1); \
+    }; f"
 
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch
@@ -1555,39 +1568,39 @@ deploy-prod =
 
     # Usage: git divergence BRANCH_NAME
     divergence = "!f() { \
-            git log --cherry-pick --left-right --graph $1...$(git origin)/$1; \
-        }; f"
+        git log --cherry-pick --left-right --graph $1...$(git origin)/$1; \
+    }; f"
 
     # Usage: git sha1-tag COMMIT
     sha1-tag = "!f() { \
-            git name-rev --name-only \"$@\"; \
-        }; f"
+        git name-rev --name-only \"$@\"; \
+    }; f"
 
     lll = log -u
 
     # Apply a patch to files and/or to the index from URL.
     apply-url = "!f() { \
-            curl -s $1 2>nul \
-                | git apply ${@:2}; \
-        }; f"
+        curl -s $1 2>nul \
+            | git apply ${@:2}; \
+    }; f"
 
     # Apply a series of patches from an URL.
     am-url = "!f() { \
-            curl -s $1 2>nul \
-                | git am ${@:2}; \
-        }; f"
+        curl -s $1 2>nul \
+            | git am ${@:2}; \
+    }; f"
 
     # Interactive apply patch.
     ipatch = "!f() { \
-            git apply $1; \
-            git add -p; \
-        }; f"
+        git apply $1; \
+        git add -p; \
+    }; f"
 
     # Usage: git changelog [FIRST_TAG_NAME] [LAST_TAG_NAME] XXX
     # Detailed list of changes.
     changelog1 = "!f() { \
-            git log --no-merges ${1-$(git last-tag)}..$2; \
-        }; f"
+        git log --no-merges ${1-$(git last-tag)}..$2; \
+    }; f"
     changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
     changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
 
@@ -1650,8 +1663,8 @@ deploy-prod =
     }; f"
 
     export-branch = "!f() { \
-            git format-patch --stdout $1 > ~/$(git current-branch-without-slash).diff; \
-        }; f"
+        git format-patch --stdout $1 > ~/$(git current-branch-without-slash).diff; \
+    }; f"
 
     export-zip = archive -o latest.zip
     export-tgz = archive -o latest.tar.gz -9
@@ -1659,10 +1672,10 @@ deploy-prod =
     # Usage: git export-commit [COMMIT_ISH]
     # Create an archive of a commit.
     export-commit = "!f() { \
-            git changed-files ${1:-HEAD} \
-                | tr '\\n' '\\0' \
-                | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
-        }; f"
+        git changed-files ${1:-HEAD} \
+            | tr '\\n' '\\0' \
+            | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
+    }; f"
 
     # View raw commit.
     email-patch = XXX git format-patch $(git current-branch-without-slash).patch
