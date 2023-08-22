@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230822.1314
+# .gitconfig, Time-stamp: 20230822.1326
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -796,10 +796,73 @@
     main =  !git checkout main
     develop = checkout develop
 
+    # Usage: git sync-main-merge
+    # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
+    sync-main-merge = !git remote update -p \
+                && git merge $(git origin)/$(git default-branch)
+
+    # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
+    sync-main-rebase = !git remote update -p \
+                && git rebase $(git origin)/$(git default-branch)
+    # Catch up those random feature branches you haven't had to touch in months.
+
+    pull = pull -v
+
+    # up = "!git stash && git pull && git stash pop"
+
+    # Usage: git pull-autostash
+    # Auto-stash changes, pull, and restore stashed changes.
+    pull-autostash = pull --autostash
+    pull-autostash2 = "!f() { \
+        if [ -n \"$(git status --porcelain -uno)\" ]; then \
+            git stash push -m \"autostash\"; \
+        fi; \
+        git pull; \
+        git stash pop; \
+    }; f"
+
+    # Pull with rebase and auto-stash, updating your local branch with remote changes.
+    up-rebase = pull --rebase --autostash
+
+    # Update remote-tracking branches comprehensively, then rebase your current branch using fetched changes.
+    up-rebase2 = !git remote update -p && git rebase --autostash FETCH_HEAD
+
+    # Usage: git sync-ff-upstream
+    # Update local branch with fast-forward from upstream.
+    sync-upstream-ff = "!f() { \
+        git remote update -p; \
+        git merge --ff-only @{u}; \
+    }; f"
+    # (Keep your local branch in sync with the remote branch without creating
+    # merge commits.)
+
+    # Update remote-tracking branches and rebase the current local branch onto the upstream branch it tracks.
+    sync-upstream-rebase = "!f() { \
+        git remote update -p; \
+        git rebase -p @{u}; \
+    }; f"
+    # Rebasing non-linear changes (when the fast-forward merge is not possible).
+
     update-all-branches = !sh -c "for BRANCH_NAME in $(git branch -r); do \
                 git checkout $BRANCH_NAME; \
                 git pull; \
             done"
+
+    # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
+    sync-all-branches = "!f() { \
+        local old_branch=$(git current-branch); \
+        for branch_ref in $(git for-each-ref refs/heads --format='%(refname)'); do \
+            local branch_name=${branch_ref#refs/heads/}; \
+            if [ \"$branch_name\" != \"$old_branch\" ]; then \
+                echo \"Switching to branch: $branch_name\"; \
+                git checkout $branch_name && \
+                git pull --ff-only; \
+                echo; \
+                echo; \
+            fi; \
+        done; \
+        git checkout $old_branch; \
+    }; f"
 
     # Delete a local branch.
     delete-local-branch = branch -d
@@ -1374,22 +1437,6 @@ deploy-prod =
     # Pull in remote changes for the current repository and all its submodules
     p = !"git pull; git submodule foreach git pull $(git origin) master"
 
-    # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
-    sync-all-branches = "!f() { \
-        local old_branch=$(git current-branch); \
-        for branch_ref in $(git for-each-ref refs/heads --format='%(refname)'); do \
-            local branch_name=${branch_ref#refs/heads/}; \
-            if [ \"$branch_name\" != \"$old_branch\" ]; then \
-                echo \"Switching to branch: $branch_name\"; \
-                git checkout $branch_name && \
-                git pull --ff-only; \
-                echo; \
-                echo; \
-            fi; \
-        done; \
-        git checkout $old_branch; \
-    }; f"
-
     # Retrieve the timestamp of the most recent pull operation, regardless of changes being present.
     latest-pull-time = "!f() { \
         local fetch_head_time=$(stat -c %y $(git root)/.git/FETCH_HEAD | cut -d'.' -f1); \
@@ -1423,53 +1470,6 @@ deploy-prod =
 
     # Avoid a fast-forward commit.
     mnf = merge --no-ff --log
-
-    # Usage: git sync-main-merge
-    # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
-    sync-main-merge = !git remote update -p \
-                && git merge $(git origin)/$(git default-branch)
-
-    # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
-    sync-main-rebase = !git remote update -p \
-                && git rebase $(git origin)/$(git default-branch)
-    # Catch up those random feature branches you haven't had to touch in months.
-
-    pull = pull -v
-
-    # up = "!git stash && git pull && git stash pop"
-
-    # Usage: git pull-autostash
-    # Auto-stash changes, pull, and restore stashed changes.
-    pull-autostash = pull --autostash
-    pull-autostash2 = "!f() { \
-        if [ -n \"$(git status --porcelain -uno)\" ]; then \
-            git stash push -m \"autostash\"; \
-        fi; \
-        git pull; \
-        git stash pop; \
-    }; f"
-
-    # Pull with rebase and auto-stash, updating your local branch with remote changes.
-    up-rebase = pull --rebase --autostash
-
-    # Update remote-tracking branches comprehensively, then rebase your current branch using fetched changes.
-    up-rebase2 = !git remote update -p && git rebase --autostash FETCH_HEAD
-
-    # Usage: git sync-ff-upstream
-    # Update local branch with fast-forward from upstream.
-    sync-upstream-ff = "!f() { \
-        git remote update -p; \
-        git merge --ff-only @{u}; \
-    }; f"
-    # (Keep your local branch in sync with the remote branch without creating
-    # merge commits.)
-
-    # Update remote-tracking branches and rebase the current local branch onto the upstream branch it tracks.
-    sync-upstream-rebase = "!f() { \
-        git remote update -p; \
-        git rebase -p @{u}; \
-    }; f"
-    # Rebasing non-linear changes (when the fast-forward merge is not possible).
 
     merge-into-master =  "!f() { \
             OLD_BRANCH=\"$(git symbolic-ref HEAD 2>/dev/null)\" || OLD_BRANCH=\"(unnamed branch)\"; \
