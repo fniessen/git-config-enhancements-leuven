@@ -4519,8 +4519,11 @@ result in non-trivial conflicts.
         for branch_ref in $(git for-each-ref refs/heads --format='%(refname)'); do \
             local branch_name=${branch_ref#refs/heads/}; \
             if [ \"$branch_name\" != \"$old_branch\" ]; then \
+                echo \"Switching to branch: $branch_name\"; \
                 git checkout $branch_name && \
                 git pull --ff-only; \
+                echo; \
+                echo; \
             fi; \
         done; \
         git checkout $old_branch; \
@@ -4529,49 +4532,6 @@ result in non-trivial conflicts.
 
 See http://stackoverflow.com/questions/4318161/can-git-pull-all-update-all-my-local-branches
 (+ interesting comments about *rebase vs merge during a pull*!)
-
-#+begin_src shell :tangle bin/git-update-local-branches :shebang #!/usr/bin/env bash
-# Get the remote name (defaulting to "origin" if not provided).
-remote="${1:-origin}"
-
-# Get the current local branch.
-current_branch=$(git branch --show-current)
-
-# Update the remote and prune deleted branches.
-git remote update -p "$remote"
-
-# Iterate through remote branches.
-git remote show "$remote" -n \
-    | awk '/merges with remote/ {print $5" "$1}' \
-    | while read LINE; do
-          RB=$(echo "$LINE" | awk '{print $1}')
-          LB=$(echo "$LINE" | awk '{print $2}')
-          ARB="refs/remotes/$remote/$RB"
-          ALB="refs/heads/$LB"
-          NBEHIND=$(( $(git rev-list --count "$ALB..$ARB" 2>/dev/null) + 0 ))
-          NAHEAD=$(( $(git rev-list --count "$ARB..$ALB" 2>/dev/null) + 0 ))
-
-          if [ "$NBEHIND" -gt 0 ]; then
-              if [ "$NAHEAD" -gt 0 ]; then
-                  echo "[$LB is $NBEHIND commit(s) behind and $NAHEAD commit(s) ahead of $remote/$RB.] Not possible to fast-forward, aborting."
-              elif [ "$LB" = "$current_branch" ]; then
-                  echo "[$LB is $NBEHIND commit(s) behind of $remote/$RB. Fast-forwarding merge...]"
-                  git merge --ff-only --verbose "$ARB"
-              else
-                  echo "[$LB is $NBEHIND commit(s) behind of $remote/$RB. Resetting local branch to remote...]"
-                  git branch -l -f "$LB" -t "$ARB"
-              fi
-          else
-              echo "$LB is already up to date."
-          fi
-
-          echo
-done
-#+end_src
-
-This script handles more than just basic synchronization; it involves comparing
-local and remote branches, performing fast-forward merges, and potentially
-resetting local branches.
 
 *** Get timestamp of last pull
 

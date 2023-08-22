@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230822.1251
+# .gitconfig, Time-stamp: 20230822.1314
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1380,8 +1380,11 @@ deploy-prod =
         for branch_ref in $(git for-each-ref refs/heads --format='%(refname)'); do \
             local branch_name=${branch_ref#refs/heads/}; \
             if [ \"$branch_name\" != \"$old_branch\" ]; then \
+                echo \"Switching to branch: $branch_name\"; \
                 git checkout $branch_name && \
                 git pull --ff-only; \
+                echo; \
+                echo; \
             fi; \
         done; \
         git checkout $old_branch; \
