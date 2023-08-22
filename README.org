@@ -2943,13 +2943,6 @@ result in non-trivial conflicts.
 #+end_warning
 
 #+begin_src conf
-    update-all-branches = !sh -c "for BRANCH_NAME in $(git branch -r); do \
-                git checkout $BRANCH_NAME; \
-                git pull; \
-            done"
-#+end_src
-
-#+begin_src conf
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
     sync-all-branches = "!f() { \
         local old_branch=$(git current-branch); \

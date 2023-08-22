@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230822.1326
+# .gitconfig, Time-stamp: 20230822.1330
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -842,11 +842,6 @@
         git rebase -p @{u}; \
     }; f"
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
-
-    update-all-branches = !sh -c "for BRANCH_NAME in $(git branch -r); do \
-                git checkout $BRANCH_NAME; \
-                git pull; \
-            done"
 
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
     sync-all-branches = "!f() { \
