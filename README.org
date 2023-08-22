@@ -3889,8 +3889,13 @@ See also [[https://cran.r-project.org/web/packages/jsonlite/vignettes/json-apis.
 
 ** List Issues I've created
 
-#+begin_src conf
-    issues-created-by-me = XXX
+#+begin_src conf :tangle no
+    issues-created-by-me = "!f() { \
+        REPO_OWNER=\"YourUsername\"; \
+        REPO_SLUG=\"YourRepository\"; \
+        API_URL=\"https://api.github.com/repos/$REPO_OWNER/$REPO_SLUG/issues?creator=$REPO_OWNER\"; \
+        curl -s \"$API_URL\" | jq -r '.[] | \"#\( .number ) - \( .title )\"'; \
+    }; f"
 #+end_src
 
 ** Show Issue
@@ -3898,27 +3903,33 @@ See also [[https://cran.r-project.org/web/packages/jsonlite/vignettes/json-apis.
 Show an existing issue specified by NUMBER.
 
 #+begin_src conf
-    show-issue = XXX
+    # Usage: git show-issue ISSUE_NUMBER
+    show-issue = "!f() { \
+        REPO_OWNER=\"YourUsername\"; \
+        REPO_SLUG=\"YourRepository\"; \
+        ISSUE_NUMBER=\"$1\"; \
+        URL=\"https://github.com/$REPO_OWNER/$REPO_SLUG/issues/$ISSUE_NUMBER\"; \
+        open \"$URL\"; \
+    }; f"
 #+end_src
 
 ** Open Issues in a web browser
 
 #+begin_src conf
     browse-issues = "!f() { \
-            URL=$(git config --get remote.$(git origin).url); \
-            xdg-open ${URL/.git}/issues/$1; \
-        }; f"
+        URL=$(git config --get remote.$(git origin).url); \
+        xdg-open ${URL/.git}/issues/$1; \
+    }; f"
 #+end_src
 
 #+begin_src conf
-    # Jira tickets.
-    issues = "!f() { \
-            : git log; \
-            echo 'Printing issue keys'; \
-            git log $@ \
-                | egrep -o [A-Z]+-[0-9]+ \
-                | sort -u; \
-        }; f"
+    # List JIRA issue keys from commit messages.
+    issue-keys = "!f() { \
+        echo 'Printing JIRA issue keys'; \
+        git log \"$@\" \
+            | egrep -o '[A-Z]+-[0-9]+' \
+            | sort -u; \
+    }; f"
 #+end_src
 
 * Wiki

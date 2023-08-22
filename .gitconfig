@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230821.2326
+# .gitconfig, Time-stamp: 20230822.0932
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1105,23 +1105,27 @@ deploy-prod =
 
     issues-assigned-to-me = !git issues | grep "$(git config --get user.name)"
 
-    issues-created-by-me = XXX
-
-    show-issue = XXX
+    # Usage: git show-issue ISSUE_NUMBER
+    show-issue = "!f() { \
+        REPO_OWNER=\"YourUsername\"; \
+        REPO_SLUG=\"YourRepository\"; \
+        ISSUE_NUMBER=\"$1\"; \
+        URL=\"https://github.com/$REPO_OWNER/$REPO_SLUG/issues/$ISSUE_NUMBER\"; \
+        open \"$URL\"; \
+    }; f"
 
     browse-issues = "!f() { \
-            URL=$(git config --get remote.$(git origin).url); \
-            xdg-open ${URL/.git}/issues/$1; \
-        }; f"
+        URL=$(git config --get remote.$(git origin).url); \
+        xdg-open ${URL/.git}/issues/$1; \
+    }; f"
 
-    # Jira tickets.
-    issues = "!f() { \
-            : git log; \
-            echo 'Printing issue keys'; \
-            git log $@ \
-                | egrep -o [A-Z]+-[0-9]+ \
-                | sort -u; \
-        }; f"
+    # List JIRA issue keys from commit messages.
+    issue-keys = "!f() { \
+        echo 'Printing JIRA issue keys'; \
+        git log \"$@\" \
+            | egrep -o '[A-Z]+-[0-9]+' \
+            | sort -u; \
+    }; f"
 
     browse-wiki = "!f() { \
             URL=$(git config --get remote.$(git origin).url); \
