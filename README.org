@@ -434,7 +434,7 @@ character in Git-handled repositories.
                 && git config --global --unset https.proxy
 #+end_src
 
-* XXX Global options
+* Global options
 
 ** Core
 
@@ -937,28 +937,30 @@ Fetch URL: git@bitbucket.org-something:user/slug
     }; f"
 #+end_src
 
-XXX Updating git aliases for different *default branch* names (~master~, ~main~, etc.):
+Updating Git aliases for different *default branch* names (~master~, ~main~, etc.):
 
 #+begin_src conf
     # Usage: git default-branch
     # Get the name of the default branch (main or master).
-    default-branch = "!sh -c 'if [ -f $(git rev-parse --git-dir)/refs/heads/main ]; \
-                                  then echo 'main'; \
-                                  else echo 'master'; \
-                              fi'"
+    default-branch = "!f() { \
+        if git show-ref --verify --quiet refs/heads/main; then \
+            echo \"main\"; \
+        else \
+            echo \"master\"; \
+        fi \
+    }; f"
+    #+end_src
+
+The more straightforward variant:
+
+    #+begin_src conf :tangle no
+    default-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
+        | sed 's@^refs/remotes/origin/@@'"
 #+end_src
 
-: git branch | grep -o -m1 "\b\(master\|main\)\b"
-See https://stackoverflow.com/questions/65703168/how-to-get-the-default-for-the-master-branch-in-git
+occasionally produces the following output:
 
-#+begin_tip
-The ~sed~ strings contain ~$#~, which will be replaced by the number of arguments to
-the current script/function (generally 0 for an interactive shell).  This is
-part of the basic Bourne shell syntax, so *single quotes* will be needed under any
-*Bourne-like shell* (even pre-POSIX ones) on any OS.  Read the standard for more
-information:
-https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html.
-#+end_tip
+: fatal: ref refs/remotes/origin/HEAD is not a symbolic ref
 
 *** Create a new repository in GitHub
 
@@ -2803,7 +2805,10 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
 
 *** Update your current local branch with changes from the remote main
 
-Sync branch (merge master into your branch).
+To manually *sync* a *branch* (merge ~main~ into your branch), run the following
+command:
+
+: git merge origin/main
 
 **** Merging
 
@@ -2818,7 +2823,23 @@ branch up* to all the latest changes on the ~main~ branch.
                 && git merge $(git origin)/$(git default-branch)
 #+end_src
 
-Ouptuts:
+#+begin_src conf
+    sync-main-merge2 = "!f() { \
+        git remote update -p; \
+        default_branch=$(git default-branch); \
+        current_branch=$(git current-branch); \
+        git merge origin/$default_branch; \
+        merge_status=$?; \
+        if [ $merge_status -eq 0 ]; then \
+            echo \"Branch synced: '$current_branch' successfully synced with '$default_branch'\"; \
+        else \
+            git merge --abort 2>/dev/null; \
+            echo \"Unable to sync branch: You can't merge until you resolve all merge conflicts.\"; \
+        fi \
+    }; f"
+#+end_src
+
+XXX Outputs:
 
 - *Branch synced:* 'branch_name' successfully synced with 'main'
 - *Unable to sync branch:* You can't merge until you resolve all merge conflicts.
