@@ -1,21 +1,21 @@
 # |<------   50-character subject line   ------->|<------------------->|
 # If applied, this commit will...
-# [Add / Fix / Remove / Update / Refactor / Document] [summary]
+# [Add / Fix / Remove / Update / Refactor / Document] [Brief Summary]
 
 
 # |<-----   Optional 72-character wrapped extended description   ----->|
-# This should answer:
-# - Why is this change necessary?  (goals, use cases, stories, etc.?)
-# - How does this change address the issue?  (implementations, algorithms, etc.?)
-# - What side effects does this change have?
+# Describe the context and details of the change:
+# - Why was this change made? (goals, use cases, user stories, etc.)
+# - How was the issue addressed? (implementation details, algorithms, etc.)
+# - What potential side effects should be noted?
 
 
-# Include a link to the ticket, if any.
-# Closes #ISSUE_NUMBER
+# Include a reference to the associated ticket, if applicable.
+# Close/Closes/Fix/Fixes/Resolve/Resolves #ISSUE_NUMBER
 
 
 # --- COMMIT END ---
-# Emoji can be
+# Choose an emoji to represent the commit's nature:
 #    :star:              Add new feature ...
 #    :bug:               Fix bug ...
 #    :x:                 Remove ...
