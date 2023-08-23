@@ -2769,13 +2769,15 @@ List branches whose tips are reachable from the specified commit (~HEAD~ if not
 specified).
 
 #+begin_src conf
+    # Usage: git br-merged
+    # List branches merged into the current branch, excluding the current branch itself.
     br-merged = "!f() { \
-        git branch --merged \
-            | grep -v '\\*'; \
+        git branch --merged $(git current-branch) \
+            | grep -v \"^\\*\"; \
     }; f"
 
     # Usage: git branches-merged
-    # Show only branches that are merged.
+    # List merged branches (including remote branches), excluding the current branch.
     branches-merged = "!f() { \
         git branch -a -vv --merged \
             | grep -v '\\*'; \

@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230823.1807
+# .gitconfig, Time-stamp: 20230823.1823
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -783,13 +783,15 @@
             | grep -v '\\*'; \
     }; f"
 
+    # Usage: git br-merged
+    # List branches merged into the current branch, excluding the current branch itself.
     br-merged = "!f() { \
-        git branch --merged \
-            | grep -v '\\*'; \
+        git branch --merged $(git current-branch) \
+            | grep -v \"^\\*\"; \
     }; f"
 
     # Usage: git branches-merged
-    # Show only branches that are merged.
+    # List merged branches (including remote branches), excluding the current branch.
     branches-merged = "!f() { \
         git branch -a -vv --merged \
             | grep -v '\\*'; \
