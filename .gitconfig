@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230823.1635
+# .gitconfig, Time-stamp: 20230823.1807
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -735,7 +735,7 @@
     # Usage: git publish
     # Push the current branch to the upstream branch with the same name.
     push-upstream = !git push -u $(git origin) $(git current-branch)
-    # push-upstream = !git push -u $(git remote show origin | grep 'Fetch URL' | cut -d':' -f2- | sed 's/\.git$//') $(git rev-parse --abbrev-ref HEAD)
+    # push-upstream = !git push -u $(git remote show origin | grep 'Fetch URL' | cut -d':' -f2- | sed 's/\.git$//') $(git current-branch)
 
     # Alias of 'push-upstream'.
     publish = !git push-upstream
@@ -1009,14 +1009,19 @@
     }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
-    # Usage: git missing [COMMIT_ISH]
-    # Show the missing commits between this and another branch
+    # Usage: git missing [OTHER_BRANCH]
+    # Show the missing commits between the current branch and another branch.
     missing = "!f() { \
-        printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-        git log "${1:-$(git default-branch)}"..; \
-        printf \"\n\"; \
-        printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-        git log .."${1:-$(git default-branch)}"; \
+        local current_branch=$(git current-branch); \
+        local other_branch=${1:-$(git default-branch)}; \
+        commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
+        commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
+        printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\\n\" \
+            \"$other_branch\" \"$current_branch\" \"$commits_missing_to_current\"; \
+        git log \"$other_branch\"..\"$current_branch\"; \
+        printf \"\\n$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\\n\" \
+            \"$current_branch\" \"$other_branch\" \"$commits_missing_to_other\"; \
+        git log \"$current_branch\"..\"$other_branch\"; \
     }; f"
 
     # Find the point at which a branch forked from another branch (when it was branched off).
@@ -1029,13 +1034,23 @@
     log-ancestor = !sh -c 'git log $(git ancestor)..'
     diff-ancestor = !sh -c 'git diff $(git ancestor)..'
 
-    # Usage: git missing-files [COMMIT_ISH]
-    # Show the changed files between this and (the fork point from) another branch
+    # Usage: git missing-files [OTHER_BRANCH]
+    # Show the changed files that are in the current branch but not in the other (i.e., asymmetrical diff).
     # Examples:
-    #   git missing-files             list changed files between this and master
+    #   git missing-files             list changed files between this and main
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
-        git diff --stat ${1:-$(git default-branch)}...; \
+        local current_branch=$(git rev-parse --abbrev-ref HEAD); \
+        local other_branch=${1:-$(git default-branch)}; \
+        missing_files_to_current=$(git diff --name-only \"$other_branch\"..\"$current_branch\" | wc -l | tr -d '[:space:]'); \
+        printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
+        git diff --stat \"$other_branch\"...\"$current_branch\"; \
+    }; f"
+
+    missing-files-name-only = "!f() { \
+        local current_branch=$(git rev-parse --abbrev-ref HEAD); \
+        local other_branch=${1:-$(git default-branch)}; \
+        git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"
 
     # 50 most recent commits.
@@ -1051,7 +1066,7 @@
 
     hist-full = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
 
-    # Draw Git revisions graph with graphviz.
+    # Draw Git revisions graph with Graphviz.
     graphviz = "!f() { \
         echo 'digraph git {' ; \
         git log -25 --pretty='format:  %h -> { %p }' \"$@\" \

@@ -1839,22 +1839,22 @@ https://www.youtube.com/watch?v=PJjmw9TRB7s
 #+begin_src text :tangle .git_commit_template.txt
 # |<------   50-character subject line   ------->|<------------------->|
 # If applied, this commit will...
-# [Add / Fix / Remove / Update / Refactor / Document] [summary]
+# [Add / Fix / Remove / Update / Refactor / Document] [Brief Summary]
 
 
 # |<-----   Optional 72-character wrapped extended description   ----->|
-# This should answer:
-# - Why is this change necessary?  (goals, use cases, stories, etc.?)
-# - How does this change address the issue?  (implementations, algorithms, etc.?)
-# - What side effects does this change have?
+# Describe the context and details of the change:
+# - Why was this change made? (goals, use cases, user stories, etc.)
+# - How was the issue addressed? (implementation details, algorithms, etc.)
+# - What potential side effects should be noted?
 
 
-# Include a link to the ticket, if any.
-# Closes #ISSUE_NUMBER
+# Include a reference to the associated ticket, if applicable.
+# Close/Closes/Fix/Fixes/Resolve/Resolves #ISSUE_NUMBER
 
 
 # --- COMMIT END ---
-# Emoji can be
+# Choose an emoji to represent the commit's nature:
 #    :star:              Add new feature ...
 #    :bug:               Fix bug ...
 #    :x:                 Remove ...
@@ -2675,7 +2675,7 @@ Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
     # Usage: git publish
     # Push the current branch to the upstream branch with the same name.
     push-upstream = !git push -u $(git origin) $(git current-branch)
-    # push-upstream = !git push -u $(git remote show origin | grep 'Fetch URL' | cut -d':' -f2- | sed 's/\.git$//') $(git rev-parse --abbrev-ref HEAD)
+    # push-upstream = !git push -u $(git remote show origin | grep 'Fetch URL' | cut -d':' -f2- | sed 's/\.git$//') $(git current-branch)
 
     # Alias of 'push-upstream'.
     publish = !git push-upstream
@@ -3440,16 +3440,21 @@ The alias ~missing~ (an idea borrowed from Bazaar) shows the unique commits in t
 current branch and the specified branch.
 
 #+begin_src conf
-    # Usage: git missing [COMMIT_ISH]
-    # Show the missing commits between this and another branch
+    # Usage: git missing [OTHER_BRANCH]
+    # Show the missing commits between the current branch and another branch.
     missing = "!f() { \
-        printf \"$(tput bold)Only in HEAD:$(tput sgr0)\n\"; \
-        git log "${1:-$(git default-branch)}"..; \
-        printf \"\n\"; \
-        printf \"$(tput bold)Only in other:$(tput sgr0)\n\"; \
-        git log .."${1:-$(git default-branch)}"; \
+        local current_branch=$(git current-branch); \
+        local other_branch=${1:-$(git default-branch)}; \
+        commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
+        commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
+        printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\\n\" \
+            \"$other_branch\" \"$current_branch\" \"$commits_missing_to_current\"; \
+        git log \"$other_branch\"..\"$current_branch\"; \
+        printf \"\\n$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\\n\" \
+            \"$current_branch\" \"$other_branch\" \"$commits_missing_to_other\"; \
+        git log \"$current_branch\"..\"$other_branch\"; \
     }; f"
-#+end_src
+    #+end_src
 
 TODO: Remove hard-coded master
 
@@ -3518,13 +3523,23 @@ have not merged from the remote branch.
 Show all the changed files in a Git branch *since it was forked*:
 
 #+begin_src conf
-    # Usage: git missing-files [COMMIT_ISH]
-    # Show the changed files between this and (the fork point from) another branch
+    # Usage: git missing-files [OTHER_BRANCH]
+    # Show the changed files that are in the current branch but not in the other (i.e., asymmetrical diff).
     # Examples:
-    #   git missing-files             list changed files between this and master
+    #   git missing-files             list changed files between this and main
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
-        git diff --stat ${1:-$(git default-branch)}...; \
+        local current_branch=$(git rev-parse --abbrev-ref HEAD); \
+        local other_branch=${1:-$(git default-branch)}; \
+        missing_files_to_current=$(git diff --name-only \"$other_branch\"..\"$current_branch\" | wc -l | tr -d '[:space:]'); \
+        printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
+        git diff --stat \"$other_branch\"...\"$current_branch\"; \
+    }; f"
+
+    missing-files-name-only = "!f() { \
+        local current_branch=$(git rev-parse --abbrev-ref HEAD); \
+        local other_branch=${1:-$(git default-branch)}; \
+        git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"
 #+end_src
 
@@ -3610,7 +3625,7 @@ https://fossil-scm.org/home/help?cmd=leaves
 Directed Acyclic Graph:
 
 #+begin_src conf
-    # Draw Git revisions graph with graphviz.
+    # Draw Git revisions graph with Graphviz.
     graphviz = "!f() { \
         echo 'digraph git {' ; \
         git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
@@ -3751,7 +3766,7 @@ will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out
 : #!/bin/bash
 : TMP_FILE=$(mktemp)
 : REPO_SLUG=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
-: PR_NUMBER=$(git rev-parse --abbrev-ref HEAD | cut -d/ -f 2)
+: PR_NUMBER=$(git current-branch | cut -d/ -f 2)
 : curl -s https://api.github.com/repos/$REPO_SLUG/pulls/$PR_NUMBER > $TMP_FILE
 : trap "{ rm -f $TMP_FILE; }" EXIT
 : HEAD_REF=$(cat $TMP_FILE | jq -r '.head.ref')
