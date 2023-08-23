@@ -761,7 +761,7 @@ The first color given is the foreground; the second is the background.", e.g
 
 #+begin_src conf
 [format]
-    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
+    pretty = format:%C(green)%ad%C(reset) %C(yellow bold)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
@@ -4660,9 +4660,8 @@ What was going on, while you were away?
 #+begin_src conf
     # Usage: git incoming
     # Show new commits found in the remote repository.
-    incoming = !(git remote update -p \
-                && git log ..@{u})
-    # TODO: git fetch, instead?
+    incoming = "!git fetch \
+        && git log HEAD..@{u}"
     # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
     # Alias of 'incoming'.
@@ -4698,7 +4697,7 @@ Show a *single diffstat* (number of added and deleted lines for *all changed
 files*):
 
 #+begin_src conf
-    incoming-files = !(git remote update -p \
+    incoming-files = !(git fetch \
                 && git diff --stat ...@{u})
 
     # Alias of 'incoming-files'.
@@ -5146,11 +5145,14 @@ It is useful to know if you have any *local commits* that are not in the remote
 branch.
 
 #+begin_note
-It is a good idea to examine what you are about to push, before actually doing
-so, because fixing mistakes before pushing is much easier. To do that, use the
-command "git diff origin/master". If you want to show your unpushed commits with
-their commit log messages, use "git show origin/master.." instead. If you only
-have one local commit you want to push, just "git show" is enough.
+Before pushing your changes to a remote repository, it's wise to review your
+modifications in advance. This proactive step helps streamline the process of
+rectifying errors, should any arise.
+
+To do that, use the command "git diff origin/master". If you want to show your
+unpushed commits with their commit log messages, use "git show origin/master.."
+instead. If you only have one local commit you want to push, just "git show" is
+enough.
 
 > It is not clear to me how these two differ.  Does "git show origin/master.."
 > output everything that "git diff origin/master" outputs, plus log messages?
@@ -5160,13 +5162,13 @@ changes.  (When you do have uncommitted changes, "git diff" will include them,
 while "git show" will not.)
 #+end_note
 
-The ~outgoing~ command returns a list of *unpushed* (outgoing) commits for the
-*current branch*, the next time you do a push.
+The ~outgoing~ command returns a list of *unpushed* commits for the *current branch*,
+the next time you do a push.
 
 #+begin_src conf
     # Usage: git outgoing
     # Show (unpushed) commits not found in the remote branch.
-    outgoing = log @{u}..
+    outgoing = log @{u}..HEAD
 
     # Alias of 'outgoing'.
     out = !git outgoing

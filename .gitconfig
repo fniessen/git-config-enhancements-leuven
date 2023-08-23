@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230823.1823
+# .gitconfig, Time-stamp: 20230823.1942
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -189,7 +189,7 @@
     selected = white
 
 [format]
-    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
+    pretty = format:%C(green)%ad%C(reset) %C(yellow bold)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
@@ -1433,9 +1433,8 @@ deploy-prod =
 
     # Usage: git incoming
     # Show new commits found in the remote repository.
-    incoming = !(git remote update -p \
-                && git log ..@{u})
-    # TODO: git fetch, instead?
+    incoming = "!git fetch \
+        && git log HEAD..@{u}"
     # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
     # Alias of 'incoming'.
@@ -1454,7 +1453,7 @@ deploy-prod =
     who-is-changing-branch = !sh -c 'git shortlog HEAD..$(git origin)/$0'
     # TODO: Add fetch?
 
-    incoming-files = !(git remote update -p \
+    incoming-files = !(git fetch \
                 && git diff --stat ...@{u})
 
     # Alias of 'incoming-files'.
@@ -1597,7 +1596,7 @@ deploy-prod =
 
     # Usage: git outgoing
     # Show (unpushed) commits not found in the remote branch.
-    outgoing = log @{u}..
+    outgoing = log @{u}..HEAD
 
     # Alias of 'outgoing'.
     out = !git outgoing
