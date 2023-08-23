@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230823.1618
+# .gitconfig, Time-stamp: 20230823.1635
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -926,6 +926,8 @@
 
     # There's no way to tell git remote update to prune orphaned branches?
 
+    # Usage: git prune-local-branches
+    # Prune local branches that have been removed from the remote repository.
     prune-local-branches = "!f() { \
         git branch -vv \
             | grep ': gone]' \
@@ -933,6 +935,8 @@
             | xargs git delete-local-branch; \
     }; f"
 
+    # Usage: git rename-local-branch [OLD_BRANCH_NAME] NEW_BRANCH_NAME
+    # Rename a local branch.
     rename-local-branch = branch -m
 
     # Usage: git rename-branch OLD_BRANCH_NAME NEW_BRANCH_NAME

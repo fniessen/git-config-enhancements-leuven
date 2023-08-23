@@ -3145,13 +3145,17 @@ remote* one (by deleting the local ones that show they are "gone" in ~git
 branch -vv~):
 
 #+begin_src conf
+    # Usage: git prune-local-branches
+    # Prune local branches that have been removed from the remote repository.
     prune-local-branches = "!f() { \
         git branch -vv \
             | grep ': gone]' \
             | awk '{print $1}' \
             | xargs git delete-local-branch; \
     }; f"
-#+end_src
+    #+end_src
+
+Delete local branches that are tracking remote branches that are gone.
 
 ** Rename a branch
 
@@ -3161,18 +3165,18 @@ not meaningful to the work we are doing.
 To rename a branch *locally*:
 
 - If we are on the branch we want to rename, we can just
-  ~git rename-local-branch NEW_BRANCH_NAME~.
+
+  : git rename-local-branch NEW_BRANCH_NAME
 
 - If we are on another branch, we have to use
-  ~git rename-local-branch OLD_BRANCH_NAME NEW_BRANCH_NAME~.
+
+  : git rename-local-branch OLD_BRANCH_NAME NEW_BRANCH_NAME
 
 #+begin_src conf
+    # Usage: git rename-local-branch [OLD_BRANCH_NAME] NEW_BRANCH_NAME
+    # Rename a local branch.
     rename-local-branch = branch -m
 #+end_src
-
-XXX Try
-: git rename-local-branch "#520-application-fee-refunds" "#509-application-fee-refunds"
-(see https://gist.github.com/lttlrck/9628955)
 
 To rename a branch *locally and remotely*:
 
