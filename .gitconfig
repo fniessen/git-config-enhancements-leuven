@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230823.1606
+# .gitconfig, Time-stamp: 20230823.1618
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -943,12 +943,16 @@
             && git delete-remote-branch $1; \
     }; f"
 
-    tag-with-date = !sh -c 'git tag $(date "+%Y.%m.%d_%H.%M")_"$0"'
+    # Usage: git tag-with-date [SUFFIX]
+    # Tag the current commit with the current date and a custom suffix.
+    tag-with-date = "!sh -c 'git tag $(date \"+%Y.%m.%d_%H.%M\")_\"$0\"'"
 
-    # Push TAG_NAME to remote repo.
+    # Usage: git publish-tag TAG_NAME [REMOTE_NAME]
+    # Publish a Git tag to a remote repository.
     publish-tag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
 
-    # Remove TAG_NAME from remote repo.
+    # Usage: git unpublish-tag TAG_NAME [REMOTE_NAME]
+    # Remove a published Git tag from a remote repository.
     unpublish-tag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
 
     push-tags = push --tags

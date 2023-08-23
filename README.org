@@ -3235,7 +3235,9 @@ Create a /lightweight tag/ (/no message!/):
 Create a date/time tag with a suffix, e.g: 2021.01.12_15.25_PREVIOUS:
 
 #+begin_src conf
-    tag-with-date = !sh -c 'git tag $(date "+%Y.%m.%d_%H.%M")_"$0"'
+    # Usage: git tag-with-date [SUFFIX]
+    # Tag the current commit with the current date and a custom suffix.
+    tag-with-date = "!sh -c 'git tag $(date \"+%Y.%m.%d_%H.%M\")_\"$0\"'"
 #+end_src
 
 ** See the commits for a tag
@@ -3247,10 +3249,12 @@ See the list of all the commits for that tag.
 ** Push a tag to your repository
 
 #+begin_src conf
-    # Push TAG_NAME to remote repo.
+    # Usage: git publish-tag TAG_NAME [REMOTE_NAME]
+    # Publish a Git tag to a remote repository.
     publish-tag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
 
-    # Remove TAG_NAME from remote repo.
+    # Usage: git unpublish-tag TAG_NAME [REMOTE_NAME]
+    # Remove a published Git tag from a remote repository.
     unpublish-tag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
 #+end_src
 
