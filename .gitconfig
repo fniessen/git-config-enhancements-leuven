@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230825.1726
+# .gitconfig, Time-stamp: 20230825.1742
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -280,7 +280,7 @@
     # Search for a string in all Git-tracked files.
     grep-all = "!f() { \
         git rev-list --all \
-          | xargs git grep $1; \
+          | xargs git grep \"$1\"; \
     }; f"
     # IN ALL COMMITS, NOT IN ALL BRANCHES???!!! LOTS OF DUPLICATES!!!
 
@@ -467,7 +467,7 @@
         if [ -z \"$1\" ]; then \
             git stash apply; \
         else \
-            git stash apply stash@{$1}; \
+            git stash apply stash@{\"$1\"}; \
         fi \
     }; f"
     # Apply changes but don't delete them.
@@ -508,7 +508,7 @@
         if [ -z \"$1\" ]; then \
             git stash pop; \
         else \
-            git stash pop stash@{$1}; \
+            git stash pop stash@{\"$1\"}; \
         fi \
     }; f"
 
@@ -565,8 +565,8 @@
     # a diff tool.
     file-diff-last-modification = "!f() { \
         PROJECT_ROOT_DIR=$(git root); \
-        echo Finding full file path of $1 in $PROJECT_ROOT_DIR; \
-        FILEPATH=$(find $PROJECT_ROOT_DIR -type f -name $1); \
+        echo Finding full file path of \"$1\" in $PROJECT_ROOT_DIR; \
+        FILEPATH=$(find $PROJECT_ROOT_DIR -type f -name \"$1\"); \
         echo full file path $FILEPATH; \
         LAST_MODIFIED_COMMIT_HASH=$(git rev-list -1 HEAD $FILEPATH); \
         echo last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
@@ -575,8 +575,8 @@
 
     file-diff-last-modification2 = "!f() { \
         PROJECT_ROOT_DIR=$(git rev-parse --show-toplevel); \
-        echo Finding full file path of $1 in $PROJECT_ROOT_DIR; \
-        FILEPATH=$(git ls-files --full-name -- $1); \
+        echo Finding full file path of \"$1\" in $PROJECT_ROOT_DIR; \
+        FILEPATH=$(git ls-files --full-name -- \"$1\"); \
         echo Full file path $FILEPATH; \
         LAST_MODIFIED_COMMIT_HASH=$(git log -1 --pretty=format:%H -- $FILEPATH); \
         echo Last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
@@ -597,7 +597,7 @@
     # Usage: git find-tags-containing COMMIT_HASH
     # Find tags containing commit.
     find-tags-containing = "!f() { \
-        git tag -l --contains $1 \
+        git tag -l --contains \"$1\" \
             | sort -r; \
     }; f"
 
@@ -687,7 +687,7 @@
     # Checkout the commit in question, and amend its message.
     reword2 = "!f() { \
         OLD_BRANCH=$(git current-branch); \
-        git checkout $1; \
+        git checkout \"$1\"; \
         git commit --amend; \
         git checkout $OLD_BRANCH; \
     }; f"
@@ -916,8 +916,8 @@
     unpublish = !git delete-remote-branch $(git current-branch)
 
     delete-branch = "!f() { \
-        git delete-local-branch $1 \
-            && git delete-remote-branch $1; \
+        git delete-local-branch \"$1\" \
+            && git delete-remote-branch \"$1\"; \
     }; f"
 
     # Usage: git prune-all
@@ -944,9 +944,9 @@
     # Usage: git rename-branch OLD_BRANCH_NAME NEW_BRANCH_NAME
     # Rename both a local and remote branch.
     rename-branch = "!f() { \
-        git rename-local-branch $1 $2 \
+        git rename-local-branch \"$1\" $2 \
             && git push --set-upstream $(git origin) $2 \
-            && git delete-remote-branch $1; \
+            && git delete-remote-branch \"$1\"; \
     }; f"
 
     # Usage: git tag-with-date [SUFFIX]
@@ -976,17 +976,17 @@
     # Usage: git rename-tag OLD_TAG_NAME NEW_TAG_NAME
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { \
-        git tag $2 $1; \
-        git tag -d $1; \
+        git tag $2 \"$1\"; \
+        git tag -d \"$1\"; \
         git push $(git origin) $2; \
-        git push $(git origin) :refs/tags/$1; \
+        git push $(git origin) :refs/tags/\"$1\"; \
     }; f"
 
     # Delete local and remote tags.
     delete-tag = "!f() { \
-        [ -z $1 ] \
+        [ -z \"$1\" ] \
             && echo \"No tags given as an argument!\" \
-            || (git tag -l $1 | \
+            || (git tag -l \"$1\" | \
                 xargs -I % echo \"git tag -d % \
                                && git push --delete $(git origin) %\" | \
                 sh); \
@@ -994,20 +994,20 @@
 
     # Usage: git compare-commits REV_BASE REV_COMPARE
     compare-commits = "!f() { \
-        git log $1...$2; \
+        git log \"$1\"...$2; \
     }; f"
 
     # Usage: git compare-changed-files REV_BASE REV_COMPARE
     # Show changed files between two commits.
     compare-changed-files = "!f() { \
-        git diff --stat $1...$2; \
+        git diff --stat \"$1\"...$2; \
     }; f"
 
     # Usage: git compare REV_BASE REV_COMPARE
     #      = git diff REV_BASE...REV_COMPARE
     # Example: git compare master@{1day} master
     compare = "!f() { \
-        git diff $1...$2; \
+        git diff \"$1\"...$2; \
     }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
@@ -1082,7 +1082,7 @@
     whois = "!sh -c 'git log -1 --author=\"$1\" -i --pretty=\"format:%an <%ae>\n\"' -"
 
     pull-request-bb = "!f() { \
-        USER_NAME=$1; \
+        USER_NAME=\"$1\"; \
         curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
     }; f"
 
@@ -1090,15 +1090,15 @@
 
     # For GitHub.
     pr-checkout-gh = "!f() { \
-        git fetch $(git origin) pull/$1/head:pr/$1 \
-            && git checkout pr/$1; \
+        git fetch $(git origin) pull/\"$1\"/head:pr/\"$1\" \
+            && git checkout pr/\"$1\"; \
     }; f"
     # https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/checking-out-pull-requests-locally
 
     # For GitLab.
     pr-checkout-gl = "!f() { \
-        git fetch $(git origin) merge-requests/$1/head:pr/$1 \
-            && git checkout pr/$1; \
+        git fetch $(git origin) merge-requests/\"$1\"/head:pr/\"$1\" \
+            && git checkout pr/\"$1\"; \
     }; f"
     # https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/#add-an-alias-to-checkout-merge-requests-locally
 
@@ -1107,12 +1107,12 @@
         declare OLD_BRANCH=\"$(git current-branch)\"; \
         declare BRANCH=\"${2:-$OLD_BRANCH}\"; \
         if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
-            git fetch $(git origin) refs/pull/$1/head:pr/$1 \
+            git fetch $(git origin) refs/pull/\"$1\"/head:pr/\"$1\" \
                 && git checkout -B $BRANCH \
-                && git rebase $BRANCH pr/$1 \
+                && git rebase $BRANCH pr/\"$1\" \
                 && git checkout -B $BRANCH \
-                && git merge --ff-only pr/$1 \
-                && git delete-local-branch pr/$1; \
+                && git merge --ff-only pr/\"$1\" \
+                && git delete-local-branch pr/\"$1\"; \
         fi \
     }; f"
 
@@ -1136,7 +1136,7 @@
         ' -"
 
     pr-clean = "!f() { \
-        git delete-local-branch pr/$1; \
+        git delete-local-branch pr/\"$1\"; \
     }; f"
 
     pr-show = XXX <pr-number>
@@ -1147,7 +1147,7 @@
     # Usage: git release VERSION
     # Release a new version of your project.
     release = "!f() { \
-        git tag -a v$1 -m \"Release version $1\" \
+        git tag -a v\"$1\" -m \"Release version $1\" \
             && git push $(git origin) --tags \
             && git push $(git origin); \
     }; f"
@@ -1195,7 +1195,7 @@ deploy-prod =
 
     create-issue-pull-request = XXX
 
-    # issues = "!f() { USER_NAME=$1; \
+    # issues = "!f() { USER_NAME=\"$1\"; \
     #     curl --user $USER_NAME \
     #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
@@ -1222,7 +1222,7 @@ deploy-prod =
 
     browse-issues = "!f() { \
         URL=$(git config --get remote.$(git origin).url); \
-        xdg-open ${URL/.git}/issues/$1; \
+        xdg-open ${URL/.git}/issues/\"$1\"; \
     }; f"
 
     # List JIRA issue keys from commit messages.
@@ -1275,7 +1275,7 @@ deploy-prod =
 
     # Interactive rebase with the given number of latest commits
     ireb = "!f() { \
-        git rebase -i HEAD~$1; \
+        git rebase -i HEAD~\"$1\"; \
     }; f"
 
     # Start an interactive rebase of all the commits you haven't pushed
@@ -1331,9 +1331,18 @@ deploy-prod =
     # Usage: git first-modified-date FILENAME
     # Show the date of the first modification of a file.
     first-modified-date = "!f() { \
-        date=$(git log --all --follow --pretty=format:%ci -- $1 | tail -n 1); \
+        date=$(git log --all --follow --pretty=format:%ci -- \"$1\" | tail -n 1); \
         echo \"$date\"; \
     }; f"
+
+    first-modified-date2 = "!f() { \
+        date=$(git log --all --follow --pretty=format:%ci --full-history -- \"$1\" | tail -n 1); \
+        echo \"$date\"; \
+    }; f"
+
+   first-modified-date3 = "!f() { \
+        git log --follow --format=%ai -- \"$1\" | tail -1; \
+   }; f"
 
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
@@ -1392,7 +1401,7 @@ deploy-prod =
     # Show all commits that modified a specific file, including the commit
     # message and file list.
     related = "!f() { \
-        git show --name-only $(git rev-list HEAD -- $1); \
+        git show --name-only $(git rev-list HEAD -- \"$1\"); \
     }; f"
 
     # Usage: git related-files FILENAME
@@ -1411,22 +1420,22 @@ deploy-prod =
     # Not so useful in itself, but used by other aliases.
     # Thanks to Rob Miller for the merge-span-* aliaes.
     merge-span = "!f() { \
-        echo $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f1)$1$(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f2); \
+        echo $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f1)\"$1\"$(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f2); \
     }; f"
 
     # Find the commits that were introduced by a merge
     merge-span-log = "!f() { \
-        git log $(git merge-span .. $1); \
+        git log $(git merge-span .. \"$1\"); \
     }; f"
 
     # Show the changes that were introduced by a merge
     merge-span-diff = "!f() { \
-        git diff $(git merge-span ... $1); \
+        git diff $(git merge-span ... \"$1\"); \
     }; f"
 
     # Show the changes that were introduced by a merge, in your difftool
     merge-span-difftool = "!f() { \
-        git difftool $(git merge-span ... $1); \
+        git difftool $(git merge-span ... \"$1\"); \
     }; f"
 
     # Show a list of existing remotes (with URL).
@@ -1532,7 +1541,7 @@ deploy-prod =
     # Usage: git merge-dry-run BRANCH_NAME
     # Check how the merge of BRANCH_NAME into master will go
     merge-dry-run = "!f() { \
-        grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD $1) FETCH_HEAD $1) \
+        grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD \"$1\") FETCH_HEAD \"$1\") \
             && echo 'Merge conflicts!' \
             || echo 'This branch can be automatically merged.'; \
     }; f"
@@ -1540,7 +1549,7 @@ deploy-prod =
 
     # Extract the "changed in both" lines as well as the conflicting parts.
     merge-dry-run-conflicts = "!f() { \
-        git merge-tree $(git merge-base $1 $2) $1 $2 \
+        git merge-tree $(git merge-base \"$1\" $2) \"$1\" $2 \
             | sed -n '/+<<<<<<< .our/,/+>>>>>>> .their/p;/^changed in both/{n;N;N;s/^/#/mg;p}' \
             | cdiff; \
     }; f"
@@ -1565,15 +1574,15 @@ deploy-prod =
 
     # Create a feature branch.
     feature = "!f() { \
-        git create-branch feature/$1 develop; \
+        git create-branch feature/\"$1\" develop; \
     }; f"
     # XXX or feature-start?
 
     # Incorporate a finished feature on develop.
     feature-finish = "!f() { \
         git checkout develop; \
-        git merge --no-ff feature/$1 \
-            && git delete-local-branch feature/$1; \
+        git merge --no-ff feature/\"$1\" \
+            && git delete-local-branch feature/\"$1\"; \
     }; f"
 
     # XXX Also bug and refactor.
@@ -1616,7 +1625,7 @@ deploy-prod =
 
     # Usage: git divergence BRANCH_NAME
     divergence = "!f() { \
-        git log --cherry-pick --left-right --graph $1...$(git origin)/$1; \
+        git log --cherry-pick --left-right --graph \"$1\"...$(git origin)/\"$1\"; \
     }; f"
 
     # Usage: git sha1-tag COMMIT
@@ -1628,19 +1637,19 @@ deploy-prod =
 
     # Apply a patch to files and/or to the index from URL.
     apply-url = "!f() { \
-        curl -s $1 2>nul \
+        curl -s \"$1\" 2>nul \
             | git apply ${@:2}; \
     }; f"
 
     # Apply a series of patches from an URL.
     am-url = "!f() { \
-        curl -s $1 2>nul \
+        curl -s \"$1\" 2>nul \
             | git am ${@:2}; \
     }; f"
 
     # Interactive apply patch.
     ipatch = "!f() { \
-        git apply $1; \
+        git apply \"$1\"; \
         git add -p; \
     }; f"
 
@@ -1711,7 +1720,7 @@ deploy-prod =
     }; f"
 
     export-branch = "!f() { \
-        git format-patch --stdout $1 > ~/$(git current-branch-without-slash).diff; \
+        git format-patch --stdout \"$1\" > ~/$(git current-branch-without-slash).diff; \
     }; f"
 
     export-zip = archive -o latest.zip
