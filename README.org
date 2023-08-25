@@ -5476,7 +5476,25 @@ Show changes for a daily standup meeting:
     }; f"
 #+end_src
 
-TODO: git standup W donne un décompte avec une ligne trop peu !
+#+begin_src conf :tangle no
+    standup = "!f() { \
+        today=$(date +%a) \
+        if [ \"$today\" = \"Mon\" ]; then \
+            since=\"friday\" \
+        else \
+            since=\"yesterday\" \
+        fi \
+        author=\"${1-$(git config --get user.name)}\" \
+        git log \
+            --branches \
+            --since=\"$since\" \
+            --author=\"$author\" \
+            --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
+            --date=format:'%Y-%m-%d %a %H:%M' \
+    }; f"
+#+end_src
+
+TODO: 'git standup W' donne un décompte avec une ligne trop peu !
 
 *** Release assets
 
