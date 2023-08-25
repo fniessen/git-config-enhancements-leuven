@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230823.1942
+# .gitconfig, Time-stamp: 20230825.1726
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -156,7 +156,7 @@
     func = "#cc99cc"
     old = red bold
     new = green bold
-    commit = yellow bold
+    commit = yellow
     whitespace = red reverse
 
 [diff-so-fancy]
@@ -189,7 +189,7 @@
     selected = white
 
 [format]
-    pretty = format:%C(green)%ad%C(reset) %C(yellow bold)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
+    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
@@ -258,9 +258,9 @@
     # Usage: git search-for-files-all PATTERN
     # Search for a file in all branches.
     search-for-files-all = "!f() { \
-        for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
-            printf \"\n$(tput bold)$BRANCH_NAME:$(tput sgr0)\n\"; \
-            git ls-tree -r --name-only $BRANCH_NAME | nl -bn -w3 | grep --color=auto \"$1\"; \
+        for BRANCH in $(git for-each-ref refs/heads --format='%(refname)'); do \
+            printf \"\n$(tput bold)$BRANCH:$(tput sgr0)\n\"; \
+            git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
         done; \
     }; f"
 
@@ -753,8 +753,8 @@
     # Usage: git remote-branches
     # List all remote branches sorted by most recent commit.
     remote-branches = "!sh -c 'git fetch; \
-                       for BRANCH_NAME in $(git branch -r | grep -v HEAD); do \
-                           echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; \
+                       for BRANCH in $(git branch -r | grep -v HEAD); do \
+                           echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1) \\\t$BRANCH; \
                        done | sort -r'"
 
     # Usage: git branch-desc BRANCH_NAME
@@ -798,7 +798,7 @@
     }; f"
 
     main = checkout main
-    master = checkout master
+    master = "!f() { git checkout $(git default-branch); }; f"
     develop = checkout develop
 
     # Usage: git sync-main-merge
@@ -861,18 +861,18 @@
 
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
     sync-all-branches = "!f() { \
-        local old_branch=$(git current-branch); \
-        for branch_ref in $(git for-each-ref refs/heads --format='%(refname)'); do \
-            local branch_name=${branch_ref#refs/heads/}; \
-            if [ \"$branch_name\" != \"$old_branch\" ]; then \
-                echo \"Switching to branch: $branch_name\"; \
-                git checkout $branch_name && \
+        local OLD_BRANCH=$(git current-branch); \
+        for BRANCH_REF in $(git for-each-ref refs/heads --format='%(refname)'); do \
+            local BRANCH=${BRANCH_REF#refs/heads/}; \
+            if [ \"$BRANCH\" != \"$OLD_BRANCH\" ]; then \
+                echo \"Switching to branch: $BRANCH\"; \
+                git checkout $BRANCH && \
                 git pull --ff-only; \
                 echo; \
                 echo; \
             fi; \
         done; \
-        git checkout $old_branch; \
+        git checkout $OLD_BRANCH; \
     }; f"
 
     # Delete a local branch.
@@ -1105,12 +1105,12 @@
     # For GitHub.
     mpr = "!f() { \
         declare OLD_BRANCH=\"$(git current-branch)\"; \
-        declare BRANCH_NAME=\"${2:-$OLD_BRANCH}\"; \
+        declare BRANCH=\"${2:-$OLD_BRANCH}\"; \
         if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
             git fetch $(git origin) refs/pull/$1/head:pr/$1 \
-                && git checkout -B $BRANCH_NAME \
-                && git rebase $BRANCH_NAME pr/$1 \
-                && git checkout -B $BRANCH_NAME \
+                && git checkout -B $BRANCH \
+                && git rebase $BRANCH pr/$1 \
+                && git checkout -B $BRANCH \
                 && git merge --ff-only pr/$1 \
                 && git delete-local-branch pr/$1; \
         fi \
@@ -1254,11 +1254,12 @@ deploy-prod =
         printf '\\n'; \
     }; f"
 
-    # Run commands for each repository in the current directory.
+    # Usage: git all-repos COMMAND [ARGS]
+    # Run a command for each repository in the current directory.
     all-repos = "!f() { \
         ls -R -d */.git \
-            | sed s#/.git## \
-            | xargs -I{} git -C {} print-repo-info "$@"; \
+            | sed 's#/.git##' \
+            | xargs -I{} git -C {} print-repo-info \"$@\"; \
     }; f"
 
     # Usage: git pull-all-repos
@@ -1336,13 +1337,13 @@ deploy-prod =
 
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
-        for BRANCH_NAME in $(git rev-parse --symbolic --branches); do \
+        BRANCHES=$(git rev-parse --symbolic --branches); \
+        for BRANCH in $BRANCHES; do \
             echo -e \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
-                                --color=always $BRANCH_NAME -- \"$1\")  On branch $(tput bold)$BRANCH_NAME$(tput sgr0)\"; \
-        done \
-            | sort -r; \
-    }; f"
+                                --color=always $BRANCH -- \"$1\")  On branch $(tput bold)$BRANCH$(tput sgr0)\"; \
+        done | sort -r; \
+   }; f"
 
     stage-modified-removed-files = add -u
 

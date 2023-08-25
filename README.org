@@ -705,7 +705,7 @@ See http://git-scm.com/docs/git-config for the ~slot~ list.
     func = "#cc99cc"
     old = red bold
     new = green bold
-    commit = yellow bold
+    commit = yellow
     whitespace = red reverse
 #+end_src
 
@@ -761,7 +761,7 @@ The first color given is the foreground; the second is the background.", e.g
 
 #+begin_src conf
 [format]
-    pretty = format:%C(green)%ad%C(reset) %C(yellow bold)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
+    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
@@ -1014,9 +1014,9 @@ Search files in all branches.
     # Usage: git search-for-files-all PATTERN
     # Search for a file in all branches.
     search-for-files-all = "!f() { \
-        for BRANCH_NAME in $(git for-each-ref refs/heads --format='%(refname)'); do \
-            printf \"\n$(tput bold)$BRANCH_NAME:$(tput sgr0)\n\"; \
-            git ls-tree -r --name-only $BRANCH_NAME | nl -bn -w3 | grep --color=auto \"$1\"; \
+        for BRANCH in $(git for-each-ref refs/heads --format='%(refname)'); do \
+            printf \"\n$(tput bold)$BRANCH:$(tput sgr0)\n\"; \
+            git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
         done; \
     }; f"
 
@@ -2718,8 +2718,8 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
     # Usage: git remote-branches
     # List all remote branches sorted by most recent commit.
     remote-branches = "!sh -c 'git fetch; \
-                       for BRANCH_NAME in $(git branch -r | grep -v HEAD); do \
-                           echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH_NAME | head -n 1) \\\t$BRANCH_NAME; \
+                       for BRANCH in $(git branch -r | grep -v HEAD); do \
+                           echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1) \\\t$BRANCH; \
                        done | sort -r'"
 #+end_src
 
@@ -2799,7 +2799,7 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
 
 #+begin_src conf
     main = checkout main
-    master = checkout master
+    master = "!f() { git checkout $(git default-branch); }; f"
     develop = checkout develop
 #+end_src
 
@@ -2954,9 +2954,9 @@ See [[http://aanandprasad.com/git-up/][git-up]] (no longer maintained), which is
 
 : git stash
 : git fetch --all
-: [foreach branch_name]
-:     git rebase --rebase-merges <branch_name> <remote>/<branch_name>
-:     git merge --ff-only <branch_name>
+: [foreach branch]
+:     git rebase --rebase-merges <branch> <remote>/<branch>
+:     git merge --ff-only <branch>
 : [end foreach]
 : git checkout <old_branch>
 : git stash pop
@@ -2969,18 +2969,18 @@ result in non-trivial conflicts.
 #+begin_src conf
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
     sync-all-branches = "!f() { \
-        local old_branch=$(git current-branch); \
-        for branch_ref in $(git for-each-ref refs/heads --format='%(refname)'); do \
-            local branch_name=${branch_ref#refs/heads/}; \
-            if [ \"$branch_name\" != \"$old_branch\" ]; then \
-                echo \"Switching to branch: $branch_name\"; \
-                git checkout $branch_name && \
+        local OLD_BRANCH=$(git current-branch); \
+        for BRANCH_REF in $(git for-each-ref refs/heads --format='%(refname)'); do \
+            local BRANCH=${BRANCH_REF#refs/heads/}; \
+            if [ \"$BRANCH\" != \"$OLD_BRANCH\" ]; then \
+                echo \"Switching to branch: $BRANCH\"; \
+                git checkout $BRANCH && \
                 git pull --ff-only; \
                 echo; \
                 echo; \
             fi; \
         done; \
-        git checkout $old_branch; \
+        git checkout $OLD_BRANCH; \
     }; f"
 #+end_src
 
@@ -3798,12 +3798,12 @@ If everything is OK, you can merge the pull request.
     # For GitHub.
     mpr = "!f() { \
         declare OLD_BRANCH=\"$(git current-branch)\"; \
-        declare BRANCH_NAME=\"${2:-$OLD_BRANCH}\"; \
+        declare BRANCH=\"${2:-$OLD_BRANCH}\"; \
         if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
             git fetch $(git origin) refs/pull/$1/head:pr/$1 \
-                && git checkout -B $BRANCH_NAME \
-                && git rebase $BRANCH_NAME pr/$1 \
-                && git checkout -B $BRANCH_NAME \
+                && git checkout -B $BRANCH \
+                && git rebase $BRANCH pr/$1 \
+                && git checkout -B $BRANCH \
                 && git merge --ff-only pr/$1 \
                 && git delete-local-branch pr/$1; \
         fi \
@@ -4218,14 +4218,6 @@ List the user's public SSH keys:
 
 * Run on All repositories
 
-The alias ~all-repos~ proves especially useful in ensuring that all my work is
-committed.
-
-There are instances when I work on a project, only to set it aside temporarily
-without committing the changes. To ensure that I haven't overlooked any
-uncommitted work, I rely on ~git all-repos status --short~ to rapidly assess
-repositories that contain pending changes.
-
 #+begin_src conf
     # Print repository name, execute command, and separate output.
     print-repo-info = "!f() { \
@@ -4237,24 +4229,48 @@ repositories that contain pending changes.
         printf '\\n'; \
     }; f"
 
-    # Run commands for each repository in the current directory.
+    # Usage: git all-repos COMMAND [ARGS]
+    # Run a command for each repository in the current directory.
     all-repos = "!f() { \
         ls -R -d */.git \
-            | sed s#/.git## \
-            | xargs -I{} git -C {} print-repo-info "$@"; \
+            | sed 's#/.git##' \
+            | xargs -I{} git -C {} print-repo-info \"$@\"; \
     }; f"
 #+end_src
 
-See also ~git-repos~:
-http://osiux.com/2015-01-14-sincronizar-repositorios-git-repos.html
+** Display a summarized version of the status of each repository
 
-** SHOW - find all "unpushed" commits for all projects in a directory
+The alias ~all-repos~ proves especially useful in ensuring that all my work is
+committed.
+
+There are instances when I work on a project, only to set it aside temporarily
+without committing the changes. To ensure that I haven't overlooked any
+uncommitted work, I rely on
+
+: git all-repos status --short
+
+to rapidly assess repositories that contain pending changes.
+
+** Display the remote repository URLs for each repository
+
+: git all-repos remote -v
+
+** Find all "unpushed" commits for all projects in a directory
 
 : git all-repos outgoing
 
 See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-commits-for-all-projects-in-a-directory
 
-** git-pull-all-repos and git-push-all-repos
+XXX cherry -v much quicker...
+
+** Display branch information for each repository
+
+: git all-repos br
+
+** Pull new changes / push any local changes of each repository
+
+: git all-repos pull
+: git all-repos push
 
 #+begin_src conf
     # Usage: git pull-all-repos
@@ -4422,13 +4438,13 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
 #+begin_src conf
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
-        for BRANCH_NAME in $(git rev-parse --symbolic --branches); do \
+        BRANCHES=$(git rev-parse --symbolic --branches); \
+        for BRANCH in $BRANCHES; do \
             echo -e \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
-                                --color=always $BRANCH_NAME -- \"$1\")  On branch $(tput bold)$BRANCH_NAME$(tput sgr0)\"; \
-        done \
-            | sort -r; \
-    }; f"
+                                --color=always $BRANCH -- \"$1\")  On branch $(tput bold)$BRANCH$(tput sgr0)\"; \
+        done | sort -r; \
+   }; f"
 #+end_src
 
 :               | cut -f2 -d:; \
@@ -5069,14 +5085,14 @@ One solution is to *move the untracked files*, instead of *deleting them*.  For
 example:
 
 : cd "$(git root)"
-: git checkout BRANCH_NAME 2>&1 \
+: git checkout BRANCH 2>&1 \
 :     | while read F; do \
 :           [ ! -e "$F" ] || mv -v "$F" "$F.bak"; \
 :       done
 
 Another is to throw away local changes using a *forced checkout*:
 
-: git checkout -f BRANCH_NAME
+: git checkout -f BRANCH
 
 *** Website and page hosting
 

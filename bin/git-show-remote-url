@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-# Find all Git repositories in the current directory and its subdirectories,
-# and display the URL of the remote origin for each repository.
-for git_dir in $(find . -name ".git" -type d | rev | cut -c 6- | rev); do
-    printf '%s:\n' "$git_dir"
-    git -C "$git_dir" config --get remote.origin.url
-    printf '\n'
-done
