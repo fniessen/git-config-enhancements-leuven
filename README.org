@@ -2522,13 +2522,18 @@ effective skills -- so that people think you are smart.
     # Create a new commit that undoes the changes introduced by a specified
     # number of previous commits.
     squash = "!f() { \
-        local num_unpushed=$(git rev-list @{u}..HEAD --count); \
+        local upstream=$(git rev-parse --abbrev-ref @{u} 2>/dev/null); \
+        if [ -z \"$upstream\" ]; then \
+            printf >&2 \"Error: No upstream branch configured for the current branch.\n\"; \
+            return 2; \
+        fi; \
+        local num_unpushed=$(git rev-list $upstream..HEAD --count); \
         if [ $1 -le $num_unpushed ]; then \
             git reset --soft HEAD~$1 \
                 && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
         else \
             printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\\n\" $1 $num_unpushed; \
-        fi \
+        fi; \
     }; f"
 #+end_src
 
