@@ -8,9 +8,10 @@ local_path="$1"
 remote_path="$2"
 
 # Print debug information about the paths being compared.
-echo "Debug Info:"
-echo "Local Path: $local_path"
-echo "Remote Path: $remote_path"
+printf "Git Diff Tool Debug Info\n"
+printf "------------------------\n"
+printf "Local Path: %s\n" "$local_path"
+printf "Remote Path: %s\n" "$remote_path"
 
 # Use emacsclient to open the files in Emacs and initiate the ediff comparison.
 emacsclient -e "(ediff-files \"$local_path\" \"$remote_path\")"
