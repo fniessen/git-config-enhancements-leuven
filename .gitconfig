@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230829.1158
+# .gitconfig, Time-stamp: 20230829.1203
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -722,6 +722,11 @@
         else \
             printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\\n\" $1 $num_unpushed; \
         fi; \
+    }; f"
+
+    squash-force = "!f() { \
+        git reset --soft HEAD~$1 \
+            && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
     }; f"
 
     create-branch = checkout -b

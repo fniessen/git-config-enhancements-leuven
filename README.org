@@ -2537,6 +2537,15 @@ effective skills -- so that people think you are smart.
     }; f"
 #+end_src
 
+Alias without safety checks:
+
+#+begin_src conf
+    squash-force = "!f() { \
+        git reset --soft HEAD~$1 \
+            && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
+    }; f"
+#+end_src
+
 https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
 
 *** Revert a faulty merge
