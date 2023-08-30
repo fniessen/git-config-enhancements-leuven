@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230829.1423
+# .gitconfig, Time-stamp: 20230830.1650
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -230,12 +230,18 @@
             | sed 's#\\.git$##'; \
     }; f"
 
-    # Usage: git repo-slug
+    # Usage: git repo-slug-remote
     # Get the name of the remote repository.
-    repo-slug = "!f() { \
+    repo-slug-remote = "!f() { \
         git remote show $(git config --get remote.origin.url) -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
             | sed 's#\\.git$##'; \
+    }; f"
+
+    # Usage: git repo-slug-local
+    # Provide the base name (slug) of the current local repository's top-level directory.
+    repo-slug-local = "!f() { \
+        echo $(basename \"$(git rev-parse --show-toplevel)\"); \
     }; f"
 
     # Usage: git default-branch
@@ -320,6 +326,16 @@
     # Usage: git untracked-files
     # List files thare are not tracked by Git.
     untracked-files = ls-files --others --exclude-standard
+
+    # Usage: git backup-untracked
+    # Create a backup archive of untracked files in the repository.
+    backup-untracked = "!f() { \
+        repo_slug_remote=\"$(git repo-slug-remote)\"; \
+        current_date=$(date +\"%Y-%m-%d\"); \
+        backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
+        git ls-files --others --exclude-standard -z \
+            | xargs -0 tar rvf ~/$backup_filename; \
+    }; f"
 
     # Usage: git ignored-files
     # List files that are ignored according to your '.gitignore' rules.
@@ -612,6 +628,8 @@
     search-for-commits-all-2 = "!f() { \
         git log --grep \"$1\" -i $(git rev-list --all); \
     }; f"
+
+    search-all-commits = "!git rev-list --all | xargs git grep -F"
 
     # Usage: git search-for-commits-bitbucket-or KEYWORD...
     # Search for commit messages that match one or more search patterns (Filter
@@ -1095,7 +1113,7 @@
 
     pull-request-bb = "!f() { \
         USER_NAME=\"$1\"; \
-        curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
+        curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug-remote)/pull-requests/new?source=$(git current-branch)&t=1; \
     }; f"
 
     pr-list = XXX
@@ -1209,7 +1227,7 @@ deploy-prod =
 
     # issues = "!f() { USER_NAME=\"$1\"; \
     #     curl --user $USER_NAME \
-    #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues \
+    #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
     #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
     #         | sed \"s/new/NEW/\" \
@@ -1226,9 +1244,9 @@ deploy-prod =
     # Usage: git show-issue ISSUE_NUMBER
     show-issue = "!f() { \
         REPO_OWNER=\"YourUsername\"; \
-        REPO_SLUG=\"YourRepository\"; \
+        REPO_SLUG_REMOTE=\"YourRepository\"; \
         ISSUE_NUMBER=\"$1\"; \
-        URL=\"https://github.com/$REPO_OWNER/$REPO_SLUG/issues/$ISSUE_NUMBER\"; \
+        URL=\"https://github.com/$REPO_OWNER/$REPO_SLUG_REMOTE/issues/$ISSUE_NUMBER\"; \
         open \"$URL\"; \
     }; f"
 
@@ -1258,12 +1276,10 @@ deploy-prod =
 
     # Print repository name, execute command, and separate output.
     print-repo-info = "!f() { \
-        printf '\\033[1m'; \
-        basename $(git rev-parse --show-toplevel); \
-        printf '\\033[0m'; \
+        repo_slug_local=$(git repo-slug-local); \
+        printf '\\033[1m%s\\033[0m\\n' \"$repo_slug_local\"; \
         git "$@"; \
-        printf '\\n'; \
-        printf '\\n'; \
+        printf '\\n\\n'; \
     }; f"
 
     # Usage: git all-repos COMMAND [ARGS]
@@ -1743,7 +1759,7 @@ deploy-prod =
     export-commit = "!f() { \
         git changed-files ${1:-HEAD} \
             | tr '\\n' '\\0' \
-            | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
+            | xargs -0 zip -9 $(git repo-slug-remote)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
     }; f"
 
     # View raw commit.

@@ -928,12 +928,20 @@ Fetch URL: git@bitbucket.org-something:user/slug
 #+end_src
 
 #+begin_src conf
-    # Usage: git repo-slug
+    # Usage: git repo-slug-remote
     # Get the name of the remote repository.
-    repo-slug = "!f() { \
+    repo-slug-remote = "!f() { \
         git remote show $(git config --get remote.origin.url) -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
             | sed 's#\\.git$##'; \
+    }; f"
+#+end_src
+
+#+begin_src conf
+    # Usage: git repo-slug-local
+    # Provide the base name (slug) of the current local repository's top-level directory.
+    repo-slug-local = "!f() { \
+        echo $(basename \"$(git rev-parse --show-toplevel)\"); \
     }; f"
 #+end_src
 
@@ -970,8 +978,8 @@ By default, the GitHub API creates a repository as *public*.
     # Usage: git create-repository-gh OWNER REPO_NAME
     create-repository-gh = "!f() { \
         REPO_OWNER=\"$1\"; \
-        REPO_SLUG=\"$2\"; \
-        curl -u \"$REPO_OWNER\" https://api.github.com/user/repos -d \"{\\\"name\\\":\\\"$REPO_SLUG\\\"}\"; \
+        REPO_SLUG_REMOTE=\"$2\"; \
+        curl -u \"$REPO_OWNER\" https://api.github.com/user/repos -d \"{\\\"name\\\":\\\"$REPO_SLUG_REMOTE\\\"}\"; \
     }; f"
 #+end_src
 
@@ -983,7 +991,7 @@ Start working with your repository.
 
 Create a =README.md= file into your repository.
 
-: echo "# ${$(git repo-slug):-Repository name}\n\nDescription" >> README.md
+: echo "# ${$(git repo-slug-remote):-Repository name}\n\nDescription" >> README.md
 : git add README.md
 : git commit -m "Add README.md"
 :
@@ -1195,6 +1203,18 @@ List untracked files.
     # Usage: git untracked-files
     # List files thare are not tracked by Git.
     untracked-files = ls-files --others --exclude-standard
+#+end_src
+
+#+begin_src conf
+    # Usage: git backup-untracked
+    # Create a backup archive of untracked files in the repository.
+    backup-untracked = "!f() { \
+        repo_slug_remote=\"$(git repo-slug-remote)\"; \
+        current_date=$(date +\"%Y-%m-%d\"); \
+        backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
+        git ls-files --others --exclude-standard -z \
+            | xargs -0 tar rvf ~/$backup_filename; \
+    }; f"
 #+end_src
 
 List untracked *files ignored* by a =.gitignore= statement somewhere.  This one is
@@ -2083,6 +2103,10 @@ You may want to add history to search through the whole repository, by adding
     search-for-commits-all-2 = "!f() { \
         git log --grep \"$1\" -i $(git rev-list --all); \
     }; f"
+#+end_src
+
+#+begin_src conf
+    search-all-commits = "!git rev-list --all | xargs git grep -F"
 #+end_src
 
 # #+begin_tip
@@ -3700,7 +3724,7 @@ Create a pull request against the default branch:
 #+begin_src conf
     pull-request-bb = "!f() { \
         USER_NAME=\"$1\"; \
-        curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug)/pull-requests/new?source=$(git current-branch)&t=1; \
+        curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug-remote)/pull-requests/new?source=$(git current-branch)&t=1; \
     }; f"
 #+end_src
 
@@ -3783,9 +3807,9 @@ will fetch the *pull request* #5 into a *local* ~pr/5~ *branch* and check it out
 
 : #!/bin/bash
 : TMP_FILE=$(mktemp)
-: REPO_SLUG=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
+: REPO_SLUG_REMOTE=$(git remote -v | grep '^upstream' | head -n 1 | perl -lne 's/github.com:?\/?(.*)\/([^.]*)([.]git| )// or next; print $1,"/",$2')
 : PR_NUMBER=$(git current-branch | cut -d/ -f 2)
-: curl -s https://api.github.com/repos/$REPO_SLUG/pulls/$PR_NUMBER > $TMP_FILE
+: curl -s https://api.github.com/repos/$REPO_SLUG_REMOTE/pulls/$PR_NUMBER > $TMP_FILE
 : trap "{ rm -f $TMP_FILE; }" EXIT
 : HEAD_REF=$(cat $TMP_FILE | jq -r '.head.ref')
 : HEAD_SLUG=$(cat $TMP_FILE | jq -r '.head.repo.full_name')
@@ -4110,7 +4134,7 @@ See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
 #+begin_src conf
     # issues = "!f() { USER_NAME=\"$1\"; \
     #     curl --user $USER_NAME \
-    #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues \
+    #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
     #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
     #         | sed \"s/new/NEW/\" \
@@ -4124,7 +4148,7 @@ See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
 #+begin_src conf :tangle no
     issues = "!f() { \
         USER_NAME=\"$1\"; \
-        curl --user $USER_NAME 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
+        curl --user $USER_NAME 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues?pagelen=100' \
             | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
             | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
             | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; \
@@ -4134,7 +4158,7 @@ See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
 Set color to red or green, depending on issue state.
 
 : # Works!  Need to put quotes around the URL!
-: curl -u $USER_NAME -X GET 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug)/issues?pagelen=100' \
+: curl -u $USER_NAME -X GET 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues?pagelen=100' \
 :     | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]'
 : # curl -s -S
 
@@ -4157,8 +4181,8 @@ See also [[https://cran.r-project.org/web/packages/jsonlite/vignettes/json-apis.
 #+begin_src conf :tangle no
     issues-created-by-me = "!f() { \
         REPO_OWNER=\"YourUsername\"; \
-        REPO_SLUG=\"YourRepository\"; \
-        API_URL=\"https://api.github.com/repos/$REPO_OWNER/$REPO_SLUG/issues?creator=$REPO_OWNER\"; \
+        REPO_SLUG_REMOTE=\"YourRepository\"; \
+        API_URL=\"https://api.github.com/repos/$REPO_OWNER/$REPO_SLUG_REMOTE/issues?creator=$REPO_OWNER\"; \
         curl -s \"$API_URL\" | jq -r '.[] | \"#\( .number ) - \( .title )\"'; \
     }; f"
 #+end_src
@@ -4171,9 +4195,9 @@ Show an existing issue specified by NUMBER.
     # Usage: git show-issue ISSUE_NUMBER
     show-issue = "!f() { \
         REPO_OWNER=\"YourUsername\"; \
-        REPO_SLUG=\"YourRepository\"; \
+        REPO_SLUG_REMOTE=\"YourRepository\"; \
         ISSUE_NUMBER=\"$1\"; \
-        URL=\"https://github.com/$REPO_OWNER/$REPO_SLUG/issues/$ISSUE_NUMBER\"; \
+        URL=\"https://github.com/$REPO_OWNER/$REPO_SLUG_REMOTE/issues/$ISSUE_NUMBER\"; \
         open \"$URL\"; \
     }; f"
 #+end_src
@@ -4237,12 +4261,10 @@ List the user's public SSH keys:
 #+begin_src conf
     # Print repository name, execute command, and separate output.
     print-repo-info = "!f() { \
-        printf '\\033[1m'; \
-        basename $(git rev-parse --show-toplevel); \
-        printf '\\033[0m'; \
+        repo_slug_local=$(git repo-slug-local); \
+        printf '\\033[1m%s\\033[0m\\n' \"$repo_slug_local\"; \
         git "$@"; \
-        printf '\\n'; \
-        printf '\\n'; \
+        printf '\\n\\n'; \
     }; f"
 
     # Usage: git all-repos COMMAND [ARGS]
@@ -4539,7 +4561,7 @@ merge commits...
 
 That also will *print the /right/ merge commits*, *like in BitBucket*.
 
-: curl -u USER_NAME 'https://api.bitbucket.org/2.0/repositories/REPO_OWNER/REPO_SLUG/filehistory/master/PATH/TO/FILE'
+: curl -u USER_NAME 'https://api.bitbucket.org/2.0/repositories/REPO_OWNER/REPO_SLUG_REMOTE/filehistory/master/PATH/TO/FILE'
 
 This one will *follow renames and copies*:
 
@@ -5555,7 +5577,7 @@ Note that the /output format/ is inferred by the extension of the output file.
     export-commit = "!f() { \
         git changed-files ${1:-HEAD} \
             | tr '\\n' '\\0' \
-            | xargs -0 zip -9 $(git repo-slug)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
+            | xargs -0 zip -9 $(git repo-slug-remote)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
     }; f"
 #+end_src
 
