@@ -12,7 +12,7 @@ for repo in $repos; do
 
     # Push changes.
     if ! output=$(git -C "$repo_dir" push 2>&1); then
-        echo "$(tput setaf 1)$output$(tput sgr0)"
+        echo "$(tput setaf 1)$(tput bold)$output$(tput sgr0)"
     else
         echo "$(tput setaf 2)$output$(tput sgr0)"
     fi

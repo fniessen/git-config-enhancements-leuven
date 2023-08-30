@@ -10,7 +10,7 @@ for repo in $repos; do
     repo_dir=$(dirname "$repo")
     echo -e "\nPulling latest changes for repository in $(tput bold)${repo_dir##*/}$(tput sgr0)..."
     if ! output=$(git -C "$repo_dir" pull 2>&1); then
-        echo "$(tput setaf 1)$output$(tput sgr0)"
+        echo "$(tput setaf 1)$(tput bold)$output$(tput sgr0)"
     else
         echo "$(tput setaf 2)$output$(tput sgr0)"
     fi
