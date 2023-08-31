@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230830.1650
+# .gitconfig, Time-stamp: 20230831.1629
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -244,9 +244,9 @@
         echo $(basename \"$(git rev-parse --show-toplevel)\"); \
     }; f"
 
-    # Usage: git default-branch
+    # Usage: git main-branch
     # Get the name of the default branch (main or master).
-    default-branch = "!f() { \
+    main-branch = "!f() { \
         if git show-ref --verify --quiet refs/heads/main; then \
             echo \"main\"; \
         else \
@@ -754,6 +754,7 @@
     # Usage: git current-branch
     # Show the current branch name (v2.22+).
     current-branch = branch --show-current
+    # current_branch = !git symbolic-ref --short HEAD 2>/dev/null
 
     # Usage: git current-branch-without-slash
     # Show the current branch name (without slash).
@@ -775,17 +776,19 @@
     branches = branch -a -vv
 
     # Usage: git br
-    # Show detailed information about all local branches, sorted by commit date.
+    # Show detailed information about local branches, sorted by commit date.
     br = for-each-ref refs/heads \
                 --sort=-committerdate \
                 --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
 
     # Usage: git remote-branches
-    # List all remote branches sorted by most recent commit.
-    remote-branches = "!sh -c 'git fetch; \
-                       for BRANCH in $(git branch -r | grep -v HEAD); do \
-                           echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1) \\\t$BRANCH; \
-                       done | sort -r'"
+    # List remote branches sorted by most recent commit.
+    remote-branches = "!f() { \
+        git fetch; \
+        for branch in $(git branch -r | grep -v HEAD); do \
+            echo \"$(git show -s --format='%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)' $branch | head -n 1) \\t$branch\"; \
+        done | sort -r; \
+    }; f"
 
     # Usage: git branch-desc BRANCH_NAME
     # Edit the description of a branch.
@@ -828,22 +831,24 @@
     }; f"
 
     main = checkout main
-    master = "!f() { git checkout $(git default-branch); }; f"
+    master = "!f() { \
+        git checkout $(git main-branch); \
+    }; f"
     develop = checkout develop
 
     # Usage: git sync-main-merge
     # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
     sync-main-merge = !git remote update -p \
-                && git merge $(git origin)/$(git default-branch)
+                && git merge $(git origin)/$(git main-branch)
 
     sync-main-merge2 = "!f() { \
         git remote update -p; \
-        default_branch=$(git default-branch); \
-        current_branch=$(git current-branch); \
-        git merge origin/$default_branch; \
+        local main_branch=$(git main-branch || echo 'main'); \
+        local current_branch=$(git current-branch); \
+        git merge origin/$main_branch; \
         merge_status=$?; \
         if [ $merge_status -eq 0 ]; then \
-            echo \"Branch synced: '$current_branch' successfully synced with '$default_branch'\"; \
+            echo \"Branch synced: '$current_branch' successfully synced with '$main_branch'\"; \
         else \
             git merge --abort 2>/dev/null; \
             echo \"Unable to sync branch: You can't merge until you resolve all merge conflicts.\"; \
@@ -852,7 +857,7 @@
 
     # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
     sync-main-rebase = !git remote update -p \
-                && git rebase $(git origin)/$(git default-branch)
+                && git rebase $(git origin)/$(git main-branch)
 
     pull = pull -v
 
@@ -910,9 +915,9 @@
 
     # Delete local branches that have been merged into the default branch.
     bclean = "!f() { \
-        DEFAULT_BRANCH=$(git default-branch || echo 'main'); \
-        git branch --merged ${1-$DEFAULT_BRANCH} \
-            | grep -v " ${1-$DEFAULT_BRANCH}$" \
+        local main_branch=$(git main-branch || echo 'main'); \
+        git branch --merged ${1-$main_branch} \
+            | grep -v " ${1-$main_branch}$" \
             | xargs git delete-local-branch; \
     }; f"
 
@@ -931,8 +936,8 @@
 
     # Delete branches safely merged into the main branch, skipping main and *
     # (current) branches.
-    cleanup-branches = !git branch --merged $(git default-branch) \
-                            | grep -vE '^\\* | $(git default-branch)$' \
+    cleanup-branches = !git branch --merged $(git main-branch) \
+                            | grep -vE '^\\* | $(git main-branch)$' \
                             | xargs -r git delete-local-branch
     # On OSX, 'xargs' does not have '-r' argument, so it fail. If you remove
     # '-r', it will run at least once, making this not safe operation.
@@ -1045,7 +1050,7 @@
     # Show the missing commits between the current branch and another branch.
     missing = "!f() { \
         local current_branch=$(git current-branch); \
-        local other_branch=${1:-$(git default-branch)}; \
+        local other_branch=${1:-$(git main-branch)}; \
         commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
         commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
         printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\\n\" \
@@ -1058,7 +1063,7 @@
 
     # Find the point at which a branch forked from another branch (when it was branched off).
     # Find the most recent common ancestor between the current branch and the default branch.
-    ancestor = !git merge-base ${1:-$(git default-branch)} \
+    ancestor = !git merge-base ${1:-$(git main-branch)} \
                                ${2:-$(git current-branch)}
     # BUG: Does not work between 2 specific branches -- well without arguments
 
@@ -1073,7 +1078,7 @@
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
         local current_branch=$(git rev-parse --abbrev-ref HEAD); \
-        local other_branch=${1:-$(git default-branch)}; \
+        local other_branch=${1:-$(git main-branch)}; \
         missing_files_to_current=$(git diff --name-only \"$other_branch\"..\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
@@ -1081,7 +1086,7 @@
 
     missing-files-name-only = "!f() { \
         local current_branch=$(git rev-parse --abbrev-ref HEAD); \
-        local other_branch=${1:-$(git default-branch)}; \
+        local other_branch=${1:-$(git main-branch)}; \
         git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"
 
@@ -1225,7 +1230,8 @@ deploy-prod =
 
     create-issue-pull-request = XXX
 
-    # issues = "!f() { USER_NAME=\"$1\"; \
+    # issues = "!f() { \
+    #     USER_NAME=\"$1\"; \
     #     curl --user $USER_NAME \
     #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
@@ -1234,7 +1240,8 @@ deploy-prod =
     #         | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
     #         | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
     #         | sed \"s/open/OPEN/\" \
-    #         | sed \"s/closed/CLOSED/\"; }; f"
+    #         | sed \"s/closed/CLOSED/\"; \
+    # }; f"
 # --data-urlencode 'priority >= \"major\"'
 
     issues-open = !git issues | grep "open"
@@ -1325,11 +1332,16 @@ deploy-prod =
             git --no-pager diff --patch-with-stat"
 
     # Usage: git diff-commits NUMBER
-    # Show differences between the state `$number' commits ago and the current working state.
+    # Show the differences between the state `NUMBER' commits ago and the current working state.
     # Example: git diff-commits 2
-    diff-commits = "!f() { git diff --patch-with-stat HEAD~$1; }; \
-            git diff-index --quiet HEAD -- || clear; \
-            f"
+    diff-commits = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf \"Usage: git diff-commits NUMBER\\n\"; \
+            return 2; \
+        fi; \
+        git diff --patch-with-stat HEAD~$1; \
+        git diff-index --quiet HEAD -- || clear; \
+    }; f"
 
     # Ignore whitespace when comparing the same lines. This indicates empty
     # lines added or deleted.
@@ -1368,19 +1380,19 @@ deploy-prod =
         echo \"$date\"; \
     }; f"
 
-   first-modified-date3 = "!f() { \
+    first-modified-date3 = "!f() { \
         git log --follow --format=%ai -- \"$1\" | tail -1; \
-   }; f"
+    }; f"
 
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
-        BRANCHES=$(git rev-parse --symbolic --branches); \
-        for BRANCH in $BRANCHES; do \
+        local_branches=$(git rev-parse --symbolic --branches); \
+        for BRANCH in $local_branches; do \
             echo -e \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
                                 --color=always $BRANCH -- \"$1\")  On branch $(tput bold)$BRANCH$(tput sgr0)\"; \
         done | sort -r; \
-   }; f"
+    }; f"
 
     stage-modified-removed-files = add -u
 
@@ -1542,21 +1554,28 @@ deploy-prod =
     # Avoid a fast-forward commit.
     mnf = merge --no-ff --log
 
-    merge-into-master =  "!f() { \
-            OLD_BRANCH=\"$(git symbolic-ref HEAD 2>/dev/null)\" || OLD_BRANCH=\"(unnamed branch)\"; \
-            OLD_BRANCH=${OLD_BRANCH##refs/heads/}; \
-            git checkout master \
-                && git merge $OLD_BRANCH \
-                && git checkout $OLD_BRANCH; \
-        };f"
+    # Usage: git merge-into-main
+    # Merge the current branch into the 'main' branch and returns to the original branch.
+    merge-into-main = "!f() { \
+        local current_branch=\"$(git current-branch)\"; \
+        if [ -z \"$current_branch\" ]; then \
+            current_branch=\"(unnamed branch)\"; \
+        fi; \
+        git checkout $(git main-branch) \
+            && git merge \"$current_branch\" \
+            && git checkout \"$current_branch\"; \
+    }; f"
 
-    m = "!f() { \
-        local OLD_BRANCH=$(git current-branch); \
-        git checkout \"$1\" \
+    # Usage: git merge-update-push TARGET_BRANCH
+    # Merge changes from the current branch into the specified target branch, updates it, and pushes changes.
+    merge-update-push = "!f() { \
+        local current_branch=\"$(git current-branch)\"; \
+        local target_branch=\"$1\"; \
+        git checkout \"$target_branch\" \
             && git pull \
-            && git merge $OLD_BRANCH \
+            && git merge \"$current_branch\" \
             && git push \
-            && git checkout $OLD_BRANCH; \
+            && git checkout \"$current_branch\"; \
     }; f"
 
     # Run merge test (before merge) to check for any conflicts beforehand.
@@ -1747,8 +1766,21 @@ deploy-prod =
         git archive --format=zip -o $(git current-tag).zip HEAD; \
     }; f"
 
+    # Usage: git export-branch
+    # Export the changes of the current branch as a .diff file.
     export-branch = "!f() { \
-        git format-patch --stdout \"$1\" > ~/$(git current-branch-without-slash).diff; \
+        local current_branch=$(git current-branch); \
+        git format-patch --stdout $current_branch > ~/$current_branch.diff; \
+    }; f"
+
+    # Usage: git zip-changed-files
+    # Create a compressed archive (ZIP) of the files modified in the current Git branch compared to the main branch.
+    zip-changed-files = "!f() { \
+        local current_branch=$(git current-branch); \
+        local main_branch=$(git main-branch || echo 'main'); \
+        local changed_files=$(git diff --name-only $main_branch..$current_branch); \
+        zip ~/$current_branch-changed-files.zip $changed_files; \
+        echo 'Exported changed files saved as $current_branch-changed-files.zip'; \
     }; f"
 
     export-zip = archive -o latest.zip

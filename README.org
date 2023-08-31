@@ -945,12 +945,12 @@ Fetch URL: git@bitbucket.org-something:user/slug
     }; f"
 #+end_src
 
-Updating Git aliases for different *default branch* names (~master~, ~main~, etc.):
+Updating Git aliases for different *main branch* names (~main~, ~master~, etc.):
 
 #+begin_src conf
-    # Usage: git default-branch
+    # Usage: git main-branch
     # Get the name of the default branch (main or master).
-    default-branch = "!f() { \
+    main-branch = "!f() { \
         if git show-ref --verify --quiet refs/heads/main; then \
             echo \"main\"; \
         else \
@@ -962,7 +962,7 @@ Updating Git aliases for different *default branch* names (~master~, ~main~, etc
 The more straightforward variant:
 
     #+begin_src conf :tangle no
-    default-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
+    main-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
         | sed 's@^refs/remotes/origin/@@'"
 #+end_src
 
@@ -1952,6 +1952,9 @@ List all the changed files *in a commit* (also in a /merge commit/):
     changed-files = show --pretty="format:" --name-only -m
 #+end_src
 
+        changed_files=$(git diff --name-only $main_branch..$current_branch);
+
+
 ** Get the diff of a commit
 
 #+begin_src conf
@@ -2691,6 +2694,7 @@ Name of current branch (not so useful in itself, but used in other aliases):
     # Usage: git current-branch
     # Show the current branch name (v2.22+).
     current-branch = branch --show-current
+    # current_branch = !git symbolic-ref --short HEAD 2>/dev/null
 #+end_src
 
 #+begin_note
@@ -2737,8 +2741,17 @@ branch (if any).
 
 : git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads
 
-fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs/heads/__" | sed "s_refs/remotes/__" | fzf --query="$@" --height=40% --ansi --tac --color=16 --border | awk '{print $1}' | xargs git checkout; }; f"
-(fuzzy checkout a git branch)
+#+begin_src conf :tangle no
+    # Fuzzy checkout a git branch.
+    fco="!f() { \
+        git branch -a -vv --color=always --format='%(refname)' \
+            | sed "s_refs/heads/__" \
+            | sed "s_refs/remotes/__" \
+            | fzf --query="$@" --height=40% --ansi --tac --color=16 --border \
+            | awk '{print $1}' \
+            | xargs git checkout; \
+    }; f"
+#+end_src
 
 #+begin_src conf
     # Usage: git branches
@@ -2748,7 +2761,7 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 
 #+begin_src conf
     # Usage: git br
-    # Show detailed information about all local branches, sorted by commit date.
+    # Show detailed information about local branches, sorted by commit date.
     br = for-each-ref refs/heads \
                 --sort=-committerdate \
                 --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
@@ -2756,11 +2769,13 @@ fco="!f() { git branch -a -vv --color=always --format='%(refname)' | sed "s_refs
 
 #+begin_src conf
     # Usage: git remote-branches
-    # List all remote branches sorted by most recent commit.
-    remote-branches = "!sh -c 'git fetch; \
-                       for BRANCH in $(git branch -r | grep -v HEAD); do \
-                           echo $(git show -s --format=\"%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)\" $BRANCH | head -n 1) \\\t$BRANCH; \
-                       done | sort -r'"
+    # List remote branches sorted by most recent commit.
+    remote-branches = "!f() { \
+        git fetch; \
+        for branch in $(git branch -r | grep -v HEAD); do \
+            echo \"$(git show -s --format='%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)' $branch | head -n 1) \\t$branch\"; \
+        done | sort -r; \
+    }; f"
 #+end_src
 
 #+begin_src conf
@@ -2839,7 +2854,9 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
 
 #+begin_src conf
     main = checkout main
-    master = "!f() { git checkout $(git default-branch); }; f"
+    master = "!f() { \
+        git checkout $(git main-branch); \
+    }; f"
     develop = checkout develop
 #+end_src
 
@@ -2862,18 +2879,18 @@ branch up* to all the latest changes on the ~main~ branch.
     # Usage: git sync-main-merge
     # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
     sync-main-merge = !git remote update -p \
-                && git merge $(git origin)/$(git default-branch)
+                && git merge $(git origin)/$(git main-branch)
 #+end_src
 
 #+begin_src conf
     sync-main-merge2 = "!f() { \
         git remote update -p; \
-        default_branch=$(git default-branch); \
-        current_branch=$(git current-branch); \
-        git merge origin/$default_branch; \
+        local main_branch=$(git main-branch || echo 'main'); \
+        local current_branch=$(git current-branch); \
+        git merge origin/$main_branch; \
         merge_status=$?; \
         if [ $merge_status -eq 0 ]; then \
-            echo \"Branch synced: '$current_branch' successfully synced with '$default_branch'\"; \
+            echo \"Branch synced: '$current_branch' successfully synced with '$main_branch'\"; \
         else \
             git merge --abort 2>/dev/null; \
             echo \"Unable to sync branch: You can't merge until you resolve all merge conflicts.\"; \
@@ -2891,7 +2908,7 @@ XXX Outputs:
 #+begin_src conf
     # Fetch and rebase the current local branch onto the latest changes from the remote "main" branch.
     sync-main-rebase = !git remote update -p \
-                && git rebase $(git origin)/$(git default-branch)
+                && git rebase $(git origin)/$(git main-branch)
 #+end_src
 
 *** Update your local branch with changes from the remote branch
@@ -3070,9 +3087,9 @@ XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
 #+begin_src conf
     # Delete local branches that have been merged into the default branch.
     bclean = "!f() { \
-        DEFAULT_BRANCH=$(git default-branch || echo 'main'); \
-        git branch --merged ${1-$DEFAULT_BRANCH} \
-            | grep -v " ${1-$DEFAULT_BRANCH}$" \
+        local main_branch=$(git main-branch || echo 'main'); \
+        git branch --merged ${1-$main_branch} \
+            | grep -v " ${1-$main_branch}$" \
             | xargs git delete-local-branch; \
     }; f"
 #+end_src
@@ -3119,8 +3136,8 @@ for the distinction between "merged" and "fully merged" branches!
 #+begin_src conf
     # Delete branches safely merged into the main branch, skipping main and *
     # (current) branches.
-    cleanup-branches = !git branch --merged $(git default-branch) \
-                            | grep -vE '^\\* | $(git default-branch)$' \
+    cleanup-branches = !git branch --merged $(git main-branch) \
+                            | grep -vE '^\\* | $(git main-branch)$' \
                             | xargs -r git delete-local-branch
     # On OSX, 'xargs' does not have '-r' argument, so it fail. If you remove
     # '-r', it will run at least once, making this not safe operation.
@@ -3486,7 +3503,7 @@ current branch and the specified branch.
     # Show the missing commits between the current branch and another branch.
     missing = "!f() { \
         local current_branch=$(git current-branch); \
-        local other_branch=${1:-$(git default-branch)}; \
+        local other_branch=${1:-$(git main-branch)}; \
         commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
         commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
         printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\\n\" \
@@ -3543,7 +3560,7 @@ was merged.
 #+begin_src conf
     # Find the point at which a branch forked from another branch (when it was branched off).
     # Find the most recent common ancestor between the current branch and the default branch.
-    ancestor = !git merge-base ${1:-$(git default-branch)} \
+    ancestor = !git merge-base ${1:-$(git main-branch)} \
                                ${2:-$(git current-branch)}
     # BUG: Does not work between 2 specific branches -- well without arguments
 #+end_src
@@ -3572,7 +3589,7 @@ Show all the changed files in a Git branch *since it was forked*:
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
         local current_branch=$(git rev-parse --abbrev-ref HEAD); \
-        local other_branch=${1:-$(git default-branch)}; \
+        local other_branch=${1:-$(git main-branch)}; \
         missing_files_to_current=$(git diff --name-only \"$other_branch\"..\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
@@ -3580,7 +3597,7 @@ Show all the changed files in a Git branch *since it was forked*:
 
     missing-files-name-only = "!f() { \
         local current_branch=$(git rev-parse --abbrev-ref HEAD); \
-        local other_branch=${1:-$(git default-branch)}; \
+        local other_branch=${1:-$(git main-branch)}; \
         git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"
 #+end_src
@@ -4132,7 +4149,8 @@ Once merged:
 See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
 
 #+begin_src conf
-    # issues = "!f() { USER_NAME=\"$1\"; \
+    # issues = "!f() { \
+    #     USER_NAME=\"$1\"; \
     #     curl --user $USER_NAME \
     #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
@@ -4141,7 +4159,8 @@ See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
     #         | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
     #         | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
     #         | sed \"s/open/OPEN/\" \
-    #         | sed \"s/closed/CLOSED/\"; }; f"
+    #         | sed \"s/closed/CLOSED/\"; \
+    # }; f"
 # --data-urlencode 'priority >= \"major\"'
 #+end_src
 
@@ -4394,11 +4413,16 @@ Staging for commit is typically done by ~git add~.
             git --no-pager diff --patch-with-stat"
 
     # Usage: git diff-commits NUMBER
-    # Show differences between the state `$number' commits ago and the current working state.
+    # Show the differences between the state `NUMBER' commits ago and the current working state.
     # Example: git diff-commits 2
-    diff-commits = "!f() { git diff --patch-with-stat HEAD~$1; }; \
-            git diff-index --quiet HEAD -- || clear; \
-            f"
+    diff-commits = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf \"Usage: git diff-commits NUMBER\\n\"; \
+            return 2; \
+        fi; \
+        git diff --patch-with-stat HEAD~$1; \
+        git diff-index --quiet HEAD -- || clear; \
+    }; f"
 #+end_src
 
 *** Changes between the working tree and the index (staged for the next commit)
@@ -4466,9 +4490,9 @@ XXX The above alias does not work on renamed files...
         echo \"$date\"; \
     }; f"
 
-   first-modified-date3 = "!f() { \
+    first-modified-date3 = "!f() { \
         git log --follow --format=%ai -- \"$1\" | tail -1; \
-   }; f"
+    }; f"
 #+end_src
 
 *** When was this file last updated
@@ -4481,13 +4505,13 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
 #+begin_src conf
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
-        BRANCHES=$(git rev-parse --symbolic --branches); \
-        for BRANCH in $BRANCHES; do \
+        local_branches=$(git rev-parse --symbolic --branches); \
+        for BRANCH in $local_branches; do \
             echo -e \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
                                 --color=always $BRANCH -- \"$1\")  On branch $(tput bold)$BRANCH$(tput sgr0)\"; \
         done | sort -r; \
-   }; f"
+    }; f"
 #+end_src
 
 :               | cut -f2 -d:; \
@@ -4855,35 +4879,43 @@ Merge strategy:
 - Fast forward: git merge --ff-only
 
 #+begin_src conf
-    merge-into-master =  "!f() { \
-            OLD_BRANCH=\"$(git symbolic-ref HEAD 2>/dev/null)\" || OLD_BRANCH=\"(unnamed branch)\"; \
-            OLD_BRANCH=${OLD_BRANCH##refs/heads/}; \
-            git checkout master \
-                && git merge $OLD_BRANCH \
-                && git checkout $OLD_BRANCH; \
-        };f"
+    # Usage: git merge-into-main
+    # Merge the current branch into the 'main' branch and returns to the original branch.
+    merge-into-main = "!f() { \
+        local current_branch=\"$(git current-branch)\"; \
+        if [ -z \"$current_branch\" ]; then \
+            current_branch=\"(unnamed branch)\"; \
+        fi; \
+        git checkout $(git main-branch) \
+            && git merge \"$current_branch\" \
+            && git checkout \"$current_branch\"; \
+    }; f"
 #+end_src
 
 On projects where we work with a staging or test branch, I regularly merge my
 work in progress into it so others can test it.
 
 #+begin_src conf
-    m = "!f() { \
-        local OLD_BRANCH=$(git current-branch); \
-        git checkout \"$1\" \
+    # Usage: git merge-update-push TARGET_BRANCH
+    # Merge changes from the current branch into the specified target branch, updates it, and pushes changes.
+    merge-update-push = "!f() { \
+        local current_branch=\"$(git current-branch)\"; \
+        local target_branch=\"$1\"; \
+        git checkout \"$target_branch\" \
             && git pull \
-            && git merge $OLD_BRANCH \
+            && git merge \"$current_branch\" \
             && git push \
-            && git checkout $OLD_BRANCH; \
+            && git checkout \"$current_branch\"; \
     }; f"
 #+end_src
 
-If you now type ~git m staging~ while on the ~feature~ branch, this will happen:
+If you now type ~git merge-update-push staging~ while on the ~feature~ branch, this
+will happen:
 
 1. First, the function checks out the ~staging~ branch.
-2. It then pulls the latest changes to the ~staging~ branch from origin.
+2. It then pulls the latest changes to the ~staging~ branch from ~origin~.
 3. Then it merges ~feature~ into ~staging~.
-4. Next, it pushes the updated ~staging~ branch back to origin.
+4. Next, it pushes the updated ~staging~ branch back to ~origin~.
 5. Finally, it checks out the ~feature~ branch again.
 
 Such a timesaver!
@@ -5549,8 +5581,23 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+end_src
 
 #+begin_src conf
+    # Usage: git export-branch
+    # Export the changes of the current branch as a .diff file.
     export-branch = "!f() { \
-        git format-patch --stdout \"$1\" > ~/$(git current-branch-without-slash).diff; \
+        local current_branch=$(git current-branch); \
+        git format-patch --stdout $current_branch > ~/$current_branch.diff; \
+    }; f"
+#+end_src
+
+#+begin_src conf
+    # Usage: git zip-changed-files
+    # Create a compressed archive (ZIP) of the files modified in the current Git branch compared to the main branch.
+    zip-changed-files = "!f() { \
+        local current_branch=$(git current-branch); \
+        local main_branch=$(git main-branch || echo 'main'); \
+        local changed_files=$(git diff --name-only $main_branch..$current_branch); \
+        zip ~/$current_branch-changed-files.zip $changed_files; \
+        echo 'Exported changed files saved as $current_branch-changed-files.zip'; \
     }; f"
 #+end_src
 
