@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230831.1635
+# .gitconfig, Time-stamp: 20230831.1733
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -557,9 +557,15 @@
     # Usage: git changed-files [COMMIT]
     # Show all files modified in each commit, including merge commits.
     # Examples:
-    #   git changed-files             list files modified in last commit
-    #   git changed-files bada55      list files modified in this commit
-    changed-files = show --pretty="format:" --name-only -m
+    #   git changed-files             List files modified in last commit
+    #   git changed-files bada55      List files modified in the commit with hash 'bada55'
+    changed-files = "!f() { \
+        if [ $# -eq 0 ]; then \
+            git diff-tree --no-commit-id --name-only -r HEAD; \
+        else \
+            git diff-tree --no-commit-id --name-only -r $1; \
+        fi \
+    }; f"
 
     download-email-patch = XXX git format-patch $(git current-branch).patch
 
