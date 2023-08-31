@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230831.1629
+# .gitconfig, Time-stamp: 20230831.1635
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1191,6 +1191,60 @@
     # Print a list of version controlled files for the current revision.
     manifest = ls-files
 
+    # Usage: git changelog [FIRST_TAG_NAME] [LAST_TAG_NAME] XXX
+    # Detailed list of changes.
+    changelog1 = "!f() { \
+        git log --no-merges ${1-$(git last-tag)}..$2; \
+    }; f"
+    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
+    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
+
+    # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
+    # branche courante.
+    unreleased = !git log $(git last-tag)...HEAD \
+                && git last-tag
+
+    current-tag = tag --points-at HEAD
+    zip = "!f() { \
+        git archive --format=zip -o $(git current-tag).zip HEAD; \
+    }; f"
+
+    # Usage: git export-branch
+    # Export the changes of the current branch as a .diff file.
+    export-branch = "!f() { \
+        local current_branch=$(git current-branch); \
+        git format-patch --stdout $current_branch > ~/$current_branch.diff; \
+    }; f"
+
+    # Usage: git zip-changed-files
+    # Create a compressed archive (ZIP) of the files modified in the current Git branch compared to the main branch.
+    zip-changed-files = "!f() { \
+        local current_branch=$(git current-branch); \
+        local main_branch=$(git main-branch || echo 'main'); \
+        local changed_files=$(git diff --name-only $main_branch..$current_branch); \
+        zip ~/$current_branch-changed-files.zip $changed_files; \
+        echo 'Exported changed files saved as $current_branch-changed-files.zip'; \
+    }; f"
+
+    export-zip = archive -o latest.zip
+    export-tgz = archive -o latest.tar.gz -9
+
+    # Usage: git export-commit [COMMIT_ISH]
+    # Create an archive of a commit.
+    export-commit = "!f() { \
+        git changed-files ${1:-HEAD} \
+            | tr '\\n' '\\0' \
+            | xargs -0 zip -9 $(git repo-slug-remote)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
+    }; f"
+
+    # View raw commit.
+    email-patch = XXX git format-patch $(git current-branch-without-slash).patch
+
+    # Since oldest ancestor...
+    plain-diff = !git branch-diff > $(git current-branch-without-slash).diff
+
+    patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
+
     # Check if any file in repo has whitespace errors
     # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
     check-whitespace = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
@@ -1700,19 +1754,6 @@ deploy-prod =
         git add -p; \
     }; f"
 
-    # Usage: git changelog [FIRST_TAG_NAME] [LAST_TAG_NAME] XXX
-    # Detailed list of changes.
-    changelog1 = "!f() { \
-        git log --no-merges ${1-$(git last-tag)}..$2; \
-    }; f"
-    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
-    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
-
-    # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
-    # branche courante.
-    unreleased = !git log $(git last-tag)...HEAD \
-                && git last-tag
-
     # Usage: git today [AUTHOR]
     today = "!f() { \
         git log \
@@ -1760,47 +1801,6 @@ deploy-prod =
                 --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
                 --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
-
-    current-tag = tag --points-at HEAD
-    zip = "!f() { \
-        git archive --format=zip -o $(git current-tag).zip HEAD; \
-    }; f"
-
-    # Usage: git export-branch
-    # Export the changes of the current branch as a .diff file.
-    export-branch = "!f() { \
-        local current_branch=$(git current-branch); \
-        git format-patch --stdout $current_branch > ~/$current_branch.diff; \
-    }; f"
-
-    # Usage: git zip-changed-files
-    # Create a compressed archive (ZIP) of the files modified in the current Git branch compared to the main branch.
-    zip-changed-files = "!f() { \
-        local current_branch=$(git current-branch); \
-        local main_branch=$(git main-branch || echo 'main'); \
-        local changed_files=$(git diff --name-only $main_branch..$current_branch); \
-        zip ~/$current_branch-changed-files.zip $changed_files; \
-        echo 'Exported changed files saved as $current_branch-changed-files.zip'; \
-    }; f"
-
-    export-zip = archive -o latest.zip
-    export-tgz = archive -o latest.tar.gz -9
-
-    # Usage: git export-commit [COMMIT_ISH]
-    # Create an archive of a commit.
-    export-commit = "!f() { \
-        git changed-files ${1:-HEAD} \
-            | tr '\\n' '\\0' \
-            | xargs -0 zip -9 $(git repo-slug-remote)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
-    }; f"
-
-    # View raw commit.
-    email-patch = XXX git format-patch $(git current-branch-without-slash).patch
-
-    # Since oldest ancestor...
-    plain-diff = !git branch-diff > $(git current-branch-without-slash).diff
-
-    patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
 
     # Enable comprehensive debugging output.
     debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"

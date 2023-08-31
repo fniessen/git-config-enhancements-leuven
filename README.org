@@ -4045,6 +4045,171 @@ Tag and push changes to the repository:
     manifest = ls-files
 #+end_src
 
+** PUBLISH - Prepare a release
+
+See https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release
+
+*** ChangeLog
+
+Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit messages since
+the last tag.
+
+A properly formed Git commit subject line should always be able to complete the
+following sentence:
+
+: If applied, this commit will YOUR_SUBJECT_LINE_HERE
+
+How to write a good commit message + A changelog generation:
+https://dev.to/gaelthomas/a-beginner-s-guide-to-git-how-to-write-a-good-commit-message-2j49
+https://dev.to/chrissiemhrk/git-commit-message-5e21
+https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
+
+#+begin_src conf
+    # Usage: git changelog [FIRST_TAG_NAME] [LAST_TAG_NAME] XXX
+    # Detailed list of changes.
+    changelog1 = "!f() { \
+        git log --no-merges ${1-$(git last-tag)}..$2; \
+    }; f"
+    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
+    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
+#+end_src
+
+Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin
+de savoir ce qu'embarquera la « prochaine release » de mon projet.
+
+#+begin_src conf
+    # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
+    # branche courante.
+    unreleased = !git log $(git last-tag)...HEAD \
+                && git last-tag
+#+end_src
+
+XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries on mcpflow repo
+
+See also
+- https://github.com/github-changelog-generator/github-changelog-generator
+- https://github.com/github-changelog-generator/github-changelog-generator/wiki/Alternatives
+
+*** Release assets
+
+Generate =zip= archived source code from the given Git tag.
+
+I use this when zipping the current branch with the name of the zip file as the
+current tag.  Useful for uploading to Elasticbeanstalk.
+
+#+begin_src conf
+    current-tag = tag --points-at HEAD
+    zip = "!f() { \
+        git archive --format=zip -o $(git current-tag).zip HEAD; \
+    }; f"
+#+end_src
+
+#+begin_src conf
+    # Usage: git export-branch
+    # Export the changes of the current branch as a .diff file.
+    export-branch = "!f() { \
+        local current_branch=$(git current-branch); \
+        git format-patch --stdout $current_branch > ~/$current_branch.diff; \
+    }; f"
+#+end_src
+
+#+begin_src conf
+    # Usage: git zip-changed-files
+    # Create a compressed archive (ZIP) of the files modified in the current Git branch compared to the main branch.
+    zip-changed-files = "!f() { \
+        local current_branch=$(git current-branch); \
+        local main_branch=$(git main-branch || echo 'main'); \
+        local changed_files=$(git diff --name-only $main_branch..$current_branch); \
+        zip ~/$current_branch-changed-files.zip $changed_files; \
+        echo 'Exported changed files saved as $current_branch-changed-files.zip'; \
+    }; f"
+#+end_src
+
+Example for a branch:
+
+: git missing-files main > file-list.txt
+: cat file-list.txt | xargs zip -9 DATE_what-it-does.zip
+
+Save a repo (for example, ~HEAD~ or ~master~ -- or any other branch to archive, if
+you've already checked it out) as a tarball:
+
+#+begin_src conf
+    export-zip = archive -o latest.zip
+    export-tgz = archive -o latest.tar.gz -9
+#+end_src
+
+Note that the /output format/ is inferred by the extension of the output file.
+
+**** Export a commit
+
+#+begin_src conf
+    # Usage: git export-commit [COMMIT_ISH]
+    # Create an archive of a commit.
+    export-commit = "!f() { \
+        git changed-files ${1:-HEAD} \
+            | tr '\\n' '\\0' \
+            | xargs -0 zip -9 $(git repo-slug-remote)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
+    }; f"
+#+end_src
+
+XXX This does not handle spaces in file names
+
+To see the contents of the zipped file (without extraction), use ~unzip -l FILE~.
+
+**** Generate patch emails
+
+#+begin_src conf
+    # View raw commit.
+    email-patch = XXX git format-patch $(git current-branch-without-slash).patch
+
+    # Since oldest ancestor...
+    plain-diff = !git branch-diff > $(git current-branch-without-slash).diff
+#+end_src
+
+Patch = this
+
+: From 69936b7cc23c9ae78cec84baa30c599c1ad5990a Mon Sep 17 00:00:00 2001
+: From: Brett Viren <brett.viren@gmail.com>
+: Date: Fri, 2 Oct 2020 10:30:17 -0400
+: Subject: [PATCH] Move doc to index.org and generate index.html, README.org
+:  holds short links.
+:
+: This is meant to demo serving the refcard via GH pages.  The
+: README.org probably deserves more attention!
+:
+: Content modified:
+:
+: - Switched to online SETUPFILE.  Maybe better to carry a copy of readtheorg?
+:
+: - I had problems related to id:<hash> and so switch a reference to use
+:   the headline text.
+:
+: - Pointed UP and HOME to links related to the refcard.
+: ---
+:  README.html | 4118 ---------------------------------------------------
+:  README.org  | 1673 +--------------------
+:  index.html  | 3308 +++++++++++++++++++++++++++++++++++++++++
+:  index.org   | 1672 +++++++++++++++++++++
+:  4 files changed, 4984 insertions(+), 5787 deletions(-)
+:  delete mode 100755 README.html
+:  mode change 100755 => 100644 README.org
+:  create mode 100644 index.html
+:  create mode 100755 index.org
+
++ diff.
+
+#+begin_src conf
+    patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
+#+end_src
+
+** PUBLISH - Tag
+
+When tagging releases in a version control system, the tag for a version should
+be ~X.Y.Z~ (*without* prefix ~v~).  The advantages of ~X.Y.Z~ are that gitweb or GitHub
+can automatically offer a tarball or zip download of the form
+=packagename-$tag.tar.gz= (and it's quite established that a tarball should be
+named =package-X.Y.Z.tar.gz=).
+
 * Pipelines
 
 Testing.
@@ -5442,52 +5607,7 @@ alias cav='curl $(pbpaste) | git apply -v --check'
 alias capv='curl $(pbpaste) | patch -p1 --dry-run'
 #+end_src
 
-** PUBLISH - Prepare a release
-
-See https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release
-
-*** ChangeLog
-
-Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit messages since
-the last tag.
-
-A properly formed Git commit subject line should always be able to complete the
-following sentence:
-
-: If applied, this commit will YOUR_SUBJECT_LINE_HERE
-
-How to write a good commit message + A changelog generation:
-https://dev.to/gaelthomas/a-beginner-s-guide-to-git-how-to-write-a-good-commit-message-2j49
-https://dev.to/chrissiemhrk/git-commit-message-5e21
-https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
-
-#+begin_src conf
-    # Usage: git changelog [FIRST_TAG_NAME] [LAST_TAG_NAME] XXX
-    # Detailed list of changes.
-    changelog1 = "!f() { \
-        git log --no-merges ${1-$(git last-tag)}..$2; \
-    }; f"
-    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
-    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
-#+end_src
-
-Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin
-de savoir ce qu'embarquera la « prochaine release » de mon projet.
-
-#+begin_src conf
-    # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
-    # branche courante.
-    unreleased = !git log $(git last-tag)...HEAD \
-                && git last-tag
-#+end_src
-
-XXX git log --pretty=format:"- %s" 2019.10.10...HEAD displays too many entries on mcpflow repo
-
-See also
-- https://github.com/github-changelog-generator/github-changelog-generator
-- https://github.com/github-changelog-generator/github-changelog-generator/wiki/Alternatives
-
-**** Today
+** Today
 
 Quickly see what you've done today (list commits that aren't merges, on *all
 branches*):
@@ -5565,126 +5685,6 @@ Show changes for a daily standup meeting:
 #+end_src
 
 TODO: 'git standup W' donne un décompte avec une ligne trop peu !
-
-*** Release assets
-
-Generate =zip= archived source code from the given Git tag.
-
-I use this when zipping the current branch with the name of the zip file as the
-current tag.  Useful for uploading to Elasticbeanstalk.
-
-#+begin_src conf
-    current-tag = tag --points-at HEAD
-    zip = "!f() { \
-        git archive --format=zip -o $(git current-tag).zip HEAD; \
-    }; f"
-#+end_src
-
-#+begin_src conf
-    # Usage: git export-branch
-    # Export the changes of the current branch as a .diff file.
-    export-branch = "!f() { \
-        local current_branch=$(git current-branch); \
-        git format-patch --stdout $current_branch > ~/$current_branch.diff; \
-    }; f"
-#+end_src
-
-#+begin_src conf
-    # Usage: git zip-changed-files
-    # Create a compressed archive (ZIP) of the files modified in the current Git branch compared to the main branch.
-    zip-changed-files = "!f() { \
-        local current_branch=$(git current-branch); \
-        local main_branch=$(git main-branch || echo 'main'); \
-        local changed_files=$(git diff --name-only $main_branch..$current_branch); \
-        zip ~/$current_branch-changed-files.zip $changed_files; \
-        echo 'Exported changed files saved as $current_branch-changed-files.zip'; \
-    }; f"
-#+end_src
-
-Example for a branch:
-
-: git missing-files main > file-list.txt
-: cat file-list.txt | xargs zip -9 DATE_what-it-does.zip
-
-Save a repo (for example, ~HEAD~ or ~master~ -- or any other branch to archive, if
-you've already checked it out) as a tarball:
-
-#+begin_src conf
-    export-zip = archive -o latest.zip
-    export-tgz = archive -o latest.tar.gz -9
-#+end_src
-
-Note that the /output format/ is inferred by the extension of the output file.
-
-**** Export a commit
-
-#+begin_src conf
-    # Usage: git export-commit [COMMIT_ISH]
-    # Create an archive of a commit.
-    export-commit = "!f() { \
-        git changed-files ${1:-HEAD} \
-            | tr '\\n' '\\0' \
-            | xargs -0 zip -9 $(git repo-slug-remote)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
-    }; f"
-#+end_src
-
-XXX This does not handle spaces in file names
-
-To see the contents of the zipped file (without extraction), use ~unzip -l FILE~.
-
-**** Generate patch emails
-
-#+begin_src conf
-    # View raw commit.
-    email-patch = XXX git format-patch $(git current-branch-without-slash).patch
-
-    # Since oldest ancestor...
-    plain-diff = !git branch-diff > $(git current-branch-without-slash).diff
-#+end_src
-
-Patch = this
-
-: From 69936b7cc23c9ae78cec84baa30c599c1ad5990a Mon Sep 17 00:00:00 2001
-: From: Brett Viren <brett.viren@gmail.com>
-: Date: Fri, 2 Oct 2020 10:30:17 -0400
-: Subject: [PATCH] Move doc to index.org and generate index.html, README.org
-:  holds short links.
-:
-: This is meant to demo serving the refcard via GH pages.  The
-: README.org probably deserves more attention!
-:
-: Content modified:
-:
-: - Switched to online SETUPFILE.  Maybe better to carry a copy of readtheorg?
-:
-: - I had problems related to id:<hash> and so switch a reference to use
-:   the headline text.
-:
-: - Pointed UP and HOME to links related to the refcard.
-: ---
-:  README.html | 4118 ---------------------------------------------------
-:  README.org  | 1673 +--------------------
-:  index.html  | 3308 +++++++++++++++++++++++++++++++++++++++++
-:  index.org   | 1672 +++++++++++++++++++++
-:  4 files changed, 4984 insertions(+), 5787 deletions(-)
-:  delete mode 100755 README.html
-:  mode change 100755 => 100644 README.org
-:  create mode 100644 index.html
-:  create mode 100755 index.org
-
-+ diff.
-
-#+begin_src conf
-    patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
-#+end_src
-
-** PUBLISH - Tag
-
-When tagging releases in a version control system, the tag for a version should
-be ~X.Y.Z~ (*without* prefix ~v~).  The advantages of ~X.Y.Z~ are that gitweb or GitHub
-can automatically offer a tarball or zip download of the form
-=packagename-$tag.tar.gz= (and it's quite established that a tarball should be
-named =package-X.Y.Z.tar.gz=).
 
 ** Debugging
 
