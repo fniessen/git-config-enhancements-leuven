@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230831.1733
+# .gitconfig, Time-stamp: 20230831.2039
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -561,13 +561,18 @@
     #   git changed-files bada55      List files modified in the commit with hash 'bada55'
     changed-files = "!f() { \
         if [ $# -eq 0 ]; then \
-            git diff-tree --no-commit-id --name-only -r HEAD; \
+            git diff --name-only HEAD^ HEAD; \
         else \
-            git diff-tree --no-commit-id --name-only -r $1; \
+            git diff --name-only $1^ $1; \
         fi \
     }; f"
 
-    download-email-patch = XXX git format-patch $(git current-branch).patch
+    # Usage: git download-email-patch
+    # Generate a patch file for the current branch using the git format-patch command.
+    download-email-patch = "!f() { \
+        local current_branch=$(git current-branch); \
+        git format-patch $current_branch.patch; \
+    }; f"
 
     # Usage: git download-commit-plain-diff [COMMIT]
     # Create a diff file for the changes in a commit or range of commits.
@@ -710,10 +715,10 @@
 
     # Checkout the commit in question, and amend its message.
     reword2 = "!f() { \
-        OLD_BRANCH=$(git current-branch); \
+        local current_branch=$(git current-branch); \
         git checkout \"$1\"; \
         git commit --amend; \
-        git checkout $OLD_BRANCH; \
+        git checkout $current_branch; \
     }; f"
 
     # Usage: git uncommit
@@ -760,7 +765,9 @@
     # Usage: git current-branch
     # Show the current branch name (v2.22+).
     current-branch = branch --show-current
-    # current_branch = !git symbolic-ref --short HEAD 2>/dev/null
+
+    # current-branch = !git symbolic-ref --short HEAD 2>/dev/null
+    # Less readable, less convenient and user-friendly.
 
     # Usage: git current-branch-without-slash
     # Show the current branch name (without slash).
@@ -902,10 +909,10 @@
 
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
     sync-all-branches = "!f() { \
-        local OLD_BRANCH=$(git current-branch); \
+        local current_branch=$(git current-branch); \
         for BRANCH_REF in $(git for-each-ref refs/heads --format='%(refname)'); do \
             local BRANCH=${BRANCH_REF#refs/heads/}; \
-            if [ \"$BRANCH\" != \"$OLD_BRANCH\" ]; then \
+            if [ \"$BRANCH\" != \"$current_branch\" ]; then \
                 echo \"Switching to branch: $BRANCH\"; \
                 git checkout $BRANCH && \
                 git pull --ff-only; \
@@ -913,7 +920,7 @@
                 echo; \
             fi; \
         done; \
-        git checkout $OLD_BRANCH; \
+        git checkout $current_branch; \
     }; f"
 
     # Delete a local branch.
@@ -1145,8 +1152,8 @@
 
     # For GitHub.
     mpr = "!f() { \
-        declare OLD_BRANCH=\"$(git current-branch)\"; \
-        declare BRANCH=\"${2:-$OLD_BRANCH}\"; \
+        declare current_branch=\"$(git current-branch)\"; \
+        declare BRANCH=\"${2:-$current_branch}\"; \
         if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
             git fetch $(git origin) refs/pull/\"$1\"/head:pr/\"$1\" \
                 && git checkout -B $BRANCH \

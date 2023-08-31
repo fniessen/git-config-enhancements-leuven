@@ -1951,19 +1951,22 @@ List all the changed files *in a commit* (also in a /merge commit/):
     #   git changed-files bada55      List files modified in the commit with hash 'bada55'
     changed-files = "!f() { \
         if [ $# -eq 0 ]; then \
-            git diff-tree --no-commit-id --name-only -r HEAD; \
+            git diff --name-only HEAD^ HEAD; \
         else \
-            git diff-tree --no-commit-id --name-only -r $1; \
+            git diff --name-only $1^ $1; \
         fi \
     }; f"
 #+end_src
 
-    changed_files=!git diff --name-only HEAD@{1} HEAD
-
 ** Get the diff of a commit
 
 #+begin_src conf
-    download-email-patch = XXX git format-patch $(git current-branch).patch
+    # Usage: git download-email-patch
+    # Generate a patch file for the current branch using the git format-patch command.
+    download-email-patch = "!f() { \
+        local current_branch=$(git current-branch); \
+        git format-patch $current_branch.patch; \
+    }; f"
 
     # Usage: git download-commit-plain-diff [COMMIT]
     # Create a diff file for the changes in a commit or range of commits.
@@ -2407,10 +2410,10 @@ My new favorite alias lets you amend to a specific commit, *no* need to be the
 
     # Checkout the commit in question, and amend its message.
     reword2 = "!f() { \
-        OLD_BRANCH=$(git current-branch); \
+        local current_branch=$(git current-branch); \
         git checkout \"$1\"; \
         git commit --amend; \
-        git checkout $OLD_BRANCH; \
+        git checkout $current_branch; \
     }; f"
 #+end_src
 
@@ -2699,7 +2702,9 @@ Name of current branch (not so useful in itself, but used in other aliases):
     # Usage: git current-branch
     # Show the current branch name (v2.22+).
     current-branch = branch --show-current
-    # current_branch = !git symbolic-ref --short HEAD 2>/dev/null
+
+    # current-branch = !git symbolic-ref --short HEAD 2>/dev/null
+    # Less readable, less convenient and user-friendly.
 #+end_src
 
 #+begin_note
@@ -3031,10 +3036,10 @@ result in non-trivial conflicts.
 #+begin_src conf
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
     sync-all-branches = "!f() { \
-        local OLD_BRANCH=$(git current-branch); \
+        local current_branch=$(git current-branch); \
         for BRANCH_REF in $(git for-each-ref refs/heads --format='%(refname)'); do \
             local BRANCH=${BRANCH_REF#refs/heads/}; \
-            if [ \"$BRANCH\" != \"$OLD_BRANCH\" ]; then \
+            if [ \"$BRANCH\" != \"$current_branch\" ]; then \
                 echo \"Switching to branch: $BRANCH\"; \
                 git checkout $BRANCH && \
                 git pull --ff-only; \
@@ -3042,7 +3047,7 @@ result in non-trivial conflicts.
                 echo; \
             fi; \
         done; \
-        git checkout $OLD_BRANCH; \
+        git checkout $current_branch; \
     }; f"
 #+end_src
 
@@ -3859,8 +3864,8 @@ If everything is OK, you can merge the pull request.
 #+begin_src conf
     # For GitHub.
     mpr = "!f() { \
-        declare OLD_BRANCH=\"$(git current-branch)\"; \
-        declare BRANCH=\"${2:-$OLD_BRANCH}\"; \
+        declare current_branch=\"$(git current-branch)\"; \
+        declare BRANCH=\"${2:-$current_branch}\"; \
         if [ $(printf \"%s\" \"$1\" | grep '^[0-9]\\+$' > /dev/null; printf $?) -eq 0 ]; then \
             git fetch $(git origin) refs/pull/\"$1\"/head:pr/\"$1\" \
                 && git checkout -B $BRANCH \
@@ -5265,15 +5270,15 @@ stories, or hotfix patches, etc.
 
 Create a new feature branch:
 
-: feature-start = '!OLD_BRANCH=$1; git checkout master; git pull; git create-branch "$OLD_BRANCH" master'
+: feature-start = '!CURRENT_BRANCH=$1; git checkout master; git pull; git create-branch "$CURRENT_BRANCH" master'
 
 Update the feature branch:
 
-: feature-pull = '!OLD_BRANCH=$(git current-branch); git checkout master; git pull; git checkout "$OLD_BRANCH"; git rebase master'
+: feature-pull = '!CURRENT_BRANCH=$(git current-branch); git checkout master; git pull; git checkout "$CURRENT_BRANCH"; git rebase master'
 
 Share the feature branch:
 
-: feature-push = '!OLD_BRANCH=$(git current-branch); git push -u $(git origin) "$OLD_BRANCH"'
+: feature-push = '!CURRENT_BRANCH=$(git current-branch); git push -u $(git origin) "$CURRENT_BRANCH"'
 
 If your team uses a different feature flow, you may want to skip including these
 aliases, or you may want to edit these aliases to match your team's feature flow.
