@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230906.1553
+# .gitconfig, Time-stamp: 20230906.1745
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -615,11 +615,14 @@
     dir-diff = difftool -t meld --dir-diff
 
     # Usage: git find-branches-containing COMMIT_HASH
-    # List references that contain a specific commit hash.
-    find-branches-containing = branch -a --contains
-
-    # List local branches that point to the current HEAD commit.
-    where2 = for-each-ref --format="%(refname:short)" --points-at HEAD refs/heads
+    # List branches containing a specific commit.
+    find-branches-containing = "!f() { \
+        if [ $# -eq 0 ]; then \
+            echo 'Usage: git find-branches-containing COMMIT_HASH'; \
+        else \
+            git branch -a --contains $1; \
+        fi \
+    }; f"
 
     # Usage: git find-tags-containing COMMIT_HASH
     # Find tags containing commit.
