@@ -2232,40 +2232,15 @@ that commit!
 
 **** Search for commits that introduced or removed instances of a specific string
 
-The alias ~search-for-diff-contents~ searches for string-related changes:
+The alias ~search-changes-in-message-and-diff~ searches for string-related changes
+in the commit message and the diff.
 
 #+begin_src conf
-    # Usage: git search-for-diff-contents SEARCH_TERM
+    # Usage: git search-changes-in-message-and-diff SEARCH_TERM
     # Search for commits that add or remove a specific term in the repository's diff contents.
-    search-for-diff-contents = "!f() { \
+    search-changes-in-message-and-diff = "!f() { \
         git log --all -S \"$1\"; \
     }; f"
-#+end_src
-
-It searches for changes related to a specific string in diffs only?
-
-or
-
-It searches for changes related to a specific string in commit messages, file
-changes, and diffs?
-
-Alternate alias names:
-
-- ~search-changes~
-- ~search-diff-changes~
-- ~search-everything~
-- ~search-diff~
-
-Same question for:
-
-The alias ~search-changes-for-term~ allows you to view the Git log with a specific
-search term within the entire codebase, including commit messages, file changes,
-and diffs.
-
-#+begin_src conf
-    # Usage: git search-changes-for-term SEARCH_TERM
-    # Search for changes that introduced or removed a specific term in the repository.
-    search-changes-for-term = log --all -p -S
 #+end_src
 
 **** To check

@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230906.1745
+# .gitconfig, Time-stamp: 20230906.1758
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -674,15 +674,11 @@
         git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
     }; f"
 
-    # Usage: git search-for-diff-contents SEARCH_TERM
+    # Usage: git search-changes-in-message-and-diff SEARCH_TERM
     # Search for commits that add or remove a specific term in the repository's diff contents.
-    search-for-diff-contents = "!f() { \
+    search-changes-in-message-and-diff = "!f() { \
         git log --all -S \"$1\"; \
     }; f"
-
-    # Usage: git search-changes-for-term SEARCH_TERM
-    # Search for changes that introduced or removed a specific term in the repository.
-    search-changes-for-term = log --all -p -S
 
     # Usage: git show-commits-for-string STRING FILENAME
     # Show commits that add or remove a specific string in a file.
