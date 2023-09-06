@@ -1915,16 +1915,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                                            |
-|----------+--------------------------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                                          |
-| fix      | A bug fix                                                                                              |
+| Label    | Description                                                                      |
+|----------+----------------------------------------------------------------------------------|
+| feat     | A new feature                                                                    |
+| fix      | A bug fix                                                                        |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                                              |
-| perf     | A code change that improves performance                                                                |
-| test     | Adding missing or correcting existing tests                                                            |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
-| doc      | Documentation only changes                                                                             |
+| refactor | A code change that neither fixes a bug nor adds a feature                        |
+| perf     | A code change that improves performance                                          |
+| test     | Adding missing or correcting existing tests                                      |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
+| doc      | Documentation only changes                                                       |
 
 ** Get a commit hash
 
@@ -3682,12 +3682,18 @@ To see real *timeline* of who is working on what and when:
 https://fossil-scm.org/home/help?cmd=leaves
 
 #+begin_src conf
+    # Usage: git releases
+    # Display a decorated Git commit history graph, excluding merge commits.
     releases = log --no-merges --all --simplify-by-decoration --graph
 #+end_src
 
 #+begin_src conf
+    # Usage: git hist
+    # Display a Git commit history graph in tree format.
     hist = log --graph
 
+    # Usage: git lgf
+    # Display a Git commit history graph with file change status and custom formatting.
     hist-full = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
 #+end_src
 
@@ -4522,11 +4528,11 @@ Define:
 
 #+begin_src conf
     # Execute shell command and show output.
-    exec = '!exec '
+    x = "!exec "
 #+end_src
 
-so that you can do things like ~git exec make~.  This works because Shell aliases
-are always executed in the top-level directory.
+so that you can do things like ~git x make~.  This works because Shell aliases are
+always executed in the top-level directory.
 
 Clean up your commits before publishing.  Before you push your commits to the
 repository, it's good to revise them.  You can run the git interactive rebase to

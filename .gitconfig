@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230831.2039
+# .gitconfig, Time-stamp: 20230906.1500
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1110,10 +1110,16 @@
     # Show log as a graph
     glog = log --all --graph
 
+    # Usage: git releases
+    # Display a decorated Git commit history graph, excluding merge commits.
     releases = log --no-merges --all --simplify-by-decoration --graph
 
+    # Usage: git hist
+    # Display a Git commit history graph in tree format.
     hist = log --graph
 
+    # Usage: git lgf
+    # Display a Git commit history graph with file change status and custom formatting.
     hist-full = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
 
     # Draw Git revisions graph with Graphviz.
@@ -1373,7 +1379,7 @@ deploy-prod =
     push-all-repos = !$HOME/bin/git-push-all-repos
 
     # Execute shell command and show output.
-    exec = '!exec '
+    x = "!exec "
 
     # Interactive rebase with the given number of latest commits
     ireb = "!f() { \
