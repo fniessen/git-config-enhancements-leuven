@@ -1915,16 +1915,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                      |
-|----------+----------------------------------------------------------------------------------|
-| feat     | A new feature                                                                    |
-| fix      | A bug fix                                                                        |
+| Label    | Description                                                                                            |
+|----------+--------------------------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                                          |
+| fix      | A bug fix                                                                                              |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                        |
-| perf     | A code change that improves performance                                          |
-| test     | Adding missing or correcting existing tests                                      |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
-| doc      | Documentation only changes                                                       |
+| refactor | A code change that neither fixes a bug nor adds a feature                                              |
+| perf     | A code change that improves performance                                                                |
+| test     | Adding missing or correcting existing tests                                                            |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
+| doc      | Documentation only changes                                                                             |
 
 ** Get a commit hash
 
@@ -2092,7 +2092,7 @@ Therefore, Git cannot determine "which branch was which" before merge commits.
 : curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/search?scope=commits&search=bye
 : curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file
 
-*** Search within Commit Messages
+*** Search in the commit messages
 
 You can find commits that contain particular words in the commit message. For
 example, ~fix typo~ matches commits containing the words ~fix~ *and* ~typo~.
@@ -2229,18 +2229,33 @@ that commit!
 
 : git log --since="1 week ago" --all -S "foo"
 
-The alias ~search-for-diff-contents~ lets you view the Git log filtered by
-a specific string.
+**** Search for commits that introduced or removed instances of a specific string
 
-Prettier ~whatchanged~ with full diffs based on text search:
+The alias ~search-for-diff-contents~ searches for string-related changes:
 
 #+begin_src conf
     # Usage: git search-for-diff-contents SEARCH_TERM
     # Search for commits that add or remove a specific term in the repository's diff contents.
     search-for-diff-contents = "!f() { \
-        git log -S \"$1\"; \
+        git log --all -S \"$1\"; \
     }; f"
 #+end_src
+
+It searches for changes related to a specific string in diffs only?
+
+or
+
+It searches for changes related to a specific string in commit messages, file
+changes, and diffs?
+
+Alternate alias names:
+
+- ~search-changes~
+- ~search-diff-changes~
+- ~search-everything~
+- ~search-diff~
+
+Same question for:
 
 The alias ~search-changes-for-term~ allows you to view the Git log with a specific
 search term within the entire codebase, including commit messages, file changes,
@@ -2249,8 +2264,10 @@ and diffs.
 #+begin_src conf
     # Usage: git search-changes-for-term SEARCH_TERM
     # Search for changes that introduced or removed a specific term in the repository.
-    search-changes-for-term = log -p -S
+    search-changes-for-term = log --all -p -S
 #+end_src
+
+**** To check
 
 #+begin_src conf
     # Usage: git show-commits-for-string STRING FILENAME
