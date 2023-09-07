@@ -610,9 +610,11 @@ need to reconcile them:
       rebase = true
   #+end_src
 
-  If there are no local commits to rebase, this is equivalent to a fast-forward.
+  If there are no local commits to rebase, Git will perform a fast-forward
+  merge, effectively moving your branch pointer to the upstream branch.
 
-  rebase with auto-abort
+  Rebase with auto-abort (if it encounters conflicts):
+
   : git rebase foo || git rebase --abort
 
   See https://www.gitkraken.com/learn/git/problems/git-pull-rebase!!!
@@ -636,6 +638,7 @@ with the /same name/.
 
 #+begin_src conf
 [push]
+    # Only push the current branch to its upstream branch.
     default = simple
 #+end_src
 
@@ -645,7 +648,10 @@ with the /same name/.
 
 #+begin_src conf
 [merge]
+    # Show a diffstat of what changed in the merge.
     stat = true
+
+    # Provide a summary of the merge, including affected files and commit messages.
     summary = true
 
     # Include summaries of merged commits in newly created merge commit messages.
@@ -658,6 +664,8 @@ Set ~rebase.stat = true~, so the ~diffstat~ output is still shown when they pull
 
 #+begin_src conf
 [rebase]
+    # Enable the display of a diffstat when rebasing, showing what changed
+    # during the rebase.
     stat = true
 #+end_src
 
@@ -667,11 +675,13 @@ https://git-scm.com/docs/git-grep
 
 #+begin_src conf
 [grep]
+    # Show line numbers in the results.
     lineNumber = true
 
     # # Allow extended regular expressions
     # extendedRegexp = true
 
+    # Display the full path of matching files in the results.
     fullName = true
 #+end_src
 

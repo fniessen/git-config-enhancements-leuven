@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230906.1758
+# .gitconfig, Time-stamp: 20230907.1739
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -115,24 +115,32 @@
     submoduleSummary = true
 
 [push]
+    # Only push the current branch to its upstream branch.
     default = simple
 
 [merge]
+    # Show a diffstat of what changed in the merge.
     stat = true
+
+    # Provide a summary of the merge, including affected files and commit messages.
     summary = true
 
     # Include summaries of merged commits in newly created merge commit messages.
     log = true
 
 [rebase]
+    # Enable the display of a diffstat when rebasing, showing what changed
+    # during the rebase.
     stat = true
 
 [grep]
+    # Show line numbers in the results.
     lineNumber = true
 
     # # Allow extended regular expressions
     # extendedRegexp = true
 
+    # Display the full path of matching files in the results.
     fullName = true
 
 [color]
