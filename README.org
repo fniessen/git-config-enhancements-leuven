@@ -803,13 +803,104 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
 ~git aliases~.
 
 #+begin_src conf
-    # Usage: git aliases
-    # List all Git aliases in alphabetical order.
+    ##? Usage: git aliases
+    ##?
+    ##? List all Git aliases in alphabetical order.
     aliases = "!git config -l \
                   | grep alias \
                   | cut -c 7- \
                   | sort \
                   | sed 's/=/ = /'"
+#+end_src
+
+#+begin_src conf :tangle no
+    ##? Usage: git h ALIAS_NAME
+    ##?
+    ##? Display the help for a custom Git alias.
+    ##?
+    ##? Arguments:
+    ##?   ALIAS_NAME                    The name of the custom Git alias.
+    h = "!f() { \
+        local alias_name=\"$1\"; \
+        if [ -z \"$alias_name\" ]; then \
+            printf >&2 'Error: Missing alias name argument\n'; \
+            return 2; \
+        fi; \
+        local alias_description=\"$(git config alias.$alias_name)\"; \
+        if [ -z \"$alias_description\" ]; then \
+            printf >&2 'Error: Alias not found\n'; \
+            return 2; \
+        fi; \
+        local alias_help=\"$(git config alias.$alias_name | sed -n '/^##?/,/^$/p')\"; \
+        if [ -z \"$alias_help\" ]; then \
+            printf >&2 'Error: No help found for the alias\n'; \
+            return 2; \
+        fi; \
+        printf \"$alias_help\"; \
+    }; f"
+
+
+# Usage: git h ALIAS_NAME
+# Display the help comments for a custom Git alias.
+#
+# Arguments:
+#   ALIAS_NAME    The name of the custom Git alias.
+h = "!f() { \
+    local alias_name=\"$1\"; \
+    if [ -z \"$alias_name\" ]; then \
+        printf >&2 'Error: Missing alias name argument\n'; \
+        return 2; \
+    fi; \
+    local gitconfig_path=\"$(git rev-parse --show-toplevel)/.git/config\"; \
+    local alias_comments=\"$(awk -v alias=\"$alias_name\" \
+        '/\\[alias\\]/ { in_alias = 1; next } \
+        in_alias && /^\\s*$/ { in_alias = 0; next } \
+        in_alias && $1 == alias { \
+            while (getline) { \
+                if ($0 ~ /^##? /) { \
+                    sub(/^##? /, \"\", $0); \
+                    comments = comments $0 \"\\n\"; \
+                } else { \
+                    break; \
+                } \
+            } \
+        } \
+        END { \
+            gsub(/\\n$/, \"\", comments); \
+            print comments; \
+        }' \"$gitconfig_path\")\"; \
+    if [ -z \"$alias_comments\" ]; then \
+        printf >&2 'Error: No comments found for the alias\n'; \
+        return 1; \
+    fi; \
+    printf \"$alias_comments\"; \
+}; f"
+
+# Usage: git h ALIAS_NAME
+# Display the help comments for a custom Git alias.
+#
+# Arguments:
+#   ALIAS_NAME    The name of the custom Git alias.
+h = "!f() { \
+    local alias_name=\"$1\"; \
+    if [ -z \"$alias_name\" ]; then \
+        printf >&2 'Error: Missing alias name argument\n'; \
+        return 2; \
+    fi; \
+    local gitconfig_path=\"$(git rev-parse --show-toplevel)/.git/config\"; \
+    local alias_comments=\"$(awk -v alias=\"$alias_name\" \
+        -v RS=\"\" \
+        '$1 == alias { \
+            sub(/^##? /, \"\", $0); \
+            sub(/\n$/, \"\", $0); \
+            print $0; \
+        }' \"$gitconfig_path\")\"; \
+    if [ -z \"$alias_comments\" ]; then \
+        printf >&2 'Error: No comments found for the alias\n'; \
+        return 1; \
+    fi; \
+    printf \"$alias_comments\"; \
+}; f"
 #+end_src
 
 * Repository
@@ -1024,9 +1115,21 @@ You can also create a =.gitignore= file into your repository.
 Search files (by file path) in the current branch.
 
 #+begin_src conf
-    # Usage: git search-for-files PATTERN
-    # List all files in the current branch matching a case-insensitive search pattern.
-    search-for-files = !git ls-tree -r --name-only HEAD | grep -i --color=auto
+    ##? Usage: git search-for-files PATTERN
+    ##?
+    ##? List all files in the current branch matching a case-insensitive search pattern.
+    ##?
+    ##? Arguments:
+    ##?   PATTERN                       Pattern
+    search-for-files = "!f() { \
+        local pattern=\"$1\"; \
+        if [ -z \"$pattern\" ]; then \
+            printf >&2 'Error: Missing pattern argument\n'; \
+            return 2; \
+        fi; \
+        git ls-tree -r --name-only HEAD \
+            | grep -i --color=auto \"$pattern\"; \
+    }; f"
 
     # Alias of 'search-for-files'.
     find-files = !git search-for-files
@@ -1440,7 +1543,7 @@ clean-all-dry~.
 
 Remove (only) ignored files that are still on the repository:
 
-: git ignored | xargs rm
+: git ignored-files | xargs rm
 
 *** Hg shelve untracked files
 
@@ -2779,6 +2882,16 @@ branch (if any).
 #+end_src
 
 #+begin_src conf
+    ##? Usage: git local-branches
+    ##?
+    ##? List and display local branches.
+    local-branches = "!git rev-parse --symbolic --branches"
+    # Note: The alternative method
+    # local-branches = "!git for-each-ref --format='%(refname:short)' refs/heads/"
+    # is slower.
+    #+end_src
+
+#+begin_src conf
     # Usage: git br
     # Show detailed information about local branches, sorted by commit date.
     br = for-each-ref refs/heads \
@@ -3044,7 +3157,7 @@ result in non-trivial conflicts.
 
 #+begin_src conf
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
-    sync-all-branches = "!f() { \
+    update-all-branches = "!f() { \
         local current_branch=$(git current-branch); \
         for BRANCH_REF in $(git for-each-ref refs/heads --format='%(refname)'); do \
             local BRANCH=${BRANCH_REF#refs/heads/}; \
@@ -3057,6 +3170,25 @@ result in non-trivial conflicts.
             fi; \
         done; \
         git checkout $current_branch; \
+    }; f"
+#+end_src
+
+#+begin_src conf
+    ##? Usage: git update-all-branches2
+    ##?
+    ##? Update all local branches with their remote counterparts, checking for conflicts before updating.
+    update-all-branches2 = "!f() { \
+        local local_branches=$(git local-branches); \
+        for branch in $local_branches; do \
+            printf \"Checking for conflicts in \\e[1m%s\\e[0m...\\n\" \"$branch\"; \
+            if git merge-base --is-ancestor origin/$branch $branch; then \
+                printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
+                git pull origin $branch:$branch; \
+                printf \"\\n\"; \
+            else \
+                printf \"Potential conflicts found in \\e[1m%s\\e[0m. Skipping update.\\n\\n\" \"$branch\"; \
+            fi; \
+        done \
     }; f"
 #+end_src
 
@@ -3170,6 +3302,7 @@ Delete a *remote* branch:
     # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
     delete-remote-branch = !git push $(git origin) --delete
+    # = "Close source branch" (after merging).
 
     # Usage: git unpublish
     # Delete the current branch from the remote repository.
@@ -3607,11 +3740,24 @@ Show all the changed files in a Git branch *since it was forked*:
     #   git missing-files             list changed files between this and main
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
-        local current_branch=$(git rev-parse --abbrev-ref HEAD); \
+        local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
         missing_files_to_current=$(git diff --name-only \"$other_branch\"..\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
+    }; f"
+
+    missing-files2 = "!f() { \
+        local current_branch=$(git current-branch); \
+        local other_branch=${1:-$(git main-branch)}; \
+        IFS=$'\n'; \
+        missing_files_to_current=($(git diff --name-only \"$other_branch\"..\"$current_branch\")); \
+        unset IFS; \
+        total_missing_files=${#missing_files_to_current[@]}; \
+        printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$total_missing_files\"; \
+        for file in \"${missing_files_to_current[@]}\"; do \
+            echo \"$file\"; \
+        done; \
     }; f"
 
     missing-files-name-only = "!f() { \
@@ -4695,11 +4841,11 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
 #+begin_src conf
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
-        local_branches=$(git rev-parse --symbolic --branches); \
-        for BRANCH in $local_branches; do \
+        local local_branches=$(git local-branches); \
+        for branch in $local_branches; do \
             echo -e \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
-                                --color=always $BRANCH -- \"$1\")  On branch $(tput bold)$BRANCH$(tput sgr0)\"; \
+                                --color=always $branch -- \"$1\")  On branch $(tput bold)$branch$(tput sgr0)\"; \
         done | sort -r; \
     }; f"
 #+end_src
@@ -5054,7 +5200,7 @@ repository) *into the current branch*. [...]  Merging is performed by an automat
 process that identifies changes made since the branches diverged, and then
 applies all those changes together.
 
-: Merge branch 'BRANCH_NAME' into master
+: Merge branch 'branch_name' into main
 
 #+begin_src conf
     # Avoid a fast-forward commit.
@@ -5081,6 +5227,11 @@ Merge strategy:
             && git checkout \"$current_branch\"; \
     }; f"
 #+end_src
+
+XXX Outputs:
+
+- *Branch merged:* 'branch_name' successfully merged
+- *Unable to merge branch*?
 
 On projects where we work with a staging or test branch, I regularly merge my
 work in progress into it so others can test it.
@@ -5692,7 +5843,7 @@ Show changes for a daily standup meeting:
 #+end_src
 
 #+begin_src conf :tangle no
-    standup = "!f() { \
+    standup2 = "!f() { \
         today=$(date +%a) \
         if [ \"$today\" = \"Mon\" ]; then \
             since=\"friday\" \
@@ -5744,10 +5895,6 @@ This command has some useful parameters:
 - ~-x~ to add a line "Cherry-picked commit" in the commit message
 - ~--no-commit~ or ~-n~ to apply the commit changes in the unstaged area (unstead of
   creating a commit in the branch)
-
-#+begin_src conf
-    h = help
-#+end_src
 
 ** Show the path to root directory of Git repo
 

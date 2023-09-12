@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230907.1739
+# .gitconfig, Time-stamp: 20230912.1121
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -207,8 +207,9 @@
 
 [alias]
 
-    # Usage: git aliases
-    # List all Git aliases in alphabetical order.
+    ##? Usage: git aliases
+    ##?
+    ##? List all Git aliases in alphabetical order.
     aliases = "!git config -l \
                   | grep alias \
                   | cut -c 7- \
@@ -262,9 +263,21 @@
         fi \
     }; f"
 
-    # Usage: git search-for-files PATTERN
-    # List all files in the current branch matching a case-insensitive search pattern.
-    search-for-files = !git ls-tree -r --name-only HEAD | grep -i --color=auto
+    ##? Usage: git search-for-files PATTERN
+    ##?
+    ##? List all files in the current branch matching a case-insensitive search pattern.
+    ##?
+    ##? Arguments:
+    ##?   PATTERN                       Pattern
+    search-for-files = "!f() { \
+        local pattern=\"$1\"; \
+        if [ -z \"$pattern\" ]; then \
+            printf >&2 'Error: Missing pattern argument\n'; \
+            return 2; \
+        fi; \
+        git ls-tree -r --name-only HEAD \
+            | grep -i --color=auto \"$pattern\"; \
+    }; f"
 
     # Alias of 'search-for-files'.
     find-files = !git search-for-files
@@ -795,6 +808,14 @@
     # Show all branches with their corresponding upstream branches and commit hashes.
     branches = branch -a -vv
 
+    ##? Usage: git local-branches
+    ##?
+    ##? List and display local branches.
+    local-branches = "!git rev-parse --symbolic --branches"
+    # Note: The alternative method
+    # local-branches = "!git for-each-ref --format='%(refname:short)' refs/heads/"
+    # is slower.
+
     # Usage: git br
     # Show detailed information about local branches, sorted by commit date.
     br = for-each-ref refs/heads \
@@ -915,7 +936,7 @@
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
 
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
-    sync-all-branches = "!f() { \
+    update-all-branches = "!f() { \
         local current_branch=$(git current-branch); \
         for BRANCH_REF in $(git for-each-ref refs/heads --format='%(refname)'); do \
             local BRANCH=${BRANCH_REF#refs/heads/}; \
@@ -928,6 +949,23 @@
             fi; \
         done; \
         git checkout $current_branch; \
+    }; f"
+
+    ##? Usage: git update-all-branches2
+    ##?
+    ##? Update all local branches with their remote counterparts, checking for conflicts before updating.
+    update-all-branches2 = "!f() { \
+        local local_branches=$(git local-branches); \
+        for branch in $local_branches; do \
+            printf \"Checking for conflicts in \\e[1m%s\\e[0m...\\n\" \"$branch\"; \
+            if git merge-base --is-ancestor origin/$branch $branch; then \
+                printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
+                git pull origin $branch:$branch; \
+                printf \"\\n\"; \
+            else \
+                printf \"Potential conflicts found in \\e[1m%s\\e[0m. Skipping update.\\n\\n\" \"$branch\"; \
+            fi; \
+        done \
     }; f"
 
     # Delete a local branch.
@@ -965,6 +1003,7 @@
     # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
     delete-remote-branch = !git push $(git origin) --delete
+    # = "Close source branch" (after merging).
 
     # Usage: git unpublish
     # Delete the current branch from the remote repository.
@@ -1097,11 +1136,24 @@
     #   git missing-files             list changed files between this and main
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
-        local current_branch=$(git rev-parse --abbrev-ref HEAD); \
+        local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
         missing_files_to_current=$(git diff --name-only \"$other_branch\"..\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
+    }; f"
+
+    missing-files2 = "!f() { \
+        local current_branch=$(git current-branch); \
+        local other_branch=${1:-$(git main-branch)}; \
+        IFS=$'\n'; \
+        missing_files_to_current=($(git diff --name-only \"$other_branch\"..\"$current_branch\")); \
+        unset IFS; \
+        total_missing_files=${#missing_files_to_current[@]}; \
+        printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$total_missing_files\"; \
+        for file in \"${missing_files_to_current[@]}\"; do \
+            echo \"$file\"; \
+        done; \
     }; f"
 
     missing-files-name-only = "!f() { \
@@ -1466,11 +1518,11 @@ deploy-prod =
 
     # When was this file last updated, on each local branch.
     wwflu = "!f() { \
-        local_branches=$(git rev-parse --symbolic --branches); \
-        for BRANCH in $local_branches; do \
+        local local_branches=$(git local-branches); \
+        for branch in $local_branches; do \
             echo -e \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
-                                --color=always $BRANCH -- \"$1\")  On branch $(tput bold)$BRANCH$(tput sgr0)\"; \
+                                --color=always $branch -- \"$1\")  On branch $(tput bold)$branch$(tput sgr0)\"; \
         done | sort -r; \
     }; f"
 
@@ -1839,8 +1891,6 @@ deploy-prod =
 
     # cherry-pick without making a commit, and when when recording the commit, append a line that says "(cherry picked from commit ...)"
     cp-nx = cherry-pick --no-commit -x
-
-    h = help
 
     root = rev-parse --show-toplevel
     root-relative = rev-parse --show-prefix
