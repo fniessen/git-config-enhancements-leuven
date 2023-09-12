@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230912.1131
+# .gitconfig, Time-stamp: 20230912.1151
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -652,9 +652,22 @@
             | sort -r; \
     }; f"
 
-    # Usage: git is-ancestor COMMIT_1 COMMIT_2
-    # Check if one commit is an ancestor of another.
-    is-ancestor = !$HOME/bin/git-is-ancestor
+    ##? Usage: git is-ancestor COMMIT1 COMMIT2
+    ##?
+    ##? Check if the first commit is an ancestor of the second commit.
+    ##?
+    ##? Arguments:
+    ##?   COMMIT1                       The first commit to check for ancestry
+    ##?   COMMIT2                       The second commit to check for ancestry
+    is-ancestor = "!f() { \
+        if [ \"$#\" -ne 2 ]; then \
+            printf >&2 \"Usage: git is-ancestor COMMIT1 COMMIT2\\n\"; \
+            exit 2; \
+        fi; \
+        local commit1=\"$1\"; \
+        local commit2=\"$2\"; \
+        git merge-base --is-ancestor \"$commit1\" \"$commit2\"; \
+    }; f"
 
     # Error with 2 search strings!!!
     search-for-commits-all-1 = "log -i --all --grep"
@@ -769,6 +782,7 @@
             git squash-force $1; \
         else \
             printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\\n\" $1 $num_unpushed; \
+            return 2; \
         fi; \
     }; f"
 
@@ -970,7 +984,7 @@
         for branch in $local_branches; do \
             printf \"Checking for conflicts in \\e[1m%s\\e[0m...\\n\" \"$branch\"; \
             if git check-remote-branch \"$branch\"; then \
-                if git merge-base --is-ancestor origin/$branch $branch; then \
+                if git is-ancestor origin/$branch $branch; then \
                     printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
                     git pull origin $branch:$branch; \
                     printf \"\\n\"; \

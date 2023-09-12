@@ -871,7 +871,7 @@ h = "!f() { \
         }' \"$gitconfig_path\")\"; \
     if [ -z \"$alias_comments\" ]; then \
         printf >&2 'Error: No comments found for the alias\n'; \
-        return 1; \
+        return 2; \
     fi; \
     printf \"$alias_comments\"; \
 }; f"
@@ -897,7 +897,7 @@ h = "!f() { \
         }' \"$gitconfig_path\")\"; \
     if [ -z \"$alias_comments\" ]; then \
         printf >&2 'Error: No comments found for the alias\n'; \
-        return 1; \
+        return 2; \
     fi; \
     printf \"$alias_comments\"; \
 }; f"
@@ -2193,9 +2193,22 @@ List all *tags* that contain a specific commit ID:
 ** Check if one commit is an ancestor of another
 
 #+begin_src conf
-    # Usage: git is-ancestor COMMIT_1 COMMIT_2
-    # Check if one commit is an ancestor of another.
-    is-ancestor = !$HOME/bin/git-is-ancestor
+    ##? Usage: git is-ancestor COMMIT1 COMMIT2
+    ##?
+    ##? Check if the first commit is an ancestor of the second commit.
+    ##?
+    ##? Arguments:
+    ##?   COMMIT1                       The first commit to check for ancestry
+    ##?   COMMIT2                       The second commit to check for ancestry
+    is-ancestor = "!f() { \
+        if [ \"$#\" -ne 2 ]; then \
+            printf >&2 \"Usage: git is-ancestor COMMIT1 COMMIT2\\n\"; \
+            exit 2; \
+        fi; \
+        local commit1=\"$1\"; \
+        local commit2=\"$2\"; \
+        git merge-base --is-ancestor \"$commit1\" \"$commit2\"; \
+    }; f"
 #+end_src
 
 ** Search for commits
@@ -2679,6 +2692,7 @@ effective skills -- so that people think you are smart.
             git squash-force $1; \
         else \
             printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\\n\" $1 $num_unpushed; \
+            return 2; \
         fi; \
     }; f"
 #+end_src
@@ -3195,7 +3209,7 @@ result in non-trivial conflicts.
         for branch in $local_branches; do \
             printf \"Checking for conflicts in \\e[1m%s\\e[0m...\\n\" \"$branch\"; \
             if git check-remote-branch \"$branch\"; then \
-                if git merge-base --is-ancestor origin/$branch $branch; then \
+                if git is-ancestor origin/$branch $branch; then \
                     printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
                     git pull origin $branch:$branch; \
                     printf \"\\n\"; \
