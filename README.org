@@ -2889,7 +2889,20 @@ branch (if any).
     # Note: The alternative method
     # local-branches = "!git for-each-ref --format='%(refname:short)' refs/heads/"
     # is slower.
-    #+end_src
+#+end_src
+
+#+begin_src conf
+    # Usage: git check-remote-branch BRANCH_NAME
+    # Check if a remote branch exists.
+    check-remote-branch = "!f() { \
+        local branch_name=\"$1\"; \
+        if [ -z \"$branch_name\" ]; then \
+            echo \"Usage: git check-remote-branch BRANCH_NAME\"; \
+        else \
+            git rev-parse --verify origin/$branch_name >/dev/null 2>&1; \
+        fi; \
+    }; f"
+#+end_src
 
 #+begin_src conf
     # Usage: git br
@@ -3181,7 +3194,7 @@ result in non-trivial conflicts.
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             printf \"Checking for conflicts in \\e[1m%s\\e[0m...\\n\" \"$branch\"; \
-            if git rev-parse --verify origin/$branch >/dev/null 2>&1; then \
+            if git check-remote-branch \"$branch\"; then \
                 if git merge-base --is-ancestor origin/$branch $branch; then \
                     printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
                     git pull origin $branch:$branch; \

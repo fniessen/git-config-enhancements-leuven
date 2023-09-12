@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230912.1122
+# .gitconfig, Time-stamp: 20230912.1131
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -816,6 +816,17 @@
     # local-branches = "!git for-each-ref --format='%(refname:short)' refs/heads/"
     # is slower.
 
+    # Usage: git check-remote-branch BRANCH_NAME
+    # Check if a remote branch exists.
+    check-remote-branch = "!f() { \
+        local branch_name=\"$1\"; \
+        if [ -z \"$branch_name\" ]; then \
+            echo \"Usage: git check-remote-branch BRANCH_NAME\"; \
+        else \
+            git rev-parse --verify origin/$branch_name >/dev/null 2>&1; \
+        fi; \
+    }; f"
+
     # Usage: git br
     # Show detailed information about local branches, sorted by commit date.
     br = for-each-ref refs/heads \
@@ -958,7 +969,7 @@
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             printf \"Checking for conflicts in \\e[1m%s\\e[0m...\\n\" \"$branch\"; \
-            if git rev-parse --verify origin/$branch >/dev/null 2>&1; then \
+            if git check-remote-branch \"$branch\"; then \
                 if git merge-base --is-ancestor origin/$branch $branch; then \
                     printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
                     git pull origin $branch:$branch; \
