@@ -3181,12 +3181,16 @@ result in non-trivial conflicts.
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             printf \"Checking for conflicts in \\e[1m%s\\e[0m...\\n\" \"$branch\"; \
-            if git merge-base --is-ancestor origin/$branch $branch; then \
-                printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
-                git pull origin $branch:$branch; \
-                printf \"\\n\"; \
+            if git rev-parse --verify origin/$branch >/dev/null 2>&1; then \
+                if git merge-base --is-ancestor origin/$branch $branch; then \
+                    printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
+                    git pull origin $branch:$branch; \
+                    printf \"\\n\"; \
+                else \
+                    printf \"Potential conflicts found in \\e[1m%s\\e[0m. Skipping update.\\n\\n\" \"$branch\"; \
+                fi; \
             else \
-                printf \"Potential conflicts found in \\e[1m%s\\e[0m. Skipping update.\\n\\n\" \"$branch\"; \
+                printf \"Remote branch \\e[1m%s\\e[0m does not exist. Skipping update.\\n\\n\" \"$branch\"; \
             fi; \
         done \
     }; f"
