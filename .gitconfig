@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230913.1746
+# .gitconfig, Time-stamp: 20230913.1759
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -961,24 +961,35 @@
     }; f"
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
 
+    # Usage: git has-new-commits BRANCH_NAME
+    # Check if a branch has new commits.
+    has-new-commits = "!f() { \
+        branch=\"$1\"; \
+        if [ -z \"$branch\" ]; then \
+            echo \"Error: Please provide a branch name as a parameter.\"; \
+            exit 1; \
+        fi; \
+        [ $(git rev-list --count origin/\"$branch\"..\"$branch\") -gt 0 ]; \
+    }; f"
+
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
     update-all-branches = "!f() { \
         local current_branch=$(git current-branch); \
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             if [ \"$branch\" != \"$current_branch\" ]; then \
-                echo \"Switching to branch: $branch\"; \
+                printf 'Switching to branch: \\e[1m%s\\e[0m\n' \"$branch\"; \
                 git checkout $branch; \
-                if [ $(git rev-list --count origin/$branch..$branch) -gt 0 ]; then \
+                if git has-new-commits $branch; then \
                     if git pull --ff-only; then \
-                        echo \"Successfully updated $branch\"; \
+                        printf 'Successfully updated %s\n' \"$branch\"; \
                     else \
-                        echo \"Failed to update $branch. Please resolve any conflicts manually.\"; \
+                        printf 'Failed to update %s. Please resolve any conflicts manually.\n' \"$branch\"; \
                     fi; \
                 else \
-                    echo \"No new commits to fetch for $branch\"; \
+                    printf 'No new commits to fetch for %s\n' \"$branch\"; \
                 fi; \
-                echo; \
+                printf '\n'; \
             fi; \
         done; \
         git checkout $current_branch; \
