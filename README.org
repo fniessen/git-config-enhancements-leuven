@@ -3184,8 +3184,12 @@ result in non-trivial conflicts.
 #+end_warning
 
 #+begin_src conf
-    # Usage: git has-new-commits BRANCH_NAME
-    # Check if a branch has new commits.
+    ##? Usage: git has-new-commits BRANCH_NAME
+    ##?
+    ##? Check if a branch has new commits.
+    ##?
+    ##? Arguments:
+    ##?   BRANCH_NAME                   The name of the branch to check.
     has-new-commits = "!f() { \
         branch=\"$1\"; \
         if [ -z \"$branch\" ]; then \

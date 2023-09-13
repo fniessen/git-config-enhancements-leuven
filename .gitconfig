@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230913.2044
+# .gitconfig, Time-stamp: 20230913.2056
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -961,8 +961,12 @@
     }; f"
     # Rebasing non-linear changes (when the fast-forward merge is not possible).
 
-    # Usage: git has-new-commits BRANCH_NAME
-    # Check if a branch has new commits.
+    ##? Usage: git has-new-commits BRANCH_NAME
+    ##?
+    ##? Check if a branch has new commits.
+    ##?
+    ##? Arguments:
+    ##?   BRANCH_NAME                   The name of the branch to check.
     has-new-commits = "!f() { \
         branch=\"$1\"; \
         if [ -z \"$branch\" ]; then \
