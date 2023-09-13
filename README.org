@@ -3205,14 +3205,18 @@ result in non-trivial conflicts.
             if [ \"$branch\" != \"$current_branch\" ]; then \
                 printf 'Switching to branch: \\e[1m%s\\e[0m\n' \"$branch\"; \
                 git checkout $branch; \
-                if git has-new-commits $branch; then \
-                    if git pull --ff-only; then \
-                        printf 'Successfully updated %s\n' \"$branch\"; \
+                if git check-remote-branch \"$branch\"; then \
+                    if git has-new-commits $branch; then \
+                        if git pull --ff-only; then \
+                            printf 'Successfully updated %s\n' \"$branch\"; \
+                        else \
+                            printf 'Failed to update %s. Please resolve any conflicts manually.\n' \"$branch\"; \
+                        fi; \
                     else \
-                        printf 'Failed to update %s. Please resolve any conflicts manually.\n' \"$branch\"; \
+                        printf 'No new commits to fetch for %s\n' \"$branch\"; \
                     fi; \
                 else \
-                    printf 'No new commits to fetch for %s\n' \"$branch\"; \
+                    printf \"Remote branch \\e[1m%s\\e[0m does not exist. Skipping update.\\n\\n\" \"$branch\"; \
                 fi; \
                 printf '\n'; \
             fi; \
