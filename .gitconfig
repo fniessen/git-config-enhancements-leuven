@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230913.1730
+# .gitconfig, Time-stamp: 20230913.1743
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -801,7 +801,7 @@
     current-branch = branch --show-current
 
     # current-branch = !git symbolic-ref --short HEAD 2>/dev/null
-    # Less readable, less convenient and user-friendly.
+    # Less readable, less convenient and less user-friendly.
 
     # Usage: git current-branch-without-slash
     # Show the current branch name (without slash).
@@ -826,9 +826,10 @@
     ##?
     ##? List and display local branches.
     local-branches = "!git rev-parse --symbolic --branches"
-    # Note: The alternative method
+    # Note: The alternative methods
     # local-branches = "!git for-each-ref --format='%(refname:short)' refs/heads/"
-    # is slower.
+    # local-branches = "!git for-each-ref refs/heads --format='%(refname:short)'"
+    # are slower.
 
     # Usage: git check-remote-branch BRANCH_NAME
     # Check if a remote branch exists.
@@ -963,13 +964,16 @@
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
     update-all-branches = "!f() { \
         local current_branch=$(git current-branch); \
-        for BRANCH_REF in $(git for-each-ref refs/heads --format='%(refname)'); do \
-            local BRANCH=${BRANCH_REF#refs/heads/}; \
-            if [ \"$BRANCH\" != \"$current_branch\" ]; then \
-                echo \"Switching to branch: $BRANCH\"; \
-                git checkout $BRANCH && \
-                git pull --ff-only; \
-                echo; \
+        local local_branches=$(git local-branches); \
+        for branch in $local_branches; do \
+            if [ \"$branch\" != \"$current_branch\" ]; then \
+                echo \"Switching to branch: $branch\"; \
+                git checkout $branch && \
+                if git pull --ff-only; then \
+                    echo \"Successfully updated $branch\"; \
+                else \
+                    echo \"Failed to update $branch. Please resolve any conflicts manually.\"; \
+                fi; \
                 echo; \
             fi; \
         done; \
@@ -994,8 +998,8 @@
                             printf \"Rebase operation aborted.\\n\\n\"; \
                         else \
                             printf \"\\e[91mCould not abort the rebase operation. Please do so manually.\\n\\e[0m\"; \
-                            return 1; \
                         fi; \
+                        continue; \
                     fi; \
                 else \
                     printf \"Potential conflicts found in \\e[1m%s\\e[0m. Skipping update.\\n\\n\" \"$branch\"; \
