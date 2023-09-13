@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230913.1743
+# .gitconfig, Time-stamp: 20230913.1746
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -968,11 +968,15 @@
         for branch in $local_branches; do \
             if [ \"$branch\" != \"$current_branch\" ]; then \
                 echo \"Switching to branch: $branch\"; \
-                git checkout $branch && \
-                if git pull --ff-only; then \
-                    echo \"Successfully updated $branch\"; \
+                git checkout $branch; \
+                if [ $(git rev-list --count origin/$branch..$branch) -gt 0 ]; then \
+                    if git pull --ff-only; then \
+                        echo \"Successfully updated $branch\"; \
+                    else \
+                        echo \"Failed to update $branch. Please resolve any conflicts manually.\"; \
+                    fi; \
                 else \
-                    echo \"Failed to update $branch. Please resolve any conflicts manually.\"; \
+                    echo \"No new commits to fetch for $branch\"; \
                 fi; \
                 echo; \
             fi; \
