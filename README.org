@@ -3211,8 +3211,17 @@ result in non-trivial conflicts.
             if git check-remote-branch \"$branch\"; then \
                 if git is-ancestor origin/$branch $branch; then \
                     printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
-                    git pull origin $branch:$branch; \
-                    printf \"\\n\"; \
+                    if git pull origin $branch:$branch; then \
+                        printf \"\\n\"; \
+                    else \
+                        printf \"\\e[91mError: Pull failed for branch \\e[1m%s\\e[0m.\\n\\e[0m\" \"$branch\"; \
+                        if git rebase --abort > /dev/null 2>&1; then \
+                            printf \"Rebase operation aborted.\\n\\n\"; \
+                        else \
+                            printf \"\\e[91mCould not abort the rebase operation. Please do so manually.\\n\\e[0m\"; \
+                            return 1; \
+                        fi; \
+                    fi; \
                 else \
                     printf \"Potential conflicts found in \\e[1m%s\\e[0m. Skipping update.\\n\\n\" \"$branch\"; \
                 fi; \
