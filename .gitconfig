@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230913.2056
+# .gitconfig, Time-stamp: 20230914.1721
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -828,6 +828,7 @@
     local-branches = "!git rev-parse --symbolic --branches"
     # Note: The alternative methods
     # local-branches = "!git for-each-ref --format='%(refname:short)' refs/heads/"
+    # or
     # local-branches = "!git for-each-ref refs/heads --format='%(refname:short)'"
     # are slower.
 
@@ -1203,22 +1204,9 @@
     missing-files = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
-        missing_files_to_current=$(git diff --name-only \"$other_branch\"..\"$current_branch\" | wc -l | tr -d '[:space:]'); \
+        missing_files_to_current=$(git diff --name-only \"$other_branch\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
-    }; f"
-
-    missing-files2 = "!f() { \
-        local current_branch=$(git current-branch); \
-        local other_branch=${1:-$(git main-branch)}; \
-        IFS=$'\n'; \
-        missing_files_to_current=($(git diff --name-only \"$other_branch\"..\"$current_branch\")); \
-        unset IFS; \
-        total_missing_files=${#missing_files_to_current[@]}; \
-        printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$total_missing_files\"; \
-        for file in \"${missing_files_to_current[@]}\"; do \
-            echo \"$file\"; \
-        done; \
     }; f"
 
     missing-files-name-only = "!f() { \
