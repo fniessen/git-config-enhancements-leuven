@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230915.1421
+# .gitconfig, Time-stamp: 20230915.1647
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1581,16 +1581,6 @@ deploy-prod =
         git log --follow --format=%ai -- \"$1\" | tail -1; \
     }; f"
 
-    # When was this file last updated, on each local branch.
-    wwflu = "!f() { \
-        local local_branches=$(git local-branches); \
-        for branch in $local_branches; do \
-            echo -e \"$(git log --decorate=no -1 \
-                                --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
-                                --color=always $branch -- \"$1\")  On branch $(tput bold)$branch$(tput sgr0)\"; \
-        done | sort -r; \
-    }; f"
-
     stage-modified-removed-files = add -u
 
     # Usage: git ls
@@ -1649,6 +1639,25 @@ deploy-prod =
                 | uniq -c \
                 | sort -b -n -r \
                 | less'
+
+    ##? Usage: git file-most-recent-commits FILE_PATH
+    ##?
+    ##? Show the most recent commits for a specific file across all local branches.
+    file-most-recent-commits = "!f() { \
+        local file_path=\"$1\"; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git file-most-recent-commits FILE_PATH\n\"; \
+            return 2; \
+        fi; \
+        local local_branches=$(git local-branches); \
+        for branch in $local_branches; do \
+            printf \"$(git log --decorate=no -1 \
+                                --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
+                                --color=always $branch -- \"$file_path\")  On branch $(tput bold)$branch$(tput sgr0)\n\"; \
+        done | sort -r; \
+    }; f"
+
+    wwflu = file-most-recent-commits
 
     praise = blame -w
     archeology = blame -w -C -n
