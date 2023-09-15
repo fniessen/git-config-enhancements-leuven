@@ -2926,7 +2926,7 @@ branch (if any).
     # Show detailed information about local branches, sorted by commit date.
     br = for-each-ref refs/heads \
                 --sort=-committerdate \
-                --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:bold blue)<%(authorname)>%(color:reset)'
+                --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset)'
 #+end_src
 
 XXX Add "no remote" for branches which are not published
@@ -5052,7 +5052,7 @@ succession.
         for branch in $local_branches; do \
             printf \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
-                                --color=always $branch -- \"$file_path\") $(tput bold)Branch: $branch$(tput sgr0)\n\"; \
+                                --color=always $branch -- \"$file_path\") $(tput bold)$branch$(tput sgr0)\n\"; \
         done | sort -r; \
     }; f"
 
@@ -5070,7 +5070,7 @@ succession.
         while read branch commit_hash; do \
             commit_info=$(git log -n 1 --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' --date=format-local:\"%Y-%m-%d\" \"$commit_hash\" -- \"$file\"); \
             if [[ -n \"$commit_info\" ]]; then \
-                echo -e \"$commit_info \\e[32;1mBranch: $branch\\e[0m\"; \
+                echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
             fi; \
         done | sort -k1,1r; \
     }; f"
