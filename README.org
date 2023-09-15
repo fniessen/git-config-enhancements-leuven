@@ -1055,8 +1055,9 @@ Fetch URL: git@bitbucket.org-something:user/slug
 Updating Git aliases for different *main branch* names (~main~, ~master~, etc.):
 
 #+begin_src conf
-    # Usage: git main-branch
-    # Get the name of the default branch (main or master).
+    ##? Usage: git main-branch
+    ##?
+    ##? Get the name of the main branch, regardless of whether it is called 'main' or 'master'.
     main-branch = "!f() { \
         if git show-ref --verify --quiet refs/heads/main; then \
             echo \"main\"; \
@@ -1064,18 +1065,13 @@ Updating Git aliases for different *main branch* names (~main~, ~master~, etc.):
             echo \"master\"; \
         fi \
     }; f"
-    #+end_src
-
-The more straightforward variant:
-
-    #+begin_src conf :tangle no
-    main-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
-        | sed 's@^refs/remotes/origin/@@'"
+    # Note: The alias
+    # main-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
+    #     | sed 's#^refs/remotes/origin/##'"
+    # generates the error message
+    # "fatal: ref refs/remotes/origin/HEAD is not a symbolic ref"
+    # when the remote repository does not have a default branch.
 #+end_src
-
-occasionally produces the following output:
-
-: fatal: ref refs/remotes/origin/HEAD is not a symbolic ref
 
 *** Create a new repository in GitHub
 
@@ -2034,16 +2030,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                        |
-|----------+------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                      |
-| fix      | A bug fix                                                                          |
+| Label    | Description                                                                                            |
+|----------+--------------------------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                                          |
+| fix      | A bug fix                                                                                              |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                          |
-| perf     | A code change that improves performance                                            |
-| test     | Adding missing or correcting existing tests                                        |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
-| doc      | Documentation only changes                                                         |
+| refactor | A code change that neither fixes a bug nor adds a feature                                              |
+| perf     | A code change that improves performance                                                                |
+| test     | Adding missing or correcting existing tests                                                            |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
+| doc      | Documentation only changes                                                                             |
 
 ** Get a commit hash
 
@@ -3825,7 +3821,7 @@ Show all the changed files in a Git branch *since it was forked*:
     }; f"
 
     missing-files-name-only = "!f() { \
-        local current_branch=$(git rev-parse --abbrev-ref HEAD); \
+        local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
         git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"

@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230915.0927
+# .gitconfig, Time-stamp: 20230915.1421
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -253,8 +253,9 @@
         echo $(basename \"$(git rev-parse --show-toplevel)\"); \
     }; f"
 
-    # Usage: git main-branch
-    # Get the name of the default branch (main or master).
+    ##? Usage: git main-branch
+    ##?
+    ##? Get the name of the main branch, regardless of whether it is called 'main' or 'master'.
     main-branch = "!f() { \
         if git show-ref --verify --quiet refs/heads/main; then \
             echo \"main\"; \
@@ -262,6 +263,12 @@
             echo \"master\"; \
         fi \
     }; f"
+    # Note: The alias
+    # main-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
+    #     | sed 's#^refs/remotes/origin/##'"
+    # generates the error message
+    # "fatal: ref refs/remotes/origin/HEAD is not a symbolic ref"
+    # when the remote repository does not have a default branch.
 
     ##? Usage: git search-for-files PATTERN
     ##?
@@ -1215,7 +1222,7 @@
     }; f"
 
     missing-files-name-only = "!f() { \
-        local current_branch=$(git rev-parse --abbrev-ref HEAD); \
+        local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
         git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"
