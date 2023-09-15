@@ -2034,16 +2034,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                                            |
-|----------+--------------------------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                                          |
-| fix      | A bug fix                                                                                              |
+| Label    | Description                                                                        |
+|----------+------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                      |
+| fix      | A bug fix                                                                          |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                                              |
-| perf     | A code change that improves performance                                                                |
-| test     | Adding missing or correcting existing tests                                                            |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
-| doc      | Documentation only changes                                                                             |
+| refactor | A code change that neither fixes a bug nor adds a feature                          |
+| perf     | A code change that improves performance                                            |
+| test     | Adding missing or correcting existing tests                                        |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
+| doc      | Documentation only changes                                                         |
 
 ** Get a commit hash
 
@@ -2825,12 +2825,17 @@ resolved, ie. like so
 Name of current branch (not so useful in itself, but used in other aliases):
 
 #+begin_src conf
-    # Usage: git current-branch
-    # Show the current branch name (v2.22+).
+    ##? Usage: git current-branch
+    ##?
+    ##? Get the current branch name.
     current-branch = branch --show-current
-
-    # current-branch = !git symbolic-ref --short HEAD 2>/dev/null
-    # Less readable, less convenient and less user-friendly.
+    # Note: This is the most recent (v2.22+) and recommended way to get the
+    # current branch name.
+    # The alternative methods
+    # current-branch = rev-parse --abbrev-ref HEAD
+    # and
+    # current-branch = symbolic-ref --short HEAD 2>/dev/null
+    # are Less readable, less convenient and less user-friendly.
 #+end_src
 
 #+begin_note

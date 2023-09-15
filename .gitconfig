@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230914.1721
+# .gitconfig, Time-stamp: 20230915.0927
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -796,12 +796,17 @@
 
     create-branch = checkout -b
 
-    # Usage: git current-branch
-    # Show the current branch name (v2.22+).
+    ##? Usage: git current-branch
+    ##?
+    ##? Get the current branch name.
     current-branch = branch --show-current
-
-    # current-branch = !git symbolic-ref --short HEAD 2>/dev/null
-    # Less readable, less convenient and less user-friendly.
+    # Note: This is the most recent (v2.22+) and recommended way to get the
+    # current branch name.
+    # The alternative methods
+    # current-branch = rev-parse --abbrev-ref HEAD
+    # and
+    # current-branch = symbolic-ref --short HEAD 2>/dev/null
+    # are Less readable, less convenient and less user-friendly.
 
     # Usage: git current-branch-without-slash
     # Show the current branch name (without slash).
