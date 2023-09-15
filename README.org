@@ -5062,6 +5062,19 @@ succession.
 XXX
 :               | cut -f2 -d:; \
 
+#+begin_src conf
+    file-most-recent-commits2 = "!f() { \
+        file=\"$1\"; \
+        git for-each-ref --format=\"%(refname:short) %(objectname)\" refs/heads/ | \
+        while read branch commit_hash; do \
+            commit_info=$(git log -n 1 --pretty=format:'\\e[32m%ad \\e[33m%h \\e[34m%s \\e[35m%an\\e[0m' --date=format-local:\"%Y-%m-%d\" \"$commit_hash\" -- \"$file\"); \
+            if [[ -n \"$commit_info\" ]]; then \
+                echo -e \"$commit_info \\e[32mBranch: $branch\\e[0m\"; \
+            fi; \
+        done | sort -k1,1r; \
+    }; f"
+#+end_src
+
 *** Inspect the commits for each edit
 
 : git log ... | xargs -n 1 git show
