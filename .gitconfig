@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230915.2312
+# .gitconfig, Time-stamp: 20230915.2316
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1653,7 +1653,7 @@ deploy-prod =
         for branch in $local_branches; do \
             printf \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
-                                --color=always $branch -- \"$file_path\")  On branch $(tput bold)$branch$(tput sgr0)\n\"; \
+                                --color=always $branch -- \"$file_path\") $(tput bold)Branch: $branch$(tput sgr0)\n\"; \
         done | sort -r; \
     }; f"
 
