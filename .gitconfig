@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230915.2252
+# .gitconfig, Time-stamp: 20230915.2312
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -197,7 +197,7 @@
     selected = white
 
 [format]
-    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)
+    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)
 
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
@@ -1652,7 +1652,7 @@ deploy-prod =
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             printf \"$(git log --decorate=no -1 \
-                                --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" \
+                                --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
                                 --color=always $branch -- \"$file_path\")  On branch $(tput bold)$branch$(tput sgr0)\n\"; \
         done | sort -r; \
     }; f"
@@ -1660,12 +1660,16 @@ deploy-prod =
     wwflu = file-most-recent-commits
 
     file-most-recent-commits2 = "!f() { \
-        file=\"$1\"; \
+        local file=\"$1\"; \
+        if [ -z \"$file\" ]; then \
+            echo \"Usage: git last-commits FILE\"; \
+            return 2; \
+        fi; \
         git for-each-ref --format=\"%(refname:short) %(objectname)\" refs/heads/ | \
         while read branch commit_hash; do \
-            commit_info=$(git log -n 1 --pretty=format:'\\e[32m%ad \\e[33m%h \\e[34m%s \\e[35m%an\\e[0m' --date=format-local:\"%Y-%m-%d\" \"$commit_hash\" -- \"$file\"); \
+            commit_info=$(git log -n 1 --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' --date=format-local:\"%Y-%m-%d\" \"$commit_hash\" -- \"$file\"); \
             if [[ -n \"$commit_info\" ]]; then \
-                echo -e \"$commit_info \\e[32mBranch: $branch\\e[0m\"; \
+                echo -e \"$commit_info \\e[32;1mBranch: $branch\\e[0m\"; \
             fi; \
         done | sort -k1,1r; \
     }; f"
