@@ -5043,11 +5043,11 @@ succession.
     ##?
     ##? Show the most recent commits for a specific file across all local branches.
     file-most-recent-commits = "!f() { \
-        local file_path=\"$1\"; \
         if [ $# -ne 1 ]; then \
             printf >&2 \"Usage: git file-most-recent-commits FILE_PATH\n\"; \
             return 2; \
         fi; \
+        local file_path=\"$1\"; \
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             printf \"$(git log --decorate=no -1 \
@@ -5059,16 +5059,20 @@ succession.
     wwflu = file-most-recent-commits
 #+end_src
 
+: git file-most-recent-commits schema/ab-products/bldgops/common/console/ab-bldgops-console-wr-ds.axvw
+
 #+begin_src conf
     file-most-recent-commits2 = "!f() { \
-        local file=\"$1\"; \
-        if [ -z \"$file\" ]; then \
-            echo \"Usage: git last-commits FILE\"; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git file-most-recent-commits2 FILE_PATH\n\"; \
             return 2; \
         fi; \
+        local file_path=\"$1\"; \
         git for-each-ref --format=\"%(refname:short) %(objectname)\" refs/heads/ | \
         while read branch commit_hash; do \
-            commit_info=$(git log -n 1 --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' --date=format-local:\"%Y-%m-%d\" \"$commit_hash\" -- \"$file\"); \
+            local commit_info=$(git log -n 1 \
+                                    --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
+                                    --date=format-local:\"%Y-%m-%d\" \"$commit_hash\" -- \"$file_path\"); \
             if [[ -n \"$commit_info\" ]]; then \
                 echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
             fi; \
