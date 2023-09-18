@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230918.0959
+# .gitconfig, Time-stamp: 20230918.1006
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1654,7 +1654,7 @@ deploy-prod =
             printf \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
                                 --color=always $branch -- \"$file_path\") $(tput bold)$branch$(tput sgr0)\n\"; \
-        done | sort -r; \
+        done | sort -r | sed 's/^[0-9]*://g'; \
     }; f"
 
     wwflu = file-most-recent-commits
