@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230918.1006
+# .gitconfig, Time-stamp: 20230918.1041
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -287,26 +287,38 @@
     }; f"
 
     # Alias of 'search-for-files'.
-    find-files = !git search-for-files
+    find-files = search-for-files
 
-    # Usage: git search-for-files-all PATTERN
-    # Search for a file in all branches.
-    search-for-files-all = "!f() { \
-        for BRANCH in $(git for-each-ref refs/heads --format='%(refname)'); do \
-            printf \"\n$(tput bold)$BRANCH:$(tput sgr0)\n\"; \
-            git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
+    ##? Usage: git search-for-files-all-branches FILE_NAME
+    ##?
+    ##? Search for a specific file in all local branches.
+    ##?
+    ##? Arguments:
+    ##?   FILE_NAME                     The name of the file to search for in all local branches.
+    search-for-files-all-branches = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git search-for-files-all-branches FILE_NAME\n\"; \
+            return 2; \
+        fi; \
+        local search_term=\"$1\"; \
+        git local-branches | \
+        while read -r branch; do \
+            printf \"\n$(tput bold)$(tput setaf 2)$branch:$(tput sgr0)\n\"; \
+            git ls-tree -r --name-only \"$branch\" | \
+            nl -bn -w3 | \
+            grep --color=auto \"$search_term\"; \
         done; \
     }; f"
 
     # Alias of 'search-for-files-all'.
-    find-files-all = !git search-for-files-all
+    find-files-all-branches = search-for-files-all-branches
 
     # Usage: git search-for-code PATTERN [TREE]
     # Search for a string in files, ignoring binary files and highlighting matches.
     search-for-code = "grep -i -I --line-number --break --heading -C 1"
 
     # Alias of 'search-for-code'.
-    ack = !git search-for-code
+    ack = search-for-code
 
     search-for-code-in-extension = "XXX"
 
@@ -828,7 +840,7 @@
     # push-upstream = !git push -u $(git remote show origin | grep 'Fetch URL' | cut -d':' -f2- | sed 's/\.git$//') $(git current-branch)
 
     # Alias of 'push-upstream'.
-    publish = !git push-upstream
+    publish = push-upstream
 
     # Usage: git branches
     # Show all branches with their corresponding upstream branches and commit hashes.
@@ -1657,6 +1669,7 @@ deploy-prod =
         done | sort -r | sed 's/^[0-9]*://g'; \
     }; f"
 
+    # Alias of 'file-most-recent-commits'.
     wwflu = file-most-recent-commits
 
     file-most-recent-commits2 = "!f() { \
@@ -1711,7 +1724,7 @@ deploy-prod =
     # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
     # Alias of 'incoming'.
-    in = !git incoming
+    in = incoming
 
     # Show log of new commits after you fetched, with stats, excluding merges
     log-fresh = log --no-merges --stat ORIG_HEAD..
@@ -1730,7 +1743,7 @@ deploy-prod =
                 && git diff --stat ...@{u})
 
     # Alias of 'incoming-files'.
-    in-files = !git incoming-files
+    in-files = incoming-files
 
     incoming-diff = diff @{u} HEAD
     # diff with upstream branch
@@ -1879,19 +1892,19 @@ deploy-prod =
     outgoing = log @{u}..HEAD
 
     # Alias of 'outgoing'.
-    out = !git outgoing
+    out = outgoing
 
     outgoing-files = diff --stat @{u}...
 
     # Alias of 'outgoing-files'.
-    out-files = !git outgoing-files
+    out-files = outgoing-files
 
     # Usage: git outgoing-all
     # Show commits not found in the destination repository.
     outgoing-all = log --branches --not --remotes
 
     # Alias of 'outgoing-all'.
-    out-all = !git outgoing-all
+    out-all = outgoing-all
 
     # Usage: git divergence BRANCH_NAME
     divergence = "!f() { \
@@ -1991,7 +2004,7 @@ deploy-prod =
     commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 
     # Alias of 'commit-interactive'.
-    record = !git commit-interactive
+    record = commit-interactive
 
     lost = "!git fsck \
                 | awk '/dangling commit/ {print $3}' \

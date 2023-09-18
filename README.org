@@ -1128,23 +1128,35 @@ Search files (by file path) in the current branch.
     }; f"
 
     # Alias of 'search-for-files'.
-    find-files = !git search-for-files
+    find-files = search-for-files
 #+end_src
 
 Search files in all branches.
 
 #+begin_src conf
-    # Usage: git search-for-files-all PATTERN
-    # Search for a file in all branches.
-    search-for-files-all = "!f() { \
-        for BRANCH in $(git for-each-ref refs/heads --format='%(refname)'); do \
-            printf \"\n$(tput bold)$BRANCH:$(tput sgr0)\n\"; \
-            git ls-tree -r --name-only $BRANCH | nl -bn -w3 | grep --color=auto \"$1\"; \
+    ##? Usage: git search-for-files-all-branches FILE_NAME
+    ##?
+    ##? Search for a specific file in all local branches.
+    ##?
+    ##? Arguments:
+    ##?   FILE_NAME                     The name of the file to search for in all local branches.
+    search-for-files-all-branches = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git search-for-files-all-branches FILE_NAME\n\"; \
+            return 2; \
+        fi; \
+        local search_term=\"$1\"; \
+        git local-branches | \
+        while read -r branch; do \
+            printf \"\n$(tput bold)$(tput setaf 2)$branch:$(tput sgr0)\n\"; \
+            git ls-tree -r --name-only \"$branch\" | \
+            nl -bn -w3 | \
+            grep --color=auto \"$search_term\"; \
         done; \
     }; f"
 
     # Alias of 'search-for-files-all'.
-    find-files-all = !git search-for-files-all
+    find-files-all-branches = search-for-files-all-branches
 #+end_src
 
 ** Search for code
@@ -1166,7 +1178,7 @@ specified path*).
     search-for-code = "grep -i -I --line-number --break --heading -C 1"
 
     # Alias of 'search-for-code'.
-    ack = !git search-for-code
+    ack = search-for-code
 #+end_src
 
 Find all instances of the specified string in code files *with a certain file
@@ -1501,8 +1513,8 @@ want, use ~git clean-untracked-dry~.
     clean-untracked-dry = clean -n -d -X
 #+end_src
 
-If you want to save your current branch's state before doing this (just in
-case), you can do:
+If you wish to safeguard the current state of your current branch, you can
+perform the following:
 
 : git commit -a -m "Saving my work, just in case"
 : git branch my-saved-work
@@ -2859,7 +2871,7 @@ Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
     # push-upstream = !git push -u $(git remote show origin | grep 'Fetch URL' | cut -d':' -f2- | sed 's/\.git$//') $(git current-branch)
 
     # Alias of 'push-upstream'.
-    publish = !git push-upstream
+    publish = push-upstream
     #+end_src
 
 Then:
@@ -5056,6 +5068,7 @@ succession.
         done | sort -r | sed 's/^[0-9]*://g'; \
     }; f"
 
+    # Alias of 'file-most-recent-commits'.
     wwflu = file-most-recent-commits
 #+end_src
 
@@ -5172,7 +5185,7 @@ What was going on, while you were away?
     # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
     # Alias of 'incoming'.
-    in = !git incoming
+    in = incoming
 #+end_src
 
 #+begin_src conf
@@ -5181,9 +5194,10 @@ What was going on, while you were away?
 #+end_src
 
 #+begin_tip
-Starting with Git 1.7.0, ~@{u}~ is shorthand for the *current* branch's *upstream*
-branch; e.g., ~origin/foo~ (or ~github/foo~, etc., since the remote doesn't have to
-be called ~origin~) if the checked out branch is ~foo~.
+Beginning with Git version 1.7.0, ~@{u}~ is a convenient shorthand notation for
+referring to the *upstream* branch of the *current* branch. For instance, if you are
+on the ~foo~ branch, the upstream branch would be ~origin/foo~ (or ~github/foo~, etc.,
+depending on the remote's name), and you can use ~@{u}~ to represent it.
 #+end_tip
 
 #+begin_src conf
@@ -5208,7 +5222,7 @@ files*):
                 && git diff --stat ...@{u})
 
     # Alias of 'incoming-files'.
-    in-files = !git incoming-files
+    in-files = incoming-files
 #+end_src
 
 #+begin_warning
@@ -5691,7 +5705,7 @@ the next time you do a push.
     outgoing = log @{u}..HEAD
 
     # Alias of 'outgoing'.
-    out = !git outgoing
+    out = outgoing
 #+end_src
 
 TODO: Fix missing newline at the end...
@@ -5701,7 +5715,7 @@ Hence, wrong count of lines (with shell alias "W")...
     outgoing-files = diff --stat @{u}...
 
     # Alias of 'outgoing-files'.
-    out-files = !git outgoing-files
+    out-files = outgoing-files
 #+end_src
 
 This causes ~git log~ to show all commits reachable from =HEAD= excluding those
@@ -5717,7 +5731,7 @@ If you want to see all *unpushed* commits from *all branches*, do this:
     outgoing-all = log --branches --not --remotes
 
     # Alias of 'outgoing-all'.
-    out-all = !git outgoing-all
+    out-all = outgoing-all
 #+end_src
 
 *** Show the history difference between a local branch and its remote
@@ -6018,7 +6032,7 @@ Ask interactively which patch hunk to commit, and then do the commit:
     commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
 
     # Alias of 'commit-interactive'.
-    record = !git commit-interactive
+    record = commit-interactive
 #+end_src
 
 It will not only do ~git add -p~ (with an optional file list), but it will also
