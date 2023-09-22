@@ -1724,6 +1724,7 @@ user wants to have an updated repository.
             printf \"%s\" \"$stash_list\"; \
         else \
             printf >&2 \"%s\" 'Nothing stashed\n'; \
+            return 2; \
         fi; \
     }; f"
 #+end_src

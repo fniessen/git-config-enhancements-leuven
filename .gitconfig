@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230922.1724
+# .gitconfig, Time-stamp: 20230922.1727
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -505,6 +505,7 @@
             printf \"%s\" \"$stash_list\"; \
         else \
             printf >&2 \"%s\" 'Nothing stashed\n'; \
+            return 2; \
         fi; \
     }; f"
 
