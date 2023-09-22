@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230922.1727
+# .gitconfig, Time-stamp: 20230922.1922
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1386,8 +1386,10 @@
         local current_branch=$(git current-branch); \
         local main_branch=$(git main-branch || echo 'main'); \
         local changed_files=$(git diff --name-only $main_branch..$current_branch); \
-        zip ~/$current_branch-changed-files.zip $changed_files; \
-        echo 'Exported changed files saved as $current_branch-changed-files.zip'; \
+        local date=$(date +\\%Y-\\%m-\\%d); \
+        local zip_file=\"$date-$current_branch-changed-files.zip\"; \
+        zip -9 ~/$zip_file $changed_files; \
+        printf 'Exported changed files saved as %s\n' $zip_file; \
     }; f"
 
     export-zip = archive -o latest.zip

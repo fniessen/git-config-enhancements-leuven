@@ -4376,15 +4376,17 @@ current tag.  Useful for uploading to Elasticbeanstalk.
         local current_branch=$(git current-branch); \
         local main_branch=$(git main-branch || echo 'main'); \
         local changed_files=$(git diff --name-only $main_branch..$current_branch); \
-        zip ~/$current_branch-changed-files.zip $changed_files; \
-        echo 'Exported changed files saved as $current_branch-changed-files.zip'; \
+        local date=$(date +\\%Y-\\%m-\\%d); \
+        local zip_file=\"$date-$current_branch-changed-files.zip\"; \
+        zip -9 ~/$zip_file $changed_files; \
+        printf 'Exported changed files saved as %s\n' $zip_file; \
     }; f"
 #+end_src
 
 Example for a branch:
 
-: git missing-files main > file-list.txt
-: cat file-list.txt | xargs zip -9 DATE_what-it-does.zip
+: git missing-files-name-only main > file-list.txt
+: cat file-list.txt | xargs zip -9 "$(date +\%Y-\%m-\%d)_what-it-does.zip"
 
 Save a repo (for example, ~HEAD~ or ~master~ -- or any other branch to archive, if
 you've already checked it out) as a tarball:
