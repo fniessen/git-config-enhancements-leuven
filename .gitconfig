@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230918.1041
+# .gitconfig, Time-stamp: 20230922.1724
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -496,9 +496,17 @@
             | xargs -L 1 git log -3 --format='%Cblue%h %Cgreen(%ar) %Creset%s' --graph; \
     }; f"
 
-    # Usage: git stashes
-    # List stashes with their short creation dates.
-    stashes = stash list --date=short
+    ##? Usage: git stashes
+    ##?
+    ##? List stashes with their short creation dates, or output "Nothing stashed" to stderr if none.
+    stashes = "!f() { \
+        stash_list=\"$(git stash list --date=short)\"; \
+        if [[ -n $stash_list ]]; then \
+            printf \"%s\" \"$stash_list\"; \
+        else \
+            printf >&2 \"%s\" 'Nothing stashed\n'; \
+        fi; \
+    }; f"
 
     # Usage: git stash-view
     # Show the changes introduced by the latest stash in a unified diff format.

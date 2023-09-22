@@ -1131,6 +1131,8 @@ Search files (by file path) in the current branch.
     find-files = search-for-files
 #+end_src
 
+XXX Put directory names in blue color.
+
 Search files in all branches.
 
 #+begin_src conf
@@ -1713,9 +1715,17 @@ user wants to have an updated repository.
 *** Show a list of all stashes
 
 #+begin_src conf
-    # Usage: git stashes
-    # List stashes with their short creation dates.
-    stashes = stash list --date=short
+    ##? Usage: git stashes
+    ##?
+    ##? List stashes with their short creation dates, or output "Nothing stashed" to stderr if none.
+    stashes = "!f() { \
+        stash_list=\"$(git stash list --date=short)\"; \
+        if [[ -n $stash_list ]]; then \
+            printf \"%s\" \"$stash_list\"; \
+        else \
+            printf >&2 \"%s\" 'Nothing stashed\n'; \
+        fi; \
+    }; f"
 #+end_src
 
 : {0}: On feature/2023-08-04-request-notification: autostash
