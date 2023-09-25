@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230925.1443
+# .gitconfig, Time-stamp: 20230925.1526
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1344,12 +1344,19 @@
     related-pr-of-commit = "!sh -c 'git log --merges --ancestry-path $1..master \
                 | tail -n 1 ' -"
 
-    # Usage: git release VERSION
-    # Release a new version of your project.
-    release = "!f() { \
-        git tag -a v\"$1\" -m \"Release version $1\" \
-            && git push $(git origin) --tags \
-            && git push $(git origin); \
+    ##? Usage: git release-tag VERSION
+    ##?
+    ##? Create a tagged release version in Git and push it to the remote repository.
+    release-tag = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf \"Usage: git release-tag VERSION\\n\"; \
+            return 2; \
+        else \
+            local version=\"$1\"; \
+            git tag -a v\"$version\" -m \"Release version $version\" \
+                && git push --tags \
+                && git push; \
+        fi \
     }; f"
 
     # Usage: git manifest
