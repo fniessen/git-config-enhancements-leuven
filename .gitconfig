@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230922.1922
+# .gitconfig, Time-stamp: 20230925.1443
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -836,9 +836,10 @@
     # current-branch = symbolic-ref --short HEAD 2>/dev/null
     # are Less readable, less convenient and less user-friendly.
 
-    # Usage: git current-branch-without-slash
-    # Show the current branch name (without slash).
-    current-branch-without-slash = "!f() { \
+    ##? Usage: git convert-current-branch-name
+    ##?
+    ##? Convert the current branch name by replacing slashes with hyphens.
+    convert-current-branch-name = "!f() { \
         git current-branch \
             | tr '/' '-'; \
     }; f"
@@ -1237,7 +1238,7 @@
     missing-files = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
-        missing_files_to_current=$(git diff --name-only \"$other_branch\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
+        local missing_files_to_current=$(git diff --name-only \"$other_branch\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
     }; f"
@@ -1380,34 +1381,38 @@
         git format-patch --stdout $current_branch > ~/$current_branch.diff; \
     }; f"
 
-    # Usage: git zip-changed-files
-    # Create a compressed archive (ZIP) of the files modified in the current Git branch compared to the main branch.
-    zip-changed-files = "!f() { \
-        local current_branch=$(git current-branch); \
+    ##? Usage: git export-changed-files
+    ##?
+    ##? Export and zip changed files from the current branch compared to the main branch.
+    export-changed-files = "!f() { \
+        local current_branch=$(git convert-current-branch-name); \
         local main_branch=$(git main-branch || echo 'main'); \
-        local changed_files=$(git diff --name-only $main_branch..$current_branch); \
+        local changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
         local date=$(date +\\%Y-\\%m-\\%d); \
-        local zip_file=\"$date-$current_branch-changed-files.zip\"; \
-        zip -9 ~/$zip_file $changed_files; \
+        local zip_file=\"$date-$(git repo-slug-remote)-changed-files-$current_branch.zip\"; \
+        /usr/bin/zip -9 ~/$zip_file $changed_files; \
         printf 'Exported changed files saved as %s\n' $zip_file; \
     }; f"
 
     export-zip = archive -o latest.zip
     export-tgz = archive -o latest.tar.gz -9
 
-    # Usage: git export-commit [COMMIT_ISH]
-    # Create an archive of a commit.
-    export-commit = "!f() { \
-        git changed-files ${1:-HEAD} \
-            | tr '\\n' '\\0' \
-            | xargs -0 zip -9 $(git repo-slug-remote)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
+    ##? Usage: git export-commit-files [COMMIT_HASH]
+    ##?
+    ##? Export changed files from a commit or HEAD and create a zip archive.
+    export-commit-files = "!f() { \
+        local target_commit=${1:-HEAD}; \
+        local current_branch=$(git convert-current-branch-name); \
+        local commit_hash=$(git commit-hash); \
+        local zip_file_name=$(git repo-slug-remote)-commit-${branch_name}-${target_commit:-$commit_hash}.zip; \
+        git changed-files \"$target_commit\" | tr '\\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
     }; f"
 
     # View raw commit.
-    email-patch = XXX git format-patch $(git current-branch-without-slash).patch
+    email-patch = XXX git format-patch $(git convert-current-branch-name).patch
 
     # Since oldest ancestor...
-    plain-diff = !git branch-diff > $(git current-branch-without-slash).diff
+    plain-diff = !git branch-diff > $(git convert-current-branch-name).diff
 
     patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
 

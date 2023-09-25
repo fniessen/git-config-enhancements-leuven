@@ -2863,9 +2863,10 @@ name, there is *no branch name*. You can't get something that doesn't exist.
 #+end_note
 
 #+begin_src conf
-    # Usage: git current-branch-without-slash
-    # Show the current branch name (without slash).
-    current-branch-without-slash = "!f() { \
+    ##? Usage: git convert-current-branch-name
+    ##?
+    ##? Convert the current branch name by replacing slashes with hyphens.
+    convert-current-branch-name = "!f() { \
         git current-branch \
             | tr '/' '-'; \
     }; f"
@@ -3840,7 +3841,7 @@ Show all the changed files in a Git branch *since it was forked*:
     missing-files = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
-        missing_files_to_current=$(git diff --name-only \"$other_branch\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
+        local missing_files_to_current=$(git diff --name-only \"$other_branch\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
     }; f"
@@ -4370,15 +4371,16 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+end_src
 
 #+begin_src conf
-    # Usage: git zip-changed-files
-    # Create a compressed archive (ZIP) of the files modified in the current Git branch compared to the main branch.
-    zip-changed-files = "!f() { \
-        local current_branch=$(git current-branch); \
+    ##? Usage: git export-changed-files
+    ##?
+    ##? Export and zip changed files from the current branch compared to the main branch.
+    export-changed-files = "!f() { \
+        local current_branch=$(git convert-current-branch-name); \
         local main_branch=$(git main-branch || echo 'main'); \
-        local changed_files=$(git diff --name-only $main_branch..$current_branch); \
+        local changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
         local date=$(date +\\%Y-\\%m-\\%d); \
-        local zip_file=\"$date-$current_branch-changed-files.zip\"; \
-        zip -9 ~/$zip_file $changed_files; \
+        local zip_file=\"$date-$(git repo-slug-remote)-changed-files-$current_branch.zip\"; \
+        /usr/bin/zip -9 ~/$zip_file $changed_files; \
         printf 'Exported changed files saved as %s\n' $zip_file; \
     }; f"
 #+end_src
@@ -4401,14 +4403,20 @@ Note that the /output format/ is inferred by the extension of the output file.
 **** Export a commit
 
 #+begin_src conf
-    # Usage: git export-commit [COMMIT_ISH]
-    # Create an archive of a commit.
-    export-commit = "!f() { \
-        git changed-files ${1:-HEAD} \
-            | tr '\\n' '\\0' \
-            | xargs -0 zip -9 $(git repo-slug-remote)-commit-$(git current-branch-without-slash)-${1:-$(git commit-hash)}.zip; \
+    ##? Usage: git export-commit-files [COMMIT_HASH]
+    ##?
+    ##? Export changed files from a commit or HEAD and create a zip archive.
+    export-commit-files = "!f() { \
+        local target_commit=${1:-HEAD}; \
+        local current_branch=$(git convert-current-branch-name); \
+        local commit_hash=$(git commit-hash); \
+        local zip_file_name=$(git repo-slug-remote)-commit-${branch_name}-${target_commit:-$commit_hash}.zip; \
+        git changed-files \"$target_commit\" | tr '\\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
     }; f"
 #+end_src
+
+export-commit-files-files = "!f() {
+    local targe
 
 XXX This does not handle spaces in file names
 
@@ -4418,10 +4426,10 @@ To see the contents of the zipped file (without extraction), use ~unzip -l FILE~
 
 #+begin_src conf
     # View raw commit.
-    email-patch = XXX git format-patch $(git current-branch-without-slash).patch
+    email-patch = XXX git format-patch $(git convert-current-branch-name).patch
 
     # Since oldest ancestor...
-    plain-diff = !git branch-diff > $(git current-branch-without-slash).diff
+    plain-diff = !git branch-diff > $(git convert-current-branch-name).diff
 #+end_src
 
 Patch = this
@@ -5783,7 +5791,7 @@ the ~v2.3~ tag -- we can be certain that this change is part of v2.3, then.
 
 2. Run
 
-   : git format-patch COMMIT_ISH
+   : git format-patch COMMIT_HASH
 
    to convert all commits since the referenced commit (not including it) into
    patch files.
