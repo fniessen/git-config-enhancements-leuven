@@ -4292,7 +4292,7 @@ Tag and push changes to the repository:
     ##? Create a tagged release version in Git and push it to the remote repository.
     release-tag = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf \"Usage: git release-tag VERSION\\n\"; \
+            printf >&2 \"Usage: git release-tag VERSION\\n\"; \
             return 2; \
         else \
             local version=\"$1\"; \
@@ -4855,7 +4855,7 @@ Staging for commit is typically done by ~git add~.
     # Example: git diff-commits 2
     diff-commits = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf \"Usage: git diff-commits NUMBER\\n\"; \
+            printf >&2 \"Usage: git diff-commits NUMBER\\n\"; \
             return 2; \
         fi; \
         git diff --patch-with-stat HEAD~$1; \
