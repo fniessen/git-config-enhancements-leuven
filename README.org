@@ -917,6 +917,14 @@ Set email addresses for you:
     work-profile = config user.email \"john@work.com\"
 #+end_src
 
+#+begin_src conf
+    whoami = "!f() { \
+        printf \"%s <%s>\\n\" \
+            \"$(git config user.name)\" \
+            \"$(git config user.email)\"; \
+    }; f"
+#+end_src
+
 Then, in the working copy:
 
 #+begin_src conf
