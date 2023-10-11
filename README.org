@@ -341,7 +341,9 @@ Improve the ~git diff~ output using a tool like:
 
 #+begin_src conf
     # Set Git pager to use less with custom flags and diff-so-fancy.
-    pager = diff-so-fancy | LESS= less --tabs=4 -FRX
+    pager = "!sh -c '~/bin/git-pager'"
+    pager = "!f() { if command -v diff-so-fancy &>/dev/null; then echo 'Using diff-so-fancy pager' && diff-so-fancy | LESS=less --tabs=4 -FRX \"$@\"; else echo 'Using default pager' && LESS=less --tabs=4 -FRX \"$@\"; fi; }; f"
+    pager = LESS= less --tabs=4 -FRX
 #+end_src
 
 ~less~ options:
