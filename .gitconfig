@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20230925.1536
+# .gitconfig, Time-stamp: 20231015.1143
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -61,7 +61,9 @@
     # whitespace = fix,-indent-with-non-tab,trailing-space,space-before-tab,cr-at-eol
 
     # Set Git pager to use less with custom flags and diff-so-fancy.
-    pager = diff-so-fancy | LESS= less --tabs=4 -FRX
+    pager = "!sh -c '~/bin/git-pager'"
+    pager = "!f() { if command -v diff-so-fancy &>/dev/null; then echo 'Using diff-so-fancy pager' && diff-so-fancy | LESS=less --tabs=4 -FRX \"$@\"; else echo 'Using default pager' && LESS=less --tabs=4 -FRX \"$@\"; fi; }; f"
+    pager = LESS= less --tabs=4 -FRX
 
 [core]
 
@@ -217,6 +219,12 @@
                   | sed 's/=/ = /'"
 
     work-profile = config user.email \"john@work.com\"
+
+    whoami = "!f() { \
+        printf \"%s <%s>\\n\" \
+            \"$(git config user.name)\" \
+            \"$(git config user.email)\"; \
+    }; f"
 
     # Usage: git init-repository
     # Initialize a new Git repository with an initial commit.
@@ -802,7 +810,8 @@
     squash = "!f() { \
         local upstream=$(git rev-parse --abbrev-ref @{u} 2>/dev/null); \
         if [ -z \"$upstream\" ]; then \
-            printf >&2 \"Error: No upstream branch configured for the current branch.\\n\"; \
+            printf >&2 \"Warning: No upstream branch configured for the current branch.\\n\"; \
+            printf >&2 \"Consider using 'squash-force' alias.\\n\"; \
             return 2; \
         fi; \
         local num_unpushed=$(git rev-list $upstream..HEAD --count); \

@@ -2713,7 +2713,8 @@ effective skills -- so that people think you are smart.
     squash = "!f() { \
         local upstream=$(git rev-parse --abbrev-ref @{u} 2>/dev/null); \
         if [ -z \"$upstream\" ]; then \
-            printf >&2 \"Error: No upstream branch configured for the current branch.\\n\"; \
+            printf >&2 \"Warning: No upstream branch configured for the current branch.\\n\"; \
+            printf >&2 \"Consider using 'squash-force' alias.\\n\"; \
             return 2; \
         fi; \
         local num_unpushed=$(git rev-list $upstream..HEAD --count); \
