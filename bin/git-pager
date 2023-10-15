@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if command -v diff-so-fancy &>/dev/null; then
+  echo "diff-so-fancy | LESS=less --tabs=4 -FRX"
+else
+  echo "LESS=less --tabs=4 -FRX"
+fi
