@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+if ! command -v zip &>/dev/null; then
+    printf >&2 "The 'zip' utility is not installed.  Please install it.\n";
+    return 2;
+fi
