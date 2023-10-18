@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231018.1727
+# .gitconfig, Time-stamp: 20231018.1738
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1401,10 +1401,6 @@
     ##?
     ##? Export and zip changed files from the current branch compared to the main branch.
     export-changed-files = "!f() { \
-        if ! command -v zip &>/dev/null; then \
-            printf >&2 \"The `zip` utility is not installed. Please install it and try again.\n\"; \
-            return 2; \
-        fi \
         local current_branch=$(git convert-current-branch-name); \
         local main_branch=$(git main-branch || echo 'main'); \
         local changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
@@ -1421,10 +1417,6 @@
     ##?
     ##? Export changed files from a commit or HEAD and create a zip archive.
     export-commit-files = "!f() { \
-        if ! command -v zip &>/dev/null; then \
-            printf >&2 \"The `zip` utility is not installed. Please install it and try again.\n\"; \
-            return 2; \
-        fi \
         local target_commit=${1:-HEAD}; \
         local current_branch=$(git convert-current-branch-name); \
         local commit_hash=$(git commit-hash); \
