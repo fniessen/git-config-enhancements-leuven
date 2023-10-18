@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231018.1738
+# .gitconfig, Time-stamp: 20231018.1758
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1404,6 +1404,10 @@
         local current_branch=$(git convert-current-branch-name); \
         local main_branch=$(git main-branch || echo 'main'); \
         local changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
+        if [ -z \"$changed_files\" ]; then \
+            printf >&2 'No changed files to export.\n'; \
+            return 2; \
+        fi; \
         local date=$(date +\\%Y-\\%m-\\%d); \
         local zip_file=\"$date-$(git repo-slug-remote)-changed-files-$current_branch.zip\"; \
         zip -9 ~/$zip_file $changed_files; \

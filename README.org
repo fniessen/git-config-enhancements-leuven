@@ -2063,16 +2063,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                                  |
-|----------+----------------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                                |
-| fix      | A bug fix                                                                                    |
+| Label    | Description                                                                                            |
+|----------+--------------------------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                                          |
+| fix      | A bug fix                                                                                              |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                                    |
-| perf     | A code change that improves performance                                                      |
-| test     | Adding missing or correcting existing tests                                                  |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
-| doc      | Documentation only changes                                                                   |
+| refactor | A code change that neither fixes a bug nor adds a feature                                              |
+| perf     | A code change that improves performance                                                                |
+| test     | Adding missing or correcting existing tests                                                            |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
+| doc      | Documentation only changes                                                                             |
 
 ** Get a commit hash
 
@@ -4396,6 +4396,10 @@ current tag.  Useful for uploading to Elasticbeanstalk.
         local current_branch=$(git convert-current-branch-name); \
         local main_branch=$(git main-branch || echo 'main'); \
         local changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
+        if [ -z \"$changed_files\" ]; then \
+            printf >&2 'No changed files to export.\n'; \
+            return 2; \
+        fi; \
         local date=$(date +\\%Y-\\%m-\\%d); \
         local zip_file=\"$date-$(git repo-slug-remote)-changed-files-$current_branch.zip\"; \
         zip -9 ~/$zip_file $changed_files; \
