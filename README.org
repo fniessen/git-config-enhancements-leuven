@@ -1329,12 +1329,16 @@ area).
 #+begin_src conf
     # Usage: git deleted-files
     # List files that have been deleted in the working directory.
-    deleted-files = ls-files -d
+    deleted-files = ls-files --deleted
 #+end_src
 
-How to restore a deleted file in a Git repository?
+How to recover deleted files in the Git repository?
 
-: git deleted-files | xargs git checkout --
+: git deleted-files -z | xargs -0 git checkout --
+
+How to remove deleted files from the Git repository?
+
+: git deleted-files -z | xargs -0 git rm
 
 List untracked files.
 
