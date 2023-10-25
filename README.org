@@ -2108,16 +2108,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                                            |
-|----------+--------------------------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                                          |
-| fix      | A bug fix                                                                                              |
+| Label    | Description                                                                      |
+|----------+----------------------------------------------------------------------------------|
+| feat     | A new feature                                                                    |
+| fix      | A bug fix                                                                        |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                                              |
-| perf     | A code change that improves performance                                                                |
-| test     | Adding missing or correcting existing tests                                                            |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
-| doc      | Documentation only changes                                                                             |
+| refactor | A code change that neither fixes a bug nor adds a feature                        |
+| perf     | A code change that improves performance                                          |
+| test     | Adding missing or correcting existing tests                                      |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
+| doc      | Documentation only changes                                                       |
 
 ** Get a commit hash
 
@@ -5852,6 +5852,9 @@ the ~v2.3~ tag -- we can be certain that this change is part of v2.3, then.
     lll = log -u
 #+end_src
 
+The starting point is essential because it defines the commit from which you
+want to generate the patch files...
+
 *** Creating a patch
 
 1. Make your changes and commit them.
@@ -5979,7 +5982,9 @@ Quickly see what you've done today (list commits that aren't merges, on *all
 branches*):
 
 #+begin_src conf
-    # Usage: git today [AUTHOR]
+    ##? Usage: git today [AUTHOR]
+    ##?
+    ##? Show today's commits.
     today = "!f() { \
         git log \
             --since=midnight \
@@ -5990,7 +5995,9 @@ branches*):
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
 
-    # Usage: git yesterday [AUTHOR]
+    ##? Usage: git yesterday [AUTHOR]
+    ##?
+    ##? Show yesterday's commits.
     yesterday = "!f() { \
         git log \
             --since='1 day ago midnight' --until=midnight \
@@ -6001,7 +6008,9 @@ branches*):
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
 
-    # Usage: git this-week [AUTHOR]
+    ##? Usage: git this-week [AUTHOR]
+    ##?
+    ##? Show commits from this week.
     this-week = "!f() { \
         git log \
             --since='1 week ago' \

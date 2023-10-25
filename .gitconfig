@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231025.1113
+# .gitconfig, Time-stamp: 20231025.1520
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1989,7 +1989,9 @@ deploy-prod =
         git add -p; \
     }; f"
 
-    # Usage: git today [AUTHOR]
+    ##? Usage: git today [AUTHOR]
+    ##?
+    ##? Show today's commits.
     today = "!f() { \
         git log \
             --since=midnight \
@@ -2000,7 +2002,9 @@ deploy-prod =
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
 
-    # Usage: git yesterday [AUTHOR]
+    ##? Usage: git yesterday [AUTHOR]
+    ##?
+    ##? Show yesterday's commits.
     yesterday = "!f() { \
         git log \
             --since='1 day ago midnight' --until=midnight \
@@ -2011,7 +2015,9 @@ deploy-prod =
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
 
-    # Usage: git this-week [AUTHOR]
+    ##? Usage: git this-week [AUTHOR]
+    ##?
+    ##? Show commits from this week.
     this-week = "!f() { \
         git log \
             --since='1 week ago' \
