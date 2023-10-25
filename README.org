@@ -386,6 +386,19 @@ character in Git-handled repositories.
 
   This /turns all LF back into CRLF when writing out into the working tree/.
 
+  #+begin_warning
+  It's important to be cautious when using it in a repository with *shell scripts*
+  to prevent unintentional line ending conversions that could break the shell
+  scripts (designed to run in Linux and macOS systems) and lead to syntax
+  errors.
+
+  To avoid issues with shell scripts, it's often recommended to set ~autocrlf~ to
+  ~input~. This setting will ensure that Git doesn't modify line endings in the
+  repository but still normalizes them when checking out files on your local
+  machine. This way, thei line endings of your shell scripts won't be altered by
+  Git.
+  #+end_warning
+
 - *Checkout as-is, commit Unix-style line endings*
 
   Git will /not perform any conversion when checking out text files/.  When
