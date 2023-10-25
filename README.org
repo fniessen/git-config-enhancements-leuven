@@ -1269,19 +1269,29 @@ If you decide that the changes you have made since the last commit ought to be
 thrown away, the alias to use is ~unmodify~;
 
 #+begin_src conf
-    # Usage: git unmodify TREE_ISH...
-    # Undo changes made to the working directory of the current branch by
-    # overwriting them with the last committed version.
+    ##? Usage: git unmodify [FILE]
+    ##?
+    ##? Undo local modifications for a specific file or all files if no file is
+    ##? provided.
     unmodify = checkout --
+
+    ##? Usage: git undelete [FILE]
+    ##?
+    ##? Restore deleted files for a specific file or all files if no file is
+    ##? provided.
     undelete = checkout --
+
+    ##? Usage: git undo-changes [FILE]
+    ##?
+    ##? Revert changes for a specific file or all files if no file is provided.
     undo-changes = checkout --
 #+end_src
 
 #+begin_note
-The two dashes there (~--~, canonically called the "bare double dashes" or the /end
-of options/ character) ensure that the checkout command know that we are trying
-to roll back a file and not /change branches/ (the typical usage of the checkout
-command).
+The two dashes (~--~, often referred to as the "bare double dashes" or the "end of
+options" character) serve the purpose of signaling to the ~checkout~ command that
+we intend to roll back a file and not switch branches, which is the conventional
+use of the ~checkout~ command.
 #+end_note
 
 When you grab a file from a previous time, it sits *in your index*, modified.

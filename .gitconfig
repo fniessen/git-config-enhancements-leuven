@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231025.1046
+# .gitconfig, Time-stamp: 20231025.1113
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -343,11 +343,21 @@
     # files.
     gno = "grep -i -I --name-only"
 
-    # Usage: git unmodify TREE_ISH...
-    # Undo changes made to the working directory of the current branch by
-    # overwriting them with the last committed version.
+    ##? Usage: git unmodify [FILE]
+    ##?
+    ##? Undo local modifications for a specific file or all files if no file is
+    ##? provided.
     unmodify = checkout --
+
+    ##? Usage: git undelete [FILE]
+    ##?
+    ##? Restore deleted files for a specific file or all files if no file is
+    ##? provided.
     undelete = checkout --
+
+    ##? Usage: git undo-changes [FILE]
+    ##?
+    ##? Revert changes for a specific file or all files if no file is provided.
     undo-changes = checkout --
 
     # Usage: git unstage [FILENAME...]
