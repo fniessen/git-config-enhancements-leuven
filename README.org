@@ -1340,32 +1340,46 @@ How to remove deleted files from the Git repository?
 
 : git deleted-files -z | xargs -0 git rm
 
-List untracked files.
+List *all* of the *files* in the working directory that are *not tracked* by Git.
+It's useful for quickly identifying all files that Git does not currently
+manage.
 
 #+begin_src conf
-    # Usage: git untracked-files
-    # List files thare are not tracked by Git.
-    untracked-files = ls-files --others --exclude-standard
+    ##? Usage: git all-untracked-files
+    ##?
+    ##? List all untracked files.
+    all-untracked-files = ls-files --others
 #+end_src
 
 #+begin_src conf
-    # Usage: git backup-untracked
-    # Create a backup archive of untracked files in the repository.
-    backup-untracked = "!f() { \
+    # Usage: git backup-all-untracked-files
+    # Create a backup archive of all untracked files in the repository.
+    backup-all-untracked-files = "!f() { \
         repo_slug_remote=\"$(git repo-slug-remote)\"; \
         current_date=$(date +\"%Y-%m-%d\"); \
         backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
-        git ls-files --others --exclude-standard -z \
+        git all-untracked-files -z \
             | xargs -0 tar rvf ~/$backup_filename; \
     }; f"
 #+end_src
 
-List untracked *files ignored* by a =.gitignore= statement somewhere.  This one is
-a MUST have:
+List all of the files in the working directory that are not tracked by Git and
+are not listed in the =.gitignore= file.
 
 #+begin_src conf
-    # Usage: git ignored-files
-    # List files that are ignored according to your '.gitignore' rules.
+    ##? Usage: git untracked-files-excluding-ignored
+    ##?
+    ##? List untracked files, excluding Git-ignored files.
+    untracked-files-excluding-ignored = ls-files --others --exclude-standard
+#+end_src
+
+List untracked *files* that are *ignored* according to your Git repository's
+=.gitignore= rules and patterns:
+
+#+begin_src conf
+    ##? Usage: git ignored-files
+    ##?
+    ##? List ignored files.
     ignored-files = ls-files --others --ignored --exclude-standard
 #+end_src
 
@@ -1499,6 +1513,10 @@ List ignored files (*marked unchanged*):
 
 ** Clean
 
+#+begin_warning
+Be careful when using the ~git clean~ command, as it cannot be undone.
+#+end_warning
+
 *** Delete all untracked files
 
 To delete all files (and directories) unknown to Git, you can run ~git
@@ -1565,9 +1583,9 @@ clean-all-dry~.
 
 *** Delete only ignored files
 
-Remove (only) ignored files that are still on the repository:
+How to remove ignored files (that are still on the repository)?
 
-: git ignored-files | xargs rm
+: git ignored-files -z | xargs -0 rm
 
 *** Hg shelve untracked files
 

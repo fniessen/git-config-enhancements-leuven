@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231023.1229
+# .gitconfig, Time-stamp: 20231025.1046
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -371,22 +371,29 @@
     # List files that have been deleted in the working directory.
     deleted-files = ls-files --deleted
 
-    # Usage: git untracked-files
-    # List files thare are not tracked by Git.
-    untracked-files = ls-files --others --exclude-standard
+    ##? Usage: git all-untracked-files
+    ##?
+    ##? List all untracked files.
+    all-untracked-files = ls-files --others
 
-    # Usage: git backup-untracked
-    # Create a backup archive of untracked files in the repository.
-    backup-untracked = "!f() { \
+    # Usage: git backup-all-untracked-files
+    # Create a backup archive of all untracked files in the repository.
+    backup-all-untracked-files = "!f() { \
         repo_slug_remote=\"$(git repo-slug-remote)\"; \
         current_date=$(date +\"%Y-%m-%d\"); \
         backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
-        git ls-files --others --exclude-standard -z \
+        git all-untracked-files -z \
             | xargs -0 tar rvf ~/$backup_filename; \
     }; f"
 
-    # Usage: git ignored-files
-    # List files that are ignored according to your '.gitignore' rules.
+    ##? Usage: git untracked-files-excluding-ignored
+    ##?
+    ##? List untracked files, excluding Git-ignored files.
+    untracked-files-excluding-ignored = ls-files --others --exclude-standard
+
+    ##? Usage: git ignored-files
+    ##?
+    ##? List ignored files.
     ignored-files = ls-files --others --ignored --exclude-standard
 
     # Usage: git tracked-files
