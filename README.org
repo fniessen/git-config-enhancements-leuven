@@ -10,7 +10,7 @@
 #+SETUPFILE: ~/org/theme-readtheorg.setup
 
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+PROPERTY:  header-args :tangle .gitconfig :eval no
+#+PROPERTY:  header-args :tangle .gitconfig_leuven :eval no
 
 #+name: current-time
 #+begin_src emacs-lisp :eval yes :results value silent :tangle no :exports none
@@ -111,17 +111,17 @@ committer and author of a change in every commit.
 
 #+begin_src conf
 [user]
-    # Override with your name and email in the file .gitconfig_local.
+    # Override with your name and email in the file .gitconfig.
     name = John Doe
     email = john.doe@example.com
 
 [github]
-    # Override with your GitHub username in the file .gitconfig_local.
+    # Override with your GitHub username in the file .gitconfig.
     user = jdoe
 #+end_src
 
 You should "override" the above with your personal details in the file
-=.gitconfig_local=.
+=.gitconfig=.
 
 ** Auto-Prune
 
@@ -6317,9 +6317,15 @@ branch (using ~git push --force~) and someone needs a talkin' to.
 
 * Local configuration
 
-#+begin_src conf
+Your =.gitconfig= could be something like this:
+
+#+begin_src conf :tangle no
 [include]
-    path = .gitconfig_local
+    path = .gitconfig_leuven
+
+[user]
+    email = you@example.com
+    name = Your Name
 #+end_src
 
 * Contributing
