@@ -1,16 +1,16 @@
-# .gitconfig, Time-stamp: 20231025.1520
+# .gitconfig, Time-stamp: 20231027.2105
 
 [checkout]
     # Preserve timestamps of checked out files.
     preserveTimestamps = true
 
 [user]
-    # Override with your name and email in the file .gitconfig_local.
+    # Override with your name and email in the file .gitconfig.
     name = John Doe
     email = john.doe@example.com
 
 [github]
-    # Override with your GitHub username in the file .gitconfig_local.
+    # Override with your GitHub username in the file .gitconfig.
     user = jdoe
 
 [fetch]

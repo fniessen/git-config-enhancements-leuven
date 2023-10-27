@@ -6317,14 +6317,14 @@ branch (using ~git push --force~) and someone needs a talkin' to.
 
 * Local configuration
 
-Your =.gitconfig= could be something like this:
+Your =.gitconfig= file might resemble the following configuration:
 
 #+begin_src conf :tangle no
 [include]
     path = .gitconfig_leuven
 
 [user]
-    email = you@example.com
+    email = your_email@example.com
     name = Your Name
 #+end_src
 
