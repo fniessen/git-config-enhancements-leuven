@@ -2073,6 +2073,3 @@ deploy-prod =
     # Show a graph of the commit history, including dangling commits (not reachable by any reference).
     dangling-graph-log = !git log --all --pretty=oneline --abbrev-commit --graph \
                     $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
-
-[include]
-    path = .gitconfig_local
