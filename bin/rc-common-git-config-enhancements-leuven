@@ -3,3 +3,5 @@
 if ! command -v zip &>/dev/null; then
     printf >&2 "The 'zip' utility is not installed.  Please install it.\n";
 fi
+
+alias g=git
