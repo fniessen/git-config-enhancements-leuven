@@ -2,11 +2,8 @@
 
 # Push the latest changes for each Git repository found in the current directory.
 
-# Find all Git repositories recursively.
-repos=$(find . -type d -name ".git")
-
-# Push the latest changes for each repository.
-for repo in $repos; do
+# Find all Git repositories recursively and sort them alphabetically.
+find . -type d -name ".git" | sort | while read -r repo; do
     repo_dir=$(dirname "$repo")
     echo -e "\nPushing latest changes for repository in $(tput bold)${repo_dir##*/}$(tput sgr0)..."
 
@@ -20,7 +17,6 @@ for repo in $repos; do
     # Display modified files in yellow bold.
     modified_files=$(git -C "$repo_dir" modified-files)
     if [ -n "$modified_files" ]; then
-        # echo -e "$(tput setaf 3)$(tput bold)Modified files:$(tput sgr0)"
         while IFS= read -r line; do
             echo -e "$(tput setaf 3)$(tput bold)        modified:   $line$(tput sgr0)"
         done <<< "$modified_files"

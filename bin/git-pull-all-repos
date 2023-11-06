@@ -2,11 +2,8 @@
 
 # Pull the latest changes for each Git repository found in the current directory.
 
-# Find all Git repositories recursively.
-repos=$(find . -type d -name ".git")
-
-# Pull the latest changes for each repository.
-for repo in $repos; do
+# Find all Git repositories recursively and sort them alphabetically.
+find . -type d -name ".git" | sort | while read -r repo; do
     repo_dir=$(dirname "$repo")
     echo -e "\nPulling latest changes for repository in $(tput bold)${repo_dir##*/}$(tput sgr0)..."
     if ! output=$(git -C "$repo_dir" pull 2>&1); then
