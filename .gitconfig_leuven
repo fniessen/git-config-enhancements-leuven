@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231027.2105
+# .gitconfig, Time-stamp: 20231126.2108
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -526,8 +526,8 @@
     ##? List stashes with their short creation dates, or output "Nothing stashed" to stderr if none.
     stashes = "!f() { \
         stash_list=\"$(git stash list --date=short)\"; \
-        if [[ -n $stash_list ]]; then \
-            printf \"%s\" \"$stash_list\"; \
+        if [ -n \"$stash_list\" ]; then \
+            printf \"%s\" \"$stash_list\n\"; \
         else \
             printf >&2 \"%s\" 'Nothing stashed\n'; \
             return 2; \
@@ -1736,7 +1736,7 @@ deploy-prod =
             local commit_info=$(git log -n 1 \
                                     --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
                                     --date=format-local:\"%Y-%m-%d\" \"$commit_hash\" -- \"$file_path\"); \
-            if [[ -n \"$commit_info\" ]]; then \
+            if [ -n \"$commit_info\" ]; then \
                 echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
             fi; \
         done | sort -k1,1r; \
@@ -1872,6 +1872,37 @@ deploy-prod =
         git merge --no-commit --no-ff \"$1\"; \
         git merge --abort; \
         echo \"Merge aborted\"; \
+    }; f"
+
+    ##? Usage: git dry-merge BRANCH_NAME
+    ##?
+    ##? Simulate a "dry run" merge of a branch into the current branch.
+    ##?
+    ##? Example:
+    ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
+    dry-merge1 = "!f() { \
+        local branch_to_merge=\"$1\"; \
+        if [ -z \"$branch_to_merge\" ]; then \
+            printf >&2 'Error: Missing branch to merge argument\n'; \
+            return 2; \
+        fi; \
+        git merge --no-commit \"$branch_to_merge\"; \
+        git reset; \
+    }; f"
+
+    ##? Usage: git dry-merge BRANCH_NAME
+    ##?
+    ##? Simulate a "dry run" merge of a branch into the current branch.
+    ##?
+    ##? Example:
+    ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
+    dry-merge2 = "!f() { \
+        local branch_to_merge=\"$1\"; \
+        if [ -z \"$branch_to_merge\" ]; then \
+            printf >&2 'Error: Missing branch to merge argument\n'; \
+            return 2; \
+        fi; \
+        git merge --no-commit --no-ff \"$branch_to_merge\"; \
     }; f"
 
     # Usage: git merge-dry-run BRANCH_NAME

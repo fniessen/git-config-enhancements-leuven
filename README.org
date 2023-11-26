@@ -1775,8 +1775,8 @@ user wants to have an updated repository.
     ##? List stashes with their short creation dates, or output "Nothing stashed" to stderr if none.
     stashes = "!f() { \
         stash_list=\"$(git stash list --date=short)\"; \
-        if [[ -n $stash_list ]]; then \
-            printf \"%s\" \"$stash_list\"; \
+        if [ -n \"$stash_list\" ]; then \
+            printf \"%s\" \"$stash_list\n\"; \
         else \
             printf >&2 \"%s\" 'Nothing stashed\n'; \
             return 2; \
@@ -2108,16 +2108,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                      |
-|----------+----------------------------------------------------------------------------------|
-| feat     | A new feature                                                                    |
-| fix      | A bug fix                                                                        |
+| Label    | Description                                                                                            |
+|----------+--------------------------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                                          |
+| fix      | A bug fix                                                                                              |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                        |
-| perf     | A code change that improves performance                                          |
-| test     | Adding missing or correcting existing tests                                      |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
-| doc      | Documentation only changes                                                       |
+| refactor | A code change that neither fixes a bug nor adds a feature                                              |
+| perf     | A code change that improves performance                                                                |
+| test     | Adding missing or correcting existing tests                                                            |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
+| doc      | Documentation only changes                                                                             |
 
 ** Get a commit hash
 
@@ -5174,7 +5174,7 @@ succession.
             local commit_info=$(git log -n 1 \
                                     --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
                                     --date=format-local:\"%Y-%m-%d\" \"$commit_hash\" -- \"$file_path\"); \
-            if [[ -n \"$commit_info\" ]]; then \
+            if [ -n \"$commit_info\" ]; then \
                 echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
             fi; \
         done | sort -k1,1r; \
@@ -5486,6 +5486,41 @@ You can do ~git merge --abort~ after seeing that there are conflicts.
         git merge --no-commit --no-ff \"$1\"; \
         git merge --abort; \
         echo \"Merge aborted\"; \
+    }; f"
+#+end_src
+
+#+begin_src conf
+    ##? Usage: git dry-merge BRANCH_NAME
+    ##?
+    ##? Simulate a "dry run" merge of a branch into the current branch.
+    ##?
+    ##? Example:
+    ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
+    dry-merge1 = "!f() { \
+        local branch_to_merge=\"$1\"; \
+        if [ -z \"$branch_to_merge\" ]; then \
+            printf >&2 'Error: Missing branch to merge argument\n'; \
+            return 2; \
+        fi; \
+        git merge --no-commit \"$branch_to_merge\"; \
+        git reset; \
+    }; f"
+#+end_src
+
+#+begin_src conf
+    ##? Usage: git dry-merge BRANCH_NAME
+    ##?
+    ##? Simulate a "dry run" merge of a branch into the current branch.
+    ##?
+    ##? Example:
+    ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
+    dry-merge2 = "!f() { \
+        local branch_to_merge=\"$1\"; \
+        if [ -z \"$branch_to_merge\" ]; then \
+            printf >&2 'Error: Missing branch to merge argument\n'; \
+            return 2; \
+        fi; \
+        git merge --no-commit --no-ff \"$branch_to_merge\"; \
     }; f"
 #+end_src
 
