@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231126.2108
+# .gitconfig, Time-stamp: 20231127.1134
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -237,6 +237,7 @@
 
     # origin = !echo "${$(git config --get clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
+    # git remote get-url origin | sed 's/\.git$//'
 
     # Usage: git repo-owner
     # Get the owner of the remote Git repository.
@@ -825,13 +826,13 @@
     # Create a new commit that combines the changes introduced by a specified
     # number of previous commits into a single commit.
     squash = "!f() { \
-        local upstream=$(git rev-parse --abbrev-ref @{u} 2>/dev/null); \
-        if [ -z \"$upstream\" ]; then \
+        local upstream_branch=$(git upstream-branch 2>/dev/null); \
+        if [ -z \"$upstream_branch\" ]; then \
             printf >&2 \"Warning: No upstream branch configured for the current branch.\\n\"; \
             printf >&2 \"Consider using 'squash-force' alias.\\n\"; \
             return 2; \
         fi; \
-        local num_unpushed=$(git rev-list $upstream..HEAD --count); \
+        local num_unpushed=$(git rev-list $upstream_branch..HEAD --count); \
         if [ $1 -le $num_unpushed ]; then \
             git squash-force $1; \
         else \
@@ -873,10 +874,14 @@
     # Usage: git publish
     # Push the current branch to the upstream branch with the same name.
     push-upstream = !git push -u $(git origin) $(git current-branch)
-    # push-upstream = !git push -u $(git remote show origin | grep 'Fetch URL' | cut -d':' -f2- | sed 's/\.git$//') $(git current-branch)
 
     # Alias of 'push-upstream'.
     publish = push-upstream
+
+    ##? Usage: git upstream-branch
+    ##?
+    ##? Get the upstream branch name.
+    upstream-branch = rev-parse --abbrev-ref @{u}
 
     # Usage: git branches
     # Show all branches with their corresponding upstream branches and commit hashes.

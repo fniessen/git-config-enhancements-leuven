@@ -918,6 +918,27 @@ h = "!f() { \
 }; f"
 #+end_src
 
+** Best Practices
+
+*Sh* scripting can be a powerful tool for automating tasks, but it's important to
+follow best practices to ensure that your scripts are efficient, reliable, and
+maintainable. Here are some best practices to keep in mind:
+
+- Use variables to store values used multiple times.
+
+- Rename variables to follow lowercase naming convention.
+
+- Enclose variables in double quotes to prevent word splitting and globbing.
+
+- Use exit codes to indicate success or failure.
+
+- Use ~printf~ instead of ~echo~ for better control over the output format.
+
+- Use ~$()~ instead of backticks for command substitution.
+
+- Use the *single square bracket* ~[~ for conditional testing, which is more
+  universally supported.
+
 * Repository
 
 For *free private repositories*, see https://bitbucket.org/.
@@ -1044,6 +1065,7 @@ Fetch URL: git@bitbucket.org-something:user/slug
 #+begin_src conf
     # origin = !echo "${$(git config --get clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
+    # git remote get-url origin | sed 's/\.git$//'
 #+end_src
 
 #+begin_src conf
@@ -2756,13 +2778,13 @@ effective skills -- so that people think you are smart.
     # Create a new commit that combines the changes introduced by a specified
     # number of previous commits into a single commit.
     squash = "!f() { \
-        local upstream=$(git rev-parse --abbrev-ref @{u} 2>/dev/null); \
-        if [ -z \"$upstream\" ]; then \
+        local upstream_branch=$(git upstream-branch 2>/dev/null); \
+        if [ -z \"$upstream_branch\" ]; then \
             printf >&2 \"Warning: No upstream branch configured for the current branch.\\n\"; \
             printf >&2 \"Consider using 'squash-force' alias.\\n\"; \
             return 2; \
         fi; \
-        local num_unpushed=$(git rev-list $upstream..HEAD --count); \
+        local num_unpushed=$(git rev-list $upstream_branch..HEAD --count); \
         if [ $1 -le $num_unpushed ]; then \
             git squash-force $1; \
         else \
@@ -2930,21 +2952,29 @@ name, there is *no branch name*. You can't get something that doesn't exist.
 
 ** Publish a branch
 
-Push the ~CURRENT_BRANCH~ branch to the =origin= remote and set up tracking:
+Push the current branch to the remote and establish tracking:
 
 #+begin_src conf
     # Usage: git publish
     # Push the current branch to the upstream branch with the same name.
     push-upstream = !git push -u $(git origin) $(git current-branch)
-    # push-upstream = !git push -u $(git remote show origin | grep 'Fetch URL' | cut -d':' -f2- | sed 's/\.git$//') $(git current-branch)
 
     # Alias of 'push-upstream'.
     publish = push-upstream
-    #+end_src
+#+end_src
 
 Then:
 1. [[id:a7039f6e-825c-484c-8739-f3e32a9c45fc][Create a pull request]].
 2. Your team lead will review the code & merge it to the main branch.
+
+** Upstream branch
+
+#+begin_src conf
+    ##? Usage: git upstream-branch
+    ##?
+    ##? Get the upstream branch name.
+    upstream-branch = rev-parse --abbrev-ref @{u}
+#+end_src
 
 ** List branches
 
