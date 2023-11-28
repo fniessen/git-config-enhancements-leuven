@@ -1,15 +1,18 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 
+# Check if 'zip' utility is installed.
 if ! command -v zip &>/dev/null; then
-    printf >&2 "The 'zip' utility is not installed.  Please install it.\n";
+    printf >&2 "The 'zip' utility is not installed. Please install it.\n"
 fi
 
+# Git aliases.
 alias g='git'
 
 # Go to the root directory of your Git repo.
 alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
-                                        # That will not blow up cd if you aren't
-                                        # in a Git directory.
+                                        ## The above command will not throw an
+                                        ## error if you aren't in a Git
+                                        ## directory.
 
 # Check if 'tig' command is installed before creating aliases.
 if command -v tig &> /dev/null; then
