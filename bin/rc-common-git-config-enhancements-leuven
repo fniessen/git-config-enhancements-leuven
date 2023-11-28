@@ -11,7 +11,11 @@ alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
                                         # That will not blow up cd if you aren't
                                         # in a Git directory.
 
-alias tigs='tig status'                 # Use it all of the time!
-alias tigb='tig blame'
-alias tigall='tig --all'
-alias tigreleases='tig --all --simplify-by-decoration'
+# Check if 'tig' command is installed before creating aliases.
+if command -v tig &> /dev/null; then
+    # Aliases for 'tig' commands.
+    alias tigs='tig status'             # Use it all of the time!
+    alias tigb='tig blame'
+    alias tigall='tig --all'
+    alias tigreleases='tig --all --simplify-by-decoration'
+fi
