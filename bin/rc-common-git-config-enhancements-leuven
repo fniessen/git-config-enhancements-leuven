@@ -11,9 +11,6 @@ alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
                                         # That will not blow up cd if you aren't
                                         # in a Git directory.
 
-#! The change in working directory will persist after the function has
-#! completed.
-
 alias tigs='tig status'                 # Use it all of the time!
 alias tigb='tig blame'
 alias tigall='tig --all'
