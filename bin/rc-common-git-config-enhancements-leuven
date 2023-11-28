@@ -1,5 +1,10 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 
+# Check if 'git' utility is installed.
+if ! command -v git &>/dev/null; then
+    printf >&2 "The 'git' utility is not installed. Please install it.\n"
+fi
+
 # Check if 'zip' utility is installed.
 if ! command -v zip &>/dev/null; then
     printf >&2 "The 'zip' utility is not installed. Please install it.\n"
