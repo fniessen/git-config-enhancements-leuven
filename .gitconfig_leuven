@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231127.1134
+# .gitconfig, Time-stamp: 20231207.1519
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -221,7 +221,7 @@
     work-profile = config user.email \"john@work.com\"
 
     whoami = "!f() { \
-        printf \"%s <%s>\\n\" \
+        printf \"%s <%s>\n\" \
             \"$(git config user.name)\" \
             \"$(git config user.email)\"; \
     }; f"
@@ -416,12 +416,12 @@
     check-file-status = "!f() { \
         if [ -e \"$1\" ]; then \
             if git ls-files --error-unmatch \"$1\" >/dev/null 2>&1; then \
-                printf \"$1: tracked\\n\"; \
+                printf \"$1: tracked\n\"; \
             else \
-                printf \"$1: not tracked\\n\"; \
+                printf \"$1: not tracked\n\"; \
             fi; \
         else \
-            printf \"$1: does not exist\\n\"; \
+            printf \"$1: does not exist\n\"; \
         fi; \
     }; f"
 
@@ -715,7 +715,7 @@
     ##?   COMMIT2                       The second commit to check for ancestry
     is-ancestor = "!f() { \
         if [ \"$#\" -ne 2 ]; then \
-            printf >&2 \"Usage: git is-ancestor COMMIT1 COMMIT2\\n\"; \
+            printf >&2 \"Usage: git is-ancestor COMMIT1 COMMIT2\n\"; \
             exit 2; \
         fi; \
         local commit1=\"$1\"; \
@@ -739,7 +739,7 @@
     search-for-commits-or-bitbucket = "!f() { \
         for l in \"$@\"; do \
             git log --grep \"$l\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
-            printf \"\\n\"; \
+            printf \"\n\"; \
         done | sort -r; \
     }; f"
     # XXX Wrong sorting if all on the same date (wth "testing failure" on PFlow)
@@ -828,15 +828,15 @@
     squash = "!f() { \
         local upstream_branch=$(git upstream-branch 2>/dev/null); \
         if [ -z \"$upstream_branch\" ]; then \
-            printf >&2 \"Warning: No upstream branch configured for the current branch.\\n\"; \
-            printf >&2 \"Consider using 'squash-force' alias.\\n\"; \
+            printf >&2 \"Warning: No upstream branch configured for the current branch.\n\"; \
+            printf >&2 \"Consider using 'squash-force' alias.\n\"; \
             return 2; \
         fi; \
         local num_unpushed=$(git rev-list $upstream_branch..HEAD --count); \
         if [ $1 -le $num_unpushed ]; then \
             git squash-force $1; \
         else \
-            printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\\n\" $1 $num_unpushed; \
+            printf >&2 \"Error: Cannot squash %d commits. There are only %d unpushed commits.\n\" $1 $num_unpushed; \
             return 2; \
         fi; \
     }; f"
@@ -1061,7 +1061,7 @@
                         printf 'No new commits to fetch for %s\n' \"$branch\"; \
                     fi; \
                 else \
-                    printf \"Remote branch \\e[1m%s\\e[0m does not exist. Skipping update.\\n\\n\" \"$branch\"; \
+                    printf \"Remote branch \\e[1m%s\\e[0m does not exist. Skipping update.\n\n\" \"$branch\"; \
                 fi; \
                 printf '\n'; \
             fi; \
@@ -1075,26 +1075,26 @@
     update-all-branches2 = "!f() { \
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
-            printf \"Checking for conflicts in \\e[1m%s\\e[0m...\\n\" \"$branch\"; \
+            printf \"Checking for conflicts in \\e[1m%s\\e[0m...\n\" \"$branch\"; \
             if git check-remote-branch \"$branch\"; then \
                 if git is-ancestor origin/$branch $branch; then \
-                    printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\\n\" \"$branch\"; \
+                    printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\n\" \"$branch\"; \
                     if git pull origin $branch:$branch; then \
-                        printf \"\\n\"; \
+                        printf \"\n\"; \
                     else \
-                        printf \"\\e[91mError: Pull failed for branch \\e[1m%s\\e[0m.\\n\\e[0m\" \"$branch\"; \
+                        printf \"\\e[91mError: Pull failed for branch \\e[1m%s\\e[0m.\n\\e[0m\" \"$branch\"; \
                         if git rebase --abort > /dev/null 2>&1; then \
-                            printf \"Rebase operation aborted.\\n\\n\"; \
+                            printf \"Rebase operation aborted.\n\n\"; \
                         else \
-                            printf \"\\e[91mCould not abort the rebase operation. Please do so manually.\\n\\e[0m\"; \
+                            printf \"\\e[91mCould not abort the rebase operation. Please do so manually.\n\\e[0m\"; \
                         fi; \
                         continue; \
                     fi; \
                 else \
-                    printf \"Potential conflicts found in \\e[1m%s\\e[0m. Skipping update.\\n\\n\" \"$branch\"; \
+                    printf \"Potential conflicts found in \\e[1m%s\\e[0m. Skipping update.\n\n\" \"$branch\"; \
                 fi; \
             else \
-                printf \"Remote branch \\e[1m%s\\e[0m does not exist. Skipping update.\\n\\n\" \"$branch\"; \
+                printf \"Remote branch \\e[1m%s\\e[0m does not exist. Skipping update.\n\n\" \"$branch\"; \
             fi; \
         done \
     }; f"
@@ -1243,12 +1243,13 @@
         local other_branch=${1:-$(git main-branch)}; \
         commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
         commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
-        printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\\n\" \
+        printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
             \"$other_branch\" \"$current_branch\" \"$commits_missing_to_current\"; \
-        git log \"$other_branch\"..\"$current_branch\"; \
-        printf \"\\n$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\\n\" \
+        git --no-pager log \"$other_branch\"..\"$current_branch\"; \
+        printf \"\n\n$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
             \"$current_branch\" \"$other_branch\" \"$commits_missing_to_other\"; \
-        git log \"$current_branch\"..\"$other_branch\"; \
+        git --no-pager log \"$current_branch\"..\"$other_branch\"; \
+        printf \"\n\"; \
     }; f"
 
     # Find the point at which a branch forked from another branch (when it was branched off).
@@ -1270,7 +1271,7 @@
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
         local missing_files_to_current=$(git diff --name-only \"$other_branch\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
-        printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
+        printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
     }; f"
 
@@ -1380,7 +1381,7 @@
     ##? Create a tagged release version in Git and push it to the remote repository.
     release-tag = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git release-tag VERSION\\n\"; \
+            printf >&2 \"Usage: git release-tag VERSION\n\"; \
             return 2; \
         else \
             local version=\"$1\"; \
@@ -1447,7 +1448,7 @@
         local current_branch=$(git convert-current-branch-name); \
         local commit_hash=$(git commit-hash); \
         local zip_file_name=$(git repo-slug-remote)-commit-${branch_name}-${target_commit:-$commit_hash}.zip; \
-        git changed-files \"$target_commit\" | tr '\\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
+        git changed-files \"$target_commit\" | tr '\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
     }; f"
 
     # View raw commit.
@@ -1551,9 +1552,9 @@ deploy-prod =
     # Print repository name, execute command, and separate output.
     print-repo-info = "!f() { \
         repo_slug_local=$(git repo-slug-local); \
-        printf '\\033[1m%s\\033[0m\\n' \"$repo_slug_local\"; \
+        printf '\\033[1m%s\\033[0m\n' \"$repo_slug_local\"; \
         git "$@"; \
-        printf '\\n\\n'; \
+        printf '\n\n'; \
     }; f"
 
     # Usage: git all-repos COMMAND [ARGS]
@@ -1603,7 +1604,7 @@ deploy-prod =
     # Example: git diff-commits 2
     diff-commits = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git diff-commits NUMBER\\n\"; \
+            printf >&2 \"Usage: git diff-commits NUMBER\n\"; \
             return 2; \
         fi; \
         git diff --patch-with-stat HEAD~$1; \
@@ -1817,7 +1818,7 @@ deploy-prod =
     # Retrieve the timestamp of the most recent pull operation, regardless of changes being present.
     latest-pull-time = "!f() { \
         local fetch_head_time=$(stat -c %y $(git root)/.git/FETCH_HEAD | cut -d'.' -f1); \
-        printf \"Latest pull time: %s\\n\" \"$fetch_head_time\"; \
+        printf \"Latest pull time: %s\n\" \"$fetch_head_time\"; \
     }; f"
     # For the latest pull (even if there's nothing new).
 
@@ -1825,7 +1826,7 @@ deploy-prod =
     latest-update-time = "!f() { \
         local current_branch=$(git current-branch); \
         local update_time=$(stat -c %y $(git root)/.git/refs/heads/$current_branch | cut -d'.' -f1); \
-        printf \"Latest update time for branch '%s': %s\\n\" \"$current_branch\" \"$update_time\"; \
+        printf \"Latest update time for branch '%s': %s\n\" \"$current_branch\" \"$update_time\"; \
     }; f"
     # For the latest pull resulting in changes coming in from the remote master
     # branch (the timestamp won't change when git pull reports there are no
