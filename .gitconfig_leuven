@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231207.1519
+# .gitconfig, Time-stamp: 20231214.1612
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1281,24 +1281,31 @@
         git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"
 
-    # 50 most recent commits.
-    # XXX this is a summary?
-    graph = log -50 --branches --tags --remotes --date-order --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --graph
+    ##? Usage: git history-graph
+    ##?
+    ##? Display a commit history graph.
+    history-graph = log --graph
 
-    # Show log as a graph
-    glog = log --all --graph
+    ##? Usage: git history-graph2
+    ##?
+    ##? Display a commit history graph with branches, tags, and remotes.
+    history-graph2 = log --branches --tags --remotes --date-order --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --graph
 
-    # Usage: git releases
-    # Display a decorated Git commit history graph, excluding merge commits.
+    ##? Usage: git history-all-graph
+    ##?
+    ##? Display a complete commit history with a graph.
+    history-all-graph = log --all --graph
+
+    ##? Usage: git history-details
+    ##?
+    ##? Display a detailed commit history graph with file changes.
+    history-details = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
+
+    ##? Usage: git releases
+    ##?
+    ##? Display a simplified commit history graph with decorations, excluding
+    ##? merge commits.
     releases = log --no-merges --all --simplify-by-decoration --graph
-
-    # Usage: git hist
-    # Display a Git commit history graph in tree format.
-    hist = log --graph
-
-    # Usage: git lgf
-    # Display a Git commit history graph with file change status and custom formatting.
-    hist-full = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
 
     # Draw Git revisions graph with Graphviz.
     graphviz = "!f() { \
