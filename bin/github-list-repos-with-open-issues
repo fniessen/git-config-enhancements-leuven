@@ -12,12 +12,12 @@ fi
 
 # Get GitHub username and personal access token from command-line arguments, or
 # from a config file, or use default values.
-if [ "$#" -eq 2 ]; then
+if [[ "$#" -eq 2 ]]; then
     username="$1"
     token="$2"
-elif [ -f "$HOME/.github_config" ]; then
+elif [[ -f "$HOME/.github_config" ]]; then
     source "$HOME/.github_config"
-elif [ -f ".github_config" ]; then
+elif [[ -f ".github_config" ]]; then
     source ".github_config"
 else
     printf "No GitHub username and personal access token found. Using default values.\n"
@@ -32,7 +32,7 @@ repos=$(curl -s -H "Authorization: token $token" "https://api.github.com/users/$
 for repo in $(echo "${repos}" | jq -r '.[].name' | sort); do
     num_issues=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo" | jq '.open_issues')
     issues=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/issues?state=open" | jq -r '.[] | "  #" + (.number | tostring) + " - " + .title')
-    if [ "$issues" ]; then
+    if [[ "$issues" ]]; then
         printf "%s: %d open issues\n%s\n\n" "$repo" "$num_issues" "$issues"
     fi
 done
