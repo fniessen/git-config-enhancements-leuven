@@ -16,7 +16,7 @@ find . -type d -name ".git" | sort | while read -r repo; do
 
     # Display modified files in yellow bold.
     modified_files=$(git -C "$repo_dir" modified-files)
-    if [ -n "$modified_files" ]; then
+    if [[ -n "$modified_files" ]]; then
         while IFS= read -r line; do
             printf "$(tput setaf 3)$(tput bold)        modified:   %s$(tput sgr0)\n" "$line"
         done <<< "$modified_files"
