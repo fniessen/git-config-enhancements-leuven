@@ -15,8 +15,8 @@ printf "Are you sure you want to delete these files? (y/N) "
 read confirmation
 
 if [[ "$confirmation" == "y" ]]; then
-    printf "%s\n" "$ignored_files" | while read ignored_file; do
-        if [ -e "$ignored_file" ]; then
+    printf "%s\n" "$ignored_files" | while read -r ignored_file; do
+        if [[ -e "$ignored_file" ]]; then
             rm "$ignored_file"
         fi
     done
