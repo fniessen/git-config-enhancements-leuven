@@ -3,18 +3,18 @@
 bold=$(tput bold)
 reset=$(tput sgr0)
 
-if [ -d .git ]; then
+if [[ -d .git ]]; then
     # Git repository.
-    echo "Disable .git folder... ${bold}Enable .svn${reset} folder..."
+    printf "Disable .git folder... %sEnable .svn%s folder...\n" "${bold}" "${reset}"
     mv .git .git-bak && mv .svn-bak .svn
     exit 0
-elif [ -d .svn ]; then
+elif [[ -d .svn ]]; then
     # Subversion repository.
-    echo "Disable .svn folder... ${bold}Enable .git${reset} folder..."
+    printf "Disable .svn folder... %sEnable .git%s folder...\n" "${bold}" "${reset}"
     mv .svn .svn-bak && mv .git-bak .git
     exit 0
 else
     # Not a Git or Subversion repository.
-    echo "This folder is not a Git or Subversion repository."
-    exit 1
+    printf "This folder is not a Git or Subversion repository.\n"
+    exit 2
 fi
