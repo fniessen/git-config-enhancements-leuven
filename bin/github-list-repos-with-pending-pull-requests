@@ -12,12 +12,12 @@ fi
 
 # Get GitHub username and personal access token from command-line arguments, or
 # from a config file, or use default values.
-if [ "$#" -eq 2 ]; then
+if [[ "$#" -eq 2 ]]; then
     username="$1"
     token="$2"
-elif [ -f "$HOME/.github_config" ]; then
+elif [[ -f "$HOME/.github_config" ]]; then
     source "$HOME/.github_config"
-elif [ -f ".github_config" ]; then
+elif [[ -f ".github_config" ]]; then
     source ".github_config"
 else
     printf "No GitHub username and personal access token found. Using default values.\n"
@@ -33,7 +33,7 @@ repos=$(curl -s -H "Authorization: token $token" "https://api.github.com/search/
 for repo in $repos; do
     count=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/pulls?state=open" | jq '. | length')
     printf "%s: %d pending pull requests\n" "$repo" "$count"
-    if [ "$count" -gt 0 ]; then
+    if [[ "$count" -gt 0 ]]; then
         prs=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/pulls?state=open" | jq -r '.[].number')
         for pr in $prs; do
             title=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/pulls/$pr" | jq -r '.title')
@@ -41,7 +41,7 @@ for repo in $repos; do
         done
     fi
     # Add a blank line between each repo, except for the last one.
-    if [ "$repo" != "$(echo $repos | awk '{print $NF}')" ]; then
+    if [[ "$repo" != "$(echo $repos | awk '{print $NF}')" ]]; then
         printf "\n"
     fi
 done
