@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231214.1728
+# .gitconfig, Time-stamp: 20231226.1642
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -286,11 +286,11 @@
     ##? Arguments:
     ##?   PATTERN                       Pattern
     search-for-files = "!f() { \
-        local pattern=\"$1\"; \
-        if [ -z \"$pattern\" ]; then \
-            printf >&2 'Error: Missing pattern argument\n'; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git search-for-files PATTERN\n\"; \
             return 2; \
         fi; \
+        local pattern=\"$1\"; \
         git ls-tree -r --name-only HEAD \
             | grep -i --color=auto \"$pattern\"; \
     }; f"
@@ -826,6 +826,10 @@
     # Create a new commit that combines the changes introduced by a specified
     # number of previous commits into a single commit.
     squash = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git squash NUMBER_OF_COMMITS_TO_UNDO\n\"; \
+            return 2; \
+        fi; \
         local upstream_branch=$(git upstream-branch 2>/dev/null); \
         if [ -z \"$upstream_branch\" ]; then \
             printf >&2 \"Warning: No upstream branch configured for the current branch.\n\"; \
@@ -1390,12 +1394,11 @@
         if [ $# -ne 1 ]; then \
             printf >&2 \"Usage: git release-tag VERSION\n\"; \
             return 2; \
-        else \
-            local version=\"$1\"; \
-            git tag -a v\"$version\" -m \"Release version $version\" \
-                && git push --tags \
-                && git push; \
-        fi \
+        fi; \
+        local version=\"$1\"; \
+        git tag -a v\"$version\" -m \"Release version $version\" \
+            && git push --tags \
+            && git push; \
     }; f"
 
     # Usage: git manifest
@@ -1690,39 +1693,36 @@ deploy-prod =
     ##?
     ##? Show the commit history of a specific file.
     file-history2 = "!f() { \
-        FILENAME=\"$1\"; \
-        if [ -z \"$FILENAME\" ]; then \
-            printf >&2 'Usage: git filehist FILENAME\n'; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git file-history2 FILENAME\n\"; \
             return 2; \
-        else \
-            git log --oneline --graph --decorate --follow -- \"$FILENAME\"; \
         fi; \
+        FILENAME=\"$1\"; \
+        git log --oneline --graph --decorate --follow -- \"$FILENAME\"; \
     }; f"
 
     ##? Usage: git file-history-all FILENAME
     ##?
     ##? Show the commit history of a specific file across all branches.
     file-history-all = "!f() { \
-        FILENAME=\"$1\"; \
-        if [ -z \"$FILENAME\" ]; then \
-            printf >&2 'Usage: git filehist FILENAME\n'; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git file-history-all FILENAME\n\"; \
             return 2; \
-        else \
-            git log --oneline --graph --decorate --follow --all -- \"$FILENAME\"; \
         fi; \
+        FILENAME=\"$1\"; \
+        git log --oneline --graph --decorate --follow --all -- \"$FILENAME\"; \
     }; f"
 
     ##? Usage: git file-history-all FILENAME
     ##?
     ##? Show the commit history of a specific file across all branches.
     file-history-all2 = "!f() { \
-        FILENAME=\"$1\"; \
-        if [ -z \"$FILENAME\" ]; then \
-            printf >&2 'Usage: git filehist FILENAME\n'; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git file-history-all2 FILENAME\n\"; \
             return 2; \
-        else \
-            git log --pretty=format:'%h %ad %an %s' --date=short --graph --decorate --follow --all -- \"$FILENAME\"; \
         fi; \
+        FILENAME=\"$1\"; \
+        git log --pretty=format:'%h %ad %an %s' --date=short --graph --decorate --follow --all -- \"$FILENAME\"; \
     }; f"
 
     # Usage: git file-history-follow-copy-without-merge-commits FILENAME
@@ -1934,11 +1934,11 @@ deploy-prod =
     ##? Example:
     ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
     dry-merge1 = "!f() { \
-        local branch_to_merge=\"$1\"; \
-        if [ -z \"$branch_to_merge\" ]; then \
-            printf >&2 'Error: Missing branch to merge argument\n'; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git dry-merge1 BRANCH_NAME\n\"; \
             return 2; \
         fi; \
+        local branch_to_merge=\"$1\"; \
         git merge --no-commit \"$branch_to_merge\"; \
         git reset; \
     }; f"
@@ -1950,11 +1950,11 @@ deploy-prod =
     ##? Example:
     ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
     dry-merge2 = "!f() { \
-        local branch_to_merge=\"$1\"; \
-        if [ -z \"$branch_to_merge\" ]; then \
-            printf >&2 'Error: Missing branch to merge argument\n'; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 \"Usage: git dry-merge2 BRANCH_NAME\n\"; \
             return 2; \
         fi; \
+        local branch_to_merge=\"$1\"; \
         git merge --no-commit --no-ff \"$branch_to_merge\"; \
     }; f"
 
