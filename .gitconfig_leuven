@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231214.1612
+# .gitconfig, Time-stamp: 20231214.1728
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1681,9 +1681,49 @@ deploy-prod =
     #     git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
     # }; f"
 
-    # Usage: git file-history FILENAME
-    # Show the commit history of a specific file.
+    ##? Usage: git file-history FILENAME
+    ##?
+    ##? Show the commit history of a specific file.
     file-history = log --
+
+    ##? Usage: git file-history FILENAME
+    ##?
+    ##? Show the commit history of a specific file.
+    file-history2 = "!f() { \
+        FILENAME=\"$1\"; \
+        if [ -z \"$FILENAME\" ]; then \
+            printf >&2 'Usage: git filehist FILENAME\n'; \
+            return 2; \
+        else \
+            git log --oneline --graph --decorate --follow -- \"$FILENAME\"; \
+        fi; \
+    }; f"
+
+    ##? Usage: git file-history-all FILENAME
+    ##?
+    ##? Show the commit history of a specific file across all branches.
+    file-history-all = "!f() { \
+        FILENAME=\"$1\"; \
+        if [ -z \"$FILENAME\" ]; then \
+            printf >&2 'Usage: git filehist FILENAME\n'; \
+            return 2; \
+        else \
+            git log --oneline --graph --decorate --follow --all -- \"$FILENAME\"; \
+        fi; \
+    }; f"
+
+    ##? Usage: git file-history-all FILENAME
+    ##?
+    ##? Show the commit history of a specific file across all branches.
+    file-history-all2 = "!f() { \
+        FILENAME=\"$1\"; \
+        if [ -z \"$FILENAME\" ]; then \
+            printf >&2 'Usage: git filehist FILENAME\n'; \
+            return 2; \
+        else \
+            git log --pretty=format:'%h %ad %an %s' --date=short --graph --decorate --follow --all -- \"$FILENAME\"; \
+        fi; \
+    }; f"
 
     # Usage: git file-history-follow-copy-without-merge-commits FILENAME
     # Show commit history with file copies and renames.

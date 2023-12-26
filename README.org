@@ -5090,10 +5090,50 @@ merge commits...
 
 *List of commits* that modified the *specified file*:
 
-#+begin_src conf
-    # Usage: git file-history FILENAME
-    # Show the commit history of a specific file.
+#+begin_src conf \
+    ##? Usage: git file-history FILENAME
+    ##?
+    ##? Show the commit history of a specific file.
     file-history = log --
+
+    ##? Usage: git file-history FILENAME
+    ##?
+    ##? Show the commit history of a specific file.
+    file-history2 = "!f() { \
+        FILENAME=\"$1\"; \
+        if [ -z \"$FILENAME\" ]; then \
+            printf >&2 'Usage: git filehist FILENAME\n'; \
+            return 2; \
+        else \
+            git log --oneline --graph --decorate --follow -- \"$FILENAME\"; \
+        fi; \
+    }; f"
+
+    ##? Usage: git file-history-all FILENAME
+    ##?
+    ##? Show the commit history of a specific file across all branches.
+    file-history-all = "!f() { \
+        FILENAME=\"$1\"; \
+        if [ -z \"$FILENAME\" ]; then \
+            printf >&2 'Usage: git filehist FILENAME\n'; \
+            return 2; \
+        else \
+            git log --oneline --graph --decorate --follow --all -- \"$FILENAME\"; \
+        fi; \
+    }; f"
+
+    ##? Usage: git file-history-all FILENAME
+    ##?
+    ##? Show the commit history of a specific file across all branches.
+    file-history-all2 = "!f() { \
+        FILENAME=\"$1\"; \
+        if [ -z \"$FILENAME\" ]; then \
+            printf >&2 'Usage: git filehist FILENAME\n'; \
+            return 2; \
+        else \
+            git log --pretty=format:'%h %ad %an %s' --date=short --graph --decorate --follow --all -- \"$FILENAME\"; \
+        fi; \
+    }; f"
 #+end_src
 
 That also will *print the /right/ merge commits*, *like in BitBucket*.
