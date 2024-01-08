@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20231226.1642
+# .gitconfig, Time-stamp: 20240108.1206
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -216,7 +216,7 @@
                   | grep alias \
                   | cut -c 7- \
                   | sort \
-                  | sed 's/=/ = /'"
+                  | sed 's_=_ = _'"
 
     work-profile = config user.email \"john@work.com\"
 
@@ -237,15 +237,15 @@
 
     # origin = !echo "${$(git config --get clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
-    # git remote get-url origin | sed 's/\.git$//'
+    # git remote get-url origin | sed 's_\.git$__'
 
     # Usage: git repo-owner
     # Get the owner of the remote Git repository.
     repo-owner = "!f() { \
         git remote show $(git config --get remote.origin.url) -n \
             | grep 'Fetch URL:' \
-            | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
-            | sed 's#\\.git$##'; \
+            | sed -E 's_^.*[/:](.*)/.*$_\\1_' \
+            | sed 's_\\.git$__'; \
     }; f"
 
     # Usage: git repo-slug-remote
@@ -253,7 +253,7 @@
     repo-slug-remote = "!f() { \
         git remote show $(git config --get remote.origin.url) -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
-            | sed 's#\\.git$##'; \
+            | sed 's_\\.git$__'; \
     }; f"
 
     # Usage: git repo-slug-local
@@ -274,7 +274,7 @@
     }; f"
     # Note: The alias
     # main-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
-    #     | sed 's#^refs/remotes/origin/##'"
+    #     | sed 's_^refs/remotes/origin/__'"
     # generates the error message
     # "fatal: ref refs/remotes/origin/HEAD is not a symbolic ref"
     # when the remote repository does not have a default branch.
@@ -437,7 +437,7 @@
     ignore-untracked = "!git status \
                 | grep -P \"^\\t\" \
                 | grep -vF .gitignore \
-                | sed \"s/^\\t//\" \
+                | sed \"s_^\\t__\" \
                 >> \"${GIT_PREFIX}.gitignore\""
 
     # Mark a file as unchanged and hide it from the Git status.
@@ -582,7 +582,7 @@
         git stash list \
             | grep $@ \
             | head -n 1 \
-            | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
+            | sed -n 's_stash@{\\(.*\\)}.*_\\1_p'; \
     }; f"
     # Only accepts single word, no quotations.
 
@@ -1315,7 +1315,7 @@
     graphviz = "!f() { \
         echo 'digraph git {' ; \
         git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
-            | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
+            | sed 's_[0-9a-f][0-9a-f]*_\"&\"_g' ; \
         echo '}'; \
     }; f"
 
@@ -1513,12 +1513,12 @@ deploy-prod =
     #     curl --user $USER_NAME \
     #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
-    #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
-    #         | sed \"s/new/NEW/\" \
-    #         | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
-    #         | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
-    #         | sed \"s/open/OPEN/\" \
-    #         | sed \"s/closed/CLOSED/\"; \
+    #         | sed -r 's_(....)-(..)-(..)T(..):(..):(..).(............)_\\1-\\2-\\3_g' \
+    #         | sed \"s_new_NEW_\" \
+    #         | sed \"s_NEW_$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)_\" \
+    #         | sed \"s_NEW_\$(tput setaf 3) -NOUV- \$(tput sgr0)_\" \
+    #         | sed \"s_open_OPEN_\" \
+    #         | sed \"s_closed_CLOSED_\"; \
     # }; f"
 # --data-urlencode 'priority >= \"major\"'
 
@@ -1559,20 +1559,27 @@ deploy-prod =
     }; f"
 # XXX Test it with tag or branch.
 
-    # Print repository name, execute command, and separate output.
-    print-repo-info = "!f() { \
-        repo_slug_local=$(git repo-slug-local); \
-        printf '\\033[1m%s\\033[0m\n' \"$repo_slug_local\"; \
-        git "$@"; \
-        printf '\n\n'; \
-    }; f"
-
-    # Usage: git all-repos COMMAND [ARGS]
-    # Run a command for each repository in the current directory.
+    ##? Usage: git all-repos COMMAND [ARGS]
+    ##?
+    ##? Run a Git command for each repository in the current directory and its subdirectories.
+    ##?
+    ##? Arguments:
+    ##?   COMMAND                       Git command to be executed in each repository
+    ##?   ARGS                          Additional arguments to be passed to the Git command
     all-repos = "!f() { \
-        ls -R -d */.git \
-            | sed 's#/.git##' \
-            | xargs -I{} git -C {} print-repo-info \"$@\"; \
+        if [ $# -lt 1 ]; then \
+            printf >&2 'Usage: git all-repos COMMAND [ARGS]\n'; \
+            return 2; \
+        fi; \
+        local repo_slug_local; \
+        find . -type d -name '.git' \
+            | sed 's_/.git__' \
+            | while read -r repo_path; do \
+                repo_slug_local=$(git -C $repo_path repo-slug-local); \
+                printf '\\033[1m%s\\033[0m\n' \"$repo_slug_local\"; \
+                git -C $repo_path \"$@\"; \
+                printf '\n\n'; \
+            done; \
     }; f"
 
     # Usage: git pull-all-repos
@@ -1694,7 +1701,7 @@ deploy-prod =
     ##? Show the commit history of a specific file.
     file-history2 = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git file-history2 FILENAME\n\"; \
+            printf >&2 \"Usage: git file-history FILENAME\n\"; \
             return 2; \
         fi; \
         FILENAME=\"$1\"; \
@@ -1772,7 +1779,7 @@ deploy-prod =
             printf \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
                                 --color=always $branch -- \"$file_path\") $(tput bold)$branch$(tput sgr0)\n\"; \
-        done | sort -r | sed 's/^[0-9]*://g'; \
+        done | sort -r | sed 's_^[0-9]*:__g'; \
     }; f"
 
     # Alias of 'file-most-recent-commits'.
