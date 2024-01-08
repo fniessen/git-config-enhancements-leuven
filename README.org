@@ -4833,7 +4833,7 @@ List the user's public SSH keys:
             | while read -r repo_path; do \
                 repo_slug_local=$(git -C $repo_path repo-slug-local); \
                 printf '\\033[1m%s\\033[0m\n' \"$repo_slug_local\"; \
-                git -C $repo_path \"$@\"; \
+                git -C $repo_path -c color.status=always \"$@\" 2>&1 | sed 's/^/  /'; \
                 printf '\n\n'; \
             done; \
     }; f"
@@ -6446,33 +6446,32 @@ Your =.gitconfig= file might resemble the following configuration:
     name = Your Name
 #+end_src
 
-* Contributing
+* Contribute to the project!
 
-** Issues
+** Report issues and enhancements
 
-Report issues and suggest features and improvements on the [[https://github.com/fniessen/git-leuven/issues/new][GitHub issue tracker]].
+Found a bug or have an idea for a new feature?  Share your thoughts on the
+[[https://github.com/fniessen/git-leuven/issues/new][GitHub issue tracker]].
 
-** Patches
+** Submit patches
 
-I love contributions!  Patches under any form are always welcome!
+I welcome contributions in any form!  Feel free to submit patches to enhance the
+project.
 
-** Donations
+** Support development with a donation!
 
-If you use the git-leuven project (or any of [[https://github.com/fniessen/][my other projects]]) and feel it is
-making your life better and easier, you can show your appreciation and help
-support future development by making today a [[https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=git%2dleuven&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted][donation]] through PayPal.  Thank
-you!
+If you find the "git-config-enhancements-leuven project" (or any of
+[[https://github.com/fniessen/][my other projects]]) enhancing your Git experience and simplifying your workflow,
+seize the opportunity to express your appreciation!  Help fuel future
+development by making a [[https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=git%2dleuven&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted][donation]] through PayPal. Your support is invaluable --
+thank you!
 
-Regardless of the donations, git-leuven will always be free both as in beer and
-as in speech.
-
-** Follow me
-
-I have an [[https://twitter.com/f_niessen][f_niessen]] account on Twitter.  You should follow it.
+Remember, regardless of donations, "git-config-enhancements-leuven project" will
+always remain freely accessible, both as in Belgian beer and as in speech.
 
 * License
 
-Copyright (C) 2013-2022 Fabrice Niessen
+Copyright (C) 2013-2024 Fabrice Niessen
 
 Author: Fabrice Niessen \\
 Keywords: git aliases

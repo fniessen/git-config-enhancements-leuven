@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240108.1206
+# .gitconfig, Time-stamp: 20240108.1255
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1577,7 +1577,7 @@ deploy-prod =
             | while read -r repo_path; do \
                 repo_slug_local=$(git -C $repo_path repo-slug-local); \
                 printf '\\033[1m%s\\033[0m\n' \"$repo_slug_local\"; \
-                git -C $repo_path \"$@\"; \
+                git -C $repo_path -c color.status=always \"$@\" 2>&1 | sed 's/^/  /'; \
                 printf '\n\n'; \
             done; \
     }; f"
