@@ -837,7 +837,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     ##?   ALIAS_NAME                    The name of the custom Git alias.
     h = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git h ALIAS_NAME\n\"; \
+            printf >&2 'Usage: git h ALIAS_NAME\n'; \
             return 2; \
         fi; \
         local alias_name=\"$1\"; \
@@ -862,7 +862,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     #   ALIAS_NAME    The name of the custom Git alias.
     h = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git h ALIAS_NAME\n\"; \
+            printf >&2 'Usage: git h ALIAS_NAME\n'; \
             return 2; \
         fi; \
         local alias_name=\"$1\"; \
@@ -898,7 +898,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     #   ALIAS_NAME    The name of the custom Git alias.
     h = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git h ALIAS_NAME\n\"; \
+            printf >&2 'Usage: git h ALIAS_NAME\n'; \
             return 2; \
         fi; \
         local alias_name=\"$1\"; \
@@ -1164,7 +1164,7 @@ Search files (by file path) in the current branch.
     ##?   PATTERN                       Pattern
     search-for-files = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git search-for-files PATTERN\n\"; \
+            printf >&2 'Usage: git search-for-files PATTERN\n'; \
             return 2; \
         fi; \
         local pattern=\"$1\"; \
@@ -1189,7 +1189,7 @@ Search files in all branches.
     ##?   FILE_NAME                     The name of the file to search for in all local branches.
     search-for-files-all-branches = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git search-for-files-all-branches FILE_NAME\n\"; \
+            printf >&2 'Usage: git search-for-files-all-branches FILE_NAME\n'; \
             return 2; \
         fi; \
         local search_term=\"$1\"; \
@@ -1800,7 +1800,7 @@ user wants to have an updated repository.
         if [ -n \"$stash_list\" ]; then \
             printf \"%s\" \"$stash_list\n\"; \
         else \
-            printf >&2 \"%s\" 'Nothing stashed\n'; \
+            printf >&2 'Nothing stashed\n'; \
             return 2; \
         fi; \
     }; f"
@@ -2298,7 +2298,7 @@ List all *tags* that contain a specific commit ID:
     ##?   COMMIT2                       The second commit to check for ancestry
     is-ancestor = "!f() { \
         if [ \"$#\" -ne 2 ]; then \
-            printf >&2 \"Usage: git is-ancestor COMMIT1 COMMIT2\n\"; \
+            printf >&2 'Usage: git is-ancestor COMMIT1 COMMIT2\n'; \
             exit 2; \
         fi; \
         local commit1=\"$1\"; \
@@ -2779,13 +2779,13 @@ effective skills -- so that people think you are smart.
     # number of previous commits into a single commit.
     squash = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git squash NUMBER_OF_COMMITS_TO_UNDO\n\"; \
+            printf >&2 'Usage: git squash NUMBER_OF_COMMITS_TO_UNDO\n'; \
             return 2; \
         fi; \
         local upstream_branch=$(git upstream-branch 2>/dev/null); \
         if [ -z \"$upstream_branch\" ]; then \
-            printf >&2 \"Warning: No upstream branch configured for the current branch.\n\"; \
-            printf >&2 \"Consider using 'squash-force' alias.\n\"; \
+            printf >&2 'Warning: No upstream branch configured for the current branch.\n'; \
+            printf >&2 'Consider using 'squash-force' alias.\n'; \
             return 2; \
         fi; \
         local num_unpushed=$(git rev-list $upstream_branch..HEAD --count); \
@@ -4388,7 +4388,7 @@ Tag and push changes to the repository:
     ##? Create a tagged release version in Git and push it to the remote repository.
     release-tag = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git release-tag VERSION\n\"; \
+            printf >&2 'Usage: git release-tag VERSION\n'; \
             return 2; \
         fi; \
         local version=\"$1\"; \
@@ -4833,7 +4833,7 @@ List the user's public SSH keys:
             | while read -r repo_path; do \
                 repo_slug_local=$(git -C $repo_path repo-slug-local); \
                 printf '\\033[1m%s\\033[0m\n' \"$repo_slug_local\"; \
-                git -C $repo_path -c color.status=always \"$@\" 2>&1 | sed 's/^/  /'; \
+                git -C $repo_path -c color.status=always \"$@\" 2>&1; \
                 printf '\n\n'; \
             done; \
     }; f"
@@ -4961,7 +4961,7 @@ Staging for commit is typically done by ~git add~.
     # Example: git diff-commits 2
     diff-commits = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git diff-commits NUMBER\n\"; \
+            printf >&2 'Usage: git diff-commits NUMBER\n'; \
             return 2; \
         fi; \
         git diff --patch-with-stat HEAD~$1; \
@@ -5111,7 +5111,7 @@ merge commits...
     ##? Show the commit history of a specific file.
     file-history2 = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git file-history FILENAME\n\"; \
+            printf >&2 'Usage: git file-history FILENAME\n'; \
             return 2; \
         fi; \
         FILENAME=\"$1\"; \
@@ -5123,7 +5123,7 @@ merge commits...
     ##? Show the commit history of a specific file across all branches.
     file-history-all = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git file-history-all FILENAME\n\"; \
+            printf >&2 'Usage: git file-history-all FILENAME\n'; \
             return 2; \
         fi; \
         FILENAME=\"$1\"; \
@@ -5135,7 +5135,7 @@ merge commits...
     ##? Show the commit history of a specific file across all branches.
     file-history-all2 = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git file-history-all2 FILENAME\n\"; \
+            printf >&2 'Usage: git file-history-all2 FILENAME\n'; \
             return 2; \
         fi; \
         FILENAME=\"$1\"; \
@@ -5227,7 +5227,7 @@ succession.
     ##? Show the most recent commits for a specific file across all local branches.
     file-most-recent-commits = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git file-most-recent-commits FILE_PATH\n\"; \
+            printf >&2 'Usage: git file-most-recent-commits FILE_PATH\n'; \
             return 2; \
         fi; \
         local file_path=\"$1\"; \
@@ -5248,7 +5248,7 @@ succession.
 #+begin_src conf
     file-most-recent-commits2 = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git file-most-recent-commits2 FILE_PATH\n\"; \
+            printf >&2 'Usage: git file-most-recent-commits2 FILE_PATH\n'; \
             return 2; \
         fi; \
         local file_path=\"$1\"; \
@@ -5581,7 +5581,7 @@ You can do ~git merge --abort~ after seeing that there are conflicts.
     ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
     dry-merge1 = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git dry-merge1 BRANCH_NAME\n\"; \
+            printf >&2 'Usage: git dry-merge1 BRANCH_NAME\n'; \
             return 2; \
         fi; \
         local branch_to_merge=\"$1\"; \
@@ -5599,7 +5599,7 @@ You can do ~git merge --abort~ after seeing that there are conflicts.
     ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
     dry-merge2 = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 \"Usage: git dry-merge2 BRANCH_NAME\n\"; \
+            printf >&2 'Usage: git dry-merge2 BRANCH_NAME\n'; \
             return 2; \
         fi; \
         local branch_to_merge=\"$1\"; \
