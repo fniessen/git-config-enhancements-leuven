@@ -1,4 +1,4 @@
-#+TITLE:     Awesome Git aliases and time-saving commands
+#+TITLE:     Mastering Git: Awesome aliases and time-saving commands
 #+AUTHOR:    Fabrice Niessen
 #+EMAIL:     (concat "fniessen" at-sign "pirilampo.org")
 #+DESCRIPTION: Git configs & aliases collection
@@ -825,7 +825,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
                   | grep alias \
                   | cut -c 7- \
                   | sort \
-                  | sed 's/=/ = /'"
+                  | sed 's_=_ = _'"
 #+end_src
 
 #+begin_src conf :tangle no
@@ -1065,7 +1065,7 @@ Fetch URL: git@bitbucket.org-something:user/slug
 #+begin_src conf
     # origin = !echo "${$(git config --get clone.defaultRemoteName):-origin}"
     origin = !echo "origin"
-    # git remote get-url origin | sed 's/\.git$//'
+    # git remote get-url origin | sed 's_\.git$__'
 #+end_src
 
 #+begin_src conf
@@ -1074,8 +1074,8 @@ Fetch URL: git@bitbucket.org-something:user/slug
     repo-owner = "!f() { \
         git remote show $(git config --get remote.origin.url) -n \
             | grep 'Fetch URL:' \
-            | sed -E 's#^.*[/:](.*)/.*$#\\1#' \
-            | sed 's#\\.git$##'; \
+            | sed -E 's_^.*[/:](.*)/.*$_\\1_' \
+            | sed 's_\\.git$__'; \
     }; f"
 #+end_src
 
@@ -1085,7 +1085,7 @@ Fetch URL: git@bitbucket.org-something:user/slug
     repo-slug-remote = "!f() { \
         git remote show $(git config --get remote.origin.url) -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
-            | sed 's#\\.git$##'; \
+            | sed 's_\\.git$__'; \
     }; f"
 #+end_src
 
@@ -1112,7 +1112,7 @@ Updating Git aliases for different *main branch* names (~main~, ~master~, etc.):
     }; f"
     # Note: The alias
     # main-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
-    #     | sed 's#^refs/remotes/origin/##'"
+    #     | sed 's_^refs/remotes/origin/__'"
     # generates the error message
     # "fatal: ref refs/remotes/origin/HEAD is not a symbolic ref"
     # when the remote repository does not have a default branch.
@@ -1499,7 +1499,7 @@ Quickly add a file or directory to =.gitignore=:
     ignore-untracked = "!git status \
                 | grep -P \"^\\t\" \
                 | grep -vF .gitignore \
-                | sed \"s/^\\t//\" \
+                | sed \"s_^\\t__\" \
                 >> \"${GIT_PREFIX}.gitignore\""
 #+end_src
 
@@ -1647,7 +1647,7 @@ remove files which have been deleted
 https://www.commandlinefu.com/commands/view/3502/git-remove-files-which-have-been-deleted
 
 stage manually deleted files
-: git status | grep deleted | sed 's/deleted://g' | sed 's/[#| ]//g' | xargs git rm
+: git status | grep deleted | sed 's_deleted:__g' | sed 's_[#| ]__g' | xargs git rm
 
 ** Stash (shelve)
 
@@ -1896,7 +1896,7 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
         git stash list \
             | grep $@ \
             | head -n 1 \
-            | sed -n 's/stash@{\\(.*\\)}.*/\\1/p'; \
+            | sed -n 's_stash@{\\(.*\\)}.*_\\1_p'; \
     }; f"
     # Only accepts single word, no quotations.
 
@@ -3687,10 +3687,10 @@ List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
 : git show-ref -d --tags \
 :     | cut -b 42- \
 :     | sort \
-:     | sed 's/\^{}//' \
+:     | sed 's_\^{}__' \
 :     | uniq -c \
-:     | sed 's/2\ refs\/tags\// a /' \
-:     | sed 's/1\ refs\/tags\//lw /'
+:     | sed 's_2\ refs/tags/_ a _' \
+:     | sed 's_1\ refs/tags/_lw _'
 : # 2. Remove the commit-id.
 : # 4. Remove ^{} markings.
 : # 5. Count identical lines.
@@ -4041,7 +4041,7 @@ Directed Acyclic Graph:
     graphviz = "!f() { \
         echo 'digraph git {' ; \
         git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
-            | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; \
+            | sed 's_[0-9a-f][0-9a-f]*_\"&\"_g' ; \
         echo '}'; \
     }; f"
 #+end_src
@@ -4691,12 +4691,12 @@ See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
     #     curl --user $USER_NAME \
     #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
-    #         | sed -r 's/(....)-(..)-(..)T(..):(..):(..).(............)/\\1-\\2-\\3/g' \
-    #         | sed \"s/new/NEW/\" \
-    #         | sed \"s/NEW/$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)/\" \
-    #         | sed \"s/NEW/\$(tput setaf 3) -NOUV- \$(tput sgr0)/\" \
-    #         | sed \"s/open/OPEN/\" \
-    #         | sed \"s/closed/CLOSED/\"; \
+    #         | sed -r 's_(....)-(..)-(..)T(..):(..):(..).(............)_\\1-\\2-\\3_g' \
+    #         | sed \"s_new_NEW_\" \
+    #         | sed \"s_NEW_$(tput setaf 2) -- NOUVEAU -- $(tput sgr0)_\" \
+    #         | sed \"s_NEW_\$(tput setaf 3) -NOUV- \$(tput sgr0)_\" \
+    #         | sed \"s_open_OPEN_\" \
+    #         | sed \"s_closed_CLOSED_\"; \
     # }; f"
 # --data-urlencode 'priority >= \"major\"'
 #+end_src
@@ -4706,8 +4706,8 @@ See https://blog.bennycornelissen.nl/post/github-from-your-terminal/
         USER_NAME=\"$1\"; \
         curl --user $USER_NAME 'https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues?pagelen=100' \
             | jq --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
-            | sed \"s#\"open\"#$(tput setaf 2)&$(tput sgr0)#\" \
-            | sed \"s#\"closed\"#$(tput setaf 1)&$(tput sgr0)#\"; \
+            | sed \"s_\"open\"_$(tput setaf 2)&$(tput sgr0)_\" \
+            | sed \"s_\"closed\"_$(tput setaf 1)&$(tput sgr0)_\"; \
     }; f"
 #+end_src
 
@@ -4827,7 +4827,7 @@ List the user's public SSH keys:
     # Run a command for each repository in the current directory.
     all-repos = "!f() { \
         ls -R -d */.git \
-            | sed 's#/.git##' \
+            | sed 's_/.git__' \
             | xargs -I{} git -C {} print-repo-info \"$@\"; \
     }; f"
 #+end_src
@@ -5229,7 +5229,7 @@ succession.
             printf \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
                                 --color=always $branch -- \"$file_path\") $(tput bold)$branch$(tput sgr0)\n\"; \
-        done | sort -r | sed 's/^[0-9]*://g'; \
+        done | sort -r | sed 's_^[0-9]*:__g'; \
     }; f"
 
     # Alias of 'file-most-recent-commits'.
