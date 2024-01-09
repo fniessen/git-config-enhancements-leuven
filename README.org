@@ -1312,11 +1312,16 @@ thrown away, the alias to use is ~unmodify~;
         local file_to_restore=\"$1\"; \
         if [ -z \"$file_to_restore\" ]; then \
             git status --porcelain \
-                | grep -E '^[ M]' \
-                | sed 's_^[ M]__' \
+                | grep -E '^ M' \
+                | sed 's_^ M __' \
                 | xargs -I {} git checkout -- \"{}\"; \
         else \
-            git checkout -- \"$file_to_restore\"; \
+            if git status --porcelain \"$file_to_restore\" | grep -qE '^ M'; then \
+                git checkout -- \"$file_to_restore\"; \
+            else \
+                printf >&2 \"Error: File %s is not modified.\n\" \"$file_to_restore\"; \
+                return 2; \
+            fi; \
         fi; \
     }; f"
 
@@ -1332,7 +1337,12 @@ thrown away, the alias to use is ~unmodify~;
                 | sed 's_^ D __' \
                 | xargs -I {} git checkout -- \"{}\"; \
         else \
-            git checkout -- \"$file_to_restore\"; \
+            if git status --porcelain \"$file_to_restore\" | grep -qE '^ D'; then \
+                git checkout -- \"$file_to_restore\"; \
+            else \
+                printf >&2 \"Error: File %s is not deleted.\n\" \"$file_to_restore\"; \
+                return 2; \
+            fi; \
         fi; \
     }; f"
 #+end_src

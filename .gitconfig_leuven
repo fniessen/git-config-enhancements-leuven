@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240109.0908
+# .gitconfig, Time-stamp: 20240109.1051
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -352,11 +352,16 @@
         local file_to_restore=\"$1\"; \
         if [ -z \"$file_to_restore\" ]; then \
             git status --porcelain \
-                | grep -E '^[ M]' \
-                | sed 's_^[ M]__' \
+                | grep -E '^ M' \
+                | sed 's_^ M __' \
                 | xargs -I {} git checkout -- \"{}\"; \
         else \
-            git checkout -- \"$file_to_restore\"; \
+            if git status --porcelain \"$file_to_restore\" | grep -qE '^ M'; then \
+                git checkout -- \"$file_to_restore\"; \
+            else \
+                printf >&2 \"Error: File %s is not modified.\n\" \"$file_to_restore\"; \
+                return 2; \
+            fi; \
         fi; \
     }; f"
 
@@ -372,7 +377,12 @@
                 | sed 's_^ D __' \
                 | xargs -I {} git checkout -- \"{}\"; \
         else \
-            git checkout -- \"$file_to_restore\"; \
+            if git status --porcelain \"$file_to_restore\" | grep -qE '^ D'; then \
+                git checkout -- \"$file_to_restore\"; \
+            else \
+                printf >&2 \"Error: File %s is not deleted.\n\" \"$file_to_restore\"; \
+                return 2; \
+            fi; \
         fi; \
     }; f"
 
