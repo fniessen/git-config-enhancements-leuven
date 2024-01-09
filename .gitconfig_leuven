@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240109.1051
+# .gitconfig, Time-stamp: 20240109.1058
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -348,6 +348,11 @@
     ##?
     ##? Undo local modifications for a specific file or all files if no file is
     ##? provided.
+    ##?
+    ##? Examples:
+    ##?   git unmodify                  Restore all modified files.
+    ##?   git unmodify .                Restore all modified files in the current directory.
+    ##?   git unmodify PATH/TO/FILE     Restore a specific modified file:.
     unmodify = "!f() { \
         local file_to_restore=\"$1\"; \
         if [ -z \"$file_to_restore\" ]; then \
@@ -369,6 +374,11 @@
     ##?
     ##? Restore deleted files for a specific file or all files if no file is
     ##? provided.
+    ##?
+    ##? Examples:
+    ##?   git undelete                  Restore all deleted files.
+    ##?   git undelete .                Restore all deleted files in the current directory.
+    ##?   git undelete PATH/TO/FILE     Restore a specific deleted file:.
     undelete = "!f() { \
         local file_to_restore=\"$1\"; \
         if [ -z \"$file_to_restore\" ]; then \
