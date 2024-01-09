@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240109.1058
+# .gitconfig, Time-stamp: 20240109.1119
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -62,7 +62,13 @@
 
     # Set Git pager to use less with custom flags and diff-so-fancy.
     pager = "!sh -c '~/bin/git-pager'"
-    pager = "!f() { if command -v diff-so-fancy &>/dev/null; then echo 'Using diff-so-fancy pager' && diff-so-fancy | LESS=less --tabs=4 -FRX \"$@\"; else echo 'Using default pager' && LESS=less --tabs=4 -FRX \"$@\"; fi; }; f"
+    pager = "!f() { \
+        if command -v diff-so-fancy &>/dev/null; then \
+            echo 'Using diff-so-fancy pager' && diff-so-fancy | LESS=less --tabs=4 -FRX \"$@\"; \
+        else \
+            echo 'Using default pager' && LESS=less --tabs=4 -FRX \"$@\"; \
+        fi; \
+    }; f"
     pager = LESS= less --tabs=4 -FRX
 
 [core]
@@ -1230,11 +1236,15 @@
 
     # Usage: git publish-tag TAG_NAME [REMOTE_NAME]
     # Publish a Git tag to a remote repository.
-    publish-tag = "!sh -c 'git push ${2:-$(git origin)} $1' -"
+    publish-tag = "!f() { \
+        git push ${2:-$(git origin)} $1; \
+    }; f"
 
     # Usage: git unpublish-tag TAG_NAME [REMOTE_NAME]
     # Remove a published Git tag from a remote repository.
-    unpublish-tag = "!sh -c 'git push ${2:-$(git origin)} :refs/tags/$1' -"
+    unpublish-tag = "!f() { \
+        git push ${2:-$(git origin)} :refs/tags/$1; \
+    }; f"
 
     push-tags = push --tags
 
@@ -2197,7 +2207,13 @@ deploy-prod =
 
     # Usage: git commit-interactive FILENAME...
     # Interactively stage changes and commit, or abort.
-    commit-interactive = !sh -c '(git add -p -- $@ && git commit) || git reset' --
+    commit-interactive = "!f() { \
+        if [ \"$(git root)\" != \"$(pwd)\" ]; then \
+            printf >&2 'Error: Not at the root of the Git repository.'; \
+            return 2; \
+        fi; \
+        (git add -p -- \"$@\" && git commit) || git reset; \
+    }; f"
 
     # Alias of 'commit-interactive'.
     record = commit-interactive
