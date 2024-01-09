@@ -1308,18 +1308,33 @@ thrown away, the alias to use is ~unmodify~;
     ##?
     ##? Undo local modifications for a specific file or all files if no file is
     ##? provided.
-    unmodify = checkout --
+    unmodify = "!f() { \
+        local file_to_restore=\"$1\"; \
+        if [ -z \"$file_to_restore\" ]; then \
+            git status --porcelain \
+                | grep -E '^[ M]' \
+                | sed 's_^[ M]__' \
+                | xargs -I {} git checkout -- \"{}\"; \
+        else \
+            git checkout -- \"$file_to_restore\"; \
+        fi; \
+    }; f"
 
     ##? Usage: git undelete [FILE]
     ##?
     ##? Restore deleted files for a specific file or all files if no file is
     ##? provided.
-    undelete = checkout --
-
-    ##? Usage: git undo-changes [FILE]
-    ##?
-    ##? Revert changes for a specific file or all files if no file is provided.
-    undo-changes = checkout --
+    undelete = "!f() { \
+        local file_to_restore=\"$1\"; \
+        if [ -z \"$file_to_restore\" ]; then \
+            git status --porcelain \
+                | grep -E '^ D' \
+                | sed 's_^ D __' \
+                | xargs -I {} git checkout -- \"{}\"; \
+        else \
+            git checkout -- \"$file_to_restore\"; \
+        fi; \
+    }; f"
 #+end_src
 
 #+begin_note
@@ -1646,8 +1661,20 @@ https://stackoverflow.com/questions/2412239/how-to-do-mercurials-hg-remove-for-a
 remove files which have been deleted
 https://www.commandlinefu.com/commands/view/3502/git-remove-files-which-have-been-deleted
 
-stage manually deleted files
-: git status | grep deleted | sed 's_deleted:__g' | sed 's_[#| ]__g' | xargs git rm
+Stage manually deleted files:
+
+#+begin_src conf
+    # Remove files marked as deleted in the Git repository.
+    remove-deleted = "!f() { \
+        git status \
+            | grep deleted \
+            | sed 's_deleted:__g' \
+            | sed 's_[#| ]__g' \
+            | sed 's/^[ \t]*//' \
+            | sed 's/[ \t]*$//' \
+            | xargs -d '\n' git rm; \
+    }; f"
+#+end_src
 
 ** Stash (shelve)
 

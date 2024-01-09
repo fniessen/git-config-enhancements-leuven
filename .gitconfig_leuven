@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240108.1319
+# .gitconfig, Time-stamp: 20240109.0908
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -348,18 +348,33 @@
     ##?
     ##? Undo local modifications for a specific file or all files if no file is
     ##? provided.
-    unmodify = checkout --
+    unmodify = "!f() { \
+        local file_to_restore=\"$1\"; \
+        if [ -z \"$file_to_restore\" ]; then \
+            git status --porcelain \
+                | grep -E '^[ M]' \
+                | sed 's_^[ M]__' \
+                | xargs -I {} git checkout -- \"{}\"; \
+        else \
+            git checkout -- \"$file_to_restore\"; \
+        fi; \
+    }; f"
 
     ##? Usage: git undelete [FILE]
     ##?
     ##? Restore deleted files for a specific file or all files if no file is
     ##? provided.
-    undelete = checkout --
-
-    ##? Usage: git undo-changes [FILE]
-    ##?
-    ##? Revert changes for a specific file or all files if no file is provided.
-    undo-changes = checkout --
+    undelete = "!f() { \
+        local file_to_restore=\"$1\"; \
+        if [ -z \"$file_to_restore\" ]; then \
+            git status --porcelain \
+                | grep -E '^ D' \
+                | sed 's_^ D __' \
+                | xargs -I {} git checkout -- \"{}\"; \
+        else \
+            git checkout -- \"$file_to_restore\"; \
+        fi; \
+    }; f"
 
     # Usage: git unstage [FILENAME...]
     # Unstage the changes to a file that were previously added to the Git
@@ -480,6 +495,17 @@
     # Show what files and directories would be removed by the clean-all alias
     # without actually removing them.
     clean-all-dry = clean -n -d -x
+
+    # Remove files marked as deleted in the Git repository.
+    remove-deleted = "!f() { \
+        git status \
+            | grep deleted \
+            | sed 's_deleted:__g' \
+            | sed 's_[#| ]__g' \
+            | sed 's/^[ \t]*//' \
+            | sed 's/[ \t]*$//' \
+            | xargs -d '\n' git rm; \
+    }; f"
 
     # Usage: git stash-push
     # Stash changes in the working directory for later retrieval.
