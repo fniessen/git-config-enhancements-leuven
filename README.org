@@ -290,6 +290,8 @@ Supported editors include:
     # Set Emacsclient as the default editor.
     editor = emacsclient
     # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
+    editor = sh -c 'command -v $GIT_EDITOR >/dev/null 2>&1 && exec $GIT_EDITOR || echo "Please install $GIT_EDITOR or set another editor"'
+    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd >/dev/null 2>&1 && exec $cmd; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
 #+end_src
 
 ** Delete ".orig" files
@@ -1442,7 +1444,7 @@ manage.
     # Create a backup archive of all untracked files in the repository.
     backup-all-untracked-files = "!f() { \
         repo_slug_remote=\"$(git repo-slug-remote)\"; \
-        current_date=$(date +\"%Y-%m-%d\"); \
+        current_date=$(date +'%Y-%m-%d'); \
         backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
         git all-untracked-files -z \
             | xargs -0 tar rvf ~/$backup_filename; \
@@ -1813,7 +1815,7 @@ user wants to have an updated repository.
 #+begin_src conf
     # Usage: git snapshot
     # Create a snapshot stash with a timestamp and immediately apply it.
-    snapshot = !git stash push -m "snapshot-$(date +%Y%m%d_%H%M)" \
+    snapshot = !git stash push -m "snapshot-$(date +'%Y%m%d_%H%M')" \
                 && git stash apply "stash@{0}"
 #+end_src
 
@@ -3060,7 +3062,7 @@ branch (if any).
 #+begin_src conf
     # Usage: git branches
     # Show all branches with their corresponding upstream branches and commit hashes.
-    branches = branch -a -vv
+    branches = "!git fetch --prune && git branch -a -vv"
 #+end_src
 
 #+begin_src conf
@@ -3102,7 +3104,7 @@ XXX Add "no remote" for branches which are not published
     # Usage: git remote-branches
     # List remote branches sorted by most recent commit.
     remote-branches = "!f() { \
-        git fetch; \
+        git fetch --prune && \
         for branch in $(git branch -r | grep -v HEAD); do \
             echo \"$(git show -s --format='%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)' $branch | head -n 1) \\t$branch\"; \
         done | sort -r; \
@@ -3694,7 +3696,7 @@ Create a date/time tag with a suffix, e.g: 2021.01.12_15.25_PREVIOUS:
 #+begin_src conf
     # Usage: git tag-with-date [SUFFIX]
     # Tag the current commit with the current date and a custom suffix.
-    tag-with-date = "!sh -c 'git tag $(date \"+%Y.%m.%d_%H.%M\")_\"$0\"'"
+    tag-with-date = "!sh -c 'git tag $(date +'%Y.%m.%d_%H.%M')_\"$0\"'"
 #+end_src
 
 ** See the commits for a tag
@@ -4541,7 +4543,7 @@ current tag.  Useful for uploading to Elasticbeanstalk.
             printf >&2 'No changed files to export.\n'; \
             return 2; \
         fi; \
-        local date=$(date +\\%Y-\\%m-\\%d); \
+        local date=$(date +'%Y-%m-%d'); \
         local zip_file=\"$date-$(git repo-slug-remote)-changed-files-$current_branch.zip\"; \
         zip -9 ~/$zip_file $changed_files; \
         printf 'Exported changed files saved as %s\n' $zip_file; \
@@ -4551,7 +4553,7 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 Example for a branch:
 
 : git missing-files-name-only main > file-list.txt
-: cat file-list.txt | xargs zip -9 "$(date +\%Y-\%m-\%d)_what-it-does.zip"
+: cat file-list.txt | xargs zip -9 "$(date +'%Y-%m-%d')_what-it-does.zip"
 
 Save a repo (for example, ~HEAD~ or ~master~ -- or any other branch to archive, if
 you've already checked it out) as a tarball:
@@ -5313,7 +5315,7 @@ succession.
         while read branch commit_hash; do \
             local commit_info=$(git log -n 1 \
                                     --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
-                                    --date=format-local:\"%Y-%m-%d\" \"$commit_hash\" -- \"$file_path\"); \
+                                    --date=format-local:'%Y-%m-%d' \"$commit_hash\" -- \"$file_path\"); \
             if [ -n \"$commit_info\" ]; then \
                 echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
             fi; \
