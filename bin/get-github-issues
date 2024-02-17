@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Set your GitHub Personal Access Token here.
+GITHUB_TOKEN="..."
+
+# Get the remote URL for the 'origin' remote.
+remote_url=$(git remote get-url origin)
+
+# Extract the owner and repo names from the URL using text manipulation.
+owner_and_repo=$(echo "$remote_url" | sed -n 's#.*github.com[:/]\([^/]\+\)/\([^/]\+\)\.git#\1/\2#p')
+
+# Check if the extraction was unsuccessful.
+if [ -z "$owner_and_repo" ]; then
+    echo "Failed to extract owner and repo names from the Git remote URL."
+fi
+
+# GitHub API URL for fetching issues.
+API_URL="https://api.github.com/repos/$owner_and_repo/issues"
+
+# Make the HTTP GET request to fetch issues.
+curl -s -H "Authorization: token $GITHUB_TOKEN" "$API_URL" \
+    | jq -r '.[] | "Issue #" + (.number | tostring) + " - " + .title'

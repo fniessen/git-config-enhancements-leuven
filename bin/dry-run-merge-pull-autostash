@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Fetch the changes.
+git fetch origin
+
+CURRENT_BRANCH=$(git branch --show-current)
+
+# Dry run merge.
+MERGE_RESULT=$(git merge --no-commit --no-ff origin/$CURRENT_BRANCH 2>&1)
+
+# Check if the merge would be successful.
+if [[ $MERGE_RESULT == *"Already up to date."* ]] || [[ $MERGE_RESULT == *"Fast-forward"* ]]; then
+    echo "No conflicts detected. Stashing changes..."
+
+    # Stash the changes.
+    git stash
+
+    git pull --rebase
+
+    git stash pop
+
+else
+    echo "Conflicts detected. Please resolve them before pulling."
+
+    # Abort the dry run merge.
+    git merge --abort
+fi
