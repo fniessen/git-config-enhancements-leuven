@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240208.1635
+# .gitconfig, Time-stamp: 20240405.1104
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1207,7 +1207,16 @@
 
     # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
-    delete-remote-branch = !git push $(git origin) --delete
+    delete-remote-branch = "!f() { \
+        branch_name=\"$1\"; \
+        printf \"Are you sure you want to delete the remote branch '%s'? [y/N]\" \"$branch_name\"; \
+        read -r confirm; \
+        if [ \"$confirm\" = \"y\" ] || [ \"$confirm\" = \"Y\" ]; then \
+            git push $(git origin) --delete \"$branch_name\"; \
+        else \
+            printf \"Branch deletion cancelled.\"; \
+        fi \
+    }; f"
     # = "Close source branch" (after merging).
 
     # Usage: git unpublish

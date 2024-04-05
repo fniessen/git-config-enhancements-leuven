@@ -2314,6 +2314,8 @@ https://github.com/wmanley/git-meld:
     dir-diff = difftool -t meld --dir-diff
 #+end_src
 
+Alternative: use [[https://diffoscope.org/][diffoscope]]
+
 ** Get the references the commit has been pushed to (which branches and tags?)
 
 List all the *branches and tags* (XXX) that contain a specific commit.
@@ -3565,7 +3567,16 @@ Delete a *remote* branch:
 #+begin_src conf
     # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
-    delete-remote-branch = !git push $(git origin) --delete
+    delete-remote-branch = "!f() { \
+        branch_name=\"$1\"; \
+        printf \"Are you sure you want to delete the remote branch '%s'? [y/N]\" \"$branch_name\"; \
+        read -r confirm; \
+        if [ \"$confirm\" = \"y\" ] || [ \"$confirm\" = \"Y\" ]; then \
+            git push $(git origin) --delete \"$branch_name\"; \
+        else \
+            printf \"Branch deletion cancelled.\"; \
+        fi \
+    }; f"
     # = "Close source branch" (after merging).
 
     # Usage: git unpublish
