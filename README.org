@@ -6236,34 +6236,19 @@ Show changes for a daily standup meeting:
     # Usage: git standup [AUTHOR]
     # Summarize changes since 24h, suitable for a daily standup meeting.
     standup = "!f() { \
-        git log \
-                --branches \
-                --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
-                              printf \"last.Friday\"; \
-                          else \
-                              printf \"yesterday\"; \
-                          fi) \
-                --author=\"${1-$(git config --get user.name)}\" \
-                --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-    }; f"
-#+end_src
-
-#+begin_src conf :tangle no
-    standup2 = "!f() { \
-        today=$(date +%a) \
+        today=$(date +%a); \
         if [ \"$today\" = \"Mon\" ]; then \
-            since=\"last.Friday\" \
+            since=\"last.Friday\"; \
         else \
-            since=\"yesterday\" \
-        fi \
-        author=\"${1-$(git config --get user.name)}\" \
+            since=\"yesterday\"; \
+        fi; \
+        author=\"${1-$(git config --get user.name)}\"; \
         git log \
             --branches \
             --since=\"$since\" \
             --author=\"$author\" \
             --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
-            --date=format:'%Y-%m-%d %a %H:%M' \
+            --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
 #+end_src
 
