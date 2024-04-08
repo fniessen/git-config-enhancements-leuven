@@ -6244,13 +6244,15 @@ Show changes for a daily standup meeting:
         fi; \
         author=\"${1-$(git config --get user.name)}\"; \
         git log \
-            --branches \
+            --all \
             --since=\"$since\" \
             --author=\"$author\" \
             --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
 #+end_src
+
+TODO: Make author be case insensitive (with regexp and ignore case?)
 
 TODO: 'git standup W' donne un décompte avec une ligne trop peu !
 
