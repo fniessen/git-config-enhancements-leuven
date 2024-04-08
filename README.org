@@ -6239,9 +6239,9 @@ Show changes for a daily standup meeting:
         git log \
                 --branches \
                 --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
-                              echo \"friday\"; \
+                              printf \"last.Friday\"; \
                           else \
-                              echo \"yesterday\"; \
+                              printf \"yesterday\"; \
                           fi) \
                 --author=\"${1-$(git config --get user.name)}\" \
                 --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
@@ -6253,7 +6253,7 @@ Show changes for a daily standup meeting:
     standup2 = "!f() { \
         today=$(date +%a) \
         if [ \"$today\" = \"Mon\" ]; then \
-            since=\"friday\" \
+            since=\"last.Friday\" \
         else \
             since=\"yesterday\" \
         fi \

@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240405.1104
+# .gitconfig, Time-stamp: 20240408.1122
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2208,9 +2208,9 @@ deploy-prod =
         git log \
                 --branches \
                 --since=$(if [ \"$(date +%a)\" = \"Mon\" ]; then \
-                              echo \"friday\"; \
+                              printf \"last.Friday\"; \
                           else \
-                              echo \"yesterday\"; \
+                              printf \"yesterday\"; \
                           fi) \
                 --author=\"${1-$(git config --get user.name)}\" \
                 --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
