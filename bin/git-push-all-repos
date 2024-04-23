@@ -5,7 +5,8 @@
 # Find all Git repositories recursively and sort them alphabetically.
 find . -type d -name ".git" | sort | while read -r repo; do
     repo_dir=$(dirname "$repo")
-    printf "\nPushing latest changes for repository in %s...\n" "$(tput bold)${repo_dir##*/}$(tput sgr0)"
+    repo_name=$(basename "$repo_dir")
+    printf "\nPushing latest changes for repository '%s'...\n" "$(tput bold)$repo_name$(tput sgr0)"
 
     # Push changes.
     if ! output=$(git -C "$repo_dir" push 2>&1); then
@@ -15,10 +16,10 @@ find . -type d -name ".git" | sort | while read -r repo; do
     fi
 
     # Display modified files in yellow bold.
-    modified_files=$(git -C "$repo_dir" modified-files)
+    modified_files=$(git -C "$repo_dir" status --porcelain)
     if [[ -n "$modified_files" ]]; then
         while IFS= read -r line; do
-            printf "$(tput setaf 3)$(tput bold)        modified:   %s$(tput sgr0)\n" "$line"
+            printf "$(tput setaf 3)$(tput bold)        %s$(tput sgr0)\n" "$line"
         done <<< "$modified_files"
     fi
 done
