@@ -882,7 +882,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
             return 2; \
         fi; \
         local alias_name=\"$1\"; \
-        local gitconfig_path=\"$(git rev-parse --show-toplevel)/.git/config\"; \
+        local gitconfig_path=\"$(git root)/.git/config\"; \
         local alias_comments=\"$(awk -v alias=\"$alias_name\" \
             '/\\[alias\\]/ { in_alias = 1; next } \
             in_alias && /^\\s*$/ { in_alias = 0; next } \
@@ -918,7 +918,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
             return 2; \
         fi; \
         local alias_name=\"$1\"; \
-        local gitconfig_path=\"$(git rev-parse --show-toplevel)/.git/config\"; \
+        local gitconfig_path=\"$(git root)/.git/config\"; \
         local alias_comments=\"$(awk -v alias=\"$alias_name\" \
             -v RS=\"\" \
             '$1 == alias { \
@@ -1109,7 +1109,7 @@ Fetch URL: git@bitbucket.org-something:user/slug
     # Usage: git repo-slug-local
     # Provide the base name (slug) of the current local repository's top-level directory.
     repo-slug-local = "!f() { \
-        echo $(basename \"$(git rev-parse --show-toplevel)\"); \
+        printf \"%s\n\" \"$(basename \"$(git root)\")\"; \
     }; f"
 #+end_src
 
@@ -2286,7 +2286,7 @@ Diff the last commit for a given file:
     }; f"
 
     file-diff-last-modification2 = "!f() { \
-        PROJECT_ROOT_DIR=$(git rev-parse --show-toplevel); \
+        PROJECT_ROOT_DIR=$(git root); \
         echo Finding full file path of \"$1\" in $PROJECT_ROOT_DIR; \
         FILEPATH=$(git ls-files --full-name -- \"$1\"); \
         echo Full file path $FILEPATH; \
@@ -5883,13 +5883,81 @@ jump across commits:
     }; f"
 #+end_src
 
-*** If you get the error "The following untracked working tree files would be overwritten by checkout"
+*** If you get the error "Your local changes to the following files would be overwritten by checkout"
 
 #+begin_src text :tangle no
 error: Your local changes to the following files would be overwritten by checkout:
         WEB-INF/config/afm-projects.xml.DEV-fni
         WEB-INF/config/context/logging/logging.xml
 Please commit your changes or stash them before you switch branches.
+#+end_src
+
+To address the case where local changes to tracked files would be overwritten by
+the checkout operation, you have a few options:
+
+#+begin_src shell :tangle no
+# Change directory to the root of the Git repository.
+cd "$(git rev-parse --show-toplevel)"
+#+end_src
+
+- *Commit the Changes:* If the changes are ready to be committed, you can commit
+  them to your current branch before switching to the desired branch.
+
+#+begin_src shell :tangle no
+  # Check if there are any changes to tracked files.
+  if ! git diff --quiet; then
+      # Commit changes.
+      git add .
+      git commit -m "Committing changes before switching branches"
+  fi
+  #+end_src
+
+- *Stash the Changes:* If you're not ready to commit the changes but want to
+  switch branches, you can stash them using ~git stash~. Stashing temporarily
+  shelves changes so you can reapply them later.
+
+  #+begin_src shell :tangle no
+  # Check if there are any changes to tracked files.
+  if ! git diff --quiet; then
+      # Stash changes.
+      git stash save "Stashing changes before switching branches"
+  fi
+  #+end_src
+
+- *Discard the Changes:* If the changes are not needed or you want to discard
+  them, you can use ~git checkout -- FILE~ (*unmodify*) to discard changes for
+  individual files
+
+  #+begin_src shell :tangle no
+  # Attempt to switch to the desired branch, while handling errors.
+  git checkout BRANCH 2>&1 | {
+      # Read each line of output.
+      while IFS= read -r FILE_PATH; do
+          # If a file path is found, discard changes for that file.
+          if [ -n "$FILE_PATH" ]; then
+              # Remove leading spaces from FILE_PATH.
+              FILE_PATH=$(echo "$FILE_PATH" | sed 's/^[[:space:]]*//')
+              # Discard changes for the blocked file.
+              git checkout -- "$FILE_PATH"
+          fi
+      done
+  }
+  #+end_src
+
+  or ~git checkout -- .~ to discard changes for all tracked files in the working
+  directory.
+
+  #+begin_src shell :tangle no
+  # Check if there are any changes to tracked files.
+  if ! git diff --quiet; then
+      # Discard changes for all files.
+      git checkout -- .
+  fi
+  #+end_src
+
+*** If you get the error "The following untracked working tree files would be overwritten by checkout"
+
+#+begin_src text :tangle no
 error: The following untracked working tree files would be overwritten by checkout:
         WEB-INF/config/afm-projects.xml
 Please move or remove them before you switch branches.
@@ -5898,11 +5966,19 @@ Please move or remove them before you switch branches.
 One solution is to *move the untracked files*, instead of *deleting them*.  For
 example:
 
-: cd "$(git root)"
-: git checkout BRANCH 2>&1 \
-:     | while read F; do \
-:           [ ! -e "$F" ] || mv -v "$F" "$F.bak"; \
-:       done
+#+begin_src shell :tangle no
+# Change directory to the root of the Git repository.
+cd "$(git root)"
+
+# Attempt to switch to the desired branch, while handling errors.
+git checkout BRANCH 2>&1 | while read -r FILE_PATH; do
+    # Check if the file exists to avoid errors.
+    if [ -e "$FILE_PATH" ]; then
+        # Move the untracked file to a backup location.
+        mv -v "$FILE_PATH" "$FILE_PATH.bak"
+    fi
+done
+#+end_src
 
 Another is to throw away local changes using a *forced checkout*:
 
