@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240408.1410
+# .gitconfig, Time-stamp: 20240502.1811
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -273,7 +273,7 @@
     # Usage: git repo-slug-local
     # Provide the base name (slug) of the current local repository's top-level directory.
     repo-slug-local = "!f() { \
-        echo $(basename \"$(git rev-parse --show-toplevel)\"); \
+        printf \"%s\n\" \"$(basename \"$(git root)\")\"; \
     }; f"
 
     ##? Usage: git main-branch
@@ -734,7 +734,7 @@
     }; f"
 
     file-diff-last-modification2 = "!f() { \
-        PROJECT_ROOT_DIR=$(git rev-parse --show-toplevel); \
+        PROJECT_ROOT_DIR=$(git root); \
         echo Finding full file path of \"$1\" in $PROJECT_ROOT_DIR; \
         FILEPATH=$(git ls-files --full-name -- \"$1\"); \
         echo Full file path $FILEPATH; \
