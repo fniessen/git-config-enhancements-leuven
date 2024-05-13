@@ -17,7 +17,9 @@ for branch in $branches; do
     day_of_week=$(date -d "$last_commit_date" "+%a")
     last_commit_time=$(date -d "$last_commit_time" "+%H:%M")
     timestamp="\e[32m$last_commit_date $day_of_week $last_commit_time\e[0m"
+    author="\e[34m<$author>\e[0m"
+    branch="\e[1;31m$branch\e[0m"
     if [[ "$last_commit_date" > "$threshold_date" ]]; then
-        echo -e "$timestamp - Branch $branch <$author>"
+        echo -e "$timestamp - Branch $branch $author"
     fi
 done
