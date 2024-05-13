@@ -3116,11 +3116,13 @@ XXX Add "no remote" for branches which are not published
     # List remote branches sorted by most recent commit.
     remote-branches = "!f() { \
         git fetch --prune && \
-        for branch in $(git branch -r | grep -v HEAD); do \
-            echo \"$(git show -s --format='%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)' $branch | head -n 1) \\t$branch\"; \
+        for branch in $(git for-each-ref --format='%(refname:short)' refs/remotes | grep -v HEAD); do \
+            printf \"%s\\t%s\\n\" \"$(git show -s --format='%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)' $branch | head -n 1)\" \"$branch\"; \
         done | sort -r; \
     }; f"
 #+end_src
+
+XXX: Replace ~git branch -r --format~ with ~git for-each-ref --format~ to handle special characters in branch names.
 
 #+begin_src conf
     # Iterate over remote branches, show commit info and branch name, and sort
