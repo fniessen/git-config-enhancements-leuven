@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Define the threshold date (2 weeks ago).
+threshold_date=$(date -d "2 weeks ago" +%Y-%m-%d)
+
+# Fetch remote branches and filter by last commit date.
+git fetch --prune
+branches=$(git branch -r --format='%(refname:lstrip=3)' --sort='-committerdate' | grep -v HEAD)
+
+# Loop through branches and check if they've been modified in the last 2 weeks.
+for branch in $branches; do
+    last_commit_date=$(git show --format="%ci" $branch | head -n 1)
+    last_commit_date=$(date -d "$last_commit_date" +%Y-%m-%d)
+    if [[ "$last_commit_date" > "$threshold_date" ]]; then
+        echo "Branch $branch modified on $last_commit_date"
+    fi
+done
