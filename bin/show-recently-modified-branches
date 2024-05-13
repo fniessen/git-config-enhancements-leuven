@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
 
-# Define the threshold date (2 weeks ago).
-threshold_date=$(date -d "2 weeks ago" +%Y-%m-%d)
+# Define the threshold date (1 week ago).
+threshold_date=$(date -d "1 week ago" +%Y-%m-%d)
 
 # Fetch remote branches and filter by last commit date.
 git fetch --prune
-branches=$(git for-each-ref --format='%(refname:short)' refs/remotes | grep -v HEAD)
+branches=$(git for-each-ref --sort='-committerdate' --format='%(refname:short)' refs/remotes | grep -v HEAD)
 
-# Loop through branches and check if they've been modified in the last 2 weeks.
+# Loop through branches and check if they've been modified in the last 1 week.
 for branch in $branches; do
-    last_commit_date=$(git show --format="%ci" $branch | head -n 1)
+    last_commit_info=$(git show -s --format='%ci' $branch | head -n 1)
+    last_commit_date=$(echo "$last_commit_info" | awk '{print $1}')
+    last_commit_time=$(echo "$last_commit_info" | awk '{print $2}')
+    author=$(git show -s --format='%an' $branch | head -n 1)
     last_commit_date=$(date -d "$last_commit_date" +%Y-%m-%d)
+    day_of_week=$(date -d "$last_commit_date" "+%a")
+    last_commit_time=$(date -d "$last_commit_time" "+%H:%M")
+    timestamp="\e[32m$last_commit_date $day_of_week $last_commit_time\e[0m"
     if [[ "$last_commit_date" > "$threshold_date" ]]; then
-        echo "Branch $branch modified on $last_commit_date"
+        echo -e "$timestamp - Branch $branch <$author>"
     fi
 done
