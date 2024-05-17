@@ -52,7 +52,14 @@ threshold_date=$(date -d "$THRESHOLD days ago" +%Y-%m-%d)
 
 # Fetch remote branches and filter by last commit date.
 git fetch --prune
-branches=$(git for-each-ref --sort='-committerdate' --format='%(refname:short)' refs/remotes | grep -v HEAD)
+
+# Get the list of remote branches, exit gracefully if there are no branches.
+branches=$(git for-each-ref --sort='-committerdate' --format='%(refname:short)' refs/remotes | grep -v HEAD || true)
+
+if [[ -z "$branches" ]]; then
+    echo "No remote branches found."
+    exit 0
+fi
 
 # Loop through branches and check if they've been modified within the threshold days.
 for branch in $branches; do
