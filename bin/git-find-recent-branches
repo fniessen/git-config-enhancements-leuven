@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-# Define the threshold date (1 week ago).
-threshold_date=$(date -d "1 week ago" +%Y-%m-%d)
+# Set the default threshold (7 days ago) or use the first argument if provided.
+threshold_days=${1:-7}
+threshold_date=$(date -d "$threshold_days days ago" +%Y-%m-%d)
 
 # Fetch remote branches and filter by last commit date.
 git fetch --prune
 branches=$(git for-each-ref --sort='-committerdate' --format='%(refname:short)' refs/remotes | grep -v HEAD)
 
-# Loop through branches and check if they've been modified in the last 1 week.
+# Loop through branches and check if they've been modified within the threshold days.
 for branch in $branches; do
     last_commit_info=$(git show -s --format='%ci' $branch | head -n 1)
     last_commit_date=$(echo "$last_commit_info" | awk '{print $1}')
