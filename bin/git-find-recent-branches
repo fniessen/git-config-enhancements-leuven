@@ -41,6 +41,12 @@ set -e
 # Set the threshold.
 THRESHOLD=${1:-7}
 
+# Validate that THRESHOLD is a numeric value.
+if ! [[ "$THRESHOLD" =~ ^[0-9]+$ ]]; then
+    printf >&2 'Error: THRESHOLD must be a numeric value.\n'
+    exit 2
+fi
+
 # Convert threshold to date format.
 threshold_date=$(date -d "$THRESHOLD days ago" +%Y-%m-%d)
 
