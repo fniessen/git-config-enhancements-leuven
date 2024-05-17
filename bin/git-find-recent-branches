@@ -50,10 +50,10 @@ branches=$(git for-each-ref --sort='-committerdate' --format='%(refname:short)' 
 
 # Loop through branches and check if they've been modified within the threshold days.
 for branch in $branches; do
-    last_commit_info=$(git show -s --format='%ci' $branch | head -n 1)
+    last_commit_info=$(git show -s --format='%ci' "$branch" | head -n 1)
     last_commit_date=$(echo "$last_commit_info" | awk '{print $1}')
     last_commit_time=$(echo "$last_commit_info" | awk '{print $2}')
-    author=$(git show -s --format='%an' $branch | head -n 1)
+    author=$(git show -s --format='%an' "$branch" | head -n 1)
     last_commit_date=$(date -d "$last_commit_date" +%Y-%m-%d)
     day_of_week=$(date -d "$last_commit_date" "+%a")
     last_commit_time=$(date -d "$last_commit_time" "+%H:%M")
