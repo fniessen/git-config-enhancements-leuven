@@ -57,8 +57,8 @@ git fetch --prune
 branches=$(git for-each-ref --sort='-committerdate' --format='%(refname:short)' refs/remotes | grep -v HEAD || true)
 
 if [[ -z "$branches" ]]; then
-    echo "No remote branches found."
-    exit 0
+    printf >&2 "No remote branches found."
+    exit 2
 fi
 
 # Loop through branches and check if they've been modified within the threshold days.
