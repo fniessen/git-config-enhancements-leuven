@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# Run git-find-recent-branches script with a threshold of 30 days.
+git-find-recent-branches 30
