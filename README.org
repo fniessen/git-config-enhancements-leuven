@@ -5196,42 +5196,16 @@ merge commits...
     ##? Usage: git file-history FILENAME
     ##?
     ##? Show the commit history of a specific file.
-    file-history = log --
-
-    ##? Usage: git file-history FILENAME
-    ##?
-    ##? Show the commit history of a specific file.
-    file-history2 = "!f() { \
+    file-history = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git file-history FILENAME\n'; \
             return 2; \
         fi; \
         FILENAME=\"$1\"; \
-        git log --oneline --graph --decorate --follow -- \"$FILENAME\"; \
-    }; f"
-
-    ##? Usage: git file-history-all FILENAME
-    ##?
-    ##? Show the commit history of a specific file across all branches.
-    file-history-all = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history-all FILENAME\n'; \
-            return 2; \
+        if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
+            printf >&2 'Warning: File \"%s\" not found in the current branch of the repository.\n' \"$FILENAME\"; \
         fi; \
-        FILENAME=\"$1\"; \
-        git log --oneline --graph --decorate --follow --all -- \"$FILENAME\"; \
-    }; f"
-
-    ##? Usage: git file-history-all FILENAME
-    ##?
-    ##? Show the commit history of a specific file across all branches.
-    file-history-all2 = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history-all2 FILENAME\n'; \
-            return 2; \
-        fi; \
-        FILENAME=\"$1\"; \
-        git log --pretty=format:'%h %ad %an %s' --date=short --graph --decorate --follow --all -- \"$FILENAME\"; \
+        git log --follow -- \"$FILENAME\"; \
     }; f"
 #+end_src
 
@@ -5269,10 +5243,25 @@ Add ~--all~ to show commits of /all your branches/, not just from the current
 branch:
 
 #+begin_src conf
-    # Usage: git file-history-all FILENAME
-    # Show commit history for all branches.
-    file-history-all = log --all
+    ##? Usage: git file-history-all FILENAME
+    ##?
+    ##? Show the commit history of a specific file across all branches.
+    file-history-all = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git file-history-all FILENAME\n'; \
+            return 2; \
+        fi; \
+        FILENAME=\"$1\"; \
+        if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
+            printf >&2 'Warning: File \"%s\" not found in the current branch of the repository.\n' \"$FILENAME\"; \
+        fi; \
+        git log --follow --all -- \"$FILENAME\"; \
+    }; f"
 #+end_src
+
+# Tests:
+# : git file-history-all db/aremis/Sprint_2024_07/GCS-4307_2_BBS_ROLES_roles.sql
+# : git file-history-all db/aremis/Sprint_2024_07/GCS-4307_BBS_ROLES_FOR_S2_STACK-2.sql
 
 Find the *most recent commit* (chronologically) that modified a file -- looking in
 /all/ known commits:

@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240513.1522
+# .gitconfig, Time-stamp: 20240523.1424
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1777,42 +1777,16 @@ deploy-prod =
     ##? Usage: git file-history FILENAME
     ##?
     ##? Show the commit history of a specific file.
-    file-history = log --
-
-    ##? Usage: git file-history FILENAME
-    ##?
-    ##? Show the commit history of a specific file.
-    file-history2 = "!f() { \
+    file-history = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git file-history FILENAME\n'; \
             return 2; \
         fi; \
         FILENAME=\"$1\"; \
-        git log --oneline --graph --decorate --follow -- \"$FILENAME\"; \
-    }; f"
-
-    ##? Usage: git file-history-all FILENAME
-    ##?
-    ##? Show the commit history of a specific file across all branches.
-    file-history-all = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history-all FILENAME\n'; \
-            return 2; \
+        if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
+            printf >&2 'Warning: File \"%s\" not found in the current branch of the repository.\n' \"$FILENAME\"; \
         fi; \
-        FILENAME=\"$1\"; \
-        git log --oneline --graph --decorate --follow --all -- \"$FILENAME\"; \
-    }; f"
-
-    ##? Usage: git file-history-all FILENAME
-    ##?
-    ##? Show the commit history of a specific file across all branches.
-    file-history-all2 = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history-all2 FILENAME\n'; \
-            return 2; \
-        fi; \
-        FILENAME=\"$1\"; \
-        git log --pretty=format:'%h %ad %an %s' --date=short --graph --decorate --follow --all -- \"$FILENAME\"; \
+        git log --follow -- \"$FILENAME\"; \
     }; f"
 
     # Usage: git file-history-follow-copy-without-merge-commits FILENAME
@@ -1824,9 +1798,20 @@ deploy-prod =
     # Show commit history of a file, including copies, renames, and merges.
     file-history-follow-copy = log --follow --date-order -C --find-renames --merges
 
-    # Usage: git file-history-all FILENAME
-    # Show commit history for all branches.
-    file-history-all = log --all
+    ##? Usage: git file-history-all FILENAME
+    ##?
+    ##? Show the commit history of a specific file across all branches.
+    file-history-all = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git file-history-all FILENAME\n'; \
+            return 2; \
+        fi; \
+        FILENAME=\"$1\"; \
+        if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
+            printf >&2 'Warning: File \"%s\" not found in the current branch of the repository.\n' \"$FILENAME\"; \
+        fi; \
+        git log --follow --all -- \"$FILENAME\"; \
+    }; f"
 
     # Usage: git file-last-modified FILENAME
     # Show the most recent commit across all branches in date order.
