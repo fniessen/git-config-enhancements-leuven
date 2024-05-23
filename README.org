@@ -5203,7 +5203,7 @@ merge commits...
         fi; \
         FILENAME=\"$1\"; \
         if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 'Warning: File \"%s\" not found in the current branch of the repository.\n' \"$FILENAME\"; \
+            printf >&2 '\\e[33mWarning: File \"%s\" not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
         fi; \
         git log --follow -- \"$FILENAME\"; \
     }; f"
@@ -5253,7 +5253,7 @@ branch:
         fi; \
         FILENAME=\"$1\"; \
         if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 'Warning: File \"%s\" not found in the current branch of the repository.\n' \"$FILENAME\"; \
+            printf >&2 '\\e[33mWarning: File \"%s\" not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
         fi; \
         git log --follow --all -- \"$FILENAME\"; \
     }; f"

@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240523.1424
+# .gitconfig, Time-stamp: 20240523.1433
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1784,7 +1784,7 @@ deploy-prod =
         fi; \
         FILENAME=\"$1\"; \
         if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 'Warning: File \"%s\" not found in the current branch of the repository.\n' \"$FILENAME\"; \
+            printf >&2 '\\e[33mWarning: File \"%s\" not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
         fi; \
         git log --follow -- \"$FILENAME\"; \
     }; f"
@@ -1808,7 +1808,7 @@ deploy-prod =
         fi; \
         FILENAME=\"$1\"; \
         if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 'Warning: File \"%s\" not found in the current branch of the repository.\n' \"$FILENAME\"; \
+            printf >&2 '\\e[33mWarning: File \"%s\" not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
         fi; \
         git log --follow --all -- \"$FILENAME\"; \
     }; f"
