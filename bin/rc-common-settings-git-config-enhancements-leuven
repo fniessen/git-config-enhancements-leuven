@@ -31,16 +31,21 @@ fi
 # Function to iterate over commit hashes and execute a given Git command.
 #
 # Example:
-#   git-iterate-commits show      Call the 'git-iterate-commits' function with the
-#                                 Git command as an argument.
+#   git-iterate-commits changed-files
+#                                 Call the 'git-iterate-commits' function with the
+#                                 'changed-files' Git command.
 git-iterate-commits() {
     local git_command="$1"
 
     # Get the previous shell command dynamically.
     local previous_command=$(fc -ln -1)
 
-    # Run the previous command and store its output in git_output variable.
-    local git_output=$(eval "$previous_command")
+    # Display the last executed command for debug purposes.
+    printf "Last executed command: %s\n\n" "$previous_command"
+
+    # Run the previous command and store its output in git_output variable,
+    # suppressing stderr.
+    local git_output=$(eval "$previous_command" 2>/dev/null)
 
     # Loop through each line in the output.
     while IFS= read -r line; do
@@ -48,6 +53,6 @@ git-iterate-commits() {
         commit_hash=$(echo "$line" | awk '{print $2}')
 
         # Execute the provided Git command with the commit hash.
-        git $git_command "$commit_hash"
+        git "$git_command" "$commit_hash"
     done <<< "$git_output"
 }
