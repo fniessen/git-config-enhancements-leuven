@@ -2385,6 +2385,25 @@ Therefore, Git cannot determine "which branch was which" before merge commits.
 : curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/search?scope=commits&search=bye
 : curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file
 
+*** Iterating over Git commits
+
+You can use the ~git-iterate-commits~ function to iterate over Git commit hashes
+(obtained from the previous command) and execute a specified Git command. This
+can be particularly beneficial when you need to perform operations on each
+commit within a series.
+
+**** Example
+
+Let's say you want to execute the ~changed-files~ Git command for each commit
+reported by:
+
+: git file-history db/aremis/mms/01_sp_mms_sync_01_staging.sql
+
+This command will execute the specified ~changed-files~ command for each commit
+hash in the series:
+
+: git-iterate-commits changed-files
+
 *** Search in the commit messages
 
 You can find commits that contain particular words in the commit message. For
@@ -5203,7 +5222,7 @@ merge commits...
         fi; \
         FILENAME=\"$1\"; \
         if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 '\\e[33mWarning: File \"%s\" not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
+            printf >&2 '\\e[33mWarning: File '\\''%s'\\'' not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
         fi; \
         git log --follow -- \"$FILENAME\"; \
     }; f"
@@ -5253,7 +5272,7 @@ branch:
         fi; \
         FILENAME=\"$1\"; \
         if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 '\\e[33mWarning: File \"%s\" not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
+            printf >&2 '\\e[33mWarning: File '\\''%s'\\'' not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
         fi; \
         git log --follow --all -- \"$FILENAME\"; \
     }; f"
