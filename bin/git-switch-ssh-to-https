@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #? git-switch-ssh-to-https, Time-stamp: 20221102.1443
-#? Copyright (C) 2022-2023 Fabrice Niessen
+#? Copyright (C) 2022-2024 Fabrice Niessen
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -19,11 +19,12 @@
 ##?   -h, --help                    display this help and exit
 ##?   -V, --version                 display version information and exit
 
-set -euo pipefail
+# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+set -uo pipefail
 
-# Check if docopts command is available.
+# Check if 'docopts' command is available.
 if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 'Error: docopts command not found.\n'
+    printf >&2 "Error: 'docopts' command not found.\n"
     exit 2
 fi
 
@@ -34,6 +35,9 @@ version=$(grep "^#?" "$0" | cut -c 4-)
 # Get command-line arguments.
 args="$(docopts -h "$help" -V "$version" : "$@")"
 eval "$args"
+
+# Set -e to exit on non-zero command status.
+set -e
 
 SITE=${SITE:-"github.com"}
 REMOTE=${REMOTE:-"origin"}
