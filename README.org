@@ -1340,7 +1340,7 @@ thrown away, the alias to use is ~unmodify~;
             if git status --porcelain \"$file_to_restore\" | grep -qE '^ M'; then \
                 git checkout -- \"$file_to_restore\"; \
             else \
-                printf >&2 \"Error: File %s is not modified.\n\" \"$file_to_restore\"; \
+                printf >&2 \"Error: File '%s' is not modified.\n\" \"$file_to_restore\"; \
                 return 2; \
             fi; \
         fi; \
@@ -1366,7 +1366,7 @@ thrown away, the alias to use is ~unmodify~;
             if git status --porcelain \"$file_to_restore\" | grep -qE '^ D'; then \
                 git checkout -- \"$file_to_restore\"; \
             else \
-                printf >&2 \"Error: File %s is not deleted.\n\" \"$file_to_restore\"; \
+                printf >&2 \"Error: File '%s' is not deleted.\n\" \"$file_to_restore\"; \
                 return 2; \
             fi; \
         fi; \
@@ -3461,11 +3461,11 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
                     if git pull origin $branch:$branch; then \
                         printf \"\n\"; \
                     else \
-                        printf \"\\e[91mError: Pull failed for branch \\e[1m%s\\e[0m.\n\\e[0m\" \"$branch\"; \
+                        printf \"\\e[91mError: Pull failed for branch '%s'.\\e[0m\n\" \"$branch\"; \
                         if git rebase --abort > /dev/null 2>&1; then \
                             printf \"Rebase operation aborted.\n\n\"; \
                         else \
-                            printf \"\\e[91mCould not abort the rebase operation. Please do so manually.\n\\e[0m\"; \
+                            printf \"\\e[91mCould not abort the rebase operation. Please do so manually.\\e[0m\n\"; \
                         fi; \
                         continue; \
                     fi; \
@@ -5222,7 +5222,7 @@ merge commits...
         fi; \
         FILENAME=\"$1\"; \
         if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 '\\e[33mWarning: File '\\''%s'\\'' not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
+            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILENAME\"; \
         fi; \
         git log --follow -- \"$FILENAME\"; \
     }; f"
@@ -5272,7 +5272,7 @@ branch:
         fi; \
         FILENAME=\"$1\"; \
         if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 '\\e[33mWarning: File '\\''%s'\\'' not found in the current branch of the repository.\\e[0m\n' \"$FILENAME\"; \
+            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILENAME\"; \
         fi; \
         git log --follow --all -- \"$FILENAME\"; \
     }; f"
