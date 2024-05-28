@@ -1,17 +1,17 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 
-# Check if 'git' utility is installed.
+# Check if 'git' command is available.
 if ! command -v git &>/dev/null; then
-    printf >&2 "The 'git' utility is not installed. Please install it.\n"
+    printf >&2 "Error: The 'git' utility is not installed. Please install it.\n"
+else
+    # Alias 'g' to 'git'.
+    alias g=git
 fi
 
 # Check if 'zip' utility is installed.
 if ! command -v zip &>/dev/null; then
-    printf >&2 "The 'zip' utility is not installed. Please install it.\n"
+    printf >&2 "Error: The 'zip' utility is not installed. Please install it.\n"
 fi
-
-# Git aliases.
-alias g='git'
 
 # Go to the root directory of your Git repo.
 alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
@@ -19,7 +19,7 @@ alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
                                         ## error if you aren't in a Git
                                         ## directory.
 
-# Check if 'tig' command is installed before creating aliases.
+# Check if 'tig' command is installed.
 if command -v tig &> /dev/null; then
     # Aliases for 'tig' commands.
     alias tigs='tig status'             # Use it all of the time!
@@ -27,3 +27,27 @@ if command -v tig &> /dev/null; then
     alias tigall='tig --all'
     alias tigreleases='tig --all --simplify-by-decoration'
 fi
+
+# Function to iterate over commit hashes and execute a given Git command.
+#
+# Example:
+#   git-iterate-commits show      Call the 'git-iterate-commits' function with the
+#                                 Git command as an argument.
+git-iterate-commits() {
+    local git_command="$1"
+
+    # Get the previous shell command dynamically.
+    local previous_command=$(fc -ln -1)
+
+    # Run the previous command and store its output in git_output variable.
+    local git_output=$(eval "$previous_command")
+
+    # Loop through each line in the output.
+    while IFS= read -r line; do
+        # Extract the commit hash from the line.
+        commit_hash=$(echo "$line" | awk '{print $2}')
+
+        # Execute the provided Git command with the commit hash.
+        git $git_command "$commit_hash"
+    done <<< "$git_output"
+}
