@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240529.1804
+# .gitconfig, Time-stamp: 20240529.2210
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -304,9 +304,9 @@
             printf >&2 'Usage: git search-for-files PATTERN\n'; \
             return 2; \
         fi; \
-        local pattern=\"$1\"; \
+        local PATTERN=\"$1\"; \
         git ls-tree -r --name-only HEAD \
-            | grep -i --color=auto \"$pattern\"; \
+            | grep -i --color=auto \"$PATTERN\"; \
     }; f"
 
     # Alias of 'search-for-files'.
@@ -323,13 +323,13 @@
             printf >&2 'Usage: git search-for-files-all-branches FILE_NAME\n'; \
             return 2; \
         fi; \
-        local search_term=\"$1\"; \
+        local FILE_NAME=\"$1\"; \
         git local-branches | \
         while read -r branch; do \
             printf \"\n$(tput bold)$(tput setaf 2)$branch:$(tput sgr0)\n\"; \
             git ls-tree -r --name-only \"$branch\" | \
             nl -bn -w3 | \
-            grep --color=auto \"$search_term\"; \
+            grep --color=auto \"$FILE_NAME\"; \
         done; \
     }; f"
 
@@ -358,7 +358,7 @@
     # files.
     gno = "grep -i -I --name-only"
 
-    ##? Usage: git unmodify [FILE]
+    ##? Usage: git unmodify [FILE_TO_RESTORE]
     ##?
     ##? Undo local modifications for a specific file or all files if no file is
     ##? provided.
@@ -368,23 +368,23 @@
     ##?   git unmodify .                Restore all modified files in the current directory.
     ##?   git unmodify PATH/TO/FILE     Restore a specific modified file:.
     unmodify = "!f() { \
-        local file_to_restore=\"$1\"; \
-        if [ -z \"$file_to_restore\" ]; then \
+        local FILE_TO_RESTORE=\"$1\"; \
+        if [ -z \"$FILE_TO_RESTORE\" ]; then \
             git status --porcelain \
                 | grep -E '^ M' \
                 | sed 's_^ M __' \
                 | xargs -I {} git checkout -- \"{}\"; \
         else \
-            if git status --porcelain \"$file_to_restore\" | grep -qE '^ M'; then \
-                git checkout -- \"$file_to_restore\"; \
+            if git status --porcelain \"$FILE_TO_RESTORE\" | grep -qE '^ M'; then \
+                git checkout -- \"$FILE_TO_RESTORE\"; \
             else \
-                printf >&2 \"Error: File '%s' is not modified.\n\" \"$file_to_restore\"; \
+                printf >&2 \"Error: File '%s' is not modified.\n\" \"$FILE_TO_RESTORE\"; \
                 return 2; \
             fi; \
         fi; \
     }; f"
 
-    ##? Usage: git undelete [FILE]
+    ##? Usage: git undelete [FILE_TO_RESTORE]
     ##?
     ##? Restore deleted files for a specific file or all files if no file is
     ##? provided.
@@ -394,17 +394,17 @@
     ##?   git undelete .                Restore all deleted files in the current directory.
     ##?   git undelete PATH/TO/FILE     Restore a specific deleted file:.
     undelete = "!f() { \
-        local file_to_restore=\"$1\"; \
-        if [ -z \"$file_to_restore\" ]; then \
+        local FILE_TO_RESTORE=\"$1\"; \
+        if [ -z \"$FILE_TO_RESTORE\" ]; then \
             git status --porcelain \
                 | grep -E '^ D' \
                 | sed 's_^ D __' \
                 | xargs -I {} git checkout -- \"{}\"; \
         else \
-            if git status --porcelain \"$file_to_restore\" | grep -qE '^ D'; then \
-                git checkout -- \"$file_to_restore\"; \
+            if git status --porcelain \"$FILE_TO_RESTORE\" | grep -qE '^ D'; then \
+                git checkout -- \"$FILE_TO_RESTORE\"; \
             else \
-                printf >&2 \"Error: File '%s' is not deleted.\n\" \"$file_to_restore\"; \
+                printf >&2 \"Error: File '%s' is not deleted.\n\" \"$FILE_TO_RESTORE\"; \
                 return 2; \
             fi; \
         fi; \
@@ -754,8 +754,8 @@
             printf 'Usage: git find-branches-containing COMMIT_HASH\n'; \
             return 2; \
         fi; \
-        local commit_hash=\"$1\"; \
-        git branch -a --contains \"$commit_hash\"; \
+        local COMMIT_HASH=\"$1\"; \
+        git branch -a --contains \"$COMMIT_HASH\"; \
     }; f"
 
     # Usage: git find-tags-containing COMMIT_HASH
@@ -777,9 +777,9 @@
             printf >&2 'Usage: git is-ancestor COMMIT1 COMMIT2\n'; \
             exit 2; \
         fi; \
-        local commit1=\"$1\"; \
-        local commit2=\"$2\"; \
-        git merge-base --is-ancestor \"$commit1\" \"$commit2\"; \
+        local COMMIT1=\"$1\"; \
+        local COMMIT2=\"$2\"; \
+        git merge-base --is-ancestor \"$COMMIT1\" \"$COMMIT2\"; \
     }; f"
 
     # Error with 2 search strings!!!
@@ -969,8 +969,8 @@
             printf >&2 'Usage: git check-remote-branch BRANCH_NAME\n'; \
             return 2; \
         fi; \
-        local branch_name=\"$1\"; \
-        git rev-parse --verify origin/$branch_name >/dev/null 2>&1; \
+        local BRANCH_NAME=\"$1\"; \
+        git rev-parse --verify origin/$BRANCH_NAME >/dev/null 2>&1; \
     }; f"
 
     # Usage: git br
@@ -1108,12 +1108,12 @@
     ##? Arguments:
     ##?   BRANCH_NAME                   The name of the branch to check.
     has-new-commits = "!f() { \
-        branch=\"$1\"; \
-        if [ -z \"$branch\" ]; then \
+        local BRANCH_NAME=\"$1\"; \
+        if [ -z \"$BRANCH_NAME\" ]; then \
             echo \"Error: Please provide a branch name as a parameter.\"; \
             exit 1; \
         fi; \
-        [ $(git rev-list --count origin/\"$branch\"..\"$branch\") -gt 0 ]; \
+        [ $(git rev-list --count origin/\"$BRANCH_NAME\"..\"$BRANCH_NAME\") -gt 0 ]; \
     }; f"
 
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
@@ -1208,11 +1208,11 @@
     # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
     delete-remote-branch = "!f() { \
-        branch_name=\"$1\"; \
-        printf \"Are you sure you want to delete the remote branch '%s'? [y/N]\" \"$branch_name\"; \
+        local BRANCH_NAME=\"$1\"; \
+        printf \"Are you sure you want to delete the remote branch '%s'? [y/N]\" \"$BRANCH_NAME\"; \
         read -r confirm; \
         if [ \"$confirm\" = \"y\" ] || [ \"$confirm\" = \"Y\" ]; then \
-            git push $(git origin) --delete \"$branch_name\"; \
+            git push $(git origin) --delete \"$BRANCH_NAME\"; \
         else \
             printf \"Branch deletion cancelled.\"; \
         fi \
@@ -1408,7 +1408,7 @@
     whois = "!sh -c 'git log -1 --author=\"$1\" -i --pretty=\"format:%an <%ae>\n\"' -"
 
     pull-request-bb = "!f() { \
-        USER_NAME=\"$1\"; \
+        local USER_NAME=\"$1\"; \
         curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug-remote)/pull-requests/new?source=$(git current-branch)&t=1; \
     }; f"
 
@@ -1478,8 +1478,8 @@
             printf >&2 'Usage: git release-tag VERSION\n'; \
             return 2; \
         fi; \
-        local version=\"$1\"; \
-        git tag -a v\"$version\" -m \"Release version $version\" \
+        local VERSION=\"$1\"; \
+        git tag -a v\"$VERSION\" -m \"Release version $VERSION\" \
             && git push --tags \
             && git push; \
     }; f"
@@ -1592,7 +1592,7 @@ deploy-prod =
     create-issue-pull-request = XXX
 
     # issues = "!f() { \
-    #     USER_NAME=\"$1\"; \
+    #     local USER_NAME=\"$1\"; \
     #     curl --user $USER_NAME \
     #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
@@ -1613,7 +1613,7 @@ deploy-prod =
     show-issue = "!f() { \
         REPO_OWNER=\"YourUsername\"; \
         REPO_SLUG_REMOTE=\"YourRepository\"; \
-        ISSUE_NUMBER=\"$1\"; \
+        local ISSUE_NUMBER=\"$1\"; \
         URL=\"https://github.com/$REPO_OWNER/$REPO_SLUG_REMOTE/issues/$ISSUE_NUMBER\"; \
         open \"$URL\"; \
     }; f"
@@ -1774,19 +1774,19 @@ deploy-prod =
     #     git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
     # }; f"
 
-    ##? Usage: git file-history PATH
+    ##? Usage: git file-history FILE_PATH
     ##?
     ##? Show the commit history of a specific file or directory.
     file-history = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history PATH\n'; \
+            printf >&2 'Usage: git file-history FILE_PATH\n'; \
             return 2; \
         fi; \
-        PATH=\"$1\"; \
-        if ! git rev-parse --quiet --verify \"$PATH\" 2>/dev/null; then \
-            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$PATH\"; \
+        local FILE_PATH=\"$1\"; \
+        if ! git rev-parse --quiet --verify \"$FILE_PATH\" 2>/dev/null; then \
+            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
-        git log --follow -- \"$PATH\"; \
+        git log --follow -- \"$FILE_PATH\"; \
     }; f"
 
     # Usage: git file-history-follow-copy-without-merge-commits FILENAME
@@ -1798,24 +1798,20 @@ deploy-prod =
     # Show commit history of a file, including copies, renames, and merges.
     file-history-follow-copy = log --follow --date-order -C --find-renames --merges
 
-    ##? Usage: git file-history-all PATH
+    ##? Usage: git file-history-all FILE_PATH
     ##?
     ##? Show the commit history of a specific file or directory across all branches.
     file-history-all = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history-all PATH\n'; \
+            printf >&2 'Usage: git file-history-all FILE_PATH\n'; \
             return 2; \
         fi; \
-        PATH=\"$1\"; \
-        if ! git rev-parse --quiet --verify \"$PATH\" 2>/dev/null; then \
-            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$PATH\"; \
+        local FILE_PATH=\"$1\"; \
+        if ! git rev-parse --quiet --verify \"$FILE_PATH\" 2>/dev/null; then \
+            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
-        git log --follow --all -- \"$PATH\"; \
+        git log --follow --all -- \"$FILE_PATH\"; \
     }; f"
-
-    # Usage: git file-last-modified FILENAME
-    # Show the most recent commit across all branches in date order.
-    file-last-modified = log -n 1 --all --date-order
 
     # Usage: git related FILENAME
     # Show all commits that modified a specific file, including the commit
@@ -1833,37 +1829,41 @@ deploy-prod =
                 | sort -b -n -r \
                 | less'
 
-    ##? Usage: git file-most-recent-commits FILE_PATH
+    # Usage: git file-last-commit FILENAME
+    # Show the most recent commit across all branches (both local and remote).
+    file-last-commit = log -n 1 --all --date-order
+
+    ##? Usage: git file-last-commits FILE_PATH
     ##?
-    ##? Show the most recent commits for a specific file across all local branches.
-    file-most-recent-commits = "!f() { \
+    ##? Show the most recent commits for a specific file or directory across all local branches.
+    file-last-commits = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-most-recent-commits FILE_PATH\n'; \
+            printf >&2 'Usage: git file-last-commits FILE_PATH\n'; \
             return 2; \
         fi; \
-        local file_path=\"$1\"; \
+        local FILE_PATH=\"$1\"; \
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             printf \"$(git log --decorate=no -1 \
                                 --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
-                                --color=always $branch -- \"$file_path\") $(tput bold)$branch$(tput sgr0)\n\"; \
-        done | sort -r | sed 's_^[0-9]*:__g'; \
+                                --color=always $branch -- \"$FILE_PATH\") $(tput bold)$branch$(tput sgr0)\n\"; \
+        done | sort -r | sed 's#^[0-9]*:##g'; \
     }; f"
 
-    # Alias of 'file-most-recent-commits'.
-    wwflu = file-most-recent-commits
+    # Alias of 'file-last-commits'.
+    wwflu = file-last-commits
 
-    file-most-recent-commits2 = "!f() { \
+    file-last-commits2 = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-most-recent-commits2 FILE_PATH\n'; \
+            printf >&2 'Usage: git file-last-commits2 FILE_PATH\n'; \
             return 2; \
         fi; \
-        local file_path=\"$1\"; \
+        local FILE_PATH=\"$1\"; \
         git for-each-ref --format=\"%(refname:short) %(objectname)\" refs/heads/ | \
         while read branch commit_hash; do \
             local commit_info=$(git log -n 1 \
                                     --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
-                                    --date=format-local:'%Y-%m-%d' \"$commit_hash\" -- \"$file_path\"); \
+                                    --date=format-local:'%Y-%m-%d' \"$commit_hash\" -- \"$FILE_PATH\"); \
             if [ -n \"$commit_info\" ]; then \
                 echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
             fi; \
@@ -1987,8 +1987,8 @@ deploy-prod =
     # Merge changes from the current branch into the specified target branch, updates it, and pushes changes.
     merge-update-push = "!f() { \
         local current_branch=\"$(git current-branch)\"; \
-        local target_branch=\"$1\"; \
-        git checkout \"$target_branch\" \
+        local TARGET_BRANCH=\"$1\"; \
+        git checkout \"$TARGET_BRANCH\" \
             && git pull \
             && git merge \"$current_branch\" \
             && git push \
@@ -2002,35 +2002,35 @@ deploy-prod =
         echo \"Merge aborted\"; \
     }; f"
 
-    ##? Usage: git dry-merge BRANCH_NAME
+    ##? Usage: git dry-merge1 BRANCH_TO_MERGE
     ##?
     ##? Simulate a "dry run" merge of a branch into the current branch.
     ##?
     ##? Example:
-    ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
+    ##?   git dry-merge1 feature # Merge the `feature` branch without committing the changes.
     dry-merge1 = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git dry-merge1 BRANCH_NAME\n'; \
             return 2; \
         fi; \
-        local branch_to_merge=\"$1\"; \
-        git merge --no-commit \"$branch_to_merge\"; \
+        local BRANCH_TO_MERGE=\"$1\"; \
+        git merge --no-commit \"$BRANCH_TO_MERGE\"; \
         git reset; \
     }; f"
 
-    ##? Usage: git dry-merge BRANCH_NAME
+    ##? Usage: git dry-merge2 BRANCH_TO_MERGE
     ##?
     ##? Simulate a "dry run" merge of a branch into the current branch.
     ##?
     ##? Example:
-    ##?   git dry-merge feature # Merge the `feature` branch without committing the changes.
+    ##?   git dry-merge2 feature # Merge the `feature` branch without committing the changes.
     dry-merge2 = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git dry-merge2 BRANCH_NAME\n'; \
             return 2; \
         fi; \
-        local branch_to_merge=\"$1\"; \
-        git merge --no-commit --no-ff \"$branch_to_merge\"; \
+        local BRANCH_TO_MERGE=\"$1\"; \
+        git merge --no-commit --no-ff \"$BRANCH_TO_MERGE\"; \
     }; f"
 
     # Usage: git merge-dry-run BRANCH_NAME
