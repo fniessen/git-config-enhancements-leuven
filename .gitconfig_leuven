@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240528.1749
+# .gitconfig, Time-stamp: 20240529.1804
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1774,19 +1774,19 @@ deploy-prod =
     #     git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
     # }; f"
 
-    ##? Usage: git file-history FILENAME
+    ##? Usage: git file-history PATH
     ##?
-    ##? Show the commit history of a specific file.
+    ##? Show the commit history of a specific file or directory.
     file-history = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history FILENAME\n'; \
+            printf >&2 'Usage: git file-history PATH\n'; \
             return 2; \
         fi; \
-        FILENAME=\"$1\"; \
-        if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILENAME\"; \
+        PATH=\"$1\"; \
+        if ! git rev-parse --quiet --verify \"$PATH\" 2>/dev/null; then \
+            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$PATH\"; \
         fi; \
-        git log --follow -- \"$FILENAME\"; \
+        git log --follow -- \"$PATH\"; \
     }; f"
 
     # Usage: git file-history-follow-copy-without-merge-commits FILENAME
@@ -1798,19 +1798,19 @@ deploy-prod =
     # Show commit history of a file, including copies, renames, and merges.
     file-history-follow-copy = log --follow --date-order -C --find-renames --merges
 
-    ##? Usage: git file-history-all FILENAME
+    ##? Usage: git file-history-all PATH
     ##?
-    ##? Show the commit history of a specific file across all branches.
+    ##? Show the commit history of a specific file or directory across all branches.
     file-history-all = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history-all FILENAME\n'; \
+            printf >&2 'Usage: git file-history-all PATH\n'; \
             return 2; \
         fi; \
-        FILENAME=\"$1\"; \
-        if ! git rev-parse --quiet --verify \"$FILENAME\" 2>/dev/null; then \
-            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILENAME\"; \
+        PATH=\"$1\"; \
+        if ! git rev-parse --quiet --verify \"$PATH\" 2>/dev/null; then \
+            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$PATH\"; \
         fi; \
-        git log --follow --all -- \"$FILENAME\"; \
+        git log --follow --all -- \"$PATH\"; \
     }; f"
 
     # Usage: git file-last-modified FILENAME
