@@ -5369,12 +5369,17 @@ each commit:
 #+begin_src conf
     # Usage: git related-files FILENAME
     # Generate a list of which files changed together with a file.
-    related-files = !sh -c 'git log --format=format:%H $0 \
-                | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
-                | sort \
-                | uniq -c \
-                | sort -b -n -r \
-                | less'
+    related-files = "!f() { \
+        if [ ! -e \"$1\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
+            return 2; \
+        fi; \
+        printf \"Unique Files:\\n\"; \
+        git log --format=format:%H -- \"$1\" \
+            | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
+            | sort \
+            | uniq -c | sort -b -n -r; \
+    }; f"
 #+end_src
 
 ** SHOW - Show blame information about original authors of lines changed or removed
