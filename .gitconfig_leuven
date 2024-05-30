@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240530.1421
+# .gitconfig, Time-stamp: 20240530.1428
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1842,22 +1842,6 @@ deploy-prod =
             | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
             | sort \
             | uniq -c | sort -b -n -r; \
-    }; f"
-
-    # Usage: git first-modified-date FILENAME
-    # Show the date of the first modification of a file.
-    first-modified-date = "!f() { \
-        date=$(git log --all --follow --pretty=format:%ci -- \"$1\" | tail -n 1); \
-        echo \"$date\"; \
-    }; f"
-
-    first-modified-date2 = "!f() { \
-        date=$(git log --all --follow --pretty=format:%ci --full-history -- \"$1\" | tail -n 1); \
-        echo \"$date\"; \
-    }; f"
-
-    first-modified-date3 = "!f() { \
-        git log --follow --format=%ai -- \"$1\" | tail -1; \
     }; f"
 
     # Usage: git file-last-commit FILENAME

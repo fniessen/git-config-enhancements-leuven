@@ -5341,30 +5341,6 @@ each commit:
     }; f"
 #+end_src
 
-*** When was this File First Committed
-
-#+begin_src conf
-    # Usage: git first-modified-date FILENAME
-    # Show the date of the first modification of a file.
-    first-modified-date = "!f() { \
-        date=$(git log --all --follow --pretty=format:%ci -- \"$1\" | tail -n 1); \
-        echo \"$date\"; \
-    }; f"
-#+end_src
-
-XXX The above alias does not work on renamed files...
-
-#+begin_src conf
-    first-modified-date2 = "!f() { \
-        date=$(git log --all --follow --pretty=format:%ci --full-history -- \"$1\" | tail -n 1); \
-        echo \"$date\"; \
-    }; f"
-
-    first-modified-date3 = "!f() { \
-        git log --follow --format=%ai -- \"$1\" | tail -1; \
-    }; f"
-#+end_src
-
 *** When Was this File Last Updated
 
 To find the most recent commit (chronologically) that modified a file across /all/
