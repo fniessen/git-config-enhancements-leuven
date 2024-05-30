@@ -2878,6 +2878,29 @@ Alias without safety checks:
 
 https://bitbucket.org/blog/git-squash-commits-merging-bitbucket
 
+Clean up your commits before publishing.  Before you push your commits to the
+repository, it's good to revise them.  You can run the git interactive rebase to
+squash your commits or modify commit messages.  The goal is to publish only
+clean and relevant commits, no experiments or fixing typos.
+
+#+begin_src conf
+    # Interactively rebase a specified number of recent commits.
+    ireb = "!f() { \
+        git rebase -i HEAD~\"$1\"; \
+    }; f"
+#+end_src
+
+Start an interactive rebase of all the commits you haven't pushed yet. Handy for
+collapsing a bunch of work-in-progress snapshots into logical commits before
+pushing, without having to worry about accidentally squashing a commit someone
+else has already referred to.
+
+#+begin_src conf
+    # Interactively rebase all commits that haven't been pushed to the upstream
+    # branch.
+    work-in-progress = rebase -i @{u}
+#+end_src
+
 *** Revert a faulty merge
 
 https://mirrors.edge.kernel.org/pub/software/scm/git/docs/howto/revert-a-faulty-merge.txt
@@ -5011,26 +5034,6 @@ Define:
 
 so that you can do things like ~git x make~.  This works because Shell aliases are
 always executed in the top-level directory.
-
-Clean up your commits before publishing.  Before you push your commits to the
-repository, it's good to revise them.  You can run the git interactive rebase to
-squash your commits or modify commit messages.  The goal is to publish only
-clean and relevant commits, no experiments or fixing typos.
-
-#+begin_src conf
-    # Interactive rebase with the given number of latest commits
-    ireb = "!f() { \
-        git rebase -i HEAD~\"$1\"; \
-    }; f"
-#+end_src
-
-#+begin_src conf
-    # Start an interactive rebase of all the commits you haven't pushed
-    # yet. Handy for collapsing a bunch of work-in-progress snapshots into
-    # logical commits before pushing, without having to worry about accidentally
-    # squashing a commit someone else has already referred to.
-    work-in-progress = rebase -i @{u}
-#+end_src
 
 ** SHOW - Check the status of your files
 

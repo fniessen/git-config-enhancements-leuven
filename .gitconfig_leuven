@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240530.1428
+# .gitconfig, Time-stamp: 20240530.1528
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -914,6 +914,15 @@
             && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
     }; f"
 
+    # Interactively rebase a specified number of recent commits.
+    ireb = "!f() { \
+        git rebase -i HEAD~\"$1\"; \
+    }; f"
+
+    # Interactively rebase all commits that haven't been pushed to the upstream
+    # branch.
+    work-in-progress = rebase -i @{u}
+
     create-branch = checkout -b
 
     ##? Usage: git current-branch
@@ -1675,17 +1684,6 @@ deploy-prod =
 
     # Execute shell command and show output.
     x = "!exec "
-
-    # Interactive rebase with the given number of latest commits
-    ireb = "!f() { \
-        git rebase -i HEAD~\"$1\"; \
-    }; f"
-
-    # Start an interactive rebase of all the commits you haven't pushed
-    # yet. Handy for collapsing a bunch of work-in-progress snapshots into
-    # logical commits before pushing, without having to worry about accidentally
-    # squashing a commit someone else has already referred to.
-    work-in-progress = rebase -i @{u}
 
     # Usage: git st
     # Display the current status of the repository with branch names.
