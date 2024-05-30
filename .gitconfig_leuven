@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240530.1407
+# .gitconfig, Time-stamp: 20240530.1417
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1797,6 +1797,51 @@ deploy-prod =
         git log --follow --all -- \"$FILE_PATH\"; \
     }; f"
 
+    ##? Usage: git related-history FILE_PATH
+    ##?
+    ##? Show all commits that modified a specific file, including the commit message and file list.
+    ##?
+    ##? Note:
+    ##?   "rename from" files are not included in the output of this command.
+    related-history = "!f() { \
+        if [ ! -e \"$1\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
+            return 2; \
+        fi; \
+        git show --name-only $(git rev-list HEAD -- \"$1\"); \
+    }; f"
+
+    # DEBUG version:
+    # related-files = "!f() { \
+    #     if [ ! -e \"$1\" ]; then \
+    #         echo \"Error: File '$1' not found in the working tree.\"; \
+    #         return 1; \
+    #     fi; \
+    #     hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
+    #     echo \"\nHashes: \n$hashes\"; \
+    #     files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
+    #     echo \"\nFiles: \n$files\"; \
+    #     sorted_files=$(echo \"$files\" | sort); \
+    #     echo \"\nSorted Files: \n$sorted_files\"; \
+    #     unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
+    #     echo \"\nUnique Files: \n$unique_files\"; \
+    # }; f"
+
+    ##? Usage: git related-files FILE_PATH
+    ##?
+    ##? Generate a list of which files changed together with a file.
+    related-files = "!f() { \
+        if [ ! -e \"$1\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
+            return 2; \
+        fi; \
+        printf \"Unique Files:\\n\"; \
+        git log --format=format:%H -- \"$1\" \
+            | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
+            | sort \
+            | uniq -c | sort -b -n -r; \
+    }; f"
+
     # Usage: git first-modified-date FILENAME
     # Show the date of the first modification of a file.
     first-modified-date = "!f() { \
@@ -1852,51 +1897,6 @@ deploy-prod =
                 echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
             fi; \
         done | sort -k1,1r; \
-    }; f"
-
-    ##? Usage: git related FILE_PATH
-    ##?
-    ##? Show all commits that modified a specific file, including the commit message and file list.
-    ##?
-    ##? Note:
-    ##?   "rename from" files are not included in the output of this command.
-    related = "!f() { \
-        if [ ! -e \"$1\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
-            return 2; \
-        fi; \
-        git show --name-only $(git rev-list HEAD -- \"$1\"); \
-    }; f"
-
-    # DEBUG version:
-    # related-files = "!f() { \
-    #     if [ ! -e \"$1\" ]; then \
-    #         echo \"Error: File '$1' not found in the working tree.\"; \
-    #         return 1; \
-    #     fi; \
-    #     hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
-    #     echo \"\nHashes: \n$hashes\"; \
-    #     files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
-    #     echo \"\nFiles: \n$files\"; \
-    #     sorted_files=$(echo \"$files\" | sort); \
-    #     echo \"\nSorted Files: \n$sorted_files\"; \
-    #     unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
-    #     echo \"\nUnique Files: \n$unique_files\"; \
-    # }; f"
-
-    ##? Usage: git related-files FILE_PATH
-    ##?
-    ##? Generate a list of which files changed together with a file.
-    related-files = "!f() { \
-        if [ ! -e \"$1\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
-            return 2; \
-        fi; \
-        printf \"Unique Files:\\n\"; \
-        git log --format=format:%H -- \"$1\" \
-            | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
-            | sort \
-            | uniq -c | sort -b -n -r; \
     }; f"
 
     praise = blame -w

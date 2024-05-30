@@ -5262,6 +5262,83 @@ branch:
 # : git file-history-all db/aremis/Sprint_2024_07/GCS-4307_2_BBS_ROLES_roles.sql
 # : git file-history-all db/aremis/Sprint_2024_07/GCS-4307_BBS_ROLES_FOR_S2_STACK-2.sql
 
+*** Related files (commit history and associated file changes)
+
+List commits affecting a specific path and then get all the files modified in
+each commit:
+
+#+begin_src conf
+    ##? Usage: git related-history FILE_PATH
+    ##?
+    ##? Show all commits that modified a specific file, including the commit message and file list.
+    ##?
+    ##? Note:
+    ##?   "rename from" files are not included in the output of this command.
+    related-history = "!f() { \
+        if [ ! -e \"$1\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
+            return 2; \
+        fi; \
+        git show --name-only $(git rev-list HEAD -- \"$1\"); \
+    }; f"
+#+end_src
+
+(see https://stackoverflow.com/questions/42527378/git-get-the-list-of-files-that-have-been-modified-along-one-specific-file)
+
+# ~\n~ should be escaped. For instance, the given command:
+#
+# #+begin_src conf
+#     related = "!f() { \
+#         git log --pretty=format:\"%h %ad %s <%an>\" --date=short --name-status -- \"$1\" \
+#         | awk ' \
+#             BEGIN { RS = \"\"; FS = \"\n\"; OFS = \"\\n\" } \
+#             { print $1, $2; for (i=3; i<=NF; i++) { if ($i ~ /^R/) { split($i, arr, \"\\t\"); print \"Renamed: \" arr[3]; } else if ($i ~ /^D/) { split($i, arr, \"\\t\"); print \"Deleted: \" arr[2]; } else { print $i; } } print \"\" } \
+#         '; \
+#     }; f"
+# #+end_src
+#
+# will result in the error:
+#
+# : awk: cmd. line:1:          BEGIN { RS = ""; FS = "
+# : awk: cmd. line:1:                                ^ unterminated string
+# : awk: cmd. line:1:          BEGIN { RS = ""; FS = "
+# : awk: cmd. line:1:                                ^ syntax error
+#
+# To avoid this error, escape the backslash and the newline character properly.
+
+#+begin_src conf
+    # DEBUG version:
+    # related-files = "!f() { \
+    #     if [ ! -e \"$1\" ]; then \
+    #         echo \"Error: File '$1' not found in the working tree.\"; \
+    #         return 1; \
+    #     fi; \
+    #     hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
+    #     echo \"\nHashes: \n$hashes\"; \
+    #     files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
+    #     echo \"\nFiles: \n$files\"; \
+    #     sorted_files=$(echo \"$files\" | sort); \
+    #     echo \"\nSorted Files: \n$sorted_files\"; \
+    #     unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
+    #     echo \"\nUnique Files: \n$unique_files\"; \
+    # }; f"
+
+    ##? Usage: git related-files FILE_PATH
+    ##?
+    ##? Generate a list of which files changed together with a file.
+    related-files = "!f() { \
+        if [ ! -e \"$1\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
+            return 2; \
+        fi; \
+        printf \"Unique Files:\\n\"; \
+        git log --format=format:%H -- \"$1\" \
+            | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
+            | sort \
+            | uniq -c | sort -b -n -r; \
+    }; f"
+#+end_src
+
 *** When was this File First Committed
 
 #+begin_src conf
@@ -5347,83 +5424,6 @@ directory across all local branches:
                 echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
             fi; \
         done | sort -k1,1r; \
-    }; f"
-#+end_src
-
-*** Related
-
-List commits affecting a specific path and then get all the files modified in
-each commit:
-
-#+begin_src conf
-    ##? Usage: git related FILE_PATH
-    ##?
-    ##? Show all commits that modified a specific file, including the commit message and file list.
-    ##?
-    ##? Note:
-    ##?   "rename from" files are not included in the output of this command.
-    related = "!f() { \
-        if [ ! -e \"$1\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
-            return 2; \
-        fi; \
-        git show --name-only $(git rev-list HEAD -- \"$1\"); \
-    }; f"
-#+end_src
-
-(see https://stackoverflow.com/questions/42527378/git-get-the-list-of-files-that-have-been-modified-along-one-specific-file)
-
-# ~\n~ should be escaped. For instance, the given command:
-#
-# #+begin_src conf
-#     related = "!f() { \
-#         git log --pretty=format:\"%h %ad %s <%an>\" --date=short --name-status -- \"$1\" \
-#         | awk ' \
-#             BEGIN { RS = \"\"; FS = \"\n\"; OFS = \"\\n\" } \
-#             { print $1, $2; for (i=3; i<=NF; i++) { if ($i ~ /^R/) { split($i, arr, \"\\t\"); print \"Renamed: \" arr[3]; } else if ($i ~ /^D/) { split($i, arr, \"\\t\"); print \"Deleted: \" arr[2]; } else { print $i; } } print \"\" } \
-#         '; \
-#     }; f"
-# #+end_src
-#
-# will result in the error:
-#
-# : awk: cmd. line:1:          BEGIN { RS = ""; FS = "
-# : awk: cmd. line:1:                                ^ unterminated string
-# : awk: cmd. line:1:          BEGIN { RS = ""; FS = "
-# : awk: cmd. line:1:                                ^ syntax error
-#
-# To avoid this error, escape the backslash and the newline character properly.
-
-#+begin_src conf
-    # DEBUG version:
-    # related-files = "!f() { \
-    #     if [ ! -e \"$1\" ]; then \
-    #         echo \"Error: File '$1' not found in the working tree.\"; \
-    #         return 1; \
-    #     fi; \
-    #     hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
-    #     echo \"\nHashes: \n$hashes\"; \
-    #     files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
-    #     echo \"\nFiles: \n$files\"; \
-    #     sorted_files=$(echo \"$files\" | sort); \
-    #     echo \"\nSorted Files: \n$sorted_files\"; \
-    #     unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
-    #     echo \"\nUnique Files: \n$unique_files\"; \
-    # }; f"
-
-    ##? Usage: git related-files FILE_PATH
-    ##?
-    ##? Generate a list of which files changed together with a file.
-    related-files = "!f() { \
-        if [ ! -e \"$1\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
-            return 2; \
-        fi; \
-        printf \"Unique Files:\\n\"; \
-        git log --format=format:%H -- \"$1\" \
-            | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
-            | sort \
-            | uniq -c | sort -b -n -r; \
     }; f"
 #+end_src
 
