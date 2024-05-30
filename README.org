@@ -1451,9 +1451,9 @@ manage.
     # Usage: git backup-all-untracked-files
     # Create a backup archive of all untracked files in the repository.
     backup-all-untracked-files = "!f() { \
-        repo_slug_remote=\"$(git repo-slug-remote)\"; \
-        current_date=$(date +'%Y-%m-%d'); \
-        backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
+        local repo_slug_remote=\"$(git repo-slug-remote)\"; \
+        local current_date=$(date +'%Y-%m-%d'); \
+        local backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
         git all-untracked-files -z \
             | xargs -0 tar rvf ~/$backup_filename; \
     }; f"
@@ -2260,7 +2260,7 @@ expressions.
     # Usage: git difftool-rev [REVISION]
     # Launch a diff tool for a specific revision or branch.
     difftool-rev = "!f() { \
-        REV=$(git rev-parse \"${*:-HEAD}\"); \
+        local REV=$(git rev-parse \"${*:-HEAD}\"); \
         git difftool $REV~1 $REV; \
     }; f"
 #+end_src
@@ -2276,23 +2276,23 @@ Diff the last commit for a given file:
     # Show the diff of the last commit that modified a specific file using
     # a diff tool.
     file-diff-last-modification = "!f() { \
-        PROJECT_ROOT_DIR=$(git root); \
-        echo Finding full file path of \"$1\" in $PROJECT_ROOT_DIR; \
-        FILEPATH=$(find $PROJECT_ROOT_DIR -type f -name \"$1\"); \
-        echo full file path $FILEPATH; \
-        LAST_MODIFIED_COMMIT_HASH=$(git rev-list -1 HEAD $FILEPATH); \
-        echo last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
-        git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
+        local project_root_dir=$(git root); \
+        echo Finding full file path of \"$1\" in $project_root_dir; \
+        local file_path=$(find $project_root_dir -type f -name \"$1\"); \
+        echo Full file path $file_path; \
+        local last_modified_commit_hash=$(git rev-list -1 HEAD $file_path); \
+        echo Last commit file modified $last_modified_commit_hash; \
+        git difftool $last_modified_commit_hash^ $file_path; \
     }; f"
 
     file-diff-last-modification2 = "!f() { \
-        PROJECT_ROOT_DIR=$(git root); \
-        echo Finding full file path of \"$1\" in $PROJECT_ROOT_DIR; \
-        FILEPATH=$(git ls-files --full-name -- \"$1\"); \
-        echo Full file path $FILEPATH; \
-        LAST_MODIFIED_COMMIT_HASH=$(git log -1 --pretty=format:%H -- $FILEPATH); \
-        echo Last commit file modified $LAST_MODIFIED_COMMIT_HASH; \
-        git difftool $LAST_MODIFIED_COMMIT_HASH^ $FILEPATH; \
+        local project_root_dir=$(git root); \
+        echo Finding full file path of \"$1\" in $project_root_dir; \
+        local file_path=$(git ls-files --full-name -- \"$1\"); \
+        echo Full file path $file_path; \
+        local last_modified_commit_hash=$(git log -1 --pretty=format:%H -- $file_path); \
+        echo Last commit file modified $last_modified_commit_hash; \
+        git difftool $last_modified_commit_hash^ $file_path; \
     }; f"
 #+end_src
 
@@ -2561,7 +2561,7 @@ any *line* that was added, removed, or changed.
 
 #+begin_src conf
     browse-commits = "!f() { \
-        URL=$(git config --get remote.$(git origin).url); \
+        local URL=$(git config --get remote.$(git origin).url); \
         xdg-open ${URL/.git}/commits; \
     }; f"
 #+end_src
@@ -2687,7 +2687,7 @@ My new favorite alias lets you amend to a specific commit, *no* need to be the
 #+begin_src conf
     # Edit history.
     recommit2 = "!f() { \
-        TARGET=$(git rev-parse \"$1\"); \
+        local TARGET=$(git rev-parse \"$1\"); \
         git commit --fixup=$TARGET ${@:2} \
             && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; \
     }; f"
@@ -3291,7 +3291,7 @@ branch up* to all the latest changes on the ~main~ branch.
         local main_branch=$(git main-branch || echo 'main'); \
         local current_branch=$(git current-branch); \
         git merge origin/$main_branch; \
-        merge_status=$?; \
+        local merge_status=$?; \
         if [ $merge_status -eq 0 ]; then \
             echo \"Branch synced: '$current_branch' successfully synced with '$main_branch'\"; \
         else \
@@ -3983,8 +3983,8 @@ current branch and the specified branch.
     missing = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
-        commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
-        commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
+        local commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
+        local commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
         printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
             \"$other_branch\" \"$current_branch\" \"$commits_missing_to_current\"; \
         git --no-pager log \"$other_branch\"..\"$current_branch\"; \
@@ -4363,14 +4363,14 @@ If everything is OK, you can merge the pull request.
     # Example:
     #   git merge-pr $(git origin) 5
     merge-pr = "!sh -c '\
-        USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL:\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
-        USER=$(echo $USER_AND_REPO | cut -d\" \" -f1); \
-        REPO=$(echo $USER_AND_REPO | cut -d\" \" -f2); \
-        TMP_FILE=$(mktemp); \
+        local USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL:\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
+        local USER=$(echo $USER_AND_REPO | cut -d\" \" -f1); \
+        local REPO=$(echo $USER_AND_REPO | cut -d\" \" -f2); \
+        local TMP_FILE=$(mktemp); \
         curl -si https://api.github.com/repos/$USER/$REPO/pulls/$2 > $TMP_FILE; \
-        PULL_AUTHOR=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
-        PULL_REF=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
-        PULL_TITLE=$(cat $TMP_FILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"); \
+        local PULL_AUTHOR=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
+        local PULL_REF=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
+        local PULL_TITLE=$(cat $TMP_FILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"); \
         rm $TMP_FILE; \
         git fetch $1 pull/$2/head; \
         git merge --no-ff -m \"Merged pull request #$2 from $PULL_AUTHOR/$PULL_REF\n\n$PULL_TITLE\" FETCH_HEAD; \
@@ -4874,9 +4874,9 @@ See also [[https://cran.r-project.org/web/packages/jsonlite/vignettes/json-apis.
 
 #+begin_src conf :tangle no
     issues-created-by-me = "!f() { \
-        REPO_OWNER=\"YourUsername\"; \
-        REPO_SLUG_REMOTE=\"YourRepository\"; \
-        API_URL=\"https://api.github.com/repos/$REPO_OWNER/$REPO_SLUG_REMOTE/issues?creator=$REPO_OWNER\"; \
+        local REPO_OWNER=\"YourUsername\"; \
+        local REPO_SLUG_REMOTE=\"YourRepository\"; \
+        local API_URL=\"https://api.github.com/repos/$REPO_OWNER/$REPO_SLUG_REMOTE/issues?creator=$REPO_OWNER\"; \
         curl -s \"$API_URL\" | jq -r '.[] | \"#\( .number ) - \( .title )\"'; \
     }; f"
 #+end_src
@@ -4900,8 +4900,8 @@ Show an existing issue specified by NUMBER.
 
 #+begin_src conf
     browse-issues = "!f() { \
-        URL=$(git config --get remote.$(git origin).url); \
-        xdg-open ${URL/.git}/issues/\"$1\"; \
+        local url=$(git config --get remote.$(git origin).url); \
+        xdg-open ${url/.git}/issues/\"$1\"; \
     }; f"
 #+end_src
 
@@ -4919,8 +4919,8 @@ Show an existing issue specified by NUMBER.
 
 #+begin_src conf
     browse-wiki = "!f() { \
-        URL=$(git config --get remote.$(git origin).url); \
-        xdg-open ${URL/.git}/wiki; \
+        local url=$(git config --get remote.$(git origin).url); \
+        xdg-open ${url/.git}/wiki; \
     }; f"
 #+end_src
 
@@ -5317,13 +5317,13 @@ each commit:
     #         echo \"Error: File '$1' not found in the working tree.\"; \
     #         return 1; \
     #     fi; \
-    #     hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
+    #     local hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
     #     echo \"\nHashes: \n$hashes\"; \
-    #     files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
+    #     local files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
     #     echo \"\nFiles: \n$files\"; \
-    #     sorted_files=$(echo \"$files\" | sort); \
+    #     local sorted_files=$(echo \"$files\" | sort); \
     #     echo \"\nSorted Files: \n$sorted_files\"; \
-    #     unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
+    #     local unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
     #     echo \"\nUnique Files: \n$unique_files\"; \
     # }; f"
 
@@ -6362,7 +6362,7 @@ Show changes for a daily standup meeting:
     # Usage: git standup [AUTHOR]
     # Summarize changes since 24h, suitable for a daily standup meeting.
     standup = "!f() { \
-        today=$(date +%a); \
+        local today=$(date +%a); \
         if [ \"$today\" = \"Mon\" ]; then \
             since=\"last.Friday\"; \
         else \
