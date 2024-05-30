@@ -968,10 +968,13 @@ Set email addresses for you:
 #+end_src
 
 #+begin_src conf
+    ##? Usage: git whoami
+    ##?
+    ##? Display the current git user's name and email.
     whoami = "!f() { \
-        printf '%s <%s>\n' \
-            \"$(git config user.name)\" \
-            \"$(git config user.email)\"; \
+        local name=\"$(git config user.name)\"; \
+        local email=\"$(git config user.email)\"; \
+        printf '%s <%s>\n' \"$name\" \"$email\"; \
     }; f"
 #+end_src
 

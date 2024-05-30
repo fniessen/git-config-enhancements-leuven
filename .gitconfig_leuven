@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240530.1538
+# .gitconfig, Time-stamp: 20240530.1542
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -234,10 +234,13 @@
 
     work-profile = config user.email \"john@work.com\"
 
+    ##? Usage: git whoami
+    ##?
+    ##? Display the current git user's name and email.
     whoami = "!f() { \
-        printf '%s <%s>\n' \
-            \"$(git config user.name)\" \
-            \"$(git config user.email)\"; \
+        local name=\"$(git config user.name)\"; \
+        local email=\"$(git config user.email)\"; \
+        printf '%s <%s>\n' \"$name\" \"$email\"; \
     }; f"
 
     # Usage: git init-repository
