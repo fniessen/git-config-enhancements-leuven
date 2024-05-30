@@ -5275,11 +5275,12 @@ each commit:
     ##? Note:
     ##?   "rename from" files are not included in the output of this command.
     related-history = "!f() { \
-        if [ ! -e \"$1\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
+        local FILE_PATH=\"$1\"; \
+        if [ ! -e \"$FILE_PATH\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$FILE_PATH\"; \
             return 2; \
         fi; \
-        git show --name-only $(git rev-list HEAD -- \"$1\"); \
+        git show --name-only $(git rev-list HEAD -- \"$FILE_PATH\"); \
     }; f"
 #+end_src
 
@@ -5288,7 +5289,7 @@ each commit:
 # ~\n~ should be escaped. For instance, the given command:
 #
 # #+begin_src conf
-#     related = "!f() { \
+#     related-history = "!f() { \
 #         git log --pretty=format:\"%h %ad %s <%an>\" --date=short --name-status -- \"$1\" \
 #         | awk ' \
 #             BEGIN { RS = \"\"; FS = \"\n\"; OFS = \"\\n\" } \
@@ -5327,12 +5328,13 @@ each commit:
     ##?
     ##? Generate a list of which files changed together with a file.
     related-files = "!f() { \
-        if [ ! -e \"$1\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$1\"; \
+        local FILE_PATH=\"$1\"; \
+        if [ ! -e \"$FILE_PATH\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$FILE_PATH\"; \
             return 2; \
         fi; \
         printf \"Unique Files:\\n\"; \
-        git log --format=format:%H -- \"$1\" \
+        git log --format=format:%H -- \"$FILE_PATH\" \
             | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
             | sort \
             | uniq -c | sort -b -n -r; \
