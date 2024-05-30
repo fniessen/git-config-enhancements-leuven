@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240529.2210
+# .gitconfig, Time-stamp: 20240530.1020
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -309,7 +309,7 @@
             | grep -i --color=auto \"$PATTERN\"; \
     }; f"
 
-    # Alias of 'search-for-files'.
+    # Alias for 'search-for-files'.
     find-files = search-for-files
 
     ##? Usage: git search-for-files-all-branches FILE_NAME
@@ -333,14 +333,14 @@
         done; \
     }; f"
 
-    # Alias of 'search-for-files-all'.
+    # Alias for 'search-for-files-all'.
     find-files-all-branches = search-for-files-all-branches
 
     # Usage: git search-for-code PATTERN [TREE]
     # Search for a string in files, ignoring binary files and highlighting matches.
     search-for-code = "grep -i -I --line-number --break --heading -C 1"
 
-    # Alias of 'search-for-code'.
+    # Alias for 'search-for-code'.
     ack = search-for-code
 
     search-for-code-in-extension = "XXX"
@@ -672,7 +672,7 @@
                    | xargs -r -I {} git stash-remove {}"
 
     # Usage: git ci -m "MESSAGE"
-    # Alias for "git commit".
+    # Alias for 'commit'.
     ci = commit
 
 [commit]
@@ -940,7 +940,7 @@
     # Push the current branch to the upstream branch with the same name.
     push-upstream = !git push -u $(git origin) $(git current-branch)
 
-    # Alias of 'push-upstream'.
+    # Alias for 'push-upstream'.
     publish = push-upstream
 
     ##? Usage: git upstream-branch
@@ -1736,26 +1736,10 @@ deploy-prod =
     # Show minimal differences in changes between staged changes and the most recent commit, ignoring whitespace.
     swdiff = diff --diff-algorithm=minimal -w --cached
 
-    # Usage: git first-modified-date FILENAME
-    # Show the date of the first modification of a file.
-    first-modified-date = "!f() { \
-        date=$(git log --all --follow --pretty=format:%ci -- \"$1\" | tail -n 1); \
-        echo \"$date\"; \
-    }; f"
-
-    first-modified-date2 = "!f() { \
-        date=$(git log --all --follow --pretty=format:%ci --full-history -- \"$1\" | tail -n 1); \
-        echo \"$date\"; \
-    }; f"
-
-    first-modified-date3 = "!f() { \
-        git log --follow --format=%ai -- \"$1\" | tail -1; \
-    }; f"
-
     stage-modified-removed-files = add -u
 
     # Usage: git ls
-    # Print a summary of activity.  Alias of log.
+    # Print a summary of activity.  Alias for 'log'.
     ls = log
 
     ll = log --pretty=medium --abbrev-commit --stat
@@ -1813,21 +1797,21 @@ deploy-prod =
         git log --follow --all -- \"$FILE_PATH\"; \
     }; f"
 
-    # Usage: git related FILENAME
-    # Show all commits that modified a specific file, including the commit
-    # message and file list.
-    related = "!f() { \
-        git show --name-only $(git rev-list HEAD -- \"$1\"); \
+    # Usage: git first-modified-date FILENAME
+    # Show the date of the first modification of a file.
+    first-modified-date = "!f() { \
+        date=$(git log --all --follow --pretty=format:%ci -- \"$1\" | tail -n 1); \
+        echo \"$date\"; \
     }; f"
 
-    # Usage: git related-files FILENAME
-    # Generate a list of which files changed together with a file.
-    related-files = !sh -c 'git log --format=format:%H $0 \
-                | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
-                | sort \
-                | uniq -c \
-                | sort -b -n -r \
-                | less'
+    first-modified-date2 = "!f() { \
+        date=$(git log --all --follow --pretty=format:%ci --full-history -- \"$1\" | tail -n 1); \
+        echo \"$date\"; \
+    }; f"
+
+    first-modified-date3 = "!f() { \
+        git log --follow --format=%ai -- \"$1\" | tail -1; \
+    }; f"
 
     # Usage: git file-last-commit FILENAME
     # Show the most recent commit across all branches (both local and remote).
@@ -1850,7 +1834,7 @@ deploy-prod =
         done | sort -r | sed 's#^[0-9]*:##g'; \
     }; f"
 
-    # Alias of 'file-last-commits'.
+    # Alias for 'file-last-commits'.
     wwflu = file-last-commits
 
     file-last-commits2 = "!f() { \
@@ -1869,6 +1853,22 @@ deploy-prod =
             fi; \
         done | sort -k1,1r; \
     }; f"
+
+    # Usage: git related FILENAME
+    # Show all commits that modified a specific file, including the commit
+    # message and file list.
+    related = "!f() { \
+        git show --name-only $(git rev-list HEAD -- \"$1\"); \
+    }; f"
+
+    # Usage: git related-files FILENAME
+    # Generate a list of which files changed together with a file.
+    related-files = !sh -c 'git log --format=format:%H $0 \
+                | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
+                | sort \
+                | uniq -c \
+                | sort -b -n -r \
+                | less'
 
     praise = blame -w
     archeology = blame -w -C -n
@@ -1904,7 +1904,7 @@ deploy-prod =
         && git log HEAD..@{u}"
     # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
-    # Alias of 'incoming'.
+    # Alias for 'incoming'.
     in = incoming
 
     # Show log of new commits after you fetched, with stats, excluding merges
@@ -1923,7 +1923,7 @@ deploy-prod =
     incoming-files = !(git fetch \
                 && git diff --stat ...@{u})
 
-    # Alias of 'incoming-files'.
+    # Alias for 'incoming-files'.
     in-files = incoming-files
 
     incoming-diff = diff @{u} HEAD
@@ -2103,19 +2103,19 @@ deploy-prod =
     # Show (unpushed) commits not found in the remote branch.
     outgoing = log @{u}..HEAD
 
-    # Alias of 'outgoing'.
+    # Alias for 'outgoing'.
     out = outgoing
 
     outgoing-files = diff --stat @{u}...
 
-    # Alias of 'outgoing-files'.
+    # Alias for 'outgoing-files'.
     out-files = outgoing-files
 
     # Usage: git outgoing-all
     # Show commits not found in the destination repository.
     outgoing-all = log --branches --not --remotes
 
-    # Alias of 'outgoing-all'.
+    # Alias for 'outgoing-all'.
     out-all = outgoing-all
 
     # Usage: git divergence BRANCH_NAME
@@ -2231,7 +2231,7 @@ deploy-prod =
         (git add -p -- \"$@\" && git commit) || git reset; \
     }; f"
 
-    # Alias of 'commit-interactive'.
+    # Alias for 'commit-interactive'.
     record = commit-interactive
 
     lost = "!git fsck \
