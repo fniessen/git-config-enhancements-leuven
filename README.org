@@ -5950,7 +5950,7 @@ the checkout operation, you have a few options:
 
 #+begin_src shell :tangle no
 # Change directory to the root of the Git repository.
-cd "$(git rev-parse --show-toplevel)"
+cd "$(git root)"
 #+end_src
 
 - *Commit the Changes:* If the changes are ready to be committed, you can commit
