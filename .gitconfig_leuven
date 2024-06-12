@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240612.1306
+# .gitconfig, Time-stamp: 20240612.1320
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -750,15 +750,16 @@
     # Open Meld with directory comparison for all modified files.
     dir-diff = difftool -t meld --dir-diff
 
-    # Usage: git find-branches-containing COMMIT_HASH
-    # List branches containing a specific commit.
-    find-branches-containing = "!f() { \
+    ##? Usage: git branches-containing COMMIT_HASH
+    ##?
+    ##? List branches containing a specific commit.
+    branches-containing = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf 'Usage: git find-branches-containing COMMIT_HASH\n'; \
+            printf >&2 'Usage: git find-branches-containing COMMIT_HASH\n'; \
             return 2; \
         fi; \
         local COMMIT_HASH=\"$1\"; \
-        git branch -a --contains \"$COMMIT_HASH\"; \
+        git branch --contains \"$COMMIT_HASH\" --all; \
     }; f"
 
     # Usage: git find-tags-containing COMMIT_HASH

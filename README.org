@@ -2324,15 +2324,16 @@ Alternative: use [[https://diffoscope.org/][diffoscope]]
 List all the *branches and tags* (XXX) that contain a specific commit.
 
 #+begin_src conf
-    # Usage: git find-branches-containing COMMIT_HASH
-    # List branches containing a specific commit.
-    find-branches-containing = "!f() { \
+    ##? Usage: git branches-containing COMMIT_HASH
+    ##?
+    ##? List branches containing a specific commit.
+    branches-containing = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf 'Usage: git find-branches-containing COMMIT_HASH\n'; \
+            printf >&2 'Usage: git find-branches-containing COMMIT_HASH\n'; \
             return 2; \
         fi; \
         local COMMIT_HASH=\"$1\"; \
-        git branch -a --contains \"$COMMIT_HASH\"; \
+        git branch --contains \"$COMMIT_HASH\" --all; \
     }; f"
 #+end_src
 
