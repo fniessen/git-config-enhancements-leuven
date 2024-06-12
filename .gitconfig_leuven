@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240610.1150
+# .gitconfig, Time-stamp: 20240612.1251
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1246,11 +1246,10 @@
                 | xargs -n 1 git remote prune
     # 'git remote prune' does not understand '--all'.
 
-    # There's no way to tell git remote update to prune orphaned branches?
-
-    # Usage: git prune-local-branches
-    # Prune local branches that have been removed from the remote repository.
-    prune-local-branches = "!f() { \
+    ##? Usage: git remove-gone-branches
+    ##?
+    ##? Delete local branches that are tracking remote branches that are gone.
+    remove-gone-branches = "!f() { \
         git branch -vv \
             | grep ': gone]' \
             | awk '{print $1}' \

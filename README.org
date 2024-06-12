@@ -3646,9 +3646,8 @@ Delete a *remote* branch:
 
 *** Delete all orphaned branches (that no longer exist at remote)
 
-Once you delete the branch from the remote, you can *remove all orphaned
-remote-tracking branches that you have locally*, in =.git/refs/remotes/origin=, but
-are *no more present in the remote repository* ~origin~ with:
+Once you delete the branch from the remote, you can *prune remote-tracking
+branches that no longer exist on the remote*:
 
 : git remote prune $(git origin)
 
@@ -3663,8 +3662,6 @@ actually prune them:
     prune-all = !git remote \
                 | xargs -n 1 git remote prune
     # 'git remote prune' does not understand '--all'.
-
-    # There's no way to tell git remote update to prune orphaned branches?
 #+end_src
 
 #+begin_tip
@@ -3673,26 +3670,23 @@ If you want this to be run automatically every time you fetch/pull:
 : git config --global fetch.prune true
 #+end_tip
 
-or prune individual remote tracking branches with:
-
-: git delete-local-branch BRANCH_NAME
+However, this command *doesn't remove local branches* that are already checked out
+or that you've created locally.
 
 *Remove orphaned branches in your local repository* that *no longer exist in the
-remote* one (by deleting the local ones that show they are "gone" in ~git
-branch -vv~):
+remote* one (by deleting deleting any local branches that are marked as "gone"):
 
 #+begin_src conf
-    # Usage: git prune-local-branches
-    # Prune local branches that have been removed from the remote repository.
-    prune-local-branches = "!f() { \
+    ##? Usage: git remove-gone-branches
+    ##?
+    ##? Delete local branches that are tracking remote branches that are gone.
+    remove-gone-branches = "!f() { \
         git branch -vv \
             | grep ': gone]' \
             | awk '{print $1}' \
             | xargs git delete-local-branch; \
     }; f"
-    #+end_src
-
-Delete local branches that are tracking remote branches that are gone.
+#+end_src
 
 ** Rename a branch
 
