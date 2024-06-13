@@ -3678,16 +3678,16 @@ checked out or that you've created locally.
 (by deleting any local branches that are marked as "gone"):
 
 #+begin_src conf
-    ##? Usage: git remove-gone-branches
+    ##? Usage: git delete-gone-branches
     ##?
     ##? Delete local branches that are tracking remote branches that are gone.
-    remove-gone-branches = "!f() { \
+    delete-gone-branches = "!f() { \
         local gone_branches=$(git branch -vv | grep \": gone]\" | awk \"{print $1}\"); \
         if [ -n \"$gone_branches\" ]; then \
-            printf \"Removing gone branches:\n\"; \
+            printf \"Deleting gone branches:\n\"; \
             printf \"%s\n\" \"$gone_branches\" | xargs git delete-local-branch; \
         else \
-            printf \"No gone branches to remove.\n\"; \
+            printf \"No gone branches to delete.\n\"; \
         fi \
     }; f"
 #+end_src

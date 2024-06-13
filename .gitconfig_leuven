@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240612.1320
+# .gitconfig, Time-stamp: 20240613.1040
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1247,16 +1247,16 @@
                     | xargs -n 1 git remote prune
     # 'git remote prune' does not understand '--all'.
 
-    ##? Usage: git remove-gone-branches
+    ##? Usage: git delete-gone-branches
     ##?
     ##? Delete local branches that are tracking remote branches that are gone.
-    remove-gone-branches = "!f() { \
+    delete-gone-branches = "!f() { \
         local gone_branches=$(git branch -vv | grep \": gone]\" | awk \"{print $1}\"); \
         if [ -n \"$gone_branches\" ]; then \
-            printf \"Removing gone branches:\n\"; \
+            printf \"Deleting gone branches:\n\"; \
             printf \"%s\n\" \"$gone_branches\" | xargs git delete-local-branch; \
         else \
-            printf \"No gone branches to remove.\n\"; \
+            printf \"No gone branches to delete.\n\"; \
         fi \
     }; f"
 
