@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240614.1629
+# .gitconfig, Time-stamp: 20240614.1700
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -800,25 +800,41 @@
         git log --grep \"$1\" -i $(git rev-list --all); \
     }; f"
 
-    search-all-commits = "!git rev-list --all | xargs git grep -F"
+    ##? Usage: git search-in-all-commits SEARCH_TERM
+    ##?
+    ##? Search for a specific term in all commits.
+    search-in-all-commits = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git search-in-all-commits SEARCH_TERM\n'; \
+            return 2; \
+        fi; \
+        local SEARCH_TERM=\"$1\"; \
+        git rev-list --all | xargs git grep -F \"$SEARCH_TERM\"; \
+    }; f"
 
-    # Usage: git search-for-commits-bitbucket-or KEYWORD...
-    # Search for commit messages that match one or more search patterns (Filter
-    # by message).
+    # Usage: git search-for-commits-or-bitbucket KEYWORD...
+    #
+    # Search for commit messages that match one or more search patterns (OR semantic).
+    #
+    # This will search commit messages for the provided keywords and list the
+    # matching commits.
     search-for-commits-or-bitbucket = "!f() { \
-        for l in \"$@\"; do \
-            git log --grep \"$l\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
+        for keyword in \"$@\"; do \
+            git log --grep \"$keyword\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
             printf \"\n\"; \
         done | sort -r; \
     }; f"
-    # XXX Wrong sorting if all on the same date (wth "testing failure" on PFlow)
+    # XXX Note: Sorting may not be accurate if all commits have the same timestamp.
     # XXX Add all, date short...
 
-    # Usage: git search-for-commits-gitlab-and PATTERN...
-    # Search for commits that match one or more search patterns in commit
-    # messages OR DIFF CONTENTS??? (Filter by message).
+    # Usage: git search-for-commits-and-gitlab PATTERN...
+    #
+    # Search for commits that match all provided search patterns in commit messages (AND semantic).
+    #
+    # This will search commit messages for the provided patterns and list the
+    # matching commits.
     search-for-commits-and-gitlab = "!f() { \
-        CMD=\"git log --all-match -i\"; \
+        CMD=\"git log --all-match -i --format='%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)' --color=always\"; \
         for PATTERN in \"$@\"; do \
             CMD=\"$CMD --grep '$PATTERN'\"; \
         done; \
