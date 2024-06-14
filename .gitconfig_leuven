@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240614.1716
+# .gitconfig, Time-stamp: 20240614.1721
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -800,9 +800,9 @@
         git log --grep \"$1\" -i $(git rev-list --all); \
     }; f"
 
-    ##? Usage: git search-in-all-commits SEARCH_TERM
-    ##?
-    ##? Search for a specific term in all commits.
+    # Usage: git search-in-all-commits SEARCH_TERM
+    #
+    # Search for a specific term in all commits.
     search-in-all-commits = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git search-in-all-commits SEARCH_TERM\n'; \

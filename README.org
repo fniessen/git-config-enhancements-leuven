@@ -2425,9 +2425,9 @@ You may want to add history to search through the whole repository, by adding
 #+end_src
 
 #+begin_src conf
-    ##? Usage: git search-in-all-commits SEARCH_TERM
-    ##?
-    ##? Search for a specific term in all commits.
+    # Usage: git search-in-all-commits SEARCH_TERM
+    #
+    # Search for a specific term in all commits.
     search-in-all-commits = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git search-in-all-commits SEARCH_TERM\n'; \
