@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240613.1040
+# .gitconfig, Time-stamp: 20240614.1629
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -755,17 +755,23 @@
     ##? List branches containing a specific commit.
     branches-containing = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git find-branches-containing COMMIT_HASH\n'; \
+            printf >&2 'Usage: git branches-containing COMMIT_HASH\n'; \
             return 2; \
         fi; \
         local COMMIT_HASH=\"$1\"; \
         git branch --contains \"$COMMIT_HASH\" --all; \
     }; f"
 
-    # Usage: git find-tags-containing COMMIT_HASH
-    # Find tags containing commit.
-    find-tags-containing = "!f() { \
-        git tag -l --contains \"$1\" \
+    ##? Usage: git tags-containing COMMIT_HASH
+    ##?
+    ##? List tags containing a specific commit.
+    tags-containing = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git tags-containing COMMIT_HASH\n'; \
+            return 2; \
+        fi; \
+        local COMMIT_HASH=\"$1\"; \
+        git tag -l --contains \"$COMMIT_HASH\" \
             | sort -r; \
     }; f"
 
