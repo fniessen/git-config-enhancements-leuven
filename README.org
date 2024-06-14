@@ -2452,21 +2452,24 @@ Here's the alias which simply loops over each argument and calls ~git
 log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
 
 #+begin_src conf
-    # Usage: git search-for-commits-or-bitbucket KEYWORD...
+    # Usage: git search-for-commits-or-bitbucket PATTERN...
     #
     # Search for commit messages that match one or more search patterns (OR semantic).
     #
-    # This will search commit messages for the provided keywords and list the
+    # This will search commit messages for the provided patterns and list the
     # matching commits.
     search-for-commits-or-bitbucket = "!f() { \
-        for keyword in \"$@\"; do \
-            git log --grep \"$keyword\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
+        for PATTERN in \"$@\"; do \
+            git log --grep \"$PATTERN\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
             printf \"\n\"; \
-        done | sort -r; \
+        done | sort -r | sed 's/^[^:]*://'; \
     }; f"
-    # XXX Note: Sorting may not be accurate if all commits have the same timestamp.
     # XXX Add all, date short...
 #+end_src
+
+#+begin_note
+Sorting remains accurate even if commits share the same timestamp.
+#+end_note
 
 : testing failure
 
@@ -2487,7 +2490,7 @@ somewhere, use the *AND* semantic:
         for PATTERN in \"$@\"; do \
             CMD=\"$CMD --grep '$PATTERN'\"; \
         done; \
-        eval $CMD; \
+        eval $CMD | sort -r | sed 's/^[^:]*://'; \
     }; f"
 #+end_src
 

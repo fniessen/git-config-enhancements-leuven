@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240614.1700
+# .gitconfig, Time-stamp: 20240614.1710
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -812,19 +812,18 @@
         git rev-list --all | xargs git grep -F \"$SEARCH_TERM\"; \
     }; f"
 
-    # Usage: git search-for-commits-or-bitbucket KEYWORD...
+    # Usage: git search-for-commits-or-bitbucket PATTERN...
     #
     # Search for commit messages that match one or more search patterns (OR semantic).
     #
-    # This will search commit messages for the provided keywords and list the
+    # This will search commit messages for the provided patterns and list the
     # matching commits.
     search-for-commits-or-bitbucket = "!f() { \
-        for keyword in \"$@\"; do \
-            git log --grep \"$keyword\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
+        for PATTERN in \"$@\"; do \
+            git log --grep \"$PATTERN\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
             printf \"\n\"; \
-        done | sort -r; \
+        done | sort -r | sed 's/^[^:]*://'; \
     }; f"
-    # XXX Note: Sorting may not be accurate if all commits have the same timestamp.
     # XXX Add all, date short...
 
     # Usage: git search-for-commits-and-gitlab PATTERN...
@@ -838,7 +837,7 @@
         for PATTERN in \"$@\"; do \
             CMD=\"$CMD --grep '$PATTERN'\"; \
         done; \
-        eval $CMD; \
+        eval $CMD | sort -r | sed 's/^[^:]*://'; \
     }; f"
 
     # Usage: git author-commits [AUTHOR_EMAIL]
