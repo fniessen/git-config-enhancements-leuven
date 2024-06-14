@@ -2459,6 +2459,10 @@ log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
     # This will search commit messages for the provided patterns and list the
     # matching commits.
     search-for-commits-or-bitbucket = "!f() { \
+        if [ \"$#\" -eq 0 ]; then \
+            printf >&2 'Usage: git search-for-commits-or-bitbucket PATTERN...\n'; \
+            return 2; \
+        fi; \
         for PATTERN in \"$@\"; do \
             git log --grep \"$PATTERN\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
             printf \"\n\"; \
@@ -2486,6 +2490,10 @@ somewhere, use the *AND* semantic:
     # This will search commit messages for the provided patterns and list the
     # matching commits.
     search-for-commits-and-gitlab = "!f() { \
+        if [ \"$#\" -eq 0 ]; then \
+            printf >&2 'Usage: git search-for-commits-and-gitlab PATTERN...\n'; \
+            return 2; \
+        fi; \
         CMD=\"git log --all-match -i --format='%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)' --color=always\"; \
         for PATTERN in \"$@\"; do \
             CMD=\"$CMD --grep '$PATTERN'\"; \
