@@ -47,14 +47,15 @@ git-iterate-commits() {
     # suppressing stderr.
     local git_output=$(eval "$previous_command" 2>/dev/null)
 
-    # ANSI escape code for orange color (ANSI color code 33).
-    orange_color='\033[0;33m'
-    reset_color='\033[0m'  # Reset to default color.
+    # ANSI escape code for colors.
+    gray='\033[90m'
+    orange='\033[0;33m'
+    reset='\033[0m'                     # Reset to default color.
 
     # Loop through each line in the output.
     while IFS= read -r line; do
         # Display the current line being processed for debug purposes in gray.
-        printf "\e[90mProcessing line: %s\e[0m\n" "$line"
+        printf "${gray}Processing line: %s${reset}\n" "$line"
 
         # Extract the commit hash from the line.
         commit_hash=$(echo "$line" | awk '{print $2}')
@@ -62,7 +63,8 @@ git-iterate-commits() {
         # Check if commit_hash is a valid hash (7 or more hexadecimal characters).
         if [[ ! "$commit_hash" =~ ^[0-9a-fA-F]{7,}$ ]]; then
             # Print message in orange.
-            printf "${orange_color}Skipping invalid commit hash: %s${reset_color}\n" "$commit_hash"
+            printf "${orange}Skipping invalid commit hash: %s${reset}\n" \
+                   "$commit_hash"
             continue
         fi
 
