@@ -22,12 +22,12 @@
 # - https://documentation.help/Bazaar-help/revisionspec-help.html
 # - https://www.mercurial-scm.org/wiki/GitConcepts#Command_equivalence_table
 
-Welcome to git-config-enhancements-leuven!  This repository contains a curated
-collection of configuration settings and aliases to enhance your Git workflow.
+Welcome to git-config-enhancements-leuven!  This repository contains
+a collection of configuration settings and aliases to enhance your Git workflow.
 Whether you're a beginner or a seasoned Git user, you'll find time-saving
-shortcuts and customization options to boost your productivity.  Browse the
-contents, try them out, and feel free to contribute your own enhancements. Let's
-make Git even better together!
+shortcuts and customization options to *boost your productivity*.  Browse the
+contents, try them out, and feel free to contribute your own enhancements.
+Let's make Git even better together!
 
 * Table of Contents                                                   :TOC_1_gh:
 - [[#foreword][Foreword]]
@@ -258,19 +258,32 @@ commenting out can be swapped over if I want to use the ~$BASE~ line instead.
 
 ** External Diff Tool
 
-Use [[https://meldmerge.org/][Meld]] as Git ~difftool:~
+#+begin_src conf
+[difftool]
+    # Set prompt to false to avoid asking for confirmation before launching the diff tool.
+    prompt = false
+#+end_src
+
+*** Use [[https://meldmerge.org/][Meld]] as Git ~difftool:~
 
 #+begin_src conf
 [diff]
     tool = meld
 
-[difftool]
-    # Set prompt to false to avoid asking for confirmation before launching the diff tool.
-    prompt = false
-
 [difftool "meld"]
     # Set the command to launch "meld" with the two input files as arguments.
     cmd = meld "$LOCAL" "$REMOTE"
+#+end_src
+
+*** Use Emacs as Git ~difftool:~
+
+#+begin_src conf :tangle no
+[diff]
+    tool = emacs
+
+[difftool "emacs"]
+    # path = $(which emacs)
+    path = /snap/bin/emacs
 #+end_src
 
 ** External Editor
@@ -1117,6 +1130,8 @@ Fetch URL: git@bitbucket.org-something:user/slug
 #+end_src
 
 Updating Git aliases for different *main branch* names (~main~, ~master~, etc.):
+
+XXX default-branch???
 
 #+begin_src conf
     ##? Usage: git main-branch
@@ -2209,7 +2224,14 @@ This is a handy table for labels [[https://github.com/angular/angular/blob/maste
 
 #+begin_src conf
 [alias]
+#+end_src
 
+#+begin_tip
+If you only add options to one single ~git~ command, there is no benefit to the
+function wrapper.  On the contrary, you can't add other options.
+#+end_tip
+
+#+begin_src conf
     # Usage: git last-commit-hash
     # Show abbreviated hash of the last commit.
     # Examples:
@@ -2410,38 +2432,18 @@ of changed files) where *log message* matches a specified pattern (regular
 expression), use ~find~.
 
 #+begin_src conf
-    # Error with 2 search strings!!!
-    search-for-commits-all-1 = "log -i --all --grep"
-#+end_src
-
-You may want to add history to search through the whole repository, by adding
-~rev-list~ to your ~git log~:
-
-#+begin_src conf
-    # Only one search string is read!
-    search-for-commits-all-2 = "!f() { \
-        git log --grep \"$1\" -i $(git rev-list --all); \
-    }; f"
-#+end_src
-
-#+begin_src conf
-    # Usage: git search-in-all-commits SEARCH_TERM
-    #
-    # Search for a specific term in all commits.
-    search-in-all-commits = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git search-in-all-commits SEARCH_TERM\n'; \
+    # Search through all commit logs for multiple patterns (case-insensitive)
+    # across all branches.
+    # Example: git search-commit-message-all-branches "pattern1" "pattern2" "pattern3"
+    # See also git search-for-commits-or-bitbucket PATTERN... (for current branch!!!)
+    search-commit-message-all-branches = "!f() { \
+        if [ $# -eq 0 ]; then \
+            printf >&2 'Error: No search pattern provided\n'; \
             return 2; \
         fi; \
-        local SEARCH_TERM=\"$1\"; \
-        git rev-list --all | xargs git grep -F \"$SEARCH_TERM\"; \
+        git log --all -i $(printf -- '--grep=%s ' \"$@\"); \
     }; f"
 #+end_src
-
-# #+begin_tip
-# If you only add options to one single ~git~ command, there is no benefit to the
-# function wrapper.  On the contrary, you can't add other options.
-# #+end_tip
 
 To find commits that match *either* of patterns (implicit *OR* semantic), you can
 use:
@@ -2458,6 +2460,7 @@ log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
+    # (FOR CURRENT BRANCH ONLY!!!)
     search-for-commits-or-bitbucket = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
             printf >&2 'Usage: git search-for-commits-or-bitbucket PATTERN...\n'; \
@@ -2489,6 +2492,7 @@ somewhere, use the *AND* semantic:
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
+    # (FOR CURRENT BRANCH ONLY!!!)
     search-for-commits-and-gitlab = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
             printf >&2 'Usage: git search-for-commits-and-gitlab PATTERN...\n'; \
@@ -2564,16 +2568,30 @@ that commit!
 
 : git log --since="1 week ago" --all -S "foo"
 
-**** Search for commits that introduced or removed instances of a specific string
+**** Search for commits that add or remove a specific term in the repository's diff contents
 
 The alias ~search-changes-in-message-and-diff~ searches for string-related changes
 in the commit message and the diff.
 
 #+begin_src conf
-    # Usage: git search-changes-in-message-and-diff SEARCH_TERM
-    # Search for commits that add or remove a specific term in the repository's diff contents.
-    search-changes-in-message-and-diff = "!f() { \
+    # Usage: git search-commit-content-all-branches SEARCH_TERM
+    # Search through the content of all commits for the exact search term.
+    search-commit-content-all-branches = "!f() { \
         git log --all -S \"$1\"; \
+    }; f"
+#+end_src
+
+**** Search in files
+
+#+begin_src conf
+    # Usage: git search-all-commits SEARCH_TERM
+    search-all-commits = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git search-all-commits SEARCH_TERM\n'; \
+            return 2; \
+        fi; \
+        local SEARCH_TERM=\"$1\"; \
+        git rev-list --all | xargs git grep -F \"$SEARCH_TERM\"; \
     }; f"
 #+end_src
 
@@ -3177,15 +3195,26 @@ branch (if any).
 #+end_src
 
 #+begin_src conf
-    # Usage: git check-remote-branch BRANCH_NAME
-    # Check if a remote branch exists.
-    check-remote-branch = "!f() { \
+    # Usage: git verify-local-branch BRANCH_NAME
+    # Verify if a local branch exists.
+    verify-local-branch = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git check-remote-branch BRANCH_NAME\n'; \
+            printf >&2 'Usage: git verify-local-branch BRANCH_NAME\n'; \
             return 2; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
-        git rev-parse --verify origin/$BRANCH_NAME >/dev/null 2>&1; \
+        git rev-parse --verify \"$BRANCH_NAME\" >/dev/null 2>&1; \
+    }; f"
+
+    # Usage: git verify-remote-branch BRANCH_NAME
+    # Check if a remote branch exists.
+    verify-remote-branch = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git verify-remote-branch BRANCH_NAME\n'; \
+            return 2; \
+        fi; \
+        local BRANCH_NAME=\"$1\"; \
+        git rev-parse --verify \"origin/$BRANCH_NAME\" >/dev/null 2>&1; \
     }; f"
 #+end_src
 
@@ -3998,6 +4027,18 @@ View all diffs.
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
   #+end_src
 
+  Compare a specific file between the main branch and the current branch:
+
+  #+begin_src conf
+    compare-file-main = "!f() { \
+        git diff $(git main-branch)..$(git current-branch) -- \"$1\"; \
+    }; f"
+
+    compare-file-main-difftool = "!f() { \
+        git difftool $(git main-branch)..$(git rev-parse --abbrev-ref HEAD) -- \"$1\"; \
+    }; f"
+  #+end_src
+
 - Side-by-side diff (split view)
 
 *** Compare files from two different branches
@@ -4022,6 +4063,14 @@ current branch and the specified branch.
     missing = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
+        if ! git verify-local-branch \"$current_branch\"; then \
+            printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
+            return 2; \
+        fi; \
+        if ! git verify-local-branch \"$other_branch\"; then \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$other_branch\"; \
+            return 2; \
+        fi; \
         local commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
         local commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
         printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
@@ -4109,6 +4158,14 @@ Show all the changed files in a Git branch *since it was forked*:
     missing-files = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
+        if ! git verify-local-branch \"$current_branch\"; then \
+            printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
+            return 2; \
+        fi; \
+        if ! git verify-local-branch \"$other_branch\"; then \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$other_branch\"; \
+            return 2; \
+        fi; \
         local missing_files_to_current=$(git diff --name-only \"$other_branch\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
@@ -4117,6 +4174,14 @@ Show all the changed files in a Git branch *since it was forked*:
     missing-files-name-only = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
+        if ! git verify-local-branch \"$current_branch\"; then \
+            printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
+            return 2; \
+        fi; \
+        if ! git verify-local-branch \"$other_branch\"; then \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$other_branch\"; \
+            return 2; \
+        fi; \
         git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"
 #+end_src

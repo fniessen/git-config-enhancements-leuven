@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240614.1721
+# .gitconfig, Time-stamp: 20240621.0938
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -36,12 +36,12 @@
     # Don't keep backup files.
     keepBackup = false
 
-[diff]
-    tool = meld
-
 [difftool]
     # Set prompt to false to avoid asking for confirmation before launching the diff tool.
     prompt = false
+
+[diff]
+    tool = meld
 
 [difftool "meld"]
     # Set the command to launch "meld" with the two input files as arguments.
@@ -792,24 +792,16 @@
         git merge-base --is-ancestor \"$COMMIT1\" \"$COMMIT2\"; \
     }; f"
 
-    # Error with 2 search strings!!!
-    search-for-commits-all-1 = "log -i --all --grep"
-
-    # Only one search string is read!
-    search-for-commits-all-2 = "!f() { \
-        git log --grep \"$1\" -i $(git rev-list --all); \
-    }; f"
-
-    # Usage: git search-in-all-commits SEARCH_TERM
-    #
-    # Search for a specific term in all commits.
-    search-in-all-commits = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git search-in-all-commits SEARCH_TERM\n'; \
+    # Search through all commit logs for multiple patterns (case-insensitive)
+    # across all branches.
+    # Example: git search-commit-message-all-branches "pattern1" "pattern2" "pattern3"
+    # See also git search-for-commits-or-bitbucket PATTERN... (for current branch!!!)
+    search-commit-message-all-branches = "!f() { \
+        if [ $# -eq 0 ]; then \
+            printf >&2 'Error: No search pattern provided\n'; \
             return 2; \
         fi; \
-        local SEARCH_TERM=\"$1\"; \
-        git rev-list --all | xargs git grep -F \"$SEARCH_TERM\"; \
+        git log --all -i $(printf -- '--grep=%s ' \"$@\"); \
     }; f"
 
     # Usage: git search-for-commits-or-bitbucket PATTERN...
@@ -818,6 +810,7 @@
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
+    # (FOR CURRENT BRANCH ONLY!!!)
     search-for-commits-or-bitbucket = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
             printf >&2 'Usage: git search-for-commits-or-bitbucket PATTERN...\n'; \
@@ -836,6 +829,7 @@
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
+    # (FOR CURRENT BRANCH ONLY!!!)
     search-for-commits-and-gitlab = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
             printf >&2 'Usage: git search-for-commits-and-gitlab PATTERN...\n'; \
@@ -854,10 +848,20 @@
         git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
     }; f"
 
-    # Usage: git search-changes-in-message-and-diff SEARCH_TERM
-    # Search for commits that add or remove a specific term in the repository's diff contents.
-    search-changes-in-message-and-diff = "!f() { \
+    # Usage: git search-commit-content-all-branches SEARCH_TERM
+    # Search through the content of all commits for the exact search term.
+    search-commit-content-all-branches = "!f() { \
         git log --all -S \"$1\"; \
+    }; f"
+
+    # Usage: git search-all-commits SEARCH_TERM
+    search-all-commits = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git search-all-commits SEARCH_TERM\n'; \
+            return 2; \
+        fi; \
+        local SEARCH_TERM=\"$1\"; \
+        git rev-list --all | xargs git grep -F \"$SEARCH_TERM\"; \
     }; f"
 
     # Usage: git show-commits-for-string STRING FILENAME
@@ -1004,15 +1008,26 @@
     # local-branches = "!git for-each-ref refs/heads --format='%(refname:short)'"
     # are slower.
 
-    # Usage: git check-remote-branch BRANCH_NAME
-    # Check if a remote branch exists.
-    check-remote-branch = "!f() { \
+    # Usage: git verify-local-branch BRANCH_NAME
+    # Verify if a local branch exists.
+    verify-local-branch = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git check-remote-branch BRANCH_NAME\n'; \
+            printf >&2 'Usage: git verify-local-branch BRANCH_NAME\n'; \
             return 2; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
-        git rev-parse --verify origin/$BRANCH_NAME >/dev/null 2>&1; \
+        git rev-parse --verify \"$BRANCH_NAME\" >/dev/null 2>&1; \
+    }; f"
+
+    # Usage: git verify-remote-branch BRANCH_NAME
+    # Check if a remote branch exists.
+    verify-remote-branch = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git verify-remote-branch BRANCH_NAME\n'; \
+            return 2; \
+        fi; \
+        local BRANCH_NAME=\"$1\"; \
+        git rev-parse --verify \"origin/$BRANCH_NAME\" >/dev/null 2>&1; \
     }; f"
 
     # Usage: git br
@@ -1367,11 +1382,27 @@
     }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
 
+    compare-file-main = "!f() { \
+        git diff $(git main-branch)..$(git current-branch) -- \"$1\"; \
+    }; f"
+
+    compare-file-main-difftool = "!f() { \
+        git difftool $(git main-branch)..$(git rev-parse --abbrev-ref HEAD) -- \"$1\"; \
+    }; f"
+
     # Usage: git missing [OTHER_BRANCH]
     # Show the missing commits between the current branch and another branch.
     missing = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
+        if ! git verify-local-branch \"$current_branch\"; then \
+            printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
+            return 2; \
+        fi; \
+        if ! git verify-local-branch \"$other_branch\"; then \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$other_branch\"; \
+            return 2; \
+        fi; \
         local commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
         local commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
         printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
@@ -1401,6 +1432,14 @@
     missing-files = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
+        if ! git verify-local-branch \"$current_branch\"; then \
+            printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
+            return 2; \
+        fi; \
+        if ! git verify-local-branch \"$other_branch\"; then \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$other_branch\"; \
+            return 2; \
+        fi; \
         local missing_files_to_current=$(git diff --name-only \"$other_branch\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$other_branch\"...\"$current_branch\"; \
@@ -1409,6 +1448,14 @@
     missing-files-name-only = "!f() { \
         local current_branch=$(git current-branch); \
         local other_branch=${1:-$(git main-branch)}; \
+        if ! git verify-local-branch \"$current_branch\"; then \
+            printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
+            return 2; \
+        fi; \
+        if ! git verify-local-branch \"$other_branch\"; then \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$other_branch\"; \
+            return 2; \
+        fi; \
         git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"
 
