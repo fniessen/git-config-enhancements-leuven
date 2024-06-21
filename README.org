@@ -4147,7 +4147,18 @@ have not merged from the remote branch.
 
 *** How do I find a list of files committed to a Git branch (since branching)?
 
-Show all the changed files in a Git branch *since it was forked*:
+To show all the *changed files* (see the files that have been /added/, /copied/,
+/deleted/, /modified/, or /renamed/) in a specific Git branch *since it was forked* from
+another branch, run:
+
+: git diff main...feature_branch --name-status --diff-filter=ACDMR
+
+Available Filters for ~--diff-filter~:
+- A :: Added
+- C :: Copied
+- D :: Deleted
+- M :: Modified
+- R :: Renamed
 
 #+begin_src conf
     # Usage: git missing-files [OTHER_BRANCH]
@@ -4186,18 +4197,6 @@ Show all the changed files in a Git branch *since it was forked*:
     }; f"
 #+end_src
 
-XXX
-
-#+begin_src shell :tangle no
-for file in $(git missing-files | awk '{print $1}'); do
-    if [ -f "$file" ]; then
-        echo "Results in $file:"
-        grep "DI" "$file"
-        echo
-    fi
-done
-#+end_src
-
 #+begin_src shell :tangle no
 grep_in_command_results() {
     local cmd="$1"
@@ -4219,20 +4218,6 @@ grep_in_command_results() {
 
 does not work because the output of 'git status' is different when redirected to
 a file or to a pipe!
-
-XXX
-
-See the added / copied / deleted / modified / renamed files in a branch:
-
-: git diff forked_from_branch...my_forked_branch --name-status --diff-filter=ACDMR
-
-Available filters for ~--diff-filter~ are:
-
-- A :: Added
-- C :: Copied
-- D :: Deleted
-- M :: Modified
-- R :: Renamed
 
 * xGraph
 
