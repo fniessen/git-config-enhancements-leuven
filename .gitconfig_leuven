@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240621.0938
+# .gitconfig, Time-stamp: 20240621.1925
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -842,10 +842,16 @@
         eval $CMD | sort -r | sed 's/^[^:]*://'; \
     }; f"
 
-    # Usage: git author-commits [AUTHOR_EMAIL]
+    # Usage: git commits-by [AUTHOR]
     # Show commit history for a specific author.
-    author-commits = "!f() { \
-        git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
+    # Examples:
+    #   git commits-by                Show commits by the current user.
+    #   git commits-by "Author Name"  Show commits by a specific author.
+    #   git commits-by "author@example.com"
+    #                                 Show commits by a specific author.
+    commits-by = "!f() { \
+        local AUTHOR=\"${1:-$(git config --get user.email)}\"; \
+        git log --author=\"$AUTHOR\" -i --no-merges --all; \
     }; f"
 
     # Usage: git search-commit-content-all-branches SEARCH_TERM

@@ -2524,12 +2524,18 @@ Show the *last commit* whose *message matches a regexp*:
 *** Search by Author
 
 #+begin_src conf
-    # Usage: git author-commits [AUTHOR_EMAIL]
+    # Usage: git commits-by [AUTHOR]
     # Show commit history for a specific author.
-    author-commits = "!f() { \
-        git log --author=${1-$(git config --get user.email)} -i --no-merges --all; \
+    # Examples:
+    #   git commits-by                Show commits by the current user.
+    #   git commits-by "Author Name"  Show commits by a specific author.
+    #   git commits-by "author@example.com"
+    #                                 Show commits by a specific author.
+    commits-by = "!f() { \
+        local AUTHOR=\"${1:-$(git config --get user.email)}\"; \
+        git log --author=\"$AUTHOR\" -i --no-merges --all; \
     }; f"
-#+end_src
+    #+end_src
 
 *** Search on File Changes
 
