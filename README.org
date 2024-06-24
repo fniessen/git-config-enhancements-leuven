@@ -1372,7 +1372,7 @@ thrown away, the alias to use is ~unmodify~;
     ##? Examples:
     ##?   git undelete                  Restore all deleted files.
     ##?   git undelete .                Restore all deleted files in the current directory.
-    ##?   git undelete PATH/TO/FILE     Restore a specific deleted file:.
+    ##?   git undelete PATH/TO/FILE     Restore a specific deleted file.
     undelete = "!f() { \
         local FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
@@ -5050,11 +5050,14 @@ List the user's public SSH keys:
 #+begin_src conf
     ##? Usage: git all-repos COMMAND [ARGS]
     ##?
-    ##? Run a Git command for each repository in the current directory and its subdirectories.
+    ##? Run a Git command for each repository in the current directory and its
+    ##? subdirectories.
     ##?
     ##? Arguments:
-    ##?   COMMAND                       Git command to be executed in each repository
-    ##?   ARGS                          Additional arguments to be passed to the Git command
+    ##?   COMMAND                       Git command to be executed in each
+    ##?                                 repository
+    ##?   ARGS                          Additional arguments to be passed to the
+    ##?                                 Git command
     all-repos = "!f() { \
         if [ $# -lt 1 ]; then \
             printf >&2 'Usage: git all-repos COMMAND [ARGS]\n'; \
@@ -5072,7 +5075,7 @@ List the user's public SSH keys:
     }; f"
 #+end_src
 
-** Display a summarized version of the status of each repository
+*** Display a summarized version of the status of each repository
 
 The alias ~all-repos~ proves especially useful in ensuring that all my work is
 committed.
@@ -5085,11 +5088,11 @@ uncommitted work, I rely on
 
 to rapidly assess repositories that contain pending changes.
 
-** Display the remote repository URLs for each repository
+*** Display the remote repository URLs for each repository
 
 : git all-repos remote -v
 
-** Find all "unpushed" commits for all projects in a directory
+*** Find all "unpushed" commits for all projects in a directory
 
 : git all-repos outgoing
 
@@ -5097,14 +5100,16 @@ See https://stackoverflow.com/questions/12499195/git-how-to-find-all-unpushed-co
 
 XXX cherry -v much quicker...
 
-** Display branch information for each repository
+*** Display branch information for each repository
 
 : git all-repos br
 
-** Pull new changes / push any local changes of each repository
+*** Pull new changes / push any local changes of each repository
 
 : git all-repos pull
 : git all-repos push
+
+Alternatively,
 
 #+begin_src conf
     # Usage: git pull-all-repos
@@ -5136,8 +5141,9 @@ Give the status in the *short format* (preceded by a line showing the /branch na
 and /tracking info/).
 
 #+begin_src conf
-    # Usage: git st
-    # Display the current status of the repository with branch names.
+    ##? Usage: git st
+    ##?
+    ##? Show the status in short format with branch info.
     st = status -s -b
 #+end_src
 
@@ -5161,23 +5167,40 @@ Staging for commit is typically done by ~git add~.
 ** SHOW - View your changes
 
 #+begin_src conf
-    # Usage: git diff-latest [FILE]
-    # Show differences between the latest commit and the current working state.
-    # Examples:
-    #     git diff-latest           # Show differences for all files
-    #     git diff-latest file.txt  # Show differences only for "file.txt"
-    diff-latest = !"git diff-index --quiet HEAD -- || clear; \
-            git --no-pager diff --patch-with-stat"
+    ##? Usage: git diff-stat [FILE]
+    ##?
+    ##? Show changes with statistics (between working directory and index) if
+    ##? there are any.
+    ##?
+    ##? Examples:
+    ##?   git diff-stat                 Show differences for all files.
+    ##?   git diff-stat file.txt        Show differences only for "file.txt".
+    diff-stat = "!f() { \
+        git diff-index --quiet HEAD -- || clear; \
+        git diff --patch-with-stat; \
+    }; f"
 
-    # Usage: git diff-commits NUMBER
-    # Show the differences between the state `NUMBER' commits ago and the current working state.
-    # Example: git diff-commits 2
-    diff-commits = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git diff-commits NUMBER\n'; \
+    ##? Usage: git diff-commits-ago NUMBER [FILE]
+    ##?
+    ##? Show diff (with stats) between HEAD and the state `NUMBER' commits ago.
+    ##? Optionally, specify a FILE to show differences for a specific file.
+    ##?
+    ##? Examples:
+    ##?   git diff-commits-ago 2        Show differences between HEAD and
+    ##?                                 2 commits ago for all files.
+    ##?   git diff-commits-ago 2 file.txt
+    ##?                                 Show differences for "file.txt" between
+    ##?                                 HEAD and 2 commits ago.
+    diff-commits-ago = "!f() { \
+        if [ $# -lt 1 ] || [ $# -gt 2 ]; then \
+            printf >&2 'Usage: git diff-commits-ago NUMBER [FILE]\n'; \
             return 2; \
         fi; \
-        git diff --patch-with-stat HEAD~$1; \
+        if [ $# -eq 2 ]; then \
+            git diff --patch-with-stat HEAD~$1 -- \"$2\"; \
+        else \
+            git diff --patch-with-stat HEAD~$1; \
+        fi; \
         git diff-index --quiet HEAD -- || clear; \
     }; f"
 #+end_src
