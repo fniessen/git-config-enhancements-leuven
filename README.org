@@ -4134,14 +4134,15 @@ differences will collapse.
 
 **** Branch point
 
-The *most recent common ancestor* is the last commit that existed in both
-branches. Usually this is the branch point, but it could also be a commit that
-was merged.
+The *most recent common ancestor* commit between two branches is the last commit
+that existed in both branches. Usually this is the branch point, but it could
+also be a commit that was merged.
 
 #+begin_src conf
     # Get the merge base commit hash between two branches. Defaults to main and
     # current branch if not specified.
-    ancestor = merge-base ${1:-$(git main-branch)} ${2:-$(git current-branch)}
+    common-ancestor = merge-base ${1:-$(git main-branch)} \
+                                 ${2:-$(git current-branch)}
     # Find the point at which a branch forked from another branch (when it was
     # branched off).
     # Find the most recent common ancestor between the current branch and the
@@ -4156,9 +4157,11 @@ the changes that your branch introduces, while excluding the changes that you
 have not merged from the remote branch.
 
 #+begin_src conf
-    # Since branch point.
-    log-ancestor = !sh -c 'git log $(git ancestor)..'
-    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
+    # Log commits from the common ancestor of current branch and HEAD.
+    log-common-ancestor = log $(git common-ancestor)..
+
+    # Show diff from the common ancestor of current branch and HEAD.
+    diff-common-ancestor = diff $(git common-ancestor)..
 #+end_src
 
 *** How do I find a list of files committed to a Git branch (since branching)?

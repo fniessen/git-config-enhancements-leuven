@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240624.1419
+# .gitconfig, Time-stamp: 20240624.1426
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1429,16 +1429,19 @@
 
     # Get the merge base commit hash between two branches. Defaults to main and
     # current branch if not specified.
-    ancestor = merge-base ${1:-$(git main-branch)} ${2:-$(git current-branch)}
+    common-ancestor = merge-base ${1:-$(git main-branch)} \
+                                 ${2:-$(git current-branch)}
     # Find the point at which a branch forked from another branch (when it was
     # branched off).
     # Find the most recent common ancestor between the current branch and the
     # default branch.
     # BUG: Does not work between 2 specific branches -- well without arguments
 
-    # Since branch point.
-    log-ancestor = !sh -c 'git log $(git ancestor)..'
-    diff-ancestor = !sh -c 'git diff $(git ancestor)..'
+    # Log commits from the common ancestor of current branch and HEAD.
+    log-common-ancestor = log $(git common-ancestor)..
+
+    # Show diff from the common ancestor of current branch and HEAD.
+    diff-common-ancestor = diff $(git common-ancestor)..
 
     # Usage: git missing-files [OTHER_BRANCH]
     # Show the changed files that are in the current branch but not in the other (i.e., asymmetrical diff).
