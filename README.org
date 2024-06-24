@@ -4149,7 +4149,8 @@ also be a commit that was merged.
             printf >&2 '%s\n' \"Error: Unable to find common ancestor between branches '$main_branch' and '$current_branch'. Branches may not exist or be valid.\"; \
             return 2; \
         else \
-            printf '%s\n' \"$base\"; \
+            local short_base=$(git rev-parse --short $base); \
+            printf '%s\n' \"$short_base\"; \
         fi \
     }; f"
     # Find the point at which a branch forked from another branch (when it was
