@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240624.1050
+# .gitconfig, Time-stamp: 20240624.1110
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2093,16 +2093,23 @@ deploy-prod =
     # Avoid a fast-forward commit.
     mnf = merge --no-ff --log
 
-    # Usage: git merge-into-main
-    # Merge the current branch into the 'main' branch and returns to the original branch.
+    ##? Usage: git merge-into-main
+    ##?
+    ##? Merge changes from the current branch into the main branch.
     merge-into-main = "!f() { \
         local current_branch=\"$(git current-branch)\"; \
         if [ -z \"$current_branch\" ]; then \
-            current_branch=\"(unnamed branch)\"; \
+            printf >&2 'Unable to determine current branch.\n'; \
+            return 2; \
         fi; \
-        git checkout $(git main-branch) \
-            && git merge \"$current_branch\" \
-            && git checkout \"$current_branch\"; \
+        git checkout \"$(git main-branch)\" && \
+        if git merge \"$current_branch\"; then \
+            printf \"\\033[1mBranch merged:\\033[0m '%s' successfully merged\n\" \"$current_branch\"; \
+        else \
+            printf >&2 \"\\033[1mUnable to merge branch:\\033[0m\n\"; \
+            return 2; \
+        fi; \
+        git checkout \"$current_branch\"; \
     }; f"
 
     # Usage: git merge-update-push TARGET_BRANCH

@@ -5746,23 +5746,30 @@ Merge strategy:
 - Fast forward: git merge --ff-only
 
 #+begin_src conf
-    # Usage: git merge-into-main
-    # Merge the current branch into the 'main' branch and returns to the original branch.
+    ##? Usage: git merge-into-main
+    ##?
+    ##? Merge changes from the current branch into the main branch.
     merge-into-main = "!f() { \
         local current_branch=\"$(git current-branch)\"; \
         if [ -z \"$current_branch\" ]; then \
-            current_branch=\"(unnamed branch)\"; \
+            printf >&2 'Unable to determine current branch.\n'; \
+            return 2; \
         fi; \
-        git checkout $(git main-branch) \
-            && git merge \"$current_branch\" \
-            && git checkout \"$current_branch\"; \
+        git checkout \"$(git main-branch)\" && \
+        if git merge \"$current_branch\"; then \
+            printf \"\\033[1mBranch merged:\\033[0m '%s' successfully merged\n\" \"$current_branch\"; \
+        else \
+            printf >&2 \"\\033[1mUnable to merge branch:\\033[0m\n\"; \
+            return 2; \
+        fi; \
+        git checkout \"$current_branch\"; \
     }; f"
 #+end_src
 
-XXX Outputs:
+Outputs:
 
 - *Branch merged:* 'branch_name' successfully merged
-- *Unable to merge branch*?
+- *Unable to merge branch*
 
 On projects where we work with a staging or test branch, I regularly merge my
 work in progress into it so others can test it.
