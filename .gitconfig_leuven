@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240624.1401
+# .gitconfig, Time-stamp: 20240624.1419
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1427,10 +1427,13 @@
         printf \"\n\"; \
     }; f"
 
-    # Find the point at which a branch forked from another branch (when it was branched off).
-    # Find the most recent common ancestor between the current branch and the default branch.
-    ancestor = !git merge-base ${1:-$(git main-branch)} \
-                               ${2:-$(git current-branch)}
+    # Get the merge base commit hash between two branches. Defaults to main and
+    # current branch if not specified.
+    ancestor = merge-base ${1:-$(git main-branch)} ${2:-$(git current-branch)}
+    # Find the point at which a branch forked from another branch (when it was
+    # branched off).
+    # Find the most recent common ancestor between the current branch and the
+    # default branch.
     # BUG: Does not work between 2 specific branches -- well without arguments
 
     # Since branch point.
