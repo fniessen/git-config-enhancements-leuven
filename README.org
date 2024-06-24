@@ -1139,9 +1139,9 @@ XXX default-branch???
     ##? Get the name of the main branch, regardless of whether it is called 'main' or 'master'.
     main-branch = "!f() { \
         if git show-ref --verify --quiet refs/heads/main; then \
-            echo \"main\"; \
+            printf 'main\n'; \
         else \
-            echo \"master\"; \
+            printf 'master\n'; \
         fi \
     }; f"
     # Note: The alias
@@ -3351,8 +3351,8 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
 
 *** Update your current local branch with changes from the remote main
 
-To manually *sync* a *branch* (merge ~main~ into your branch), run the following
-command:
+To manually *sync* a *branch* (merge changes from the ~main~ branch into the current
+working branch), run the following command:
 
 : git merge origin/main
 
@@ -3372,7 +3372,7 @@ branch up* to all the latest changes on the ~main~ branch.
 #+begin_src conf
     sync-main-merge2 = "!f() { \
         git remote update -p; \
-        local main_branch=$(git main-branch || echo 'main'); \
+        local main_branch=$(git main-branch); \
         local current_branch=$(git current-branch); \
         git merge origin/$main_branch; \
         local merge_status=$?; \
@@ -3636,7 +3636,7 @@ XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
 #+begin_src conf
     # Delete local branches that have been merged into the default branch.
     bclean = "!f() { \
-        local main_branch=$(git main-branch || echo 'main'); \
+        local main_branch=$(git main-branch); \
         git branch --merged ${1-$main_branch} \
             | grep -v " ${1-$main_branch}$" \
             | xargs git delete-local-branch; \
@@ -4718,7 +4718,7 @@ current tag.  Useful for uploading to Elasticbeanstalk.
     ##? Export and zip changed files from the current branch compared to the main branch.
     export-changed-files = "!f() { \
         local current_branch=$(git convert-current-branch-name); \
-        local main_branch=$(git main-branch || echo 'main'); \
+        local main_branch=$(git main-branch); \
         local changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
         if [ -z \"$changed_files\" ]; then \
             printf >&2 'No changed files to export.\n'; \
@@ -4827,10 +4827,16 @@ named =package-X.Y.Z.tar.gz=).
 Testing.
 
 #+begin_src conf
-    # Check if any file in repo has whitespace errors
-    # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
-    check-whitespace = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
-    whitespace-violations = "!git diff --check $(git hash-object -t tree /dev/null)"
+    ##? Check for whitespace errors between the current working directory and the
+    ##? HEAD commit.
+    check-whitespace-head = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
+
+    ##? Check for whitespace errors between the index (staging area) and the
+    ##? current working directory.
+    check-whitespace-index = diff --check $(git hash-object -t tree /dev/null)
+
+    ##? Check for whitespace errors in the changes.
+    whitespace-errors = diff --check
 
     # Check if any file in repo has windows line endings
     # Currently do not work as alias, works from comand line directly. There is a problem with \r
@@ -5614,10 +5620,13 @@ remote* that you do not --, the next time you do a merge.
 What was going on, while you were away?
 
 #+begin_src conf
-    # Usage: git incoming
-    # Show new commits found in the remote repository.
-    incoming = "!git fetch \
-        && git log HEAD..@{u}"
+    ##? Usage: git incoming
+    ##?
+    ##? Fetch changes from the remote and shows incoming commits.
+    incoming = "!f() { \
+        git fetch \
+            && git log HEAD..@{u}; \
+    }; f"
     # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
     # Alias for 'incoming'.
@@ -5907,7 +5916,7 @@ and *detects conflicts*:
     }; f"
 #+end_src
 
-*** Branch/Integration manager
+*** Branch / Integration manager
 
 Often, during a *merge*, you know you want to take a file from one side wholesale;
 that is, to select the entirety of either our or their file.
@@ -5963,26 +5972,27 @@ https://stackoverflow.com/questions/366860/when-would-you-use-the-different-git-
 
 *** Show list of files in a conflict state
 
-List unmerged files (after a merge failure), having leftover conflict markers:
+This command lists files that have merge conflicts (~--diff-filter=U~ filters for
+*"unmerged" files*), that is files having leftover conflict markers after a merge
+failure:
 
 #+begin_src conf
-    # Usage: git conflicts
-    # List files with conflicts.
-    conflicts = diff --name-only --diff-filter=U
+    ##? Usage: git conflicted-files
+    ##?
+    ##? List files with merge conflicts only.
+    conflicted-files = diff --name-only --diff-filter=U
 #+end_src
-
-See also ~git diff --check~.
 
 Quickly solve conflicts using an editor.
 
 #+begin_src conf
-    edit-unmerged = "!$EDITOR $(git conflicts)"
+    edit-unmerged = "!$EDITOR $(git conflicted-files)"
 #+end_src
 
 Then, add the conflicted files.
 
 #+begin_src conf
-    add-unmerged = "!git add $(git conflicts)"
+    add-unmerged = "!git add $(git conflicted-files)"
 #+end_src
 
 ** BRANCH - Branch

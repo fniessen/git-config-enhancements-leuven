@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240624.1116
+# .gitconfig, Time-stamp: 20240624.1401
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -284,9 +284,9 @@
     ##? Get the name of the main branch, regardless of whether it is called 'main' or 'master'.
     main-branch = "!f() { \
         if git show-ref --verify --quiet refs/heads/main; then \
-            echo \"main\"; \
+            printf 'main\n'; \
         else \
-            echo \"master\"; \
+            printf 'master\n'; \
         fi \
     }; f"
     # Note: The alias
@@ -1120,7 +1120,7 @@
 
     sync-main-merge2 = "!f() { \
         git remote update -p; \
-        local main_branch=$(git main-branch || echo 'main'); \
+        local main_branch=$(git main-branch); \
         local current_branch=$(git current-branch); \
         git merge origin/$main_branch; \
         local merge_status=$?; \
@@ -1248,7 +1248,7 @@
 
     # Delete local branches that have been merged into the default branch.
     bclean = "!f() { \
-        local main_branch=$(git main-branch || echo 'main'); \
+        local main_branch=$(git main-branch); \
         git branch --merged ${1-$main_branch} \
             | grep -v " ${1-$main_branch}$" \
             | xargs git delete-local-branch; \
@@ -1622,7 +1622,7 @@
     ##? Export and zip changed files from the current branch compared to the main branch.
     export-changed-files = "!f() { \
         local current_branch=$(git convert-current-branch-name); \
-        local main_branch=$(git main-branch || echo 'main'); \
+        local main_branch=$(git main-branch); \
         local changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
         if [ -z \"$changed_files\" ]; then \
             printf >&2 'No changed files to export.\n'; \
@@ -1656,10 +1656,16 @@
 
     patch-for-this = "!git diff -p $(git hash-object -t tree /dev/null)"
 
-    # Check if any file in repo has whitespace errors
-    # As described in http://peter.eisentraut.org/blog/2014/11/04/checking-whitespace-with-git/
-    check-whitespace = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
-    whitespace-violations = "!git diff --check $(git hash-object -t tree /dev/null)"
+    ##? Check for whitespace errors between the current working directory and the
+    ##? HEAD commit.
+    check-whitespace-head = diff-tree --check $(git hash-object -t tree /dev/null) HEAD
+
+    ##? Check for whitespace errors between the index (staging area) and the
+    ##? current working directory.
+    check-whitespace-index = diff --check $(git hash-object -t tree /dev/null)
+
+    ##? Check for whitespace errors in the changes.
+    whitespace-errors = diff --check
 
     # Check if any file in repo has windows line endings
     # Currently do not work as alias, works from comand line directly. There is a problem with \r
@@ -2027,10 +2033,13 @@ deploy-prod =
     # Show a list of existing remotes (with URL).
     r = remote -v
 
-    # Usage: git incoming
-    # Show new commits found in the remote repository.
-    incoming = "!git fetch \
-        && git log HEAD..@{u}"
+    ##? Usage: git incoming
+    ##?
+    ##? Fetch changes from the remote and shows incoming commits.
+    incoming = "!f() { \
+        git fetch \
+            && git log HEAD..@{u}; \
+    }; f"
     # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
     # Alias for 'incoming'.
@@ -2195,13 +2204,14 @@ deploy-prod =
             && git add $@; \
     }; f"
 
-    # Usage: git conflicts
-    # List files with conflicts.
-    conflicts = diff --name-only --diff-filter=U
+    ##? Usage: git conflicted-files
+    ##?
+    ##? List files with merge conflicts only.
+    conflicted-files = diff --name-only --diff-filter=U
 
-    edit-unmerged = "!$EDITOR $(git conflicts)"
+    edit-unmerged = "!$EDITOR $(git conflicted-files)"
 
-    add-unmerged = "!git add $(git conflicts)"
+    add-unmerged = "!git add $(git conflicted-files)"
 
     # Create a feature branch.
     feature = "!f() { \
