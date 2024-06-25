@@ -1299,6 +1299,10 @@ Example:
 
 : git grep "foo" -- '*.java'
 
+#+begin_note
+The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
+#+end_note
+
 More readable output, *with grouping* (like Ripgrep, ~rg~, or ~ack~):
 
 #+begin_src conf
@@ -4248,7 +4252,7 @@ grep_in_command_results() {
 does not work because the output of 'git status' is different when redirected to
 a file or to a pipe!
 
-* xGraph
+* Graph
 
 Graphical history viewers
 
@@ -4311,21 +4315,17 @@ This produces output that can be displayed using ~dotty~, for example:
 
 See https://tortoisegit.org/docs/tortoisegit/tgit-dug-revgraph.html
 
-* xContributors
+* Contributors
 
 Show authors of commits in the repository, /excluding merge commits/.
 
 #+begin_src conf
-    contributors-name  = shortlog -n -s --no-merges --
-    contributors-email = shortlog -n -s -e --no-merges --
-#+end_src
+    # Display a list of authors with their email addresses and commit counts,
+    # sorted by number of commits.
+    authors = shortlog -n -s -e --no-merges --
 
-#+begin_note
-The ~--~ signals the /end of options/, that the rest of the parameters are limiters.
-#+end_note
-
-#+begin_src conf
-    whois = "!sh -c 'git log -1 --author=\"$1\" -i --pretty=\"format:%an <%ae>\n\"' -"
+    # Alias for 'authors'.
+    contributors = authors
 #+end_src
 
 * Pull requests

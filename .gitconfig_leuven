@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240625.0937
+# .gitconfig, Time-stamp: 20240625.1021
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1522,10 +1522,12 @@
         echo '}'; \
     }; f"
 
-    contributors-name  = shortlog -n -s --no-merges --
-    contributors-email = shortlog -n -s -e --no-merges --
+    # Display a list of authors with their email addresses and commit counts,
+    # sorted by number of commits.
+    authors = shortlog -n -s -e --no-merges --
 
-    whois = "!sh -c 'git log -1 --author=\"$1\" -i --pretty=\"format:%an <%ae>\n\"' -"
+    # Alias for 'authors'.
+    contributors = authors
 
     pull-request-bb = "!f() { \
         local USER_NAME=\"$1\"; \
