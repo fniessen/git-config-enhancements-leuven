@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240625.1346
+# .gitconfig, Time-stamp: 20240625.1516
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1687,16 +1687,21 @@
     unreleased = !git log $(git last-tag)...HEAD \
                 && git last-tag
 
+    ##? Get the tag that points to the current HEAD.
     current-tag = tag --points-at HEAD
-    zip = "!f() { \
-        git archive --format=zip -o $(git current-tag).zip HEAD; \
+
+    ##? Archive the current tag as a zip file.
+    archive-current-tag = "!f() { \
+        local tag=$(git current-tag); \
+        git archive --format=zip --output=${tag}.zip HEAD; \
     }; f"
 
-    # Usage: git export-branch
-    # Export the changes of the current branch as a .diff file.
-    export-branch = "!f() { \
+    ##? Usage: git export-branch-diff
+    ##?
+    ##? Export the current branch to a diff file.
+    export-branch-diff = "!f() { \
         local current_branch=$(git current-branch); \
-        git format-patch --stdout $current_branch > ~/$current_branch.diff; \
+        git format-patch --stdout $current_branch > $current_branch.diff; \
     }; f"
 
     ##? Usage: git export-changed-files
