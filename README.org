@@ -3187,23 +3187,13 @@ branch (if any).
 
 : git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads
 
-#+begin_src conf :tangle no
-    # Fuzzy checkout a git branch.
-    fco="!f() { \
-        git branch -a -vv --color=always --format='%(refname)' \
-            | sed "s_refs/heads/__" \
-            | sed "s_refs/remotes/__" \
-            | fzf --query="$@" --height=40% --ansi --tac --color=16 --border \
-            | awk '{print $1}' \
-            | xargs git checkout; \
-    }; f"
-#+end_src
-
 #+begin_src conf
     # Usage: git branches
     # Show all branches with their corresponding upstream branches and commit hashes.
     branches = "!git fetch --prune && git branch -a -vv"
 #+end_src
+
+: git gc --prune=now
 
 #+begin_src conf
     ##? Usage: git local-branches
