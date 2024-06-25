@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240625.1224
+# .gitconfig, Time-stamp: 20240625.1328
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1073,10 +1073,31 @@
         done | sort -r; \
     }; f"
 
-    # Usage: git branch-desc BRANCH_NAME
-    # Edit the description of a branch.
-    branch-desc = "!f() { \
-        git branch --edit-description \"$1\"; \
+    # Usage: git branch-edit-desc BRANCH
+    # Edit the description of a Git branch.
+    branch-edit-desc = "!f() { \
+        if [ -z \"$1\" ]; then \
+            echo \"Usage: git branch-edit-desc BRANCH\"; \
+            return 1; \
+        fi; \
+        branch=\"$1\"; \
+        description_file=\".git/refs/heads/$branch.description\"; \
+        mkdir -p \"$(dirname \"$description_file\")\"; \
+        touch \"$description_file\"; \
+        echo -n \"\" > \"$description_file\"; \
+        \"${VISUAL:-${EDITOR:-emacs}}\" \"$description_file\"; \
+        cat \"$description_file\" | git hash-object -w --stdin > \"$description_file.hash\"; \
+        git update-ref refs/heads/\"$branch.description\" \"$(cat \"$description_file.hash\")\"; \
+        git branch --edit-description \"$branch\"; \
+        rm \"$description_file\"; \
+        rm \"$description_file.hash\"; \
+    }; f"
+
+    # Usage: git branch-show-desc BRANCH
+    # Show the description of a Git branch.
+    branch-show-desc = "!f() { \
+        local BRANCH=\"$1\"; \
+        git config --get branch.\"$BRANCH\".description; \
     }; f"
 
     # Usage: git branch-upstream
