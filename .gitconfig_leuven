@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240625.1211
+# .gitconfig, Time-stamp: 20240625.1222
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -318,7 +318,7 @@
             | grep -i --color=auto \"$PATTERN\"; \
     }; f"
 
-    # Alias for 'search-for-files'.
+    ##? Alias for 'search-for-files'.
     find-files = search-for-files
 
     ##? Usage: git search-for-files-all-branches FILE_NAME
@@ -342,7 +342,7 @@
         done; \
     }; f"
 
-    # Alias for 'search-for-files-all-branches'.
+    ##? Alias for 'search-for-files-all-branches'.
     find-files-all-branches = search-for-files-all-branches
 
     # Usage: git search-for-code PATTERN [TREE]
@@ -2042,7 +2042,7 @@ deploy-prod =
         done | sort -r | sed 's#^[0-9]*:##g'; \
     }; f"
 
-    # Alias for 'file-last-commits'.
+    ##? Alias for 'file-last-commits'.
     wwflu = file-last-commits
 
     file-last-commits2 = "!f() { \
@@ -2099,7 +2099,7 @@ deploy-prod =
     }; f"
     # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
-    # Alias for 'incoming'.
+    ##? Alias for 'incoming'.
     in = incoming
 
     # Show log of new commits after you fetched, with stats, excluding merges
@@ -2115,10 +2115,14 @@ deploy-prod =
     who-is-changing-branch = !sh -c 'git shortlog HEAD..$(git origin)/$0'
     # TODO: Add fetch?
 
-    incoming-files = !(git fetch \
-                && git diff --stat ...@{u})
+    ##? Fetch updates from the remote repository and shows the difference
+    ##? statistics between local HEAD and @{u}.
+    incoming-files = "!f() { \
+        git fetch \
+            && git diff --stat HEAD...@{u}; \
+    }; f"
 
-    # Alias for 'incoming-files'.
+    ##? Alias for 'incoming-files'.
     in-files = incoming-files
 
     incoming-diff = diff @{u} HEAD
@@ -2302,16 +2306,21 @@ deploy-prod =
     sbt = show-branch --topics
     sbs = show-branch --sha1-name
 
-    # Usage: git outgoing
-    # Show (unpushed) commits not found in the remote branch.
+    ##? Usage: git outgoing
+    ##?
+    ##? Show the commits on the local branch that are not on the remote branch
+    ##? (local commits not pushed).
     outgoing = log @{u}..HEAD
 
-    # Alias for 'outgoing'.
+    ##? Alias for 'outgoing'.
     out = outgoing
 
+    ##? Usage: git outgoing-files
+    ##?
+    ##? Show the difference statistics between the remote branch and local HEAD.
     outgoing-files = diff --stat @{u}...
 
-    # Alias for 'outgoing-files'.
+    ##? Alias for 'outgoing-files'.
     out-files = outgoing-files
 
     # Usage: git outgoing-all
