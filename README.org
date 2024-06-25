@@ -4010,9 +4010,20 @@ You can see:
 ** Commits
 
 #+begin_src conf
-    # Usage: git compare-commits REV_BASE REV_COMPARE
+    ##? Usage: git compare-commits FROM TO
+    ##?
+    ##? Show commits between two branches or commits.
+    ##?
+    ##? Example:
+    ##?   git compare-commits branch1 branch2
     compare-commits = "!f() { \
-        git log \"$1\"...$2; \
+        if [ \"$#\" -ne 2 ]; then \
+            printf >&2 'Usage: git compare-commits FROM TO\n'; \
+            return 2; \
+        fi; \
+        local FROM=\"$1\"; \
+        local TO=\"$2\"; \
+        git log \"$FROM\"...\"$TO\"; \
     }; f"
 #+end_src
 
@@ -4021,10 +4032,20 @@ You can see:
 List all the changed *files between 2 commits*:
 
 #+begin_src conf
-    # Usage: git compare-changed-files REV_BASE REV_COMPARE
-    # Show changed files between two commits.
+    ##? Usage: git compare-changed-files FROM TO
+    ##?
+    ##? Show changed files between two branches or commits.
+    ##?
+    ##? Example:
+    ##?   git compare-changed-files branch1 branch2
     compare-changed-files = "!f() { \
-        git diff --stat \"$1\"...$2; \
+        if [ \"$#\" -ne 2 ]; then \
+            printf >&2 'Usage: git compare-changed-files FROM TO\n'; \
+            return 2; \
+        fi; \
+        local FROM=\"$1\"; \
+        local TO=\"$2\"; \
+        git diff --stat \"$FROM\"...\"$TO\"; \
     }; f"
 #+end_src
 
@@ -4035,11 +4056,22 @@ View all diffs.
 - Inline diff (unified, single view)
 
   #+begin_src conf
-    # Usage: git compare REV_BASE REV_COMPARE
-    #      = git diff REV_BASE...REV_COMPARE
-    # Example: git compare master@{1day} master
+    ##? Usage: git compare FROM TO
+    ##?      = git diff FROM...TO
+    ##?
+    ##? Show diff between two branches or commits.
+    ##?
+    ##? Examples:
+    ##?   git compare branch1 branch2
+    ##?   git compare master@{1day} master
     compare = "!f() { \
-        git diff \"$1\"...$2; \
+        if [ \"$#\" -ne 2 ]; then \
+            printf >&2 'Usage: git compare FROM TO\n'; \
+            return 2; \
+        fi; \
+        local FROM=\"$1\"; \
+        local TO=\"$2\"; \
+        git diff \"$FROM\"...\"$TO\"; \
     }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
   #+end_src
@@ -4079,23 +4111,23 @@ current branch and the specified branch.
     # Show the missing commits between the current branch and another branch.
     missing = "!f() { \
         local current_branch=$(git current-branch); \
-        local other_branch=${1:-$(git main-branch)}; \
+        local OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
             printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
             return 2; \
         fi; \
-        if ! git verify-local-branch \"$other_branch\"; then \
-            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$other_branch\"; \
+        if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
-        local commits_missing_to_current=$(git rev-list --count \"$other_branch\"..\"$current_branch\"); \
-        local commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$other_branch\"); \
+        local commits_missing_to_current=$(git rev-list --count \"$OTHER_BRANCH\"..\"$current_branch\"); \
+        local commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$OTHER_BRANCH\"); \
         printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
-            \"$other_branch\" \"$current_branch\" \"$commits_missing_to_current\"; \
-        git --no-pager log \"$other_branch\"..\"$current_branch\"; \
+            \"$OTHER_BRANCH\" \"$current_branch\" \"$commits_missing_to_current\"; \
+        git --no-pager log \"$OTHER_BRANCH\"..\"$current_branch\"; \
         printf \"\n\n$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
-            \"$current_branch\" \"$other_branch\" \"$commits_missing_to_other\"; \
-        git --no-pager log \"$current_branch\"..\"$other_branch\"; \
+            \"$current_branch\" \"$OTHER_BRANCH\" \"$commits_missing_to_other\"; \
+        git --no-pager log \"$current_branch\"..\"$OTHER_BRANCH\"; \
         printf \"\n\"; \
     }; f"
 #+end_src
@@ -4201,32 +4233,32 @@ Available Filters for ~--diff-filter~:
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
         local current_branch=$(git current-branch); \
-        local other_branch=${1:-$(git main-branch)}; \
+        local OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
             printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
             return 2; \
         fi; \
-        if ! git verify-local-branch \"$other_branch\"; then \
-            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$other_branch\"; \
+        if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
-        local missing_files_to_current=$(git diff --name-only \"$other_branch\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
-        printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\n\" \"$other_branch\" \"$current_branch\" \"$missing_files_to_current\"; \
-        git diff --stat \"$other_branch\"...\"$current_branch\"; \
+        local missing_files_to_current=$(git diff --name-only \"$OTHER_BRANCH\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
+        printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\n\" \"$OTHER_BRANCH\" \"$current_branch\" \"$missing_files_to_current\"; \
+        git diff --stat \"$OTHER_BRANCH\"...\"$current_branch\"; \
     }; f"
 
     missing-files-name-only = "!f() { \
         local current_branch=$(git current-branch); \
-        local other_branch=${1:-$(git main-branch)}; \
+        local OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
             printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
             return 2; \
         fi; \
-        if ! git verify-local-branch \"$other_branch\"; then \
-            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$other_branch\"; \
+        if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
-        git diff --name-only \"$other_branch\"...\"$current_branch\"; \
+        git diff --name-only \"$OTHER_BRANCH\"...\"$current_branch\"; \
     }; f"
 #+end_src
 
@@ -5462,7 +5494,7 @@ each commit:
     # related-files = "!f() { \
     #     if [ ! -e \"$1\" ]; then \
     #         echo \"Error: File '$1' not found in the working tree.\"; \
-    #         return 1; \
+    #         return 2; \
     #     fi; \
     #     local hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
     #     echo \"\nHashes: \n$hashes\"; \
