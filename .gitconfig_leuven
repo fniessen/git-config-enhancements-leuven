@@ -1,4 +1,4 @@
-# .gitconfig, Time-stamp: 20240624.1439
+# .gitconfig, Time-stamp: 20240625.0937
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1427,14 +1427,14 @@
         printf \"\n\"; \
     }; f"
 
-    # Get the merge base commit hash between two branches. Defaults to main and
-    # current branch if not specified.
+    ##? Get the merge base commit hash between two branches. Defaults to main
+    ##? and current branch if not specified.
     common-ancestor = "!f() { \
-        local main_branch=${1:-$(git main-branch)}; \
-        local current_branch=${2:-$(git rev-parse --abbrev-ref HEAD)}; \
-        local base=$(git merge-base $main_branch $current_branch 2>/dev/null); \
+        local MAIN_BRANCH=${1:-$(git main-branch)}; \
+        local CURRENT_BRANCH=${2:-$(git rev-parse --abbrev-ref HEAD)}; \
+        local base=$(git merge-base $MAIN_BRANCH $CURRENT_BRANCH 2>/dev/null); \
         if [ -z \"$base\" ]; then \
-            printf >&2 '%s\n' \"Error: Unable to find common ancestor between branches '$main_branch' and '$current_branch'. Branches may not exist or be valid.\"; \
+            printf >&2 '%s\n' \"Error: Unable to find common ancestor between branches '$MAIN_BRANCH' and '$CURRENT_BRANCH'. Branches may not exist or be valid.\"; \
             return 2; \
         else \
             local short_base=$(git rev-parse --short $base); \
@@ -1488,25 +1488,25 @@
         git diff --name-only \"$other_branch\"...\"$current_branch\"; \
     }; f"
 
-    ##? Usage: git history-graph
+    ##? Usage: git log-graph
     ##?
-    ##? Display a commit history graph.
-    history-graph = log --graph
+    ##? Show a graphical log of commits.
+    log-graph = log --graph
 
-    ##? Usage: git history-graph2
+    ##? Usage: git log-graph-branches-tags-remotes
     ##?
-    ##? Display a commit history graph with branches, tags, and remotes.
-    history-graph2 = log --branches --tags --remotes --date-order --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --graph
+    ##? Show a graphical log of commits with branches, tags, and remotes.
+    log-graph-branches-tags-remotes = log --branches --tags --remotes --date-order --format=format:'%C(yellow)%h %C(reset) %<(75,trunc)%s <%cn> (%cr) %C(red)%d' --graph
 
-    ##? Usage: git history-all-graph
+    ##? Usage: git log-graph-all
     ##?
-    ##? Display a complete commit history with a graph.
-    history-all-graph = log --all --graph
+    ##? Show a graphical log of all references.
+    log-graph-all = log --all --graph
 
-    ##? Usage: git history-details
+    ##? Usage: git log-graph-detail
     ##?
-    ##? Display a detailed commit history graph with file changes.
-    history-details = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
+    ##? Show a detailed graphical log with file changes.
+    log-graph-detail = log --pretty=format:'%C(green)%cr%C(reset) %C(yellow)%h%Creset %C(yellow)%d%Creset %s %C(bold blue)<%an>%Creset%n' --graph --name-status
 
     ##? Usage: git releases
     ##?
