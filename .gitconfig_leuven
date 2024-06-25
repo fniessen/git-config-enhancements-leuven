@@ -1,4 +1,5 @@
-# .gitconfig, Time-stamp: 20240625.1132
+# -*- mode: conf -*-
+# .gitconfig, Time-stamp: 20240625.1211
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -243,12 +244,17 @@
         printf '%s <%s>\n' \"$name\" \"$email\"; \
     }; f"
 
-    # Usage: git init-repository
-    # Initialize a new Git repository with an initial commit.
-    init-repository = !git init \
-                && (ls -1A | grep -q . || touch .gitignore) \
-                && git add . \
-                && git commit -m \"Initial commit\"
+    ##? Usage: git init-repository
+    ##?
+    ##? Initialize a new Git repository with an initial commit.
+    init-repository = "!f() { \
+        git init \
+            && if [ -z \"$(ls -A)\" ]; then \
+                   touch .gitignore; \
+               fi \
+            && git add . \
+            && git commit -m 'Initial commit'; \
+    }; f"
 
     cl = clone --recursive
 
@@ -336,7 +342,7 @@
         done; \
     }; f"
 
-    # Alias for 'search-for-files-all'.
+    # Alias for 'search-for-files-all-branches'.
     find-files-all-branches = search-for-files-all-branches
 
     # Usage: git search-for-code PATTERN [TREE]
@@ -1298,10 +1304,11 @@
             && git delete-remote-branch \"$1\"; \
     }; f"
 
-    # Usage: git prune-all
-    # Prune deleted branches from all remotes.
-    prune-all = !git remote \
-                    | xargs -n 1 git remote prune
+    # Usage: git prune-branches-all-remotes
+    # Prune all branches for all remotes.
+    prune-branches-all-remotes = "!f() { \
+        git remote | xargs -n 1 git remote prune; \
+    }; f"
     # 'git remote prune' does not understand '--all'.
 
     ##? Usage: git delete-gone-branches
@@ -1533,7 +1540,7 @@
     ##? Usage: git log-graph-all
     ##?
     ##? Show a graphical log of all references.
-    log-graph-all = log --all --graph
+    log-graph-all-branches = log --all --graph
 
     ##? Usage: git log-graph-detail
     ##?
