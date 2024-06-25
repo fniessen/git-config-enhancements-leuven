@@ -4782,7 +4782,7 @@ current tag.  Useful for uploading to Elasticbeanstalk.
 #+end_src
 
 (From Catalin)
-: git archive --format="zip" 05eb104f1 --output "C:\Users\catal\Downloads\stack-2_05eb104f1.zip" "file1" "file2" "file3" ... "fileN"
+: git archive --format="zip" 05eb104f1 --output="C:\Users\catal\Downloads\stack-2_05eb104f1.zip" "file1" "file2" "file3" ... "fileN"
 (with list of files modified between 2 commits)
 
 #+begin_src conf
@@ -4823,8 +4823,11 @@ Save a repo (for example, ~HEAD~ or ~master~ -- or any other branch to archive, 
 you've already checked it out) as a tarball:
 
 #+begin_src conf
-    export-zip = archive -o latest.zip
-    export-tgz = archive -o latest.tar.gz -9
+    # Archive the current state to a zip file named latest.zip.
+    archive-zip = archive --output=latest.zip
+
+    # Archive the current state to a compressed tar.gz file named latest.tar.gz with maximum compression.
+    archive-targz = archive --output=latest.tar.gz -9
 #+end_src
 
 Note that the /output format/ is inferred by the extension of the output file.
@@ -5122,7 +5125,7 @@ Download repository, tag or branch.
 #+begin_src conf
     # Put everything in the current repo in a Zip archive.
     download-repository = "!f() { \
-        git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; \
+        git archive ${1:-HEAD} --format=zip --output=$(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; \
     }; f"
 # XXX Test it with tag or branch.
 #+end_src

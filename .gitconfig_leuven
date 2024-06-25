@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240625.1516
+# .gitconfig, Time-stamp: 20240625.1521
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1721,8 +1721,11 @@
         printf 'Exported changed files saved as %s\n' $zip_file; \
     }; f"
 
-    export-zip = archive -o latest.zip
-    export-tgz = archive -o latest.tar.gz -9
+    # Archive the current state to a zip file named latest.zip.
+    archive-zip = archive --output=latest.zip
+
+    # Archive the current state to a compressed tar.gz file named latest.tar.gz with maximum compression.
+    archive-targz = archive --output=latest.tar.gz -9
 
     ##? Usage: git export-commit-files [COMMIT_HASH]
     ##?
@@ -1835,7 +1838,7 @@ deploy-prod =
 
     # Put everything in the current repo in a Zip archive.
     download-repository = "!f() { \
-        git archive ${1:-HEAD} --format=zip -o $(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; \
+        git archive ${1:-HEAD} --format=zip --output=$(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; \
     }; f"
 # XXX Test it with tag or branch.
 
