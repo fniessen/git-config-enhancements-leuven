@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240625.1222
+# .gitconfig, Time-stamp: 20240625.1224
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2154,14 +2154,14 @@ deploy-prod =
     # changes).
 
     # Pull the latest changes for the current branch from its remote counterpart.
-    pull-current = "!git pull $(git origin) $(git current-branch)"
+    pull-current-branch = "!git pull $(git origin) $(git current-branch)"
 
     # Push the current branch to its remote counterpart.
-    push-current = "!git push $(git origin) $(git current-branch)"
+    push-current-branch = "!git push $(git origin) $(git current-branch)"
 
     # Pull and push the latest changes for the current branch.
-    pull-and-push--current = "!f() { \
-        pull-current && push-current; \
+    pull-and-push-current-branch = "!f() { \
+        pull-current-branch && push-current-branch; \
     }; f"
 
     # Update repository by pulling changes from remote and pushing local commits.
