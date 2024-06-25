@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240625.1328
+# .gitconfig, Time-stamp: 20240625.1346
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1060,7 +1060,7 @@
     remote-branches = "!f() { \
         git fetch --prune && \
         for branch in $(git for-each-ref --format='%(refname:short)' refs/remotes | grep -v HEAD); do \
-            printf \"%s\\t%s\\n\" \"$(git show -s --format='%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)' $branch | head -n 1)\" \"$branch\"; \
+            printf \"%s\\t%s\n\" \"$(git show -s --format='%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)' $branch | head -n 1)\" \"$branch\"; \
         done | sort -r; \
     }; f"
 
@@ -1077,18 +1077,18 @@
     # Edit the description of a Git branch.
     branch-edit-desc = "!f() { \
         if [ -z \"$1\" ]; then \
-            echo \"Usage: git branch-edit-desc BRANCH\"; \
-            return 1; \
+            printf >&2 \"Usage: git branch-edit-desc BRANCH\n\"; \
+            return 2; \
         fi; \
-        branch=\"$1\"; \
-        description_file=\".git/refs/heads/$branch.description\"; \
+        local BRANCH=\"$1\"; \
+        description_file=\".git/refs/heads/$BRANCH.description\"; \
         mkdir -p \"$(dirname \"$description_file\")\"; \
         touch \"$description_file\"; \
         echo -n \"\" > \"$description_file\"; \
         \"${VISUAL:-${EDITOR:-emacs}}\" \"$description_file\"; \
         cat \"$description_file\" | git hash-object -w --stdin > \"$description_file.hash\"; \
-        git update-ref refs/heads/\"$branch.description\" \"$(cat \"$description_file.hash\")\"; \
-        git branch --edit-description \"$branch\"; \
+        git update-ref refs/heads/\"$BRANCH.description\" \"$(cat \"$description_file.hash\")\"; \
+        git branch --edit-description \"$BRANCH\"; \
         rm \"$description_file\"; \
         rm \"$description_file.hash\"; \
     }; f"
@@ -1096,6 +1096,10 @@
     # Usage: git branch-show-desc BRANCH
     # Show the description of a Git branch.
     branch-show-desc = "!f() { \
+        if [ -z \"$1\" ]; then \
+            printf >&2 \"Usage: git branch-show-desc BRANCH\n\"; \
+            return 2; \
+        fi; \
         local BRANCH=\"$1\"; \
         git config --get branch.\"$BRANCH\".description; \
     }; f"
@@ -1469,11 +1473,11 @@
         local current_branch=$(git current-branch); \
         local OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
-            printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
+            printf >&2 \"Error: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
             return 2; \
         fi; \
         if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
-            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$OTHER_BRANCH\"; \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
         local commits_missing_to_current=$(git rev-list --count \"$OTHER_BRANCH\"..\"$current_branch\"); \
@@ -1522,11 +1526,11 @@
         local current_branch=$(git current-branch); \
         local OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
-            printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
+            printf >&2 \"Error: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
             return 2; \
         fi; \
         if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
-            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$OTHER_BRANCH\"; \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
         local missing_files_to_current=$(git diff --name-only \"$OTHER_BRANCH\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
@@ -1538,11 +1542,11 @@
         local current_branch=$(git current-branch); \
         local OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
-            printf >&2 \"Error: Current branch '%s' is not a valid branch.\\n\" \"$current_branch\"; \
+            printf >&2 \"Error: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
             return 2; \
         fi; \
         if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
-            printf >&2 \"Error: Other branch '%s' is not a valid branch.\\n\" \"$OTHER_BRANCH\"; \
+            printf >&2 \"Error: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
         git diff --name-only \"$OTHER_BRANCH\"...\"$current_branch\"; \
@@ -2004,7 +2008,7 @@ deploy-prod =
     related-history = "!f() { \
         local FILE_PATH=\"$1\"; \
         if [ ! -e \"$FILE_PATH\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$FILE_PATH\"; \
+            printf >&2 \"Error: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
             return 2; \
         fi; \
         git show --name-only $(git rev-list HEAD -- \"$FILE_PATH\"); \
@@ -2030,12 +2034,16 @@ deploy-prod =
     ##?
     ##? Generate a list of which files changed together with a file.
     related-files = "!f() { \
-        local FILE_PATH=\"$1\"; \
-        if [ ! -e \"$FILE_PATH\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\\n\" \"$FILE_PATH\"; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git related-files FILE_PATH\n'; \
             return 2; \
         fi; \
-        printf \"Unique Files:\\n\"; \
+        local FILE_PATH=\"$1\"; \
+        if [ ! -e \"$FILE_PATH\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
+            return 2; \
+        fi; \
+        printf \"Unique Files:\n\"; \
         git log --format=format:%H -- \"$FILE_PATH\" \
             | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
             | sort \
