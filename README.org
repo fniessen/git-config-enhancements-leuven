@@ -1239,20 +1239,21 @@ Search files in all branches.
     ##? Search for a specific file in all local branches.
     ##?
     ##? Arguments:
-    ##?   FILE_NAME                     The name of the file to search for in all local branches.
+    ##?   FILE_NAME                     The name of the file to search for in
+    ##?                                 all local branches.
     search-for-files-all-branches = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git search-for-files-all-branches FILE_NAME\n'; \
             return 2; \
         fi; \
         local FILE_NAME=\"$1\"; \
-        git local-branches | \
-        while read -r branch; do \
-            printf \"\n$(tput bold)$(tput setaf 2)$branch:$(tput sgr0)\n\"; \
-            git ls-tree -r --name-only \"$branch\" | \
-            nl -bn -w3 | \
-            grep --color=auto \"$FILE_NAME\"; \
-        done; \
+        git local-branches \
+            | while read -r branch; do \
+                  printf \"\n$(tput bold)$(tput setaf 2)$branch:$(tput sgr0)\n\"; \
+                  git ls-tree -r --name-only \"$branch\" | \
+                  nl -bn -w3 | \
+                  grep --color=auto \"$FILE_NAME\"; \
+              done; \
     }; f"
 
     ##? Alias for 'search-for-files-all-branches'.
@@ -2322,39 +2323,42 @@ This allows doing nice things like:
 
 : git difftool-rev :/some nasty bug
 
-Diff the last commit for a given file:
-
 #+begin_src conf
-    # Usage: git file-diff-last-modification FILENAME
-    # Show the diff of the last commit that modified a specific file using
-    # a diff tool.
-    file-diff-last-modification = "!f() { \
-        local project_root_dir=$(git root); \
-        echo Finding full file path of \"$1\" in $project_root_dir; \
-        local file_path=$(find $project_root_dir -type f -name \"$1\"); \
-        echo Full file path $file_path; \
-        local last_modified_commit_hash=$(git rev-list -1 HEAD $file_path); \
-        echo Last commit file modified $last_modified_commit_hash; \
-        git difftool $last_modified_commit_hash^ $file_path; \
-    }; f"
-
-    file-diff-last-modification2 = "!f() { \
-        local project_root_dir=$(git root); \
-        echo Finding full file path of \"$1\" in $project_root_dir; \
-        local file_path=$(git ls-files --full-name -- \"$1\"); \
-        echo Full file path $file_path; \
-        local last_modified_commit_hash=$(git log -1 --pretty=format:%H -- $file_path); \
-        echo Last commit file modified $last_modified_commit_hash; \
-        git difftool $last_modified_commit_hash^ $file_path; \
+    ##? Usage: git ediff-commit COMMIT_HASH FILE_PATH
+    ##?
+    ##? Compare FILE_PATH between the current version and COMMIT_HASH using
+    ##? Emacs' ediff.
+    ediff-commit = "!f() { \
+        local COMMIT_HASH=\"$1\"; \
+        local FILE_PATH=\"$2\"; \
+        local current_file=\"$FILE_PATH\"; \
+        git show ${COMMIT_HASH}:\"$FILE_PATH\" > /tmp/ediff-temp-${COMMIT_HASH}; \
+        emacs --eval \"(ediff-files \\\"$current_file\\\" \\\"/tmp/ediff-temp-${COMMIT_HASH}\\\")\"; \
+        rm /tmp/ediff-temp-${COMMIT_HASH}; \
     }; f"
 #+end_src
 
-Usage (no matter where you are in the repo):
+Diff the last commit for a given file:
 
-: git file-diff-last-modification File.cpp
+#+begin_src conf
+    ##? Usage: git difftool-last-modified FILE_PATH
+    ##?
+    ##? Compare the current version of FILE_PATH with its state in the last
+    ##? commit that modified it, using difftool.
+    difftool-last-modified = "!f() { \
+        local FILE_PATH=\"$1\"; \
+        local last_modified_commit_hash=$(git rev-list -1 HEAD -- \"$FILE_PATH\"); \
+        printf 'Last commit file modified %s\n' \"$last_modified_commit_hash\"; \
+        git difftool \"$last_modified_commit_hash\"^ -- \"$FILE_PATH\"; \
+    }; f"
+#+end_src
 
-This opens your configured ~difftool~ with the changes to =File.cpp= in the last
-commit it was touched.
+Usage:
+
+: git difftool-last-modified Path/to/File.cpp
+
+This opens your configured ~difftool~ with the changes to =Path/to/File.cpp= in the
+last commit it was touched.
 
 *** Performing directory diffs (Comparing folders)
 
