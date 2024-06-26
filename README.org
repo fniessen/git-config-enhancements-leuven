@@ -259,11 +259,16 @@ commenting out can be swapped over if I want to use the ~$BASE~ line instead.
 
 ** External Diff Tool
 
+Select a diff tool to visualize the differences.
+
 #+begin_src conf
 [difftool]
     # Set prompt to false to avoid asking for confirmation before launching the diff tool.
     prompt = false
 #+end_src
+
+Commonly used tools include ~vimdiff~, ~meld~, ~kdiff3~, ~tkdiff~, etc. Choose one
+according to your preference and availability.
 
 *** Use [[https://meldmerge.org/][Meld]] as Git ~difftool:~
 
@@ -2281,9 +2286,9 @@ List all the changed files *in a commit* (also in a /merge commit/):
     #   git changed-files bada55      List files modified in the commit with hash 'bada55'
     changed-files = "!f() { \
         if [ $# -eq 0 ]; then \
-            git diff --name-only HEAD^ HEAD; \
+            git diff --name-only HEAD^..HEAD; \
         else \
-            git diff --name-only $1^ $1; \
+            git diff --name-only $1^..$1; \
         fi \
     }; f"
 #+end_src
@@ -2306,6 +2311,13 @@ List all the changed files *in a commit* (also in a /merge commit/):
 #+end_src
 
 ** Diff
+
+#+begin_src conf
+    # Show changes with word-level granularity and color highlighting.
+    show-words = show --color-words
+#+end_src
+
+git show 23231bf66 = git difftool 23231bf66^..23231bf66
 
 Use a generic rev syntax (rev-parse) to transparently allow complex rev
 expressions.
@@ -5339,6 +5351,10 @@ Staging for commit is typically done by ~git add~.
 
     # Diff word-wise.
     dw = diff --color-words
+#+end_src
+
+#+begin_src conf :tangle no
+    git show --color-words 23231bf66
 #+end_src
 
 #+begin_src conf

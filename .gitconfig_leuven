@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240626.1105
+# .gitconfig, Time-stamp: 20240626.1150
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -722,9 +722,9 @@
     #   git changed-files bada55      List files modified in the commit with hash 'bada55'
     changed-files = "!f() { \
         if [ $# -eq 0 ]; then \
-            git diff --name-only HEAD^ HEAD; \
+            git diff --name-only HEAD^..HEAD; \
         else \
-            git diff --name-only $1^ $1; \
+            git diff --name-only $1^..$1; \
         fi \
     }; f"
 
@@ -740,6 +740,9 @@
     download-commit-plain-diff = "!f() { \
         git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff; \
     }; f"
+
+    # Show changes with word-level granularity and color highlighting.
+    show-words = show --color-words
 
     # Usage: git difftool-rev [REVISION]
     # Launch a diff tool for a specific revision or branch.
