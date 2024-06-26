@@ -1107,10 +1107,12 @@ Fetch URL: git@bitbucket.org-something:user/slug
 #+end_src
 
 #+begin_src conf
-    # Usage: git repo-owner
-    # Get the owner of the remote Git repository.
+    ##? Usage: git repo-owner
+    ##?
+    ##? Get the owner of the repository from the remote URL.
     repo-owner = "!f() { \
-        git remote show $(git config --get remote.origin.url) -n \
+        local remote_url=$(git config --get remote.origin.url); \
+        git remote show $remote_url -n \
             | grep 'Fetch URL:' \
             | sed -E 's_^.*[/:](.*)/.*$_\\1_' \
             | sed 's_\\.git$__'; \
@@ -1118,20 +1120,24 @@ Fetch URL: git@bitbucket.org-something:user/slug
 #+end_src
 
 #+begin_src conf
-    # Usage: git repo-slug-remote
-    # Get the name of the remote repository.
+    ##? Usage: git repo-slug-remote
+    ##?
+    ##? Get the repository slug from the remote URL.
     repo-slug-remote = "!f() { \
-        git remote show $(git config --get remote.origin.url) -n \
+        local remote_url=$(git config --get remote.origin.url); \
+        git remote show $remote_url -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
             | sed 's_\\.git$__'; \
     }; f"
 #+end_src
 
 #+begin_src conf
-    # Usage: git repo-slug-local
-    # Provide the base name (slug) of the current local repository's top-level directory.
+    ##? Usage: git repo-slug-local
+    ##?
+    ##? Get the repository slug from the local directory name.
     repo-slug-local = "!f() { \
-        printf \"%s\n\" \"$(basename \"$(git root)\")\"; \
+        local repo_name=$(basename \"$(git root)\"); \
+        printf \"%s\n\" \"$repo_name\"; \
     }; f"
 #+end_src
 
@@ -5571,9 +5577,17 @@ To find the most recent commit (chronologically) that modified a file across /al
 branches, use the following alias:
 
 #+begin_src conf
-    # Usage: git file-last-commit FILENAME
-    # Show the most recent commit across all branches (both local and remote).
-    file-last-commit = log -n 1 --all --date-order
+    ##? Usage: git file-last-commit FILE_PATH
+    ##?
+    ##? Show the last commit that modified the specified FILE_PATH.
+    file-last-commit = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git file-last-commit FILE_PATH\n'; \
+            return 2; \
+        fi; \
+        local FILE_PATH=\"$1\"; \
+        git log -n 1 --all --date-order -- \"$FILE_PATH\"; \
+    }; f"
 #+end_src
 
 #+begin_warning
@@ -5599,8 +5613,8 @@ directory across all local branches:
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             printf \"$(git log --decorate=no -1 \
-                                --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
-                                --color=always $branch -- \"$FILE_PATH\") $(tput bold)$branch$(tput sgr0)\n\"; \
+                               --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
+                               --color=always $branch -- \"$FILE_PATH\") $(tput bold)$branch$(tput sgr0)\n\"; \
         done | sort -r | sed 's#^[0-9]*:##g'; \
     }; f"
 
