@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240626.0957
+# .gitconfig, Time-stamp: 20240626.1006
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -256,6 +256,9 @@
             && git commit -m 'Initial commit'; \
     }; f"
 
+    ##? Usage: git cl
+    ##?
+    ##? Clone a repository recursively, including all submodules.
     cl = clone --recursive
 
     ##? Usage: git origin
@@ -270,7 +273,7 @@
     ##?
     ##? Get the owner of the repository from the remote URL.
     repo-owner = "!f() { \
-        local remote_url=$(git config --get remote.origin.url); \
+        local remote_url=$(git config --get remote.$(git origin).url); \
         git remote show $remote_url -n \
             | grep 'Fetch URL:' \
             | sed -E 's_^.*[/:](.*)/.*$_\\1_' \
@@ -281,7 +284,7 @@
     ##?
     ##? Get the repository slug from the remote URL.
     repo-slug-remote = "!f() { \
-        local remote_url=$(git config --get remote.origin.url); \
+        local remote_url=$(git config --get remote.$(git origin).url); \
         git remote show $remote_url -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
             | sed 's_\\.git$__'; \
@@ -306,8 +309,8 @@
         fi \
     }; f"
     # Note: The alias
-    # main-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
-    #     | sed 's_^refs/remotes/origin/__'"
+    # main-branch = "!git symbolic-ref refs/remotes/$(git origin)/HEAD \
+    #     | sed 's_^refs/remotes/$(git origin)/__'"
     # generates the error message
     # "fatal: ref refs/remotes/origin/HEAD is not a symbolic ref"
     # when the remote repository does not have a default branch.
@@ -1056,7 +1059,7 @@
             return 2; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
-        git rev-parse --verify \"origin/$BRANCH_NAME\" >/dev/null 2>&1; \
+        git rev-parse --verify \"$(git origin)/$BRANCH_NAME\" >/dev/null 2>&1; \
     }; f"
 
     # Usage: git br
@@ -1163,7 +1166,7 @@
         git remote update -p; \
         local main_branch=$(git main-branch); \
         local current_branch=$(git current-branch); \
-        git merge origin/$main_branch; \
+        git merge $(git origin)/$main_branch; \
         local merge_status=$?; \
         if [ $merge_status -eq 0 ]; then \
             echo \"Branch synced: '$current_branch' successfully synced with '$main_branch'\"; \
@@ -1224,7 +1227,7 @@
             echo \"Error: Please provide a branch name as a parameter.\"; \
             exit 1; \
         fi; \
-        [ $(git rev-list --count origin/\"$BRANCH_NAME\"..\"$BRANCH_NAME\") -gt 0 ]; \
+        [ $(git rev-list --count $(git origin)/\"$BRANCH_NAME\"..\"$BRANCH_NAME\") -gt 0 ]; \
     }; f"
 
     # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
@@ -1262,9 +1265,9 @@
         for branch in $local_branches; do \
             printf \"Checking for conflicts in \\e[1m%s\\e[0m...\n\" \"$branch\"; \
             if git check-remote-branch \"$branch\"; then \
-                if git is-ancestor origin/$branch $branch; then \
+                if git is-ancestor $(git origin)/$branch $branch; then \
                     printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\n\" \"$branch\"; \
-                    if git pull origin $branch:$branch; then \
+                    if git pull $(git origin) $branch:$branch; then \
                         printf \"\n\"; \
                     else \
                         printf \"\\e[91mError: Pull failed for branch '%s'.\\e[0m\n\" \"$branch\"; \

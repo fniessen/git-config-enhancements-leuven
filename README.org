@@ -1030,6 +1030,9 @@ If you accidentally put the wrong tree under version control, simply delete the
 Clone an existing repository including all submodules.
 
 #+begin_src conf
+    ##? Usage: git cl
+    ##?
+    ##? Clone a repository recursively, including all submodules.
     cl = clone --recursive
 #+end_src
 
@@ -1115,7 +1118,7 @@ Fetch URL: git@bitbucket.org-something:user/slug
     ##?
     ##? Get the owner of the repository from the remote URL.
     repo-owner = "!f() { \
-        local remote_url=$(git config --get remote.origin.url); \
+        local remote_url=$(git config --get remote.$(git origin).url); \
         git remote show $remote_url -n \
             | grep 'Fetch URL:' \
             | sed -E 's_^.*[/:](.*)/.*$_\\1_' \
@@ -1128,7 +1131,7 @@ Fetch URL: git@bitbucket.org-something:user/slug
     ##?
     ##? Get the repository slug from the remote URL.
     repo-slug-remote = "!f() { \
-        local remote_url=$(git config --get remote.origin.url); \
+        local remote_url=$(git config --get remote.$(git origin).url); \
         git remote show $remote_url -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
             | sed 's_\\.git$__'; \
@@ -1161,8 +1164,8 @@ XXX default-branch???
         fi \
     }; f"
     # Note: The alias
-    # main-branch = "!git symbolic-ref refs/remotes/origin/HEAD \
-    #     | sed 's_^refs/remotes/origin/__'"
+    # main-branch = "!git symbolic-ref refs/remotes/$(git origin)/HEAD \
+    #     | sed 's_^refs/remotes/$(git origin)/__'"
     # generates the error message
     # "fatal: ref refs/remotes/origin/HEAD is not a symbolic ref"
     # when the remote repository does not have a default branch.
@@ -3237,7 +3240,7 @@ branch (if any).
             return 2; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
-        git rev-parse --verify \"origin/$BRANCH_NAME\" >/dev/null 2>&1; \
+        git rev-parse --verify \"$(git origin)/$BRANCH_NAME\" >/dev/null 2>&1; \
     }; f"
 #+end_src
 
@@ -3393,7 +3396,7 @@ Checkout [[http://nvie.com/posts/a-successful-git-branching-model/][*common bran
 To manually *sync* a *branch* (merge changes from the ~main~ branch into the current
 working branch), run the following command:
 
-: git merge origin/main
+: git merge $(git origin)/main
 
 **** Merging
 
@@ -3413,7 +3416,7 @@ branch up* to all the latest changes on the ~main~ branch.
         git remote update -p; \
         local main_branch=$(git main-branch); \
         local current_branch=$(git current-branch); \
-        git merge origin/$main_branch; \
+        git merge $(git origin)/$main_branch; \
         local merge_status=$?; \
         if [ $merge_status -eq 0 ]; then \
             echo \"Branch synced: '$current_branch' successfully synced with '$main_branch'\"; \
@@ -3564,7 +3567,7 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
             echo \"Error: Please provide a branch name as a parameter.\"; \
             exit 1; \
         fi; \
-        [ $(git rev-list --count origin/\"$BRANCH_NAME\"..\"$BRANCH_NAME\") -gt 0 ]; \
+        [ $(git rev-list --count $(git origin)/\"$BRANCH_NAME\"..\"$BRANCH_NAME\") -gt 0 ]; \
     }; f"
 #+end_src
 
@@ -3606,9 +3609,9 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
         for branch in $local_branches; do \
             printf \"Checking for conflicts in \\e[1m%s\\e[0m...\n\" \"$branch\"; \
             if git check-remote-branch \"$branch\"; then \
-                if git is-ancestor origin/$branch $branch; then \
+                if git is-ancestor $(git origin)/$branch $branch; then \
                     printf \"No conflicts found in \\e[1m%s\\e[0m. Updating...\n\" \"$branch\"; \
-                    if git pull origin $branch:$branch; then \
+                    if git pull $(git origin) $branch:$branch; then \
                         printf \"\n\"; \
                     else \
                         printf \"\\e[91mError: Pull failed for branch '%s'.\\e[0m\n\" \"$branch\"; \
@@ -3769,7 +3772,7 @@ Delete a *remote* branch:
 Once you delete a branch from the remote repository, you can *prune
 remote-tracking branches that no longer exist on the remote* using:
 
-: git remote prune origin
+: git remote prune $(git origin)
 
 Use the ~--dry-run~ flag to preview which branches will be pruned without actually
 pruning them:
