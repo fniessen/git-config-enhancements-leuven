@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240626.1006
+# .gitconfig, Time-stamp: 20240626.1021
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -359,8 +359,13 @@
     find-files-all-branches = search-for-files-all-branches
 
     # Usage: git search-for-code PATTERN [TREE]
-    # Search for a string in files, ignoring binary files and highlighting matches.
-    search-for-code = "grep -i -I --line-number --break --heading -C 1"
+    #
+    ##? Perform a case-insensitive search for "pattern" in all tracked files,
+    ##? displaying line numbers, context around matches, and file headers.
+    ##?
+    ##? Example:
+    ##?   git search-for-code "pattern"
+    search-for-code = "!git --no-pager grep -i -I --line-number --break --heading -C 1"
 
     # Alias for 'search-for-code'.
     ack = search-for-code

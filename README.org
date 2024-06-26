@@ -1274,8 +1274,13 @@ specified path*).
 
 #+begin_src conf
     # Usage: git search-for-code PATTERN [TREE]
-    # Search for a string in files, ignoring binary files and highlighting matches.
-    search-for-code = "grep -i -I --line-number --break --heading -C 1"
+    #
+    ##? Perform a case-insensitive search for "pattern" in all tracked files,
+    ##? displaying line numbers, context around matches, and file headers.
+    ##?
+    ##? Example:
+    ##?   git search-for-code "pattern"
+    search-for-code = "!git --no-pager grep -i -I --line-number --break --heading -C 1"
 
     # Alias for 'search-for-code'.
     ack = search-for-code
