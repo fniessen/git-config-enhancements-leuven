@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240626.0945
+# .gitconfig, Time-stamp: 20240626.0957
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -258,9 +258,13 @@
 
     cl = clone --recursive
 
-    # origin = !echo "${$(git config --get clone.defaultRemoteName):-origin}"
-    origin = !echo "origin"
-    # git remote get-url origin | sed 's_\.git$__'
+    ##? Usage: git origin
+    ##?
+    ##? Get the default remote name, defaulting to 'origin' if not set.
+    origin = "!f() { \
+        local default_remote=$(git config --get clone.defaultRemoteName); \
+        printf \"%s\n\" \"${default_remote:-origin}\"; \
+    }; f"
 
     ##? Usage: git repo-owner
     ##?
@@ -2138,8 +2142,13 @@ deploy-prod =
         git difftool $(git merge-span ... \"$1\"); \
     }; f"
 
-    # Show a list of existing remotes (with URL).
-    r = remote -v
+    ##? Usage: git r
+    ##?
+    ##? Get the default remote name and print its URL.
+    r = "!f() { \
+        local remote_name=$(git origin); \
+        git remote get-url \"$remote_name\"; \
+    }; f"
 
     ##? Usage: git incoming
     ##?

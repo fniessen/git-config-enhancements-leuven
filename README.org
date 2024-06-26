@@ -1101,9 +1101,13 @@ Or, if you want to use RSA:
 Fetch URL: git@bitbucket.org-something:user/slug
 
 #+begin_src conf
-    # origin = !echo "${$(git config --get clone.defaultRemoteName):-origin}"
-    origin = !echo "origin"
-    # git remote get-url origin | sed 's_\.git$__'
+    ##? Usage: git origin
+    ##?
+    ##? Get the default remote name, defaulting to 'origin' if not set.
+    origin = "!f() { \
+        local default_remote=$(git config --get clone.defaultRemoteName); \
+        printf \"%s\n\" \"${default_remote:-origin}\"; \
+    }; f"
 #+end_src
 
 #+begin_src conf
@@ -5700,8 +5704,13 @@ moved or copied the lines.
 ** UPDATE - Pull
 
 #+begin_src conf
-    # Show a list of existing remotes (with URL).
-    r = remote -v
+    ##? Usage: git r
+    ##?
+    ##? Get the default remote name and print its URL.
+    r = "!f() { \
+        local remote_name=$(git origin); \
+        git remote get-url \"$remote_name\"; \
+    }; f"
 #+end_src
 
 #+begin_note
