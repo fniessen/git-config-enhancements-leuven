@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240626.1103
+# .gitconfig, Time-stamp: 20240626.1105
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -768,7 +768,6 @@
     difftool-last-modified = "!f() { \
         local FILE_PATH=\"$1\"; \
         local last_modified_commit_hash=$(git rev-list -1 HEAD -- \"$FILE_PATH\"); \
-        printf 'Last commit file modified %s\n' \"$last_modified_commit_hash\"; \
         git difftool \"$last_modified_commit_hash\"^ -- \"$FILE_PATH\"; \
     }; f"
 
