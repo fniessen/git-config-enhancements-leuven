@@ -2057,9 +2057,9 @@ conflicts, Git will not remove it (but it will still apply it)!
     # Usage: git stashes-clear
     # Remove all stashes from the stash stack.
     stashes-clear = "!git stash list \
-                   | cut -d: -f1 \
-                   | xargs -r -I {} git stash-remove {}"
-#+end_src
+                          | cut -d: -f1 \
+                          | xargs -r -I {} git stash-remove {}"
+                   #+end_src
 
 *** Workflows
 
@@ -2300,7 +2300,7 @@ List all the changed files *in a commit* (also in a /merge commit/):
         git format-patch $current_branch.patch; \
     }; f"
 
-    # Usage: git download-commit-plain-diff [COMMIT]
+    # Usage: git download-commit-plain-diff [COMMIT_HASH]
     # Create a diff file for the changes in a commit or range of commits.
     download-commit-plain-diff = "!f() { \
         local COMMIT_HASH=${1:-HEAD}; \
@@ -3186,12 +3186,10 @@ name, there is *no branch name*. You can't get something that doesn't exist.
 Push the current branch to the remote and establish tracking:
 
 #+begin_src conf
-    # Usage: git publish
-    # Push the current branch to the upstream branch with the same name.
-    push-upstream = !git push -u $(git origin) $(git current-branch)
-
-    # Alias for 'push-upstream'.
-    publish = push-upstream
+    ##? Usage: git publish-branch [REMOTE_NAME]
+    ##?
+    ##? Push the current branch to a remote repository and set upstream.
+    publish-branch = "!git push -u ${1:-$(git origin)} $(git current-branch)"
 #+end_src
 
 Then:
@@ -3497,6 +3495,29 @@ then ~stash pop~ will unstash some random stuff from before.
 #+end_src
 
 XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
+
+#+begin_src conf
+    # Stash local changes, checkout branch BRANCH, and reapply stashed changes.
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git stash push --include-untracked --quiet \
+            && git checkout \"$BRANCH\" \
+            && git stash pop --quiet; \
+    }; f"
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git stash push --include-untracked \
+            && git checkout \"$BRANCH\" \
+            && git stash pop; \
+    }; f"
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git diff-index --quiet HEAD || git stash push --include-untracked \
+            && git checkout \"$BRANCH\" \
+            && { git stash list | grep -q \"^stash@{0}: WIP on\"; } \
+            && git stash pop; \
+    }; f"
+#+end_src
 
 #+begin_src conf
     # Pull with rebase and auto-stash, updating your local branch with remote changes.
@@ -3930,16 +3951,22 @@ See the list of all the commits for that tag.
 ** Push a tag to your repository
 
 #+begin_src conf
-    # Usage: git publish-tag TAG_NAME [REMOTE_NAME]
-    # Publish a Git tag to a remote repository.
+    ##? Usage: git publish-tag TAG_NAME [REMOTE_NAME]
+    ##?
+    ##? Publish a Git tag to a remote repository.
     publish-tag = "!f() { \
-        git push ${2:-$(git origin)} $1; \
+        local TAG_NAME=$1; \
+        local REMOTE_NAME=${2:-$(git origin)}; \
+        git push $REMOTE_NAME refs/tags/$TAG_NAME; \
     }; f"
 
-    # Usage: git unpublish-tag TAG_NAME [REMOTE_NAME]
-    # Remove a published Git tag from a remote repository.
+    ##? Usage: git unpublish-tag TAG_NAME [REMOTE_NAME]
+    ##?
+    ##? Remove a published Git tag from a remote repository.
     unpublish-tag = "!f() { \
-        git push ${2:-$(git origin)} :refs/tags/$1; \
+        local TAG_NAME=$1; \
+        local REMOTE_NAME=${2:-$(git origin)}; \
+        git push $REMOTE_NAME :refs/tags/$TAG_NAME; \
     }; f"
 #+end_src
 
@@ -4873,12 +4900,12 @@ Note that the /output format/ is inferred by the extension of the output file.
     ##?
     ##? Export changed files from a commit or HEAD and create a zip archive.
     export-commit-files = "!f() { \
-        local target_commit=${1:-HEAD}; \
+        local COMMIT_HASH=${1:-HEAD}; \
         local current_branch=$(git convert-current-branch-name); \
-        local commit_hash=$(git commit-hash); \
-        local zip_file_name=$(git repo-slug-remote)-commit-${branch_name}-${target_commit:-$commit_hash}.zip; \
-        git changed-files \"$target_commit\" | tr '\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
+        local zip_file_name=$(git repo-slug-remote)-commit-${branch_name}-${COMMIT_HASH}.zip; \
+        git changed-files \"$COMMIT_HASH\" | tr '\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
     }; f"
+    ## XXX If HEAD, convert to commit hash.
 #+end_src
 
 export-commit-files-files = "!f() {

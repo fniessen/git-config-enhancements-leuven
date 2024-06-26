@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240626.1212
+# .gitconfig, Time-stamp: 20240626.1405
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -696,8 +696,8 @@
     # Usage: git stashes-clear
     # Remove all stashes from the stash stack.
     stashes-clear = "!git stash list \
-                   | cut -d: -f1 \
-                   | xargs -r -I {} git stash-remove {}"
+                          | cut -d: -f1 \
+                          | xargs -r -I {} git stash-remove {}"
 
     # Usage: git ci -m "MESSAGE"
     # Alias for 'commit'.
@@ -732,7 +732,7 @@
         git format-patch $current_branch.patch; \
     }; f"
 
-    # Usage: git download-commit-plain-diff [COMMIT]
+    # Usage: git download-commit-plain-diff [COMMIT_HASH]
     # Create a diff file for the changes in a commit or range of commits.
     download-commit-plain-diff = "!f() { \
         local COMMIT_HASH=${1:-HEAD}; \
@@ -1022,12 +1022,10 @@
             | tr '/' '-'; \
     }; f"
 
-    # Usage: git publish
-    # Push the current branch to the upstream branch with the same name.
-    push-upstream = !git push -u $(git origin) $(git current-branch)
-
-    # Alias for 'push-upstream'.
-    publish = push-upstream
+    ##? Usage: git publish-branch [REMOTE_NAME]
+    ##?
+    ##? Push the current branch to a remote repository and set upstream.
+    publish-branch = "!git push -u ${1:-$(git origin)} $(git current-branch)"
 
     ##? Usage: git upstream-branch
     ##?
@@ -1199,6 +1197,27 @@
         fi; \
         git pull; \
         git stash pop; \
+    }; f"
+
+    # Stash local changes, checkout branch BRANCH, and reapply stashed changes.
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git stash push --include-untracked --quiet \
+            && git checkout \"$BRANCH\" \
+            && git stash pop --quiet; \
+    }; f"
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git stash push --include-untracked \
+            && git checkout \"$BRANCH\" \
+            && git stash pop; \
+    }; f"
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git diff-index --quiet HEAD || git stash push --include-untracked \
+            && git checkout \"$BRANCH\" \
+            && { git stash list | grep -q \"^stash@{0}: WIP on\"; } \
+            && git stash pop; \
     }; f"
 
     # Pull with rebase and auto-stash, updating your local branch with remote changes.
@@ -1386,16 +1405,22 @@
     # Tag the current commit with the current date and a custom suffix.
     tag-with-date = "!sh -c 'git tag $(date +'%Y.%m.%d_%H.%M')_\"$0\"'"
 
-    # Usage: git publish-tag TAG_NAME [REMOTE_NAME]
-    # Publish a Git tag to a remote repository.
+    ##? Usage: git publish-tag TAG_NAME [REMOTE_NAME]
+    ##?
+    ##? Publish a Git tag to a remote repository.
     publish-tag = "!f() { \
-        git push ${2:-$(git origin)} $1; \
+        local TAG_NAME=$1; \
+        local REMOTE_NAME=${2:-$(git origin)}; \
+        git push $REMOTE_NAME refs/tags/$TAG_NAME; \
     }; f"
 
-    # Usage: git unpublish-tag TAG_NAME [REMOTE_NAME]
-    # Remove a published Git tag from a remote repository.
+    ##? Usage: git unpublish-tag TAG_NAME [REMOTE_NAME]
+    ##?
+    ##? Remove a published Git tag from a remote repository.
     unpublish-tag = "!f() { \
-        git push ${2:-$(git origin)} :refs/tags/$1; \
+        local TAG_NAME=$1; \
+        local REMOTE_NAME=${2:-$(git origin)}; \
+        git push $REMOTE_NAME :refs/tags/$TAG_NAME; \
     }; f"
 
     push-tags = push --tags
@@ -1752,12 +1777,12 @@
     ##?
     ##? Export changed files from a commit or HEAD and create a zip archive.
     export-commit-files = "!f() { \
-        local target_commit=${1:-HEAD}; \
+        local COMMIT_HASH=${1:-HEAD}; \
         local current_branch=$(git convert-current-branch-name); \
-        local commit_hash=$(git commit-hash); \
-        local zip_file_name=$(git repo-slug-remote)-commit-${branch_name}-${target_commit:-$commit_hash}.zip; \
-        git changed-files \"$target_commit\" | tr '\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
+        local zip_file_name=$(git repo-slug-remote)-commit-${branch_name}-${COMMIT_HASH}.zip; \
+        git changed-files \"$COMMIT_HASH\" | tr '\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
     }; f"
+    ## XXX If HEAD, convert to commit hash.
 
     # View raw commit.
     email-patch = XXX git format-patch $(git convert-current-branch-name).patch
