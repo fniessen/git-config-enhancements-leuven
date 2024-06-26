@@ -2279,17 +2279,14 @@ function wrapper.  On the contrary, you can't add other options.
 List all the changed files *in a commit* (also in a /merge commit/):
 
 #+begin_src conf
-    # Usage: git changed-files [COMMIT]
+    # Usage: git changed-files [COMMIT_HASH]
     # Show all files modified in each commit, including merge commits.
     # Examples:
     #   git changed-files             List files modified in last commit
     #   git changed-files bada55      List files modified in the commit with hash 'bada55'
     changed-files = "!f() { \
-        if [ $# -eq 0 ]; then \
-            git diff --name-only HEAD^..HEAD; \
-        else \
-            git diff --name-only $1^..$1; \
-        fi \
+        local COMMIT_HASH=${1:-HEAD}; \
+        git diff --name-only $COMMIT_HASH^..$COMMIT_HASH; \
     }; f"
 #+end_src
 
@@ -2306,7 +2303,8 @@ List all the changed files *in a commit* (also in a /merge commit/):
     # Usage: git download-commit-plain-diff [COMMIT]
     # Create a diff file for the changes in a commit or range of commits.
     download-commit-plain-diff = "!f() { \
-        git diff ${1:-HEAD}~ ${1:-HEAD} > ${1:-HEAD}.diff; \
+        local COMMIT_HASH=${1:-HEAD}; \
+        git diff $COMMIT_HASH^..$COMMIT_HASH > ${1:-HEAD}.diff; \
     }; f"
 #+end_src
 
@@ -2323,11 +2321,12 @@ Use a generic rev syntax (rev-parse) to transparently allow complex rev
 expressions.
 
 #+begin_src conf
-    # Usage: git difftool-rev [REVISION]
-    # Launch a diff tool for a specific revision or branch.
-    difftool-rev = "!f() { \
-        local REV=$(git rev-parse \"${*:-HEAD}\"); \
-        git difftool $REV~1 $REV; \
+    ##? Usage: git difftool-parent [COMMIT_HASH]
+    ##?
+    ##? Launch difftool for changes between specified commit and its parent.
+    difftool-parent = "!f() { \
+        local COMMIT_HASH=${1:-HEAD}; \
+        git difftool $COMMIT_HASH^..$COMMIT_HASH; \
     }; f"
 #+end_src
 
@@ -4107,6 +4106,8 @@ List all the changed *files between 2 commits*:
         git diff --stat \"$FROM\"...\"$TO\"; \
     }; f"
 #+end_src
+
+XXX ... or ..?
 
 ** Diff
 
