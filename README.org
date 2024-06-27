@@ -2473,14 +2473,14 @@ example, ~fix typo~ matches commits containing the words ~fix~ *and* ~typo~.
 
 If you want to find all commits (*across all branches*, showing names and status
 of changed files) where *log message* matches a specified pattern (regular
-expression), use ~find~.
+expression), use:
 
 #+begin_src conf
     # Search through all commit logs for multiple patterns (case-insensitive)
     # across all branches.
-    # Example: git search-commit-message-all-branches "pattern1" "pattern2" "pattern3"
+    # Example: git search-commit-messages-or-logic-all-branches "pattern1" "pattern2" "pattern3"
     # See also git search-commit-messages-or-logic PATTERN... (for current branch!!!)
-    search-commit-message-all-branches = "!f() { \
+    search-commit-messages-or-logic-all-branches = "!f() { \
         if [ $# -eq 0 ]; then \
             printf >&2 'Error: No search pattern provided\n'; \
             return 2; \
@@ -2495,10 +2495,7 @@ use:
 : git log --grep=FOO --grep=BAR
 
 Here's the alias which simply loops over each argument and calls ~git
-log --grep~. Equivalent of calling ~git log --grep A --grep B --grep C ...~:
-
-r: Clearly indicates it searches commit messages for any of the provided patterns (OR logic).
-
+log --grep~. Equivalent of calling ~git log --grep=A --grep=B --grep=C ...~:
 
 #+begin_src conf
     # Usage: git search-commit-messages-or-logic PATTERN...
@@ -2514,7 +2511,7 @@ r: Clearly indicates it searches commit messages for any of the provided pattern
             return 2; \
         fi; \
         for PATTERN in \"$@\"; do \
-            git log --grep \"$PATTERN\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
+            git log --grep=\"$PATTERN\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
             printf \"\n\"; \
         done | sort -r | sed 's/^[^:]*://'; \
     }; f"
@@ -2547,7 +2544,7 @@ somewhere, use the *AND* semantic:
         fi; \
         CMD=\"git log --all-match -i --format='%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)' --color=always\"; \
         for PATTERN in \"$@\"; do \
-            CMD=\"$CMD --grep '$PATTERN'\"; \
+            CMD=\"$CMD --grep='$PATTERN'\"; \
         done; \
         eval $CMD | sort -r | sed 's/^[^:]*://'; \
     }; f"

@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240627.1537
+# .gitconfig, Time-stamp: 20240627.1544
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -823,9 +823,9 @@
 
     # Search through all commit logs for multiple patterns (case-insensitive)
     # across all branches.
-    # Example: git search-commit-message-all-branches "pattern1" "pattern2" "pattern3"
+    # Example: git search-commit-messages-or-logic-all-branches "pattern1" "pattern2" "pattern3"
     # See also git search-commit-messages-or-logic PATTERN... (for current branch!!!)
-    search-commit-message-all-branches = "!f() { \
+    search-commit-messages-or-logic-all-branches = "!f() { \
         if [ $# -eq 0 ]; then \
             printf >&2 'Error: No search pattern provided\n'; \
             return 2; \
@@ -846,7 +846,7 @@
             return 2; \
         fi; \
         for PATTERN in \"$@\"; do \
-            git log --grep \"$PATTERN\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
+            git log --grep=\"$PATTERN\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
             printf \"\n\"; \
         done | sort -r | sed 's/^[^:]*://'; \
     }; f"
@@ -866,7 +866,7 @@
         fi; \
         CMD=\"git log --all-match -i --format='%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)' --color=always\"; \
         for PATTERN in \"$@\"; do \
-            CMD=\"$CMD --grep '$PATTERN'\"; \
+            CMD=\"$CMD --grep='$PATTERN'\"; \
         done; \
         eval $CMD | sort -r | sed 's/^[^:]*://'; \
     }; f"
