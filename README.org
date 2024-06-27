@@ -2750,7 +2750,20 @@ prompting you for the message you've already entered!
 
 #+begin_src conf
     # Append the staged changes to the last commit, reusing its message.
-    amend-reuse = commit -v --amend --reuse-message HEAD
+    amend-reuse = "!f() { \
+        if git rev-parse @{u} >/dev/null 2>&1; then \
+            local upstream=$(git rev-parse @{u}); \
+            local local=$(git rev-parse @); \
+            if [ $upstream = $local ]; then \
+                git commit -v --amend --reuse-message HEAD; \
+            else \
+                printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
+                return 2; \
+            fi; \
+        else \
+            git commit -v --amend --reuse-message HEAD; \
+        fi; \
+    }; f"
 #+end_src
 
 Oh, you made a typo!
@@ -2758,7 +2771,20 @@ Oh, you made a typo!
 #+begin_src conf
     # Usage: git amend-message "NEW_COMMIT_MESSAGE"
     # Amend the last commit with a new message.
-    amend-message = commit --amend -m
+    amend-message = "!f() { \
+        if git rev-parse @{u} >/dev/null 2>&1; then \
+            local upstream=$(git rev-parse @{u}); \
+            local local=$(git rev-parse @); \
+            if [ $upstream = $local ]; then \
+                git commit --amend -m \"$1\"; \
+            else \
+                printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
+                return 2; \
+            fi; \
+        else \
+            git commit --amend -m \"$1\"; \
+        fi; \
+    }; f"
 
     # Alias for 'amend-message'.
     reword = amend-message
