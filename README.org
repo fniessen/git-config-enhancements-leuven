@@ -2624,9 +2624,10 @@ The alias ~search-changes-in-message-and-diff~ searches for string-related chang
 in the commit message and the diff.
 
 #+begin_src conf
-    # Usage: git search-commit-content-all-branches SEARCH_TERM
-    # Search through the content of all commits for the exact search term.
-    search-commit-content-all-branches = "!f() { \
+    ##? Usage: git search-commit-diffs-all-branches "search_string"
+    ##?
+    ##? Search for changes containing a specific string across all branches.
+    search-commit-diffs-all-branches = "!f() { \
         git log --all -S \"$1\"; \
     }; f"
 #+end_src
