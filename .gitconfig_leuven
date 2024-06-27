@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240627.1110
+# .gitconfig, Time-stamp: 20240627.1300
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -268,7 +268,8 @@
         local default_remote=$(git config --get clone.defaultRemoteName); \
         printf \"%s\n\" \"${default_remote:-origin}\"; \
     }; f"
-    ### git remote show?
+    ### git remote show
+    ### git rev-parse --symbolic-full-name --abbrev-ref @{u} | sed 's!/! !g' | awk '{print $1}'
 
     ##? Usage: git repo-owner
     ##?
@@ -315,6 +316,7 @@
     # generates the error message
     # "fatal: ref refs/remotes/origin/HEAD is not a symbolic ref"
     # when the remote repository does not have a default branch.
+    ### git symbolic-ref --short refs/remotes/origin/$(git rev-parse --abbrev-ref @{u})
 
     ##? Usage: git search-for-files PATTERN
     ##?
@@ -1214,22 +1216,26 @@
     }; f"
     develop = checkout develop
 
-    # Usage: git sync-main-merge
-    # Fetch and merge the latest changes from the remote "main" branch into the current local branch.
-    sync-main-merge = !git remote update -p \
-                && git merge $(git origin)/$(git main-branch)
+    ##? Usage: git sync-main
+    ##?
+    ##? Update remote branches and merge changes from the main branch into the
+    ##? current branch.
+    sync-main = "!f() { \
+        git remote update -p \
+            && git merge $(git origin)/$(git main-branch) \
+    }; f"
 
-    sync-main-merge2 = "!f() { \
+    sync-main2 = "!f() { \
         git remote update -p; \
         local main_branch=$(git main-branch); \
         local current_branch=$(git current-branch); \
         git merge $(git origin)/$main_branch; \
         local merge_status=$?; \
         if [ $merge_status -eq 0 ]; then \
-            echo \"Branch synced: '$current_branch' successfully synced with '$main_branch'\"; \
+            printf \"Branch synced: '%s' successfully synced with '%s'\\n\" \"$current_branch\" \"$main_branch\"; \
         else \
             git merge --abort 2>/dev/null; \
-            echo \"Unable to sync branch: You can't merge until you resolve all merge conflicts.\"; \
+            printf \"Unable to sync branch: You can't merge until you resolve all merge conflicts.\\n\"; \
         fi \
     }; f"
 
