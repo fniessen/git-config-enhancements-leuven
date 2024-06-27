@@ -2780,11 +2780,13 @@ to open your commit editor and reword the message.
             printf >&2 'Usage: git amend-author NAME EMAIL\n'; \
             return 2; \
         fi; \
+        local NAME=\"$1\"; \
+        local EMAIL=\"$2\"; \
         if git rev-parse @{u} >/dev/null 2>&1; then \
-            UPSTREAM=$(git rev-parse @{u}); \
-            LOCAL=$(git rev-parse @); \
-            if [ $UPSTREAM = $LOCAL ]; then \
-                git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; \
+            local upstream=$(git rev-parse @{u}); \
+            local local=$(git rev-parse @); \
+            if [ $upstream = $local ]; then \
+                git commit --amend --author=\"$NAME <$EMAIL>\" --reuse-message HEAD; \
             else \
                 printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
                 return 2; \
