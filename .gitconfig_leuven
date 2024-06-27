@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240626.1405
+# .gitconfig, Time-stamp: 20240627.1024
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -268,6 +268,7 @@
         local default_remote=$(git config --get clone.defaultRemoteName); \
         printf \"%s\n\" \"${default_remote:-origin}\"; \
     }; f"
+    ### git remote show?
 
     ##? Usage: git repo-owner
     ##?
@@ -627,13 +628,11 @@
     # Instead of unshelving the changes, show the diff that would result from
     # unshelving.
 
-    # Show only stash with name like text.
+    ##? Usage: git stash-show STASH_NAME
+    ##?
+    ##? Show the contents of a specified stash in patch format.
     stash-show = "!f() { \
         git stash show stash^{/$@} -p; \
-    }; f"
-
-    stash-show = "!f() { \
-        git stash show stash^{/$*} -p; \
     }; f"
 
     stash-shno = stash show --name-only
@@ -907,18 +906,38 @@
         xdg-open ${URL/.git}/commits; \
     }; f"
 
-    # Append the staged changes to the last commit (keeping the pre-existing
-    # commit message).
-    recommit = commit -v --amend --reuse-message HEAD
+    # Append the staged changes to the last commit, reusing its message.
+    amend-reuse = commit -v --amend --reuse-message HEAD
 
-    # Usage: git reword "NEW_COMMIT_MESSAGE"
-    # Amend the previous commit message.
-    amend = commit --amend -m
+    # Usage: git amend-message "NEW_COMMIT_MESSAGE"
+    # Amend the last commit with a new message.
+    amend-message = commit --amend -m
 
-    # Usage: git amend-author NAME EMAIL
-    # Amend the last commit with a new author.
+    # Alias for 'amend-message'.
+    reword = amend-message
+
+    ##? Usage: git amend-author NAME EMAIL
+    ##?
+    ##? Amend the last commit with a new author and reuse the commit message,
+    ##? only if the commit has not been pushed.
     amend-author = "!f() { \
-        git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; \
+        if [ $# -ne 2 ]; then \
+            printf >&2 'Usage: git amend-author NAME EMAIL\n'; \
+            return 2; \
+        fi; \
+        if git rev-parse @{u} >/dev/null 2>&1; then \
+            UPSTREAM=$(git rev-parse @{u}); \
+            LOCAL=$(git rev-parse @); \
+            if [ $UPSTREAM = $LOCAL ]; then \
+                git commit --amend --author=\"$1 <$2>\" --reuse-message HEAD; \
+            else \
+                printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
+                return 2; \
+            fi; \
+        else \
+            printf >&2 'Error: No upstream branch set. Cannot determine push status.\n'; \
+            return 2; \
+        fi; \
     }; f"
 
     # Edit history.
@@ -1022,10 +1041,14 @@
             | tr '/' '-'; \
     }; f"
 
-    ##? Usage: git publish-branch [REMOTE_NAME]
+    ##? Usage: git publish-branch [REMOTE]
     ##?
     ##? Push the current branch to a remote repository and set upstream.
-    publish-branch = "!git push -u ${1:-$(git origin)} $(git current-branch)"
+    publish-branch = "!f() { \
+        local REMOTE=${1:-$(git origin); }; \
+        local branch=$(git current-branch); \
+        git push -u $REMOTE $branch; \
+    }; f"
 
     ##? Usage: git upstream-branch
     ##?
