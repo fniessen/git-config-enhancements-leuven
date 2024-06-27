@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240627.1428
+# .gitconfig, Time-stamp: 20240627.1537
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -824,7 +824,7 @@
     # Search through all commit logs for multiple patterns (case-insensitive)
     # across all branches.
     # Example: git search-commit-message-all-branches "pattern1" "pattern2" "pattern3"
-    # See also git search-for-commits-or-bitbucket PATTERN... (for current branch!!!)
+    # See also git search-commit-messages-or-logic PATTERN... (for current branch!!!)
     search-commit-message-all-branches = "!f() { \
         if [ $# -eq 0 ]; then \
             printf >&2 'Error: No search pattern provided\n'; \
@@ -833,16 +833,16 @@
         git log --all -i $(printf -- '--grep=%s ' \"$@\"); \
     }; f"
 
-    # Usage: git search-for-commits-or-bitbucket PATTERN...
+    # Usage: git search-commit-messages-or-logic PATTERN...
     #
-    # Search for commit messages that match one or more search patterns (OR semantic).
+    # Search for commit messages that match any of the provided patterns (OR logic, like in BitBucket).
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
     # (FOR CURRENT BRANCH ONLY!!!)
-    search-for-commits-or-bitbucket = "!f() { \
+    search-commit-messages-or-logic = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
-            printf >&2 'Usage: git search-for-commits-or-bitbucket PATTERN...\n'; \
+            printf >&2 'Usage: git search-commit-messages-or-logic PATTERN...\n'; \
             return 2; \
         fi; \
         for PATTERN in \"$@\"; do \
@@ -852,16 +852,16 @@
     }; f"
     # XXX Add all, date short...
 
-    # Usage: git search-for-commits-and-gitlab PATTERN...
+    # Usage: git search-commit-messages-and-logic PATTERN...
     #
-    # Search for commits that match all provided search patterns in commit messages (AND semantic).
+    # Search for commits that match all provided patterns in commit messages (AND logic, like in Gitlab).
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
     # (FOR CURRENT BRANCH ONLY!!!)
-    search-for-commits-and-gitlab = "!f() { \
+    search-commit-messages-and-logic = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
-            printf >&2 'Usage: git search-for-commits-and-gitlab PATTERN...\n'; \
+            printf >&2 'Usage: git search-commit-messages-and-logic PATTERN...\n'; \
             return 2; \
         fi; \
         CMD=\"git log --all-match -i --format='%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)' --color=always\"; \
