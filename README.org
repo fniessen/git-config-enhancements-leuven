@@ -3521,15 +3521,6 @@ sense.
 Git's fix is to ask you to commit (or stash) before you pull (which is fetch
 followed by merge).
 
-#+begin_warning
-The following approach:
-
-: up = "!git stash && git pull && git stash pop"
-
-is *unsafe*: if there's nothing to stash, the first command will do nothing, and
-then ~stash pop~ will unstash some random stuff from before.
-#+end_warning
-
 Useful for updating your local branch with the latest changes from the remote
 branch while keeping your local changes intact and rebased:
 
@@ -3544,16 +3535,31 @@ branch while keeping your local changes intact and rebased:
 Or, if you need more control and visibility over the stash process:
 
 #+begin_src conf
-    pull-autostash2 = "!f() { \
-        if [ -n \"$(git status --porcelain -uno)\" ]; then \
-            git stash push -m \"autostash\"; \
+    ##? Auto-stash changes (including untracked files if any), pull with rebase,
+    ##? and restore stashed changes (if any).
+    pull-autostash-include-untracked = "!f() { \
+        local changes=$(git status --porcelain); \
+        if [ -n \"$changes\" ]; then \
+            git stash push --include-untracked -m 'autostash'; \
+            git pull --rebase; \
+            git stash pop; \
+        else \
+            git pull --rebase; \
         fi; \
-        git pull --rebase; \
-        git stash pop; \
     }; f"
 #+end_src
 
-XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
+This approach ensures that the stash and pop operations are only performed if
+there are changes to stash, avoiding the risk of popping an old stash.
+
+#+begin_warning
+The following approach:
+
+: up = "!git stash && git pull && git stash pop"
+
+is *unsafe*: if there's nothing to stash, the first command will do nothing, and
+then ~stash pop~ will unstash some random stuff from before.
+#+end_warning
 
 See https://www.praqma.com/stories/git-autostash/.
 

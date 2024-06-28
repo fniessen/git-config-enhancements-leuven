@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240628.1620
+# .gitconfig, Time-stamp: 20240628.1812
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1250,12 +1250,17 @@
     ##? changes (onto the current branch).
     pull-autostash = pull --rebase --autostash
 
-    pull-autostash2 = "!f() { \
-        if [ -n \"$(git status --porcelain -uno)\" ]; then \
-            git stash push -m \"autostash\"; \
+    ##? Auto-stash changes (including untracked files if any), pull with rebase,
+    ##? and restore stashed changes (if any).
+    pull-autostash-include-untracked = "!f() { \
+        local changes=$(git status --porcelain); \
+        if [ -n \"$changes\" ]; then \
+            git stash push --include-untracked -m 'autostash'; \
+            git pull --rebase; \
+            git stash pop; \
+        else \
+            git pull --rebase; \
         fi; \
-        git pull --rebase; \
-        git stash pop; \
     }; f"
 
     # Usage: git sync-ff-upstream
