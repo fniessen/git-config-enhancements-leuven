@@ -3530,51 +3530,30 @@ is *unsafe*: if there's nothing to stash, the first command will do nothing, and
 then ~stash pop~ will unstash some random stuff from before.
 #+end_warning
 
+Useful for updating your local branch with the latest changes from the remote
+branch while keeping your local changes intact and rebased:
+
 #+begin_src conf
-    # Usage: git pull-autostash
-    # Auto-stash changes, pull, and restore stashed changes.
+    ##? Usage: git pull-autostash
+    ##?
+    ##? Auto-stash changes (if needed), pull with rebase, and restore stashed
+    ##? changes (onto the current branch).
     pull-autostash = pull --rebase --autostash
+#+end_src
+
+Or, if you need more control and visibility over the stash process:
+
+#+begin_src conf
     pull-autostash2 = "!f() { \
         if [ -n \"$(git status --porcelain -uno)\" ]; then \
             git stash push -m \"autostash\"; \
         fi; \
-        git pull; \
+        git pull --rebase; \
         git stash pop; \
     }; f"
 #+end_src
 
 XXX What about ~git stash push --include-untracked~ and ~git stash pop~?
-
-#+begin_src conf
-    # Stash local changes, checkout branch BRANCH, and reapply stashed changes.
-    co-autostash = "!f() { \
-        local BRANCH=\"$1\"; \
-        git stash push --include-untracked --quiet \
-            && git checkout \"$BRANCH\" \
-            && git stash pop --quiet; \
-    }; f"
-    co-autostash = "!f() { \
-        local BRANCH=\"$1\"; \
-        git stash push --include-untracked \
-            && git checkout \"$BRANCH\" \
-            && git stash pop; \
-    }; f"
-    co-autostash = "!f() { \
-        local BRANCH=\"$1\"; \
-        git diff-index --quiet HEAD || git stash push --include-untracked \
-            && git checkout \"$BRANCH\" \
-            && { git stash list | grep -q \"^stash@{0}: WIP on\"; } \
-            && git stash pop; \
-    }; f"
-#+end_src
-
-#+begin_src conf
-    # Pull with rebase and auto-stash, updating your local branch with remote changes.
-    up-rebase = pull --rebase --autostash
-
-    # Update remote-tracking branches comprehensively, then rebase your current branch using fetched changes.
-    up-rebase2 = !git remote update -p && git rebase --autostash FETCH_HEAD
-#+end_src
 
 See https://www.praqma.com/stories/git-autostash/.
 
@@ -6367,6 +6346,31 @@ cd "$(git root)"
       git checkout -- .
   fi
   #+end_src
+
+**** Others?
+
+#+begin_src conf
+    # Stash local changes, checkout branch BRANCH, and reapply stashed changes.
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git stash push --include-untracked --quiet \
+            && git checkout \"$BRANCH\" \
+            && git stash pop --quiet; \
+    }; f"
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git stash push --include-untracked \
+            && git checkout \"$BRANCH\" \
+            && git stash pop; \
+    }; f"
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git diff-index --quiet HEAD || git stash push --include-untracked \
+            && git checkout \"$BRANCH\" \
+            && { git stash list | grep -q \"^stash@{0}: WIP on\"; } \
+            && git stash pop; \
+    }; f"
+#+end_src
 
 *** If you get the error "The following untracked working tree files would be overwritten by checkout"
 

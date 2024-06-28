@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240627.1550
+# .gitconfig, Time-stamp: 20240628.1620
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1244,43 +1244,19 @@
     ##? Perform a verbose pull operation.
     pull = pull -v
 
-    # Usage: git pull-autostash
-    # Auto-stash changes, pull, and restore stashed changes.
+    ##? Usage: git pull-autostash
+    ##?
+    ##? Auto-stash changes (if needed), pull with rebase, and restore stashed
+    ##? changes (onto the current branch).
     pull-autostash = pull --rebase --autostash
+
     pull-autostash2 = "!f() { \
         if [ -n \"$(git status --porcelain -uno)\" ]; then \
             git stash push -m \"autostash\"; \
         fi; \
-        git pull; \
+        git pull --rebase; \
         git stash pop; \
     }; f"
-
-    # Stash local changes, checkout branch BRANCH, and reapply stashed changes.
-    co-autostash = "!f() { \
-        local BRANCH=\"$1\"; \
-        git stash push --include-untracked --quiet \
-            && git checkout \"$BRANCH\" \
-            && git stash pop --quiet; \
-    }; f"
-    co-autostash = "!f() { \
-        local BRANCH=\"$1\"; \
-        git stash push --include-untracked \
-            && git checkout \"$BRANCH\" \
-            && git stash pop; \
-    }; f"
-    co-autostash = "!f() { \
-        local BRANCH=\"$1\"; \
-        git diff-index --quiet HEAD || git stash push --include-untracked \
-            && git checkout \"$BRANCH\" \
-            && { git stash list | grep -q \"^stash@{0}: WIP on\"; } \
-            && git stash pop; \
-    }; f"
-
-    # Pull with rebase and auto-stash, updating your local branch with remote changes.
-    up-rebase = pull --rebase --autostash
-
-    # Update remote-tracking branches comprehensively, then rebase your current branch using fetched changes.
-    up-rebase2 = !git remote update -p && git rebase --autostash FETCH_HEAD
 
     # Usage: git sync-ff-upstream
     # Update local branch with fast-forward from upstream.
@@ -2449,6 +2425,27 @@ deploy-prod =
 
     next = "!f() { \
         git checkout $(git rev-list --topo-order HEAD..master | tail -1); \
+    }; f"
+
+    # Stash local changes, checkout branch BRANCH, and reapply stashed changes.
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git stash push --include-untracked --quiet \
+            && git checkout \"$BRANCH\" \
+            && git stash pop --quiet; \
+    }; f"
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git stash push --include-untracked \
+            && git checkout \"$BRANCH\" \
+            && git stash pop; \
+    }; f"
+    co-autostash = "!f() { \
+        local BRANCH=\"$1\"; \
+        git diff-index --quiet HEAD || git stash push --include-untracked \
+            && git checkout \"$BRANCH\" \
+            && { git stash list | grep -q \"^stash@{0}: WIP on\"; } \
+            && git stash pop; \
     }; f"
 
     # "show-branch -g=N" can't be aliased for N easily, so we stop here:
