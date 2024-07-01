@@ -3829,9 +3829,13 @@ Delete a *remote* branch:
 *** Delete a branch locally and on the ~origin~ remote
 
 #+begin_src conf
+    ##? Usage: git delete-branch BRANCH_NAME
+    ##?
+    ##? Delete both local and remote branches.
     delete-branch = "!f() { \
-        git delete-local-branch \"$1\" \
-            && git delete-remote-branch \"$1\"; \
+        local BRANCH_NAME=\"$1\"; \
+        git delete-local-branch \"$BRANCH_NAME\" \
+            && git delete-remote-branch \"$BRANCH_NAME\"; \
     }; f"
 #+end_src
 
