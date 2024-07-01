@@ -3757,11 +3757,13 @@ been *merged to the current branch* that you are in.
 XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
 
 #+begin_src conf
-    # Delete local branches that have been merged into the default branch.
-    bclean = "!f() { \
-        local main_branch=$(git main-branch); \
-        git branch --merged ${1-$main_branch} \
-            | grep -v " ${1-$main_branch}$" \
+    # Delete local branches that are fully merged into the specified branch
+    # (default: main branch).
+    delete-merged-branches = "!f() { \
+        local base_branch=$(git main-branch); \
+        local target_branch=${1-$base_branch}; \
+        git branch --merged \"$target_branch\" \
+            | grep -v \"^\\s*$target_branch$\" \
             | xargs git delete-local-branch; \
     }; f"
 #+end_src

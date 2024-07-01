@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240628.2034
+# .gitconfig, Time-stamp: 20240701.1119
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1362,11 +1362,13 @@
     ##? Delete the specified local branch.
     delete-local-branch = branch -d
 
-    # Delete local branches that have been merged into the default branch.
-    bclean = "!f() { \
-        local main_branch=$(git main-branch); \
-        git branch --merged ${1-$main_branch} \
-            | grep -v " ${1-$main_branch}$" \
+    # Delete local branches that are fully merged into the specified branch
+    # (default: main branch).
+    delete-merged-branches = "!f() { \
+        local base_branch=$(git main-branch); \
+        local target_branch=${1-$base_branch}; \
+        git branch --merged \"$target_branch\" \
+            | grep -v \"^\\s*$target_branch$\" \
             | xargs git delete-local-branch; \
     }; f"
 
