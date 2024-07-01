@@ -3245,6 +3245,14 @@ Push the current branch to the remote and establish tracking:
         local branch=$(git current-branch); \
         git push -u $REMOTE $branch; \
     }; f"
+
+    ##? Usage: git unpublish-branch
+    ##?
+    ##? Delete the current branch from the remote repository.
+    unpublish-branch = "!f() { \
+        local current_branch=$(git current-branch); \
+        git delete-remote-branch \"$current_branch\"; \
+    }; f"
 #+end_src
 
 Then:
@@ -3814,16 +3822,6 @@ Delete a *remote* branch:
         fi \
     }; f"
     # = "Close source branch" (after merging).
-#+end_src
-
-#+begin_src conf
-    ##? Usage: git unpublish-branch
-    ##?
-    ##? Delete the current branch from the remote repository.
-    unpublish-branch = "!f() { \
-        local current_branch=$(git current-branch); \
-        git delete-remote-branch \"$current_branch\"; \
-    }; f"
 #+end_src
 
 *** Delete a branch locally and on the ~origin~ remote
