@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240701.1143
+# .gitconfig, Time-stamp: 20240701.1153
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1362,11 +1362,13 @@
     ##? Delete the specified local branch.
     delete-local-branch = branch -d
 
-    # Delete local branches that are fully merged into the specified branch,
-    # excluding master, main, and develop.
+    ##? Usage: git delete-merged-branches [BASE_BRANCH]
+    ##?
+    ##? Delete local branches that are fully merged into the specified branch,
+    ##? excluding master, main, and develop.
     delete-merged-branches = "!f() { \
-        local base_branch=$(git main-branch); \
-        local target_branch=${1-$base_branch}; \
+        local BASE_BRANCH=$(git main-branch); \
+        local target_branch=${1-$BASE_BRANCH}; \
         branches=$(git branch --merged \"$target_branch\" \
                     | grep -v \"^\\s*$target_branch$\" \
                     | grep -Ev '^(\\s*)(master|main|develop)$'); \
@@ -1391,9 +1393,13 @@
     }; f"
     # = "Close source branch" (after merging).
 
-    # Usage: git unpublish
-    # Delete the current branch from the remote repository.
-    unpublish = !git delete-remote-branch $(git current-branch)
+    ##? Usage: git unpublish-branch
+    ##?
+    ##? Delete the current branch from the remote repository.
+    unpublish-branch = "!f() { \
+        local current_branch=$(git current-branch); \
+        git delete-remote-branch \"$current_branch\"; \
+    }; f"
 
     delete-branch = "!f() { \
         git delete-local-branch \"$1\" \

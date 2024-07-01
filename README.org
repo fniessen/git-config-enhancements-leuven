@@ -3757,11 +3757,13 @@ specified branch*, with the option to default to the main branch.
 XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
 
 #+begin_src conf
-    # Delete local branches that are fully merged into the specified branch,
-    # excluding master, main, and develop.
+    ##? Usage: git delete-merged-branches [BASE_BRANCH]
+    ##?
+    ##? Delete local branches that are fully merged into the specified branch,
+    ##? excluding master, main, and develop.
     delete-merged-branches = "!f() { \
-        local base_branch=$(git main-branch); \
-        local target_branch=${1-$base_branch}; \
+        local BASE_BRANCH=$(git main-branch); \
+        local target_branch=${1-$BASE_BRANCH}; \
         branches=$(git branch --merged \"$target_branch\" \
                     | grep -v \"^\\s*$target_branch$\" \
                     | grep -Ev '^(\\s*)(master|main|develop)$'); \
@@ -3812,10 +3814,16 @@ Delete a *remote* branch:
         fi \
     }; f"
     # = "Close source branch" (after merging).
+#+end_src
 
-    # Usage: git unpublish
-    # Delete the current branch from the remote repository.
-    unpublish = !git delete-remote-branch $(git current-branch)
+#+begin_src conf
+    ##? Usage: git unpublish-branch
+    ##?
+    ##? Delete the current branch from the remote repository.
+    unpublish-branch = "!f() { \
+        local current_branch=$(git current-branch); \
+        git delete-remote-branch \"$current_branch\"; \
+    }; f"
 #+end_src
 
 *** Delete a branch locally and on the ~origin~ remote
