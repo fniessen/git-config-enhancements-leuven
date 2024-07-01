@@ -1594,20 +1594,31 @@ control.
 Quickly add a file or directory to =.gitignore=:
 
 #+begin_src conf
-    # Add file or pattern to .gitignore.
+    ##? Usage: git ignore PATTERN
+    ##?
+    ##? Add a pattern to .gitignore.
     ignore = "!f() { \
+        local PATTERN=\"$1\"; \
+        if [ -z \"$PATTERN\" ]; then \
+            printf >&2 'Error: No pattern provided.\\nUsage: git ignore PATTERN\\n' >&2; \
+            return 2; \
+        fi; \
         if [ ! -e .gitignore ]; then \
             touch .gitignore; \
         fi; \
-        echo \"$1\" >> .gitignore; \
+        printf '%s\\n' \"$PATTERN\" >> .gitignore; \
     }; f"
 
-    # Ignore all untracked files by adding them to .gitignore.
-    ignore-untracked = "!git status \
-                | grep -P \"^\\t\" \
-                | grep -vF .gitignore \
-                | sed \"s_^\\t__\" \
-                >> \"${GIT_PREFIX}.gitignore\""
+    ##? Usage: git ignore-untracked
+    ##?
+    ##? Add all untracked files to .gitignore except .gitignore itself.
+    ignore-untracked = "!f() { \
+        git status --porcelain \
+            | grep '^??' \
+            | cut -c 4- \
+            | grep -vF .gitignore \
+            >> \"${GIT_PREFIX}.gitignore\"; \
+    }; f"
 #+end_src
 
 *Note that adding the .gitignore and the file specification will have no effect
