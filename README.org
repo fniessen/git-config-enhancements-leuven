@@ -3751,39 +3751,22 @@ branch "irrespective of its merged status."
 
 *** Delete local branches that have been merged
 
-~delete-local-merged-branches~ *removes* (in bulk) *all* the *local branches* that have
-been *merged to the current branch* that you are in.
+Use ~delete-merged-branches~ if you need to *delete local branches merged into any
+specified branch*, with the option to default to the main branch.
 
 XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
 
 #+begin_src conf
-    # Delete local branches that are fully merged into the specified branch
-    # (default: main branch).
+    # Delete local branches that are fully merged into the specified branch,
+    # excluding master, main, and develop.
     delete-merged-branches = "!f() { \
         local base_branch=$(git main-branch); \
         local target_branch=${1-$base_branch}; \
         git branch --merged \"$target_branch\" \
             | grep -v \"^\\s*$target_branch$\" \
+            | grep -Ev '^(\\s*)(master|main|develop)$' \
             | xargs git delete-local-branch; \
     }; f"
-#+end_src
-
-It deletes every branch that's been merged into the specified branch except the
-branch.
-
-#+begin_src conf
-    # Delete fully merged branches.
-    delete-local-merged-branches = "!f() { \
-        git branch --no-color --merged \
-            | grep -v '\\*' \
-            | egrep -v \"(master|main|develop)\" \
-            | xargs -n 1 git delete-local-branch; \
-    }; f"
-
-    # # https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
-    # sweep = '!git branch --merged $([ $1 != "-f" ] && git rev-parse master) | \
-    #           egrep -v "(^\*|^\s*(master|main|develop)$)" | \
-    #           xargs git delete-local-branch'
 #+end_src
 
 Not "fully merged" means the branch you are about to delete contains commits
