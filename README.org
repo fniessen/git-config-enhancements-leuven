@@ -1630,10 +1630,11 @@ you'll have to stop tracking them.
 Ignore/unignore changes to *tracked file(s)* only locally, without =.gitignore=:
 
 #+begin_src conf
-    # Mark a file as unchanged and hide it from the Git status.
+    ##? Mark a file as unchanged and hide it from the Git status.
     skip = update-index --assume-unchanged
 
-    # Revert the hidden status of a file, allowing it to be tracked again by Git.
+    ##? Revert the hidden status of a file, allowing it to be tracked again by
+    ##? Git.
     unskip = update-index --no-assume-unchanged
 #+end_src
 
@@ -1651,27 +1652,28 @@ that.
 Skip all:
 
 #+begin_src conf
-    # Mark all changed files as unchanged and hides them from the Git status.
+    ##? Ignore all files currently marked as changed in Git status.
     skip-all = "!git status -s \
-                | awk {'print $2'} \
-                | xargs git skip"
+                    | awk {'print $2'} \
+                    | xargs git skip"
 #+end_src
 
 Unskip all the skipped files:
 
 #+begin_src conf
-    # Revert the hidden status of all files, allowing them to be tracked again by Git.
+    ##? Revert the hidden status of all files currently marked as unchanged in Git
+    ##? status, allowing them to be tracked again by Git.
     unskip-all = "!git skipped \
-                | xargs git update-index --no-assume-unchanged"
+                    | xargs git unskip"
 #+end_src
 
 List ignored files (*marked unchanged*):
 
 #+begin_src conf
-    # List files marked as "assume unchanged" in the Git repository.
+    ##? List all files currently marked as unchanged and hidden from Git status.
     skipped = "!git ls-files -v \
-                | grep '^h' \
-                | cut -c 3-"
+                    | grep '^h' \
+                    | cut -c 3-"
 #+end_src
 
 ** Clean

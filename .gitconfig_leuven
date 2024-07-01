@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240701.1528
+# .gitconfig, Time-stamp: 20240701.1738
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -532,25 +532,27 @@
             >> \"${GIT_PREFIX}.gitignore\"; \
     }; f"
 
-    # Mark a file as unchanged and hide it from the Git status.
+    ##? Mark a file as unchanged and hide it from the Git status.
     skip = update-index --assume-unchanged
 
-    # Revert the hidden status of a file, allowing it to be tracked again by Git.
+    ##? Revert the hidden status of a file, allowing it to be tracked again by
+    ##? Git.
     unskip = update-index --no-assume-unchanged
 
-    # Mark all changed files as unchanged and hides them from the Git status.
+    ##? Ignore all files currently marked as changed in Git status.
     skip-all = "!git status -s \
-                | awk {'print $2'} \
-                | xargs git skip"
+                    | awk {'print $2'} \
+                    | xargs git skip"
 
-    # Revert the hidden status of all files, allowing them to be tracked again by Git.
+    ##? Revert the hidden status of all files currently marked as unchanged in Git
+    ##? status, allowing them to be tracked again by Git.
     unskip-all = "!git skipped \
-                | xargs git update-index --no-assume-unchanged"
+                    | xargs git unskip"
 
-    # List files marked as "assume unchanged" in the Git repository.
+    ##? List all files currently marked as unchanged and hidden from Git status.
     skipped = "!git ls-files -v \
-                | grep '^h' \
-                | cut -c 3-"
+                    | grep '^h' \
+                    | cut -c 3-"
 
     # Usage: git clean-untracked
     # Remove all untracked files and directories (that are not ignored by Git).
