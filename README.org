@@ -3762,10 +3762,14 @@ XXX https://haacked.com/archive/2014/07/28/github-flow-aliases/
     delete-merged-branches = "!f() { \
         local base_branch=$(git main-branch); \
         local target_branch=${1-$base_branch}; \
-        git branch --merged \"$target_branch\" \
-            | grep -v \"^\\s*$target_branch$\" \
-            | grep -Ev '^(\\s*)(master|main|develop)$' \
-            | xargs git delete-local-branch; \
+        branches=$(git branch --merged \"$target_branch\" \
+                    | grep -v \"^\\s*$target_branch$\" \
+                    | grep -Ev '^(\\s*)(master|main|develop)$'); \
+        if [ -n \"$branches\" ]; then \
+            printf \"%s\\n\" \"$branches\" | xargs git delete-local-branch; \
+        else \
+            printf 'No merged branches to delete.\\n'; \
+        fi; \
     }; f"
 #+end_src
 
@@ -3789,16 +3793,6 @@ for the distinction between "merged" and "fully merged" branches!
 
 - https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged
 - https://github.com/arc90/git-sweep
-
-#+begin_src conf
-    # Delete branches safely merged into the main branch, skipping main and *
-    # (current) branches.
-    cleanup-branches = !git branch --merged $(git main-branch) \
-                            | grep -vE '^\\* | $(git main-branch)$' \
-                            | xargs -r git delete-local-branch
-    # On OSX, 'xargs' does not have '-r' argument, so it fail. If you remove
-    # '-r', it will run at least once, making this not safe operation.
-#+end_src
 
 *** Delete a remote branch
 
