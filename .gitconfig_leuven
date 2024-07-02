@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240701.1738
+# .gitconfig, Time-stamp: 20240702.1644
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -918,10 +918,22 @@
     # Example: git show-commits-for-string CLOSED '*.java'
     show-commits-for-string = "!sh -c 'git log -p -S \"$1\" \"$2\"' -"
 
-    browse-commits = "!f() { \
-        local URL=$(git config --get remote.$(git origin).url); \
-        xdg-open ${URL/.git}/commits; \
-    }; f"
+    ##? Open the commits page of the origin remote repository in the default web
+    ##? browser.
+    browse-commits = "!sh -c ' \
+        ORIGIN_URL=$(git config --get remote.origin.url); \
+        COMMITS_URL=\"$ORIGIN_URL/commits\"; \
+        OS=$(uname -s); \
+        if [ \"$OS\" = \"Linux\" ]; then \
+            xdg-open \"$COMMITS_URL\"; \
+        elif [ \"$OS\" = \"Darwin\" ]; then \
+            open \"$COMMITS_URL\"; \
+        elif [ \"$OS\" = \"CYGWIN\" ] || [ \"$OS\" = \"MINGW\" ] || [ \"$OS\" = \"MSYS\" ]; then \
+            start \"$COMMITS_URL\"; \
+        else \
+            printf \"Unsupported OS\\n\"; \
+        fi \
+    '"
 
     # Append the staged changes to the last commit, reusing its message.
     amend-reuse = "!f() { \
@@ -2445,8 +2457,31 @@ deploy-prod =
     # Shortcut for checkout.
     co = checkout
 
+    ##? Checkout the latest commit on the current branch that is not (merged) on
+    ##? 'master'.
     next = "!f() { \
         git checkout $(git rev-list --topo-order HEAD..master | tail -1); \
+    }; f"
+
+    ##? Usage: git force-checkout BRANCH
+    ##?
+    ##? Force checkout to a branch, discarding local changes if necessary.
+    force-checkout = "!f() { \
+        local BRANCH=$1; \
+        git checkout \"$BRANCH\" 2>&1 | { \
+            while IFS= read -r line; do \
+                if printf '%s\n' \"$line\" | grep -q 'Your local changes to the following files would be overwritten'; then \
+                    continue; \
+                fi; \
+                # Remove leading spaces from file_path. \
+                file_path=$(printf '%s\n' \"$line\" | sed 's/^[[:space:]]*//') \
+                # If a file path is found, discard changes for that file. \
+                if [ -n \"$file_path\" ]; then \
+                    git checkout -- \"$file_path\"; \
+                fi; \
+            done; \
+        }; \
+        git checkout \"$BRANCH\"; \
     }; f"
 
     # Stash local changes, checkout branch BRANCH, and reapply stashed changes.

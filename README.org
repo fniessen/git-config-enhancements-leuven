@@ -2684,10 +2684,22 @@ any *line* that was added, removed, or changed.
 ** Open a repository in a web browser
 
 #+begin_src conf
-    browse-commits = "!f() { \
-        local URL=$(git config --get remote.$(git origin).url); \
-        xdg-open ${URL/.git}/commits; \
-    }; f"
+    ##? Open the commits page of the origin remote repository in the default web
+    ##? browser.
+    browse-commits = "!sh -c ' \
+        ORIGIN_URL=$(git config --get remote.origin.url); \
+        COMMITS_URL=\"$ORIGIN_URL/commits\"; \
+        OS=$(uname -s); \
+        if [ \"$OS\" = \"Linux\" ]; then \
+            xdg-open \"$COMMITS_URL\"; \
+        elif [ \"$OS\" = \"Darwin\" ]; then \
+            open \"$COMMITS_URL\"; \
+        elif [ \"$OS\" = \"CYGWIN\" ] || [ \"$OS\" = \"MINGW\" ] || [ \"$OS\" = \"MSYS\" ]; then \
+            start \"$COMMITS_URL\"; \
+        else \
+            printf \"Unsupported OS\\n\"; \
+        fi \
+    '"
 #+end_src
 
 For Cygwin:
@@ -6285,6 +6297,8 @@ Check out the next commit in the commit history -- quite useful for demos to
 jump across commits:
 
 #+begin_src conf
+    ##? Checkout the latest commit on the current branch that is not (merged) on
+    ##? 'master'.
     next = "!f() { \
         git checkout $(git rev-list --topo-order HEAD..master | tail -1); \
     }; f"
@@ -6339,16 +6353,38 @@ cd "$(git root)"
   # Attempt to switch to the desired branch, while handling errors.
   git checkout BRANCH 2>&1 | {
       # Read each line of output.
-      while IFS= read -r FILE_PATH; do
+      while IFS= read -r file_path; do
+          # Remove leading spaces from file_path.
+          file_path=$(printf '%s\n' \"$line\" | sed 's/^[[:space:]]*//')
           # If a file path is found, discard changes for that file.
-          if [ -n "$FILE_PATH" ]; then
-              # Remove leading spaces from FILE_PATH.
-              FILE_PATH=$(echo "$FILE_PATH" | sed 's/^[[:space:]]*//')
-              # Discard changes for the blocked file.
-              git checkout -- "$FILE_PATH"
+          if [ -n "$file_path" ]; then
+              git checkout -- "$file_path"
           fi
       done
   }
+  #+end_src
+
+  #+begin_src conf
+    ##? Usage: git force-checkout BRANCH
+    ##?
+    ##? Force checkout to a branch, discarding local changes if necessary.
+    force-checkout = "!f() { \
+        local BRANCH=$1; \
+        git checkout \"$BRANCH\" 2>&1 | { \
+            while IFS= read -r line; do \
+                if printf '%s\n' \"$line\" | grep -q 'Your local changes to the following files would be overwritten'; then \
+                    continue; \
+                fi; \
+                # Remove leading spaces from file_path. \
+                file_path=$(printf '%s\n' \"$line\" | sed 's/^[[:space:]]*//') \
+                # If a file path is found, discard changes for that file. \
+                if [ -n \"$file_path\" ]; then \
+                    git checkout -- \"$file_path\"; \
+                fi; \
+            done; \
+        }; \
+        git checkout \"$BRANCH\"; \
+    }; f"
   #+end_src
 
   or ~git checkout -- .~ to discard changes for all tracked files in the working
@@ -6403,11 +6439,11 @@ example:
 cd "$(git root)"
 
 # Attempt to switch to the desired branch, while handling errors.
-git checkout BRANCH 2>&1 | while read -r FILE_PATH; do
+git checkout BRANCH 2>&1 | while read -r file_path; do
     # Check if the file exists to avoid errors.
-    if [ -e "$FILE_PATH" ]; then
+    if [ -e "$file_path" ]; then
         # Move the untracked file to a backup location.
-        mv -v "$FILE_PATH" "$FILE_PATH.bak"
+        mv -v "$file_path" "$file_path.bak"
     fi
 done
 #+end_src
