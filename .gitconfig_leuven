@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240703.1432
+# .gitconfig, Time-stamp: 20240703.1437
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -937,23 +937,20 @@
 
     # Append the staged changes to the last commit, reusing its message.
     amend-reuse = "!f() { \
-        if git rev-parse @{u} >/dev/null 2>&1; then \
-            local upstream=$(git rev-parse @{u}); \
-            local local=$(git rev-parse @); \
-            if [ $upstream = $local ]; then \
-                git commit -v --amend --reuse-message HEAD; \
-            else \
-                printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
-                return 2; \
-            fi; \
-        else \
-            git commit -v --amend --reuse-message HEAD; \
+        local upstream=$(git rev-parse @{u} 2>/dev/null); \
+        local local_commit=$(git rev-parse @); \
+        if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
+            printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
+            return 2; \
         fi; \
+        git commit -v --amend --reuse-message HEAD; \
     }; f"
 
-    # Usage: git amend-message "NEW_COMMIT_MESSAGE"
-    # Amend the last commit with a new message.
     amend-message = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git amend-message \"NEW_COMMIT_MESSAGE\"\n'; \
+            return 2; \
+        fi; \
         local upstream=$(git rev-parse @{u} 2>/dev/null); \
         local local_commit=$(git rev-parse @); \
         if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
