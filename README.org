@@ -2778,10 +2778,16 @@ Modify the *last* commit, amending with the same message -- without your editor
 prompting you for the message you've already entered!
 
 #+begin_src conf
+    ##? Show upstream commit of current branch.
+    upstream-commit = "!git rev-parse @{u}"
+
+    ##? Show current commit of current branch.
+    local-commit = "!git rev-parse @"
+
     # Append the staged changes to the last commit, reusing its message.
     amend-reuse = "!f() { \
-        local upstream=$(git rev-parse @{u} 2>/dev/null); \
-        local local_commit=$(git rev-parse @); \
+        local upstream=$(git upstream-commit 2>/dev/null); \
+        local local_commit=$(git local-commit); \
         if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
             printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
@@ -2798,8 +2804,8 @@ Oh, you made a typo!
             printf >&2 'Usage: git amend-message \"NEW_COMMIT_MESSAGE\"\n'; \
             return 2; \
         fi; \
-        local upstream=$(git rev-parse @{u} 2>/dev/null); \
-        local local_commit=$(git rev-parse @); \
+        local upstream=$(git upstream-commit 2>/dev/null); \
+        local local_commit=$(git local-commit); \
         if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
             printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
@@ -2825,23 +2831,17 @@ to open your commit editor and reword the message.
     amend-author = "!f() { \
         if [ $# -ne 2 ]; then \
             printf >&2 'Usage: git amend-author NAME EMAIL\n'; \
-            return 2; \
+            return 1; \
         fi; \
         local NAME=\"$1\"; \
         local EMAIL=\"$2\"; \
-        if git rev-parse @{u} >/dev/null 2>&1; then \
-            local upstream=$(git rev-parse @{u}); \
-            local local=$(git rev-parse @); \
-            if [ $upstream = $local ]; then \
-                git commit --amend --author=\"$NAME <$EMAIL>\" --reuse-message HEAD; \
-            else \
-                printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
-                return 2; \
-            fi; \
-        else \
-            printf >&2 'Error: No upstream branch set. Cannot determine push status.\n'; \
+        local upstream=$(git upstream-commit 2>/dev/null); \
+        local local_commit=$(git local-commit); \
+        if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
+            printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
         fi; \
+        git commit --amend --author=\"$NAME <$EMAIL>\" --reuse-message HEAD; \
     }; f"
 #+end_src
 
