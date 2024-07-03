@@ -2801,18 +2801,13 @@ Oh, you made a typo!
     # Usage: git amend-message "NEW_COMMIT_MESSAGE"
     # Amend the last commit with a new message.
     amend-message = "!f() { \
-        if git rev-parse @{u} >/dev/null 2>&1; then \
-            local upstream=$(git rev-parse @{u}); \
-            local local=$(git rev-parse @); \
-            if [ $upstream = $local ]; then \
-                git commit --amend -m \"$1\"; \
-            else \
-                printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
-                return 2; \
-            fi; \
-        else \
-            git commit --amend -m \"$1\"; \
+        local upstream=$(git rev-parse @{u} 2>/dev/null); \
+        local local_commit=$(git rev-parse @); \
+        if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
+            printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
+            return 2; \
         fi; \
+        git commit --amend -m \"$1\"; \
     }; f"
 
     # Alias for 'amend-message'.
@@ -5019,10 +5014,11 @@ Patch = this
 ** PUBLISH - Tag
 
 When tagging releases in a version control system, the tag for a version should
-be ~X.Y.Z~ (*without* prefix ~v~).  The advantages of ~X.Y.Z~ are that gitweb or GitHub
-can automatically offer a tarball or zip download of the form
-=packagename-$tag.tar.gz= (and it's quite established that a tarball should be
-named =package-X.Y.Z.tar.gz=).
+follow the format ~X.Y.Z~ (*without* the ~v~ prefix). This format ensures
+compatibility with tools like gitweb or GitHub, which can automatically provide
+a download link for a tarball or zip archive in the format
+=package-$TAG.tar.gz= -- and it's widely accepted that tarballs should adhere to
+the naming convention =package-X.Y.Z.tar.gz=.
 
 * Pipelines
 

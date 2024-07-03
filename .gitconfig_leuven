@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240702.1644
+# .gitconfig, Time-stamp: 20240703.1432
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -954,18 +954,13 @@
     # Usage: git amend-message "NEW_COMMIT_MESSAGE"
     # Amend the last commit with a new message.
     amend-message = "!f() { \
-        if git rev-parse @{u} >/dev/null 2>&1; then \
-            local upstream=$(git rev-parse @{u}); \
-            local local=$(git rev-parse @); \
-            if [ $upstream = $local ]; then \
-                git commit --amend -m \"$1\"; \
-            else \
-                printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
-                return 2; \
-            fi; \
-        else \
-            git commit --amend -m \"$1\"; \
+        local upstream=$(git rev-parse @{u} 2>/dev/null); \
+        local local_commit=$(git rev-parse @); \
+        if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
+            printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
+            return 2; \
         fi; \
+        git commit --amend -m \"$1\"; \
     }; f"
 
     # Alias for 'amend-message'.
