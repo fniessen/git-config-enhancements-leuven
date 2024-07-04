@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240704.1052
+# .gitconfig, Time-stamp: 20240704.1601
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -896,26 +896,33 @@
         git log --author=\"$AUTHOR\" -i --no-merges --all; \
     }; f"
 
-    ##? Usage: git search-commit-diffs SEARCH_STRING PATH
+    ##? Usage: git search-commit-diffs REGEXP [PATH]
     ##?
-    ##? Search Git log for a specific string and show the patch. The path can be
-    ##? a file, directory, or file pattern (e.g., *.txt).
-    ##? Only shows patches where the number of added instances of the string is
-    ##? different from the number of deleted instances.
+    ##? Search Git log for a specific regular expression and show the patch. The
+    ##? path can be a file, directory, or file pattern (e.g., *.txt). If no path
+    ##? is specified, the entire repository is searched.
+    ##? Shows patches where the regular expression is added, removed, or
+    ##? modified.
     ##?
-    ##? Example:
-    ##?   git search-commit-diffs fix "*.js"
+    ##? Examples:
+    ##?   git search-commit-diffs "fix" "*.js"
+    ##?   git search-commit-diffs "bugfix"
     search-commit-diffs = "!f() { \
-        git log -p -S \"$1\" \"$2\"; \
+        if [ -n \"$2\" ]; then \
+            git log -p -G \"$1\" \"$2\"; \
+        else \
+            git log -p -G \"$1\"; \
+        fi \
     }; f"
 
-    ##? Usage: git search-commit-diffs-all-branches SEARCH_STRING
+    ##? Usage: git search-commit-diffs-all-branches REGEXP
     ##?
-    ##? Search for changes containing a specific string across all branches.
-    ##? Only shows patches where the number of added instances of the string is
-    ##? different from the number of deleted instances.
+    ##? Search for changes containing a specific regular expression across all
+    ##? branches.
+    ##? Shows patches where the regular expression is added, removed, or
+    ##? modified.
     search-commit-diffs-all-branches = "!f() { \
-        git log --all -S \"$1\"; \
+        git log --all -G \"$1\"; \
     }; f"
 
     # Usage: git search-all-commits SEARCH_TERM

@@ -2596,7 +2596,39 @@ Show the *last commit* whose *message matches a regexp*:
 
 *** Search on File Changes
 
-**** Search string (added/removed) in code
+There are two key differences between ~-S~ and ~-G~ in Git:
+
+- String vs. Regular Expression:
+  + ~-S~ searches for an exact string.
+  + ~-G~ searches using a regular expression.
+
+- Matching Criteria:
+  + ~-S~ requires the match to appear a *different* /number of times/ on the left
+    (deleted lines) and right (added lines) sides of the diff.
+  + ~-G~ requires the match to appear on /at least one/ side of the diff, either in
+    the added or removed lines.
+
+To illustrate the difference between ~-S <regex> --pickaxe-regex~ and ~-G <regex>~,
+consider a commit with the following diff in the same file:
+
+#+begin_src diff :tangle no
++    return frotz(nitfol, two->ptr, 1, 0);
+...
+-    hit = frotz(nitfol, mf2.ptr, 1, 0);
+#+end_src
+
+While ~git log -G"frotz\(nitfol"~ will show this commit,
+~git log -S"frotz\(nitfol" --pickaxe-regex~ will not (because the number of
+occurrences of that string did not change).
+
+(note: the ~--pickaxe-regexp~ in that paragraph is sort of a red herring, the
+example tries to match a fixed string anyway. The author of the docs could have
+written: "~-G"frotz\(nitfol"~ will show this commit, ~-S"frotz(nitfol"~ will not"
+/[<- the astute reader will notice the blatant absence of any '\' character in
+the second pattern]/, or alternatively choose an example pattern where no
+special char was involved)
+
+**** Search for commits where a string is added or removed
 
 If you want to find all commits where a *string* was *added or removed* in the /file
 contents/ (to be more exact: where its *number of occurrences changed* in the
@@ -2629,43 +2661,12 @@ In other words, to find the following commit:
 you *need to search on 'CLOSED'*.  Searching on 'COMPLETED-V' would not bring back
 that commit!
 
-**** Search for commits that add or remove a specific term in the repository's diff contents
-
-#+begin_src conf
-    ##? Usage: git search-commit-diffs SEARCH_STRING PATH
-    ##?
-    ##? Search Git log for a specific string and show the patch. The path can be
-    ##? a file, directory, or file pattern (e.g., *.txt).
-    ##? Only shows patches where the number of added instances of the string is
-    ##? different from the number of deleted instances.
-    ##?
-    ##? Example:
-    ##?   git search-commit-diffs fix "*.js"
-    search-commit-diffs = "!f() { \
-        git log -p -S \"$1\" \"$2\"; \
-    }; f"
-#+end_src
-
 #+begin_note
 By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
 ~--pickaxe-regex~.
 #+end_note
 
-The alias ~search-commit-diffs-all-branches~ searches for string-related changes
-in the code changes (diff) across all branches.
-
-#+begin_src conf
-    ##? Usage: git search-commit-diffs-all-branches SEARCH_STRING
-    ##?
-    ##? Search for changes containing a specific string across all branches.
-    ##? Only shows patches where the number of added instances of the string is
-    ##? different from the number of deleted instances.
-    search-commit-diffs-all-branches = "!f() { \
-        git log --all -S \"$1\"; \
-    }; f"
-#+end_src
-
-**** Search regexp (added/removed/changed?) in code
+**** Search for commits where a regexp is added, removed, or modified
 
 String contained in added/removed lines from diff contents.
 
@@ -2675,36 +2676,41 @@ any *line* that was added, removed, or changed.
 : git log --since="1 week ago" --all -G "foo"
 : git log --since="1 week ago" --all --full-history -G "foo"
 
-***** Pattern Matching:
+#+begin_src conf
+    ##? Usage: git search-commit-diffs REGEXP [PATH]
+    ##?
+    ##? Search Git log for a specific regular expression and show the patch. The
+    ##? path can be a file, directory, or file pattern (e.g., *.txt). If no path
+    ##? is specified, the entire repository is searched.
+    ##? Shows patches where the regular expression is added, removed, or
+    ##? modified.
+    ##?
+    ##? Examples:
+    ##?   git search-commit-diffs "fix" "*.js"
+    ##?   git search-commit-diffs "bugfix"
+    search-commit-diffs = "!f() { \
+        if [ -n \"$2\" ]; then \
+            git log -p -G \"$1\" \"$2\"; \
+        else \
+            git log -p -G \"$1\"; \
+        fi \
+    }; f"
+#+end_src
 
-- ~-G~: Matches lines in the content of files that contain the specified pattern.
-- ~-S~: Matches exact occurrences of the specified string in the content of files.
+The alias ~search-commit-diffs-all-branches~ searches for string-related changes
+in the code changes (diff) across all branches.
 
-***** Behavior:
-
-- ~-G~: Useful when you want to track changes related to the presence or absence
-  of a pattern (such as keywords, TODOs, etc.) in the files.
-- ~-S~: Useful when you are interested in changes that specifically involve the
-  addition or removal of instances of an exact string in the files.
-
-***** Usage Considerations:
-
-- Choose ~-G~ when you need to track changes based on patterns that may appear in
-  multiple contexts.
-- Choose ~-S~ when you need to track changes based on exact strings where the
-  context and exact occurrences are critical.
-
-***** Example:
-
-To illustrate the difference further:
-
-- If you have a file where the lines containing "TODO" were added or removed,
-  you would use ~-G "TODO"~.
-- If you have a file where the exact occurrences of the string "functionName"
-  were added or removed, you would use ~-S "functionName"~.
-
-Understanding these distinctions helps you choose the appropriate option (~-G~
-or ~-S~) based on what you're trying to track in your Git history.
+#+begin_src conf
+    ##? Usage: git search-commit-diffs-all-branches REGEXP
+    ##?
+    ##? Search for changes containing a specific regular expression across all
+    ##? branches.
+    ##? Shows patches where the regular expression is added, removed, or
+    ##? modified.
+    search-commit-diffs-all-branches = "!f() { \
+        git log --all -G \"$1\"; \
+    }; f"
+#+end_src
 
 **** Search in files
 
