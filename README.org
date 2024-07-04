@@ -2646,8 +2646,10 @@ that commit!
     }; f"
 #+end_src
 
+#+begin_note
 By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
 ~--pickaxe-regex~.
+#+end_note
 
 The alias ~search-commit-diffs-all-branches~ searches for string-related changes
 in the code changes (diff) across all branches.
@@ -2672,6 +2674,37 @@ any *line* that was added, removed, or changed.
 
 : git log --since="1 week ago" --all -G "foo"
 : git log --since="1 week ago" --all --full-history -G "foo"
+
+***** Pattern Matching:
+
+- ~-G~: Matches lines in the content of files that contain the specified pattern.
+- ~-S~: Matches exact occurrences of the specified string in the content of files.
+
+***** Behavior:
+
+- ~-G~: Useful when you want to track changes related to the presence or absence
+  of a pattern (such as keywords, TODOs, etc.) in the files.
+- ~-S~: Useful when you are interested in changes that specifically involve the
+  addition or removal of instances of an exact string in the files.
+
+***** Usage Considerations:
+
+- Choose ~-G~ when you need to track changes based on patterns that may appear in
+  multiple contexts.
+- Choose ~-S~ when you need to track changes based on exact strings where the
+  context and exact occurrences are critical.
+
+***** Example:
+
+To illustrate the difference further:
+
+- If you have a file where the lines containing "TODO" were added or removed,
+  you would use ~-G "TODO"~.
+- If you have a file where the exact occurrences of the string "functionName"
+  were added or removed, you would use ~-S "functionName"~.
+
+Understanding these distinctions helps you choose the appropriate option (~-G~
+or ~-S~) based on what you're trying to track in your Git history.
 
 **** Search in files
 
