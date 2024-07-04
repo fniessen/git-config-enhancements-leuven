@@ -2280,13 +2280,12 @@ If you only add options to one single ~git~ command, there is no benefit to the
 function wrapper.  On the contrary, you can't add other options.
 #+end_tip
 
+This alias retrieves the full hash of the current commit (~HEAD~) in the working
+directory.
+
 #+begin_src conf
-    # Usage: git last-commit-hash
-    # Show abbreviated hash of the last commit.
-    # Examples:
-    #   git last-commit-hash          find hash of last commit
-    #   git last-commit-hash develop  find hash of last commit in develop
-    last-commit-hash = log -1 --pretty=format:'%h'
+    ##? Show current commit of current branch.
+    local-commit = "!git rev-parse @"
 #+end_src
 
 ** Get a commit detail
@@ -2712,7 +2711,7 @@ in the code changes (diff) across all branches.
     }; f"
 #+end_src
 
-**** Search in files
+*** Search in files
 
 #+begin_src conf
     # Usage: git search-all-commits SEARCH_TERM
@@ -2825,9 +2824,6 @@ prompting you for the message you've already entered!
 #+begin_src conf
     ##? Show upstream commit of current branch.
     upstream-commit = "!git rev-parse @{u}"
-
-    ##? Show current commit of current branch.
-    local-commit = "!git rev-parse @"
 
     # Append the staged changes to the last commit, reusing its message.
     amend-reuse = "!f() { \
