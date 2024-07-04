@@ -2629,12 +2629,28 @@ In other words, to find the following commit:
 you *need to search on 'CLOSED'*.  Searching on 'COMPLETED-V' would not bring back
 that commit!
 
-: git log --since="1 week ago" --all -S "foo"
-
 **** Search for commits that add or remove a specific term in the repository's diff contents
 
-The alias ~search-changes-in-message-and-diff~ searches for string-related changes
-in the commit message and the diff.
+#+begin_src conf
+    ##? Usage: git search-commit-diffs SEARCH_STRING PATH
+    ##?
+    ##? Search Git log for a specific string and show the patch. The path can be
+    ##? a file, directory, or file pattern (e.g., *.txt).
+    ##? Only shows patches where the number of added instances of the string is
+    ##? different from the number of deleted instances.
+    ##?
+    ##? Example:
+    ##?   git search-commit-diffs fix "*.js"
+    search-commit-diffs = "!f() { \
+        git log -p -S \"$1\" \"$2\"; \
+    }; f"
+#+end_src
+
+By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
+~--pickaxe-regex~.
+
+The alias ~search-commit-diffs-all-branches~ searches for string-related changes
+in the code changes (diff) across all branches.
 
 #+begin_src conf
     ##? Usage: git search-commit-diffs-all-branches SEARCH_STRING
@@ -2647,25 +2663,15 @@ in the commit message and the diff.
     }; f"
 #+end_src
 
-**** To check
+**** Search regexp (added/removed/changed?) in code
 
-#+begin_src conf
-    ##? Usage: git search-log-patch SEARCH_STRING PATH
-    ##?
-    ##? Search Git log for a specific string and show the patch. The path can be
-    ##? a file, directory, or file pattern (e.g., *.txt).
-    ##? Only shows patches where the number of added instances of the string is
-    ##? different from the number of deleted instances.
-    ##?
-    ##? Example:
-    ##?   git search-log-patch fix "*.js"
-    search-log-patch = "!f() { \
-        git log -p -S \"$1\" \"$2\"; \
-    }; f"
-#+end_src
+String contained in added/removed lines from diff contents.
 
-By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
-~--pickaxe-regex~.
+With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
+any *line* that was added, removed, or changed.
+
+: git log --since="1 week ago" --all -G "foo"
+: git log --since="1 week ago" --all --full-history -G "foo"
 
 **** Search in files
 
@@ -2680,16 +2686,6 @@ By default, ~-S~ accepts a string, but can be modified to accept a *regexp* with
         git rev-list --all | xargs git grep -F \"$SEARCH_TERM\"; \
     }; f"
 #+end_src
-
-**** Search regexp (added/removed/changed?) in code
-
-String contained in added/removed lines from diff contents.
-
-With the ~-G~ option, the commit is shown in the log if your *regexp* search matches
-any *line* that was added, removed, or changed.
-
-: git log --since="1 week ago" --all -G "foo"
-: git log --since="1 week ago" --all --full-history -G "foo"
 
 ** Open a repository in a web browser
 
