@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240704.1720
+# .gitconfig, Time-stamp: 20240710.1452
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2469,17 +2469,21 @@ deploy-prod =
     ##?
     ##? Force checkout to a branch, discarding local changes if necessary.
     force-checkout = "!f() { \
+        if [ -z \"$1\" ]; then \
+            printf >&2 'Error: No branch name provided.\n'; \
+            return 2; \
+        fi; \
         local BRANCH=$1; \
         git checkout \"$BRANCH\" 2>&1 | { \
             while IFS= read -r line; do \
-                if printf '%s\n' \"$line\" | grep -q 'Your local changes to the following files would be overwritten'; then \
+                if printf \"%s\n\" \"$line\" | grep -q \"error: Your local changes to the following files would be overwritten by checkout:\"; then \
                     continue; \
                 fi; \
-                # Remove leading spaces from file_path. \
-                file_path=$(printf '%s\n' \"$line\" | sed 's/^[[:space:]]*//') \
-                # If a file path is found, discard changes for that file. \
-                if [ -n \"$file_path\" ]; then \
-                    git checkout -- \"$file_path\"; \
+                if printf \"%s\n\" \"$line\" | grep -q \"^[[:space:]]*\"; then \
+                    file_path=$(echo \"$line\" | sed \"s/^[[:space:]]*//\"); \
+                    if [ -n \"$file_path\" ]; then \
+                        git checkout -- \"$file_path\"; \
+                    fi; \
                 fi; \
             done; \
         }; \
@@ -2645,7 +2649,7 @@ deploy-prod =
     # Interactively stage changes and commit, or abort.
     commit-interactive = "!f() { \
         if [ \"$(git root)\" != \"$(pwd)\" ]; then \
-            printf >&2 'Error: Not at the root of the Git repository.'; \
+            printf >&2 'Error: Not at the root of the Git repository.\n'; \
             return 2; \
         fi; \
         (git add -p -- \"$@\" && git commit) || git reset; \
