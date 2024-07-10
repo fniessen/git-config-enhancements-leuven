@@ -6187,18 +6187,24 @@ Pick a file(s) from:
 - the *current branch*
 
 #+begin_src conf
+    ##? Usage: git ours FILE
+    ##?
+    ##? Resolve conflict by using 'ours' version and add the file.
     ours = "!f() { \
-        git checkout --ours $@ \
-            && git add $@; \
+        git checkout --ours \"$@\" \
+            && git add \"$@\"; \
     }; f"
 #+end_src
 
 - the *branch being merged in*
 
 #+begin_src conf
+    ##? Usage: git theirs FILE
+    ##?
+    ##? Resolve conflict by using 'theirs' version and add the file.
     theirs = "!f() { \
-        git checkout --theirs $@ \
-            && git add $@; \
+        git checkout --theirs \"$@\" \
+            && git add \"$@\"; \
     }; f"
 #+end_src
 
@@ -6247,12 +6253,18 @@ failure:
 Quickly solve conflicts using an editor.
 
 #+begin_src conf
+    ##? Usage: git edit-unmerged
+    ##?
+    ##? Open all files with merge conflicts in the editor.
     edit-unmerged = "!$EDITOR $(git conflicted-files)"
 #+end_src
 
 Then, add the conflicted files.
 
 #+begin_src conf
+    ##? Usage: git add-unmerged
+    ##?
+    ##? Add all files with merge conflicts.
     add-unmerged = "!git add $(git conflicted-files)"
 #+end_src
 

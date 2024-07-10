@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240710.1452
+# .gitconfig, Time-stamp: 20240710.1509
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2419,14 +2419,20 @@ deploy-prod =
             | cdiff; \
     }; f"
 
+    ##? Usage: git ours FILE
+    ##?
+    ##? Resolve conflict by using 'ours' version and add the file.
     ours = "!f() { \
-        git checkout --ours $@ \
-            && git add $@; \
+        git checkout --ours \"$@\" \
+            && git add \"$@\"; \
     }; f"
 
+    ##? Usage: git theirs FILE
+    ##?
+    ##? Resolve conflict by using 'theirs' version and add the file.
     theirs = "!f() { \
-        git checkout --theirs $@ \
-            && git add $@; \
+        git checkout --theirs \"$@\" \
+            && git add \"$@\"; \
     }; f"
 
     ##? Usage: git conflicted-files
@@ -2434,8 +2440,14 @@ deploy-prod =
     ##? List files with merge conflicts only.
     conflicted-files = diff --name-only --diff-filter=U
 
+    ##? Usage: git edit-unmerged
+    ##?
+    ##? Open all files with merge conflicts in the editor.
     edit-unmerged = "!$EDITOR $(git conflicted-files)"
 
+    ##? Usage: git add-unmerged
+    ##?
+    ##? Add all files with merge conflicts.
     add-unmerged = "!git add $(git conflicted-files)"
 
     # Create a feature branch.
