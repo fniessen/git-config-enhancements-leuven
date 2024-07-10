@@ -2580,13 +2580,16 @@ Show the *last commit* whose *message matches a regexp*:
 *** Search by Author
 
 #+begin_src conf
-    # Usage: git commits-by [AUTHOR]
-    # Show commit history for a specific author.
-    # Examples:
-    #   git commits-by                Show commits by the current user.
-    #   git commits-by "Author Name"  Show commits by a specific author.
-    #   git commits-by "author@example.com"
-    #                                 Show commits by a specific author.
+    ##? Usage: git commits-by [AUTHOR]
+    ##?
+    ##? Show all commits by a specific author, defaulting to the current user's
+    ##? email if not provided.
+    ##?
+    ##? Examples:
+    ##?   git commits-by                Show commits by the current user.
+    ##?   git commits-by "Author Name"  Show commits by a specific author.
+    ##?   git commits-by "author@example.com"
+    ##?                                 Show commits by a specific author.
     commits-by = "!f() { \
         local AUTHOR=\"${1:-$(git config --get user.email)}\"; \
         git log --author=\"$AUTHOR\" -i --no-merges --all; \
