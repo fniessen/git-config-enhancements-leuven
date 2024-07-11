@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240710.1519
+# .gitconfig, Time-stamp: 20240711.1116
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2368,11 +2368,18 @@ deploy-prod =
             && git checkout \"$current_branch\"; \
     }; f"
 
-    # Run merge test (before merge) to check for any conflicts beforehand.
+    ##? Usage: git merge-test BRANCH
+    ##?
+    ##? Test a merge and then abort it.
     merge-test = "!f() { \
-        git merge --no-commit --no-ff \"$1\"; \
+        branch=\"$1\"; \
+        if [ -z \"$branch\" ]; then \
+            printf \"Error: No branch specified.\\n\"; \
+            return 1; \
+        fi; \
+        git merge --no-commit --no-ff \"$branch\"; \
         git merge --abort; \
-        echo \"Merge aborted\"; \
+        printf \"Merge aborted.\\n\"; \
     }; f"
 
     ##? Usage: git dry-merge1 BRANCH_TO_MERGE

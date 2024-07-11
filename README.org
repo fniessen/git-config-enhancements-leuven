@@ -6108,12 +6108,21 @@ examine, test, and undo the merge if required.
 
 You can do ~git merge --abort~ after seeing that there are conflicts.
 
+Run ~merge-test~ (before ~merge~) to check for any conflicts beforehand.
+
 #+begin_src conf
-    # Run merge test (before merge) to check for any conflicts beforehand.
+    ##? Usage: git merge-test BRANCH
+    ##?
+    ##? Test a merge and then abort it.
     merge-test = "!f() { \
-        git merge --no-commit --no-ff \"$1\"; \
+        branch=\"$1\"; \
+        if [ -z \"$branch\" ]; then \
+            printf \"Error: No branch specified.\\n\"; \
+            return 1; \
+        fi; \
+        git merge --no-commit --no-ff \"$branch\"; \
         git merge --abort; \
-        echo \"Merge aborted\"; \
+        printf \"Merge aborted.\\n\"; \
     }; f"
 #+end_src
 
