@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240711.1116
+# .gitconfig, Time-stamp: 20240711.1154
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -720,6 +720,19 @@
 
 [commit]
     template = ~/.git_commit_template.txt
+
+    # Usage: git commit-interactive FILENAME...
+    # Interactively stage changes and commit, or abort.
+    commit-interactive = "!f() { \
+        if [ \"$(git root)\" != \"$(pwd)\" ]; then \
+            printf >&2 'Error: Not at the root of the Git repository.\n'; \
+            return 2; \
+        fi; \
+        (git add -p -- \"$@\" && git commit) || git reset; \
+    }; f"
+
+    # Alias for 'commit-interactive'.
+    record = commit-interactive
 
 [alias]
 
@@ -2666,19 +2679,6 @@ deploy-prod =
 
     root = rev-parse --show-toplevel
     root-relative = rev-parse --show-prefix
-
-    # Usage: git commit-interactive FILENAME...
-    # Interactively stage changes and commit, or abort.
-    commit-interactive = "!f() { \
-        if [ \"$(git root)\" != \"$(pwd)\" ]; then \
-            printf >&2 'Error: Not at the root of the Git repository.\n'; \
-            return 2; \
-        fi; \
-        (git add -p -- \"$@\" && git commit) || git reset; \
-    }; f"
-
-    # Alias for 'commit-interactive'.
-    record = commit-interactive
 
     lost = "!git fsck \
                 | awk '/dangling commit/ {print $3}' \

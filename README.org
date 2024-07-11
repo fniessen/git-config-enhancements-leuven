@@ -2269,6 +2269,32 @@ This is a handy table for labels [[https://github.com/angular/angular/blob/maste
 | chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
 | doc      | Documentation only changes                                                                             |
 
+** Interactive committing (Cherry-pick style recording)
+
+For more granular control over committing changes interactively, you can use the
+~commit-interactive~ alias. This allows you to interactively stage and *commit
+patch hunks* within specific files.
+
+#+begin_src conf
+    # Usage: git commit-interactive FILENAME...
+    # Interactively stage changes and commit, or abort.
+    commit-interactive = "!f() { \
+        if [ \"$(git root)\" != \"$(pwd)\" ]; then \
+            printf >&2 'Error: Not at the root of the Git repository.\n'; \
+            return 2; \
+        fi; \
+        (git add -p -- \"$@\" && git commit) || git reset; \
+    }; f"
+
+    # Alias for 'commit-interactive'.
+    record = commit-interactive
+#+end_src
+
+To use it, navigate to your repository root and invoke git record followed by
+the file(s) you wish to interactively stage and commit. If you decide to abandon
+the commit during staging (~git add -p~), the alias automatically resets the index
+to its previous state.
+
 ** Get a commit hash
 
 #+begin_src conf
@@ -6923,29 +6949,6 @@ Fetch Git objects from upstream and update local branches.
 - If the local branch is outdated, fast-forward it;
 - If the local branch contains unpushed work, warn about it;
 - If the branch seems merged and its upstream branch was deleted, delete it.
-
-** Cherry-pick style recording
-
-Ask interactively which patch hunk to commit, and then do the commit:
-
-#+begin_src conf
-    # Usage: git commit-interactive FILENAME...
-    # Interactively stage changes and commit, or abort.
-    commit-interactive = "!f() { \
-        if [ \"$(git root)\" != \"$(pwd)\" ]; then \
-            printf >&2 'Error: Not at the root of the Git repository.\n'; \
-            return 2; \
-        fi; \
-        (git add -p -- \"$@\" && git commit) || git reset; \
-    }; f"
-
-    # Alias for 'commit-interactive'.
-    record = commit-interactive
-#+end_src
-
-It will not only do ~git add -p~ (with an optional file list), but it will also
-immediately do the ~commit~. Upon abandonment of either the ~add~ or the ~commit~, it
-will ~reset~ the index.
 
 ** Dangling
 
