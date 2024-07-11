@@ -5557,8 +5557,9 @@ date".
 #+end_note
 
 #+begin_src conf
-    # Usage: git ls
-    # Print a summary of activity.  Alias for 'log'.
+    ##? Usage: git ls
+    ##?
+    ##? Display the commit log.  Alias for 'log'.
     ls = log
 #+end_src
 
@@ -5568,7 +5569,17 @@ List commits *showing changed files* (prettier and more concise version of
 ~whatchanged~):
 
 #+begin_src conf
+    ##? Usage: git ll
+    ##?
+    ##? Show medium formatted log with abbreviated commit hashes and file statistics.
     ll = log --pretty=medium --abbrev-commit --stat
+    #+end_src
+
+#+begin_src conf
+    ##? Usage: git log-unified-diff
+    ##?
+    ##? Show commit log with unified diffs.
+    lll = log -u
 #+end_src
 
 #+begin_src conf
@@ -6692,10 +6703,6 @@ project.  For example, ~v2.3~5~ means that this commit is located 5 commits *bef
 the ~v2.3~ tag -- we can be certain that this change is part of v2.3, then.
 
 ** Create patches
-
-#+begin_src conf
-    lll = log -u
-#+end_src
 
 The starting point is essential because it defines the commit from which you
 want to generate the patch files...

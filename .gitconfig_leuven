@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240711.1154
+# .gitconfig, Time-stamp: 20240711.1203
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2078,11 +2078,20 @@ deploy-prod =
 
     stage-modified-removed-files = add -u
 
-    # Usage: git ls
-    # Print a summary of activity.  Alias for 'log'.
+    ##? Usage: git ls
+    ##?
+    ##? Display the commit log.  Alias for 'log'.
     ls = log
 
+    ##? Usage: git ll
+    ##?
+    ##? Show medium formatted log with abbreviated commit hashes and file statistics.
     ll = log --pretty=medium --abbrev-commit --stat
+
+    ##? Usage: git log-unified-diff
+    ##?
+    ##? Show commit log with unified diffs.
+    lll = log -u
 
     # Usage: git last
     # Return the last commit on the current branch.
@@ -2586,8 +2595,6 @@ deploy-prod =
     sha1-tag = "!f() { \
         git name-rev --name-only \"$@\"; \
     }; f"
-
-    lll = log -u
 
     # Apply a patch to files and/or to the index from URL.
     apply-url = "!f() { \
