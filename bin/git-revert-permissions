@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Revert file permissions to their previous state if they are the only changes.
+
+# Get the list of files where only permissions have changed.
+changed_files=$(git diff --name-only --diff-filter=MM)
+
+# Iterate over each file and revert permissions.
+while IFS= read -r file; do
+    # Get the content hash for the previous and current commit.
+    old_hash=$(git ls-tree HEAD^ -- "$file" | awk '{print $3}')
+    new_hash=$(git ls-tree HEAD -- "$file" | awk '{print $3}')
+
+    # Check if the only difference is in the file mode.
+    if git diff -- "$file" | grep -q 'old mode' && [ "$old_hash" == "$new_hash" ]; then
+        printf "Reverting permissions for %s\n" "$file"
+        git checkout HEAD^ -- "$file"
+    fi
+done <<< "$changed_files"
