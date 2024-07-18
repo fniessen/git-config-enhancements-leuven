@@ -2271,6 +2271,10 @@ This is a handy table for labels [[https://github.com/angular/angular/blob/maste
 
 ** Interactive committing (Cherry-pick style recording)
 
+#+begin_src conf
+[alias]
+#+end_src
+
 For more granular control over committing changes interactively, you can use the
 ~commit-interactive~ alias. This allows you to interactively stage and *commit
 patch hunks* within specific files.
@@ -2296,10 +2300,6 @@ the commit during staging (~git add -p~), the alias automatically resets the ind
 to its previous state.
 
 ** Get a commit hash
-
-#+begin_src conf
-[alias]
-#+end_src
 
 #+begin_tip
 If you only add options to one single ~git~ command, there is no benefit to the
