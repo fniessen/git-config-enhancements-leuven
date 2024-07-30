@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240711.1203
+# .gitconfig, Time-stamp: 20240730.1606
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -714,12 +714,17 @@
                           | cut -d: -f1 \
                           | xargs -r -I {} git stash-remove {}"
 
-    # Usage: git ci -m "MESSAGE"
-    # Alias for 'commit'.
+    ##? Usage: git ci -m "MESSAGE"
+    ##?
+    ##? Record changes to the repository.
+    ##?
+    ##? Alias for 'commit'.
     ci = commit
 
 [commit]
     template = ~/.git_commit_template.txt
+
+[alias]
 
     # Usage: git commit-interactive FILENAME...
     # Interactively stage changes and commit, or abort.
@@ -733,8 +738,6 @@
 
     # Alias for 'commit-interactive'.
     record = commit-interactive
-
-[alias]
 
     ##? Show current commit of current branch.
     local-commit = "!git rev-parse @"
@@ -2579,22 +2582,29 @@ deploy-prod =
     ##? Alias for 'outgoing-files'.
     out-files = outgoing-files
 
-    # Usage: git outgoing-all
-    # Show commits not found in the destination repository.
-    outgoing-all = log --branches --not --remotes
+    ##? Usage: git outgoing-all-branches
+    ##?
+    ##? Show commits present in local branches but not in remote branches.
+    outgoing-all-branches = log --branches --not --remotes
 
-    # Alias for 'outgoing-all'.
-    out-all = outgoing-all
+    ##? Alias for 'outgoing-all-branches'.
+    out-all = outgoing-all-branches
 
     # Usage: git divergence BRANCH_NAME
     divergence = "!f() { \
         git log --cherry-pick --left-right --graph \"$1\"...$(git origin)/\"$1\"; \
     }; f"
 
-    # Usage: git sha1-tag COMMIT
-    sha1-tag = "!f() { \
+    ##? Usage: git sha1-name COMMIT...
+    ##?
+    ##? Show the name of the closest reference (branch or tag) name for a given
+    ##? commit.
+    sha1-name = "!f() { \
         git name-rev --name-only \"$@\"; \
     }; f"
+
+    ##? Alias for 'sha1-name'.
+    commit-ref = sha1-name
 
     # Apply a patch to files and/or to the index from URL.
     apply-url = "!f() { \

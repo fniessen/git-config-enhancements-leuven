@@ -2185,8 +2185,11 @@ XXX See doc of git help stash for workflows...
 ** Create a commit
 
 #+begin_src conf
-    # Usage: git ci -m "MESSAGE"
-    # Alias for 'commit'.
+    ##? Usage: git ci -m "MESSAGE"
+    ##?
+    ##? Record changes to the repository.
+    ##?
+    ##? Alias for 'commit'.
     ci = commit
 #+end_src
 
@@ -2239,6 +2242,12 @@ and you'll be guided into writing concise commit subjects in the imperative
 mood -- a good practice. See rule 5 of Chris Beam's "How to write a commit
 message" for the inspiration of this tip and more reasoning on the use of the
 imperative mood.
+
+*** Link commits to issues
+
+Include issue keys in your commit messages to link them to your issues.
+
+: git commit -m "UBSW-985 <message>"
 
 You can automatically *close an issue* by using a supported keyword in commit
 message, such as ~Closes #10~.  (You should always include the ~#~ if you want to
@@ -3276,7 +3285,7 @@ resolved, ie. like so
 
 : git checkout master
 : git create-branch sb-master
-: git revert sha1-of-offending-commit
+: git revert sha1-name-of-offending-commit
 #+end_note
 
 ** Current branch
@@ -6670,12 +6679,13 @@ can be omitted for shorthand purposes.
 If you want to see all *unpushed* commits from *all branches*, do this:
 
 #+begin_src conf
-    # Usage: git outgoing-all
-    # Show commits not found in the destination repository.
-    outgoing-all = log --branches --not --remotes
+    ##? Usage: git outgoing-all-branches
+    ##?
+    ##? Show commits present in local branches but not in remote branches.
+    outgoing-all-branches = log --branches --not --remotes
 
-    # Alias for 'outgoing-all'.
-    out-all = outgoing-all
+    ##? Alias for 'outgoing-all-branches'.
+    out-all = outgoing-all-branches
 #+end_src
 
 *** Show the history difference between a local branch and its remote
@@ -6692,10 +6702,16 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 ** PUBLISH - Find out if a change is part of a release
 
 #+begin_src conf
-    # Usage: git sha1-tag COMMIT
-    sha1-tag = "!f() { \
+    ##? Usage: git sha1-name COMMIT...
+    ##?
+    ##? Show the name of the closest reference (branch or tag) name for a given
+    ##? commit.
+    sha1-name = "!f() { \
         git name-rev --name-only \"$@\"; \
     }; f"
+
+    ##? Alias for 'sha1-name'.
+    commit-ref = sha1-name
 #+end_src
 
 The ~name-rev~ command indicates the *position of a commit relative to tags* in the
