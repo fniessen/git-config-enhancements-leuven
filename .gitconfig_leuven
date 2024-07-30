@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240730.1606
+# .gitconfig, Time-stamp: 20240730.1621
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1467,10 +1467,10 @@
     ##?
     ##? Delete local branches that are tracking remote branches that are gone.
     delete-gone-branches = "!f() { \
-        local gone_branches=$(git branch -vv | grep \": gone]\" | awk \"{print $1}\"); \
+        local gone_branches=$(git branch -vv | awk '/: gone]/{print $1}'); \
         if [ -n \"$gone_branches\" ]; then \
             printf \"Deleting gone branches:\n\"; \
-            printf \"%s\n\" \"$gone_branches\" | xargs git delete-local-branch; \
+            printf \"%s\n\" \"$gone_branches\" | xargs -n 1 git delete-local-branch; \
         else \
             printf \"No gone branches to delete.\n\"; \
         fi \
