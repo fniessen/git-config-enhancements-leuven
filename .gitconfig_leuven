@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240730.1621
+# .gitconfig, Time-stamp: 20240801.1343
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2134,12 +2134,12 @@ deploy-prod =
     # Show commit history of a file, including copies, renames, and merges.
     file-history-follow-copy = log --follow --date-order -C --find-renames --merges
 
-    ##? Usage: git file-history-all FILE_PATH
+    ##? Usage: git file-history-all-branches FILE_PATH
     ##?
     ##? Show the commit history of a specific file or directory across all branches.
-    file-history-all = "!f() { \
+    file-history-all-branches = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history-all FILE_PATH\n'; \
+            printf >&2 'Usage: git file-history-all-branches FILE_PATH\n'; \
             return 2; \
         fi; \
         local FILE_PATH=\"$1\"; \

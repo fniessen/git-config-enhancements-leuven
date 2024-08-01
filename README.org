@@ -5665,12 +5665,12 @@ Add ~--all~ to show commits of /all your branches/, not just from the current
 branch:
 
 #+begin_src conf
-    ##? Usage: git file-history-all FILE_PATH
+    ##? Usage: git file-history-all-branches FILE_PATH
     ##?
     ##? Show the commit history of a specific file or directory across all branches.
-    file-history-all = "!f() { \
+    file-history-all-branches = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history-all FILE_PATH\n'; \
+            printf >&2 'Usage: git file-history-all-branches FILE_PATH\n'; \
             return 2; \
         fi; \
         local FILE_PATH=\"$1\"; \
@@ -5682,8 +5682,8 @@ branch:
 #+end_src
 
 # Tests:
-# : git file-history-all db/aremis/Sprint_2024_07/GCS-4307_2_BBS_ROLES_roles.sql
-# : git file-history-all db/aremis/Sprint_2024_07/GCS-4307_BBS_ROLES_FOR_S2_STACK-2.sql
+# : git file-history-all-branches db/aremis/Sprint_2024_07/GCS-4307_2_BBS_ROLES_roles.sql
+# : git file-history-all-branches db/aremis/Sprint_2024_07/GCS-4307_BBS_ROLES_FOR_S2_STACK-2.sql
 
 *** Related files (commit history and associated file changes)
 
