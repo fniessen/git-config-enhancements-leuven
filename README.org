@@ -4090,7 +4090,9 @@ Create a date/time tag with a suffix, e.g: 2021.01.12_15.25_PREVIOUS:
 #+begin_src conf
     # Usage: git tag-with-date [SUFFIX]
     # Tag the current commit with the current date and a custom suffix.
-    tag-with-date = "!sh -c 'git tag $(date +'%Y.%m.%d_%H.%M')_\"$0\"'"
+    tag-with-date = "!f() { \
+        git tag $(date +'%Y.%m.%d_%H.%M')_$1; \
+    }; f"
 #+end_src
 
 ** See the commits for a tag
@@ -4955,8 +4957,12 @@ https://dev.to/helderburato/patterns-for-writing-better-git-commit-messages-4ba0
     changelog1 = "!f() { \
         git log --no-merges ${1-$(git last-tag)}..$2; \
     }; f"
-    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
-    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
+    changelog = "!f() { \
+        git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...HEAD; \
+    }; f"
+    changelog-org = "!f() { \
+        git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...HEAD; \
+    }; f"
 #+end_src
 
 Savoir quels sont les commits de ma branche courante depuis le dernier tag, afin

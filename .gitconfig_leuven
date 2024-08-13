@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240813.1159
+# .gitconfig, Time-stamp: 20240813.1205
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1490,7 +1490,9 @@
 
     # Usage: git tag-with-date [SUFFIX]
     # Tag the current commit with the current date and a custom suffix.
-    tag-with-date = "!sh -c 'git tag $(date +'%Y.%m.%d_%H.%M')_\"$0\"'"
+    tag-with-date = "!f() { \
+        git tag $(date +'%Y.%m.%d_%H.%M')_$1; \
+    }; f"
 
     ##? Usage: git publish-tag TAG_NAME [REMOTE_NAME]
     ##?
@@ -1812,8 +1814,12 @@
     changelog1 = "!f() { \
         git log --no-merges ${1-$(git last-tag)}..$2; \
     }; f"
-    changelog = !sh -c 'git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...' -
-    changelog-org = !sh -c 'git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...' -
+    changelog = "!f() { \
+        git log --no-merges --pretty=format:\"* %s\" $(git last-tag)...HEAD; \
+    }; f"
+    changelog-org = "!f() { \
+        git log --no-merges --pretty=format:\"- %s\" $(git last-tag)...HEAD; \
+    }; f"
 
     # le dernier tag, ainsi que la liste des commits ayant eu lieu depuis sur la
     # branche courante.
