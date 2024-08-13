@@ -1197,6 +1197,31 @@ By default, the GitHub API creates a repository as *public*.
 
 Start working with your repository.
 
+** Update Git to the Latest Version
+
+Ubuntu's default repositories may not provide the most recent version of Git. To
+get the latest version, follow these steps:
+
+#+begin_src shell :tangle no
+# Check the current version of Git.
+git --version
+
+# Add the Git-Core Personal Package Archive (PPA).
+sudo add-apt-repository ppa:git-core/ppa
+
+# Update package lists.
+sudo apt update
+
+# Upgrade existing packages.
+sudo apt upgrade
+
+# Install the latest version of Git (from the PPA).
+sudo apt install git
+
+# Verify the installation.
+git --version
+#+end_src
+
 ** Create a README
 
 Create a =README.md= file into your repository.
