@@ -857,10 +857,23 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     ##?
     ##? List all Git aliases in alphabetical order.
     aliases = "!git config -l \
-                  | grep alias \
+                  | grep '^alias\\.' \
                   | cut -c 7- \
                   | sort \
-                  | sed 's_=_ = _'"
+                  | sed 's_=_ = _' \
+                  | sed 's/  */ /g' \
+                  | awk -F ' = ' '{printf \"\\033[1m%s\\033[0m = %s\\n\", $1, $2}'"
+#+end_src
+
+#+begin_src conf
+    grep-aliases = "!git config -l \
+                        | grep '^alias\\.' \
+                        | cut -c 7- \
+                        | sort \
+                        | sed 's_=_ = _' \
+                        | sed 's/  */ /g' \
+                        | awk -F ' = ' '{printf \"\\033[30;47m%s\\033[0m = %s\\n\", $1, $2}' \
+                        | grep --color=auto -i"
 #+end_src
 
 #+begin_src conf :tangle no
@@ -1324,7 +1337,7 @@ specified path*).
 Find all instances of the specified string in code files *with a certain file
 extension*.
 
-#+begin_src conf
+#+begin_src conf :tangle no
     search-for-code-in-extension = "XXX"
 #+end_src
 
@@ -2028,16 +2041,12 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
     stash-apply = "!f() { \
         git stash apply stash^{/$@}; \
     }; f"
-
-    stash-apply = "!f() { \
-        git stash apply stash^{/$*}; \
-    }; f"
 #+end_src
 
 #+begin_src conf
     # Revert the changes introduced by the most recent stash.
     stash-revert = !git stash show -p --no-textconv --binary \
-                | git apply -R
+                       | git apply -R
 #+end_src
 
 *** Restore shelved changes
@@ -4174,13 +4183,16 @@ Show the latest tag /in all branches/:
 Change the tag name but keep it on the same commit.
 
 #+begin_src conf
-    # Usage: git rename-tag OLD_TAG_NAME NEW_TAG_NAME
+    # Usage: git rename-tag OLD_TAG NEW_TAG
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { \
-        git tag $2 \"$1\"; \
-        git tag -d \"$1\"; \
-        git push $(git origin) $2; \
-        git push $(git origin) :refs/tags/\"$1\"; \
+        local OLD_TAG=\"$1\"; \
+        local NEW_TAG=\"$2\"; \
+        local origin=$(git origin); \
+        git tag \"$NEW_TAG\" \"$OLD_TAG\"; \
+        git tag -d \"$OLD_TAG\"; \
+        git push \"$origin\" \"$NEW_TAG\"; \
+        git push \"$origin\" :refs/tags/\"$OLD_TAG\"; \
     }; f"
 #+end_src
 
@@ -4662,7 +4674,7 @@ https://gist.github.com/metlos/9368527
 For GitHub
 : git ls-remote $(git origin) 'refs/pull/*'
 
-#+begin_src conf
+#+begin_src conf :tangle no
     pr-list = XXX
 #+end_src
 
@@ -4805,7 +4817,7 @@ b accident or if it's irrelevant):
 
 Open a pull request page in a web browser.
 
-#+begin_src conf
+#+begin_src conf :tangle no
     pr-show = XXX <pr-number>
 #+end_src
 
@@ -5074,10 +5086,12 @@ To see the contents of the zipped file (without extraction), use ~unzip -l FILE~
 
 **** Generate patch emails
 
-#+begin_src conf
+#+begin_src conf :tangle no
     # View raw commit.
     email-patch = XXX git format-patch $(git convert-current-branch-name).patch
+#+end_src
 
+#+begin_src conf
     # Since oldest ancestor...
     plain-diff = !git branch-diff > $(git convert-current-branch-name).diff
 #+end_src
@@ -5198,7 +5212,7 @@ Open an issue in the current repository:
 - Enter a summary
 - Write an optional description
 
-#+begin_src conf
+#+begin_src conf :tangle no
 # title
 # description
 # assignee
@@ -5220,7 +5234,7 @@ and https://jwong.co.uk/blog/2018/09/01/useful-github-features/#emoji-organising
 
 ** Create Pull Requests
 
-#+begin_src conf
+#+begin_src conf :tangle no
     create-issue-pull-request = XXX
 #+end_src
 
@@ -6196,12 +6210,12 @@ Run ~merge-test~ (before ~merge~) to check for any conflicts beforehand.
     ##?
     ##? Test a merge and then abort it.
     merge-test = "!f() { \
-        branch=\"$1\"; \
-        if [ -z \"$branch\" ]; then \
-            printf \"Error: No branch specified.\\n\"; \
-            return 1; \
+        local BRANCH=\"$1\"; \
+        if [ -z \"$BRANCH\" ]; then \
+            printf >&2 \"Error: No branch specified.\\n\"; \
+            return 2; \
         fi; \
-        git merge --no-commit --no-ff \"$branch\"; \
+        git merge --no-commit --no-ff \"$BRANCH\"; \
         git merge --abort; \
         printf \"Merge aborted.\\n\"; \
     }; f"
@@ -6913,10 +6927,10 @@ branches*):
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
 
-    ##? Usage: git this-week [AUTHOR]
+    ##? Usage: git recent [AUTHOR]
     ##?
     ##? Show commits from this week.
-    this-week = "!f() { \
+    recent = "!f() { \
         git log \
             --since='1 week ago' \
             --author=\"${1-$(git config --get user.name)}\" \
