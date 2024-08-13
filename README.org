@@ -5980,13 +5980,17 @@ depending on the remote's name), and you can use ~@{u}~ to represent it.
     # Usage: git incoming-on-branch BRANCH_NAME
     # Show new commits found in the remote repository.
     # Example: git incoming-on-branch master
-    incoming-on-branch = !sh -c 'git fetch' \
-                && git log ..$(git origin)/$1
+    incoming-on-branch = "!f() { \
+        git fetch \
+            && git log ..$(git origin)/$1; \
+    }; f"
 #+end_src
 
 #+begin_src conf
-    # Usage: git who-is-changing-branch BRANCH_NAME
-    who-is-changing-branch = !sh -c 'git shortlog HEAD..$(git origin)/$0'
+    # Usage: git who-changed BRANCH_NAME
+    who-changed = "!f() { \
+        git shortlog HEAD..$(git origin)/$1; \
+    }; f"
     # TODO: Add fetch?
 #+end_src
 
