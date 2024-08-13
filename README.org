@@ -5625,7 +5625,7 @@ merge commits...
         fi; \
         local FILE_PATH=\"$1\"; \
         if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
-            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
+            printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
         git log --follow -- \"$FILE_PATH\"; \
     }; f"
@@ -5675,7 +5675,7 @@ branch:
         fi; \
         local FILE_PATH=\"$1\"; \
         if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
-            printf >&2 \"\\e[33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
+            printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
         git log --follow --all -- \"$FILE_PATH\"; \
     }; f"
