@@ -1197,7 +1197,7 @@ By default, the GitHub API creates a repository as *public*.
 
 Start working with your repository.
 
-** Update Git to the Latest Version
+** Update Git to the latest version
 
 Ubuntu's default repositories may not provide the most recent version of Git. To
 get the latest version, follow these steps:
@@ -1226,7 +1226,7 @@ git --version
 
 Create a =README.md= file into your repository.
 
-: echo "# ${$(git repo-slug-remote):-Repository name}\n\nDescription" >> README.md
+: printf "# %s\n\nDescription\n" "${$(git repo-slug-remote):-Repository name}" >> README.md
 : git add README.md
 : git commit -m "Add README.md"
 :
@@ -3774,8 +3774,8 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
     has-new-commits = "!f() { \
         local BRANCH_NAME=\"$1\"; \
         if [ -z \"$BRANCH_NAME\" ]; then \
-            echo \"Error: Please provide a branch name as a parameter.\"; \
-            exit 1; \
+            printf >&2 'Error: Please provide a branch name as a parameter.\n' \
+            exit 2; \
         fi; \
         [ $(git rev-list --count $(git origin)/\"$BRANCH_NAME\"..\"$BRANCH_NAME\") -gt 0 ]; \
     }; f"
@@ -4508,13 +4508,13 @@ grep_in_command_results() {
     local pattern="$2"
     local files=$(eval "$cmd" | awk '{print $1}')
 
-    echo cmd: $cmd
-    echo pattern: $pattern
-    echo files: $files
+    printf "cmd: %s\n" "$cmd"
+    printf "pattern: %s\n" "$pattern"
+    printf "files: %s\n" "$files"
 
     for file in $files; do
         if [ -f "$file" ]; then
-            echo "Results in $file:"
+            printf "Results in %s:\n" "$file"
             grep "$pattern" "$file"
         fi
     done
@@ -4571,10 +4571,10 @@ Directed Acyclic Graph:
 #+begin_src conf
     # Draw Git revisions graph with Graphviz.
     graphviz = "!f() { \
-        echo 'digraph git {' ; \
+        printf 'digraph git {\n'; \
         git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
             | sed 's_[0-9a-f][0-9a-f]*_\"&\"_g' ; \
-        echo '}'; \
+        printf '}\n'; \
     }; f"
 #+end_src
 
@@ -5865,7 +5865,7 @@ directory across all local branches:
                                     --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
                                     --date=format-local:'%Y-%m-%d' \"$commit_hash\" -- \"$FILE_PATH\"); \
             if [ -n \"$commit_info\" ]; then \
-                echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
+                printf \"%s \\e[32;1m%s\\e[0m\n\" \"$commit_info\" \"$branch\" \
             fi; \
         done | sort -k1,1r; \
     }; f"
@@ -6256,11 +6256,13 @@ and *detects conflicts*:
     # Usage: git merge-dry-run BRANCH_NAME
     # Check how the merge of BRANCH_NAME into master will go
     merge-dry-run = "!f() { \
-        grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD \"$1\") FETCH_HEAD \"$1\") \
-            && echo 'Merge conflicts!' \
-            || echo 'This branch can be automatically merged.'; \
+        if grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD \"$1\") FETCH_HEAD \"$1\"); then \
+            printf 'Merge conflicts!\n' \
+        else \
+            printf 'This branch can be automatically merged.\n' \
+        fi; \
     }; f"
-# XXX DOESN'T work for git fetch & git merge
+    # XXX DOESN'T work for git fetch & git merge
 
     # Extract the "changed in both" lines as well as the conflicting parts.
     merge-dry-run-conflicts = "!f() { \
@@ -6519,7 +6521,7 @@ cd "$(git root)"
                     continue; \
                 fi; \
                 if printf \"%s\n\" \"$line\" | grep -q \"^[[:space:]]*\"; then \
-                    file_path=$(echo \"$line\" | sed \"s/^[[:space:]]*//\"); \
+                    file_path=$(printf \"%s\n\" \"$line\" | sed \"s/^[[:space:]]*//\"); \
                     if [ -n \"$file_path\" ]; then \
                         git checkout -- \"$file_path\"; \
                     fi; \
@@ -6603,25 +6605,25 @@ open HTML files directly from the file browser.
 For GitHub pages:
 
 #+begin_src shell :tangle no
-echo 'setting up gh-pages'
-echo '-------------------'
+printf 'setting up gh-pages\n'
+printf '-------------------\n'
 
-echo 'Tell me your github account username: '
+printf 'Tell me your github account username: '
 read USER_NAME
 
-echo 'Now, tell me your repository name: '
+printf 'Now, tell me your repository name: '
 read REPOSITORY
 
 git stash \
     && git create-branch 'gh-pages' \
-    && echo 'My Page' > index.html \
+    && printf 'My Page\n' > index.html \
     && git add . \
     && git commit -a -m 'Initial commit' \
     && git remote add $(git origin) https://github.com/"$USER_NAME"/"$REPOSITORY".git \
     && git push -u $(git origin) gh-pages \
-    && echo 'Complete' \
-    && echo '-------------------' \
-    && echo 'You can find your last changes in the stash!'
+    && printf 'Complete\n' \
+    && printf '-------------------\n' \
+    && printf 'You can find your last changes in the stash!\n'
 #+end_src
 
 For BitBucket:
@@ -7123,7 +7125,7 @@ git commit -am Foo \
     } \
     || {
         git reset --soft HEAD^
-        echo 'Commit failed.'
+        printf 'Commit failed.\n'
     }
 #+end_src
 

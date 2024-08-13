@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240813.1205
+# .gitconfig, Time-stamp: 20240813.1316
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1350,8 +1350,8 @@
     has-new-commits = "!f() { \
         local BRANCH_NAME=\"$1\"; \
         if [ -z \"$BRANCH_NAME\" ]; then \
-            echo \"Error: Please provide a branch name as a parameter.\"; \
-            exit 1; \
+            printf >&2 'Error: Please provide a branch name as a parameter.\n' \
+            exit 2; \
         fi; \
         [ $(git rev-list --count $(git origin)/\"$BRANCH_NAME\"..\"$BRANCH_NAME\") -gt 0 ]; \
     }; f"
@@ -1715,10 +1715,10 @@
 
     # Draw Git revisions graph with Graphviz.
     graphviz = "!f() { \
-        echo 'digraph git {' ; \
+        printf 'digraph git {\n'; \
         git log -25 --pretty='format:  %h -> { %p }' \"$@\" \
             | sed 's_[0-9a-f][0-9a-f]*_\"&\"_g' ; \
-        echo '}'; \
+        printf '}\n'; \
     }; f"
 
     # Display a list of authors with their email addresses and commit counts,
@@ -2250,7 +2250,7 @@ deploy-prod =
                                     --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
                                     --date=format-local:'%Y-%m-%d' \"$commit_hash\" -- \"$FILE_PATH\"); \
             if [ -n \"$commit_info\" ]; then \
-                echo -e \"$commit_info \\e[32;1m$branch\\e[0m\"; \
+                printf \"%s \\e[32;1m%s\\e[0m\n\" \"$commit_info\" \"$branch\" \
             fi; \
         done | sort -k1,1r; \
     }; f"
@@ -2451,11 +2451,13 @@ deploy-prod =
     # Usage: git merge-dry-run BRANCH_NAME
     # Check how the merge of BRANCH_NAME into master will go
     merge-dry-run = "!f() { \
-        grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD \"$1\") FETCH_HEAD \"$1\") \
-            && echo 'Merge conflicts!' \
-            || echo 'This branch can be automatically merged.'; \
+        if grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD \"$1\") FETCH_HEAD \"$1\"); then \
+            printf 'Merge conflicts!\n' \
+        else \
+            printf 'This branch can be automatically merged.\n' \
+        fi; \
     }; f"
-# XXX DOESN'T work for git fetch & git merge
+    # XXX DOESN'T work for git fetch & git merge
 
     # Extract the "changed in both" lines as well as the conflicting parts.
     merge-dry-run-conflicts = "!f() { \
@@ -2537,7 +2539,7 @@ deploy-prod =
                     continue; \
                 fi; \
                 if printf \"%s\n\" \"$line\" | grep -q \"^[[:space:]]*\"; then \
-                    file_path=$(echo \"$line\" | sed \"s/^[[:space:]]*//\"); \
+                    file_path=$(printf \"%s\n\" \"$line\" | sed \"s/^[[:space:]]*//\"); \
                     if [ -n \"$file_path\" ]; then \
                         git checkout -- \"$file_path\"; \
                     fi; \
