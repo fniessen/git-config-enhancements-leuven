@@ -6970,7 +6970,13 @@ Show changes for a daily standup meeting:
     }; f"
 #+end_src
 
-TODO: Make author be case insensitive (with regexp and ignore case?)
+#+begin_warning
+Git's --author option is case-sensitive.
+#+end_warning
+
+*************** TODO Search for commits by an author in a case-insensitive way
+By filtering the results with ~grep~ to achieve case-insensitive matching?
+*************** END
 
 ** Debugging
 
