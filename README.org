@@ -2944,7 +2944,7 @@ to open your commit editor and reword the message.
     amend-author = "!f() { \
         if [ $# -ne 2 ]; then \
             printf >&2 'Usage: git amend-author NAME EMAIL\n'; \
-            return 1; \
+            return 2; \
         fi; \
         local NAME=\"$1\"; \
         local EMAIL=\"$2\"; \
@@ -3675,6 +3675,8 @@ branch while keeping your local changes intact and rebased:
 Or, if you need more control and visibility over the stash process:
 
 #+begin_src conf
+    ##? Usage: git pull-autostash-include-untracked
+    ##?
     ##? Auto-stash changes (including untracked files if any), pull with rebase,
     ##? and restore stashed changes (if any).
     pull-autostash-include-untracked = "!f() { \
@@ -3686,7 +3688,7 @@ Or, if you need more control and visibility over the stash process:
             if ! git diff --quiet && ! git diff --cached --quiet; then \
                 printf >&2 \"\\033[1mStash application would result in conflicts. Resolve conflicts manually.\\033[0m\\n\"; \
                 git reset --hard; # Reset working directory to avoid accidental commit. \
-                return 1; \
+                return 2; \
             fi; \
             git stash pop; \
         else \
@@ -5164,7 +5166,7 @@ Testing.
 
 * Deployments (to different environments)
 
-#+begin_src conf
+#+begin_src conf :tangle no
 rsync-deploy =
 #+end_src
 
@@ -5172,7 +5174,7 @@ rsync-deploy =
 
 See https://bitbucket.org/blog/wordpress-continuous-deployment
 
-#+begin_src conf
+#+begin_src conf :tangle no
 # Deploy a branch to review server (https://review-feature-1.example.com).
 deploy-review =
 
@@ -5595,7 +5597,7 @@ being shown in status, added using ~git add~ etc.  So correct your =.gitignore=.
 To *stage* the modified and deleted files *for commit*, use the ~git add -u~ command:
 
 #+begin_src conf
-    stage-modified-removed-files = add -u
+    stage-updated-and-deleted-files = add -u
 #+end_src
 
 The ~-u~ flag tells Git to update the index with the modifications and deletions,
@@ -6662,12 +6664,13 @@ See https://stackoverflow.com/questions/3640764/can-i-recover-a-branch-after-its
 *** Show branches and their commits
 
 #+begin_src conf
-    # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch
+
+    sbs = show-branch --sha1-name
+
     # pg sbt master pu -- if the last line is 'master' and not 'master~'
     # or 'master~N' then pu is a descendent of master
     sbt = show-branch --topics
-    sbs = show-branch --sha1-name
 #+end_src
 
 ** PUBLISH - Push
@@ -6905,24 +6908,26 @@ branches*):
     ##?
     ##? Show today's commits.
     today = "!f() { \
+        local author=\"${1-$(git config --get user.name)}\"; \
         git log \
-            --since=midnight \
-            --author=\"${1-$(git config --get user.name)}\" \
-            --no-merges \
             --all \
+            --author=\"$author\" \
+            --since=midnight \
+            --no-merges \
             --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
             --date=format:'%Y-%m-%d %a %H:%M'; \
-    }; f"
+        }; f"
 
     ##? Usage: git yesterday [AUTHOR]
     ##?
     ##? Show yesterday's commits.
     yesterday = "!f() { \
+        local author=\"${1-$(git config --get user.name)}\"; \
         git log \
-            --since='1 day ago midnight' --until=midnight \
-            --author=\"${1-$(git config --get user.name)}\" \
-            --no-merges \
             --all \
+            --author=\"$author\" \
+            --since='1 day ago midnight' --until=midnight \
+            --no-merges \
             --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
@@ -6931,11 +6936,12 @@ branches*):
     ##?
     ##? Show commits from this week.
     recent = "!f() { \
+        local author=\"${1-$(git config --get user.name)}\"; \
         git log \
-            --since='1 week ago' \
-            --author=\"${1-$(git config --get user.name)}\" \
-            --no-merges \
             --all \
+            --author=\"$author\" \
+            --since='1 week ago midnight' \
+            --no-merges \
             --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
@@ -6948,19 +6954,19 @@ Show changes for a daily standup meeting:
     # Summarize changes since 24h, suitable for a daily standup meeting.
     standup = "!f() { \
         local today=$(date +%a); \
+        local since; \
         if [ \"$today\" = \"Mon\" ]; then \
             since=\"last.Friday\"; \
         else \
             since=\"yesterday\"; \
         fi; \
-        author=\"${1-$(git config --get user.name)}\"; \
+        local author=\"${1-$(git config --get user.name)}\"; \
         git log \
             --all \
-            --since=\"$since\" \
             --author=\"$author\" \
+            --since=\"$since\" \
             --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
             --date=format:'%Y-%m-%d %a %H:%M'; \
-        printf '\n'; \
     }; f"
 #+end_src
 

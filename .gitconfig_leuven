@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240813.1541
+# .gitconfig, Time-stamp: 20240814.1123
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1010,7 +1010,7 @@
     amend-author = "!f() { \
         if [ $# -ne 2 ]; then \
             printf >&2 'Usage: git amend-author NAME EMAIL\n'; \
-            return 1; \
+            return 2; \
         fi; \
         local NAME=\"$1\"; \
         local EMAIL=\"$2\"; \
@@ -1309,6 +1309,8 @@
     ##? changes (onto the current branch).
     pull-autostash = pull --rebase --autostash
 
+    ##? Usage: git pull-autostash-include-untracked
+    ##?
     ##? Auto-stash changes (including untracked files if any), pull with rebase,
     ##? and restore stashed changes (if any).
     pull-autostash-include-untracked = "!f() { \
@@ -1320,7 +1322,7 @@
             if ! git diff --quiet && ! git diff --cached --quiet; then \
                 printf >&2 \"\\033[1mStash application would result in conflicts. Resolve conflicts manually.\\033[0m\\n\"; \
                 git reset --hard; # Reset working directory to avoid accidental commit. \
-                return 1; \
+                return 2; \
             fi; \
             git stash pop; \
         else \
@@ -1901,27 +1903,6 @@
     # Currently do not work as alias, works from comand line directly. There is a problem with \r
     check-eol = grep --files-with-matches $'\\r' HEAD
 
-rsync-deploy =
-
-# Deploy a branch to review server (https://review-feature-1.example.com).
-deploy-review =
-
-# Deploy master to staging server (https://staging.example.com).
-deploy-staging =
-
-# Deploy master to production server (https://example.com).
-deploy-prod =
-
-  # # Deploy
-  # staging = !git push heroku-staging $(git current-branch):master -f && git track 'Deployed to staging ' # push current branch to staging, can add more comments after
-  # dev = !git push heroku-dev $(git current-branch):master -f && git track 'Deployed to dev ' # push current branch to dev
-  # deploy = !git push heroku $(git current-branch):master -f && git track 'Deployed to production ' # push current branch to production
-
-# shipit = push heroku master
-
- # deploy='git push production master && terminal-notifier-notify -title "Deploy" -message "Deploy complete"'
- # stage='git push staging $(git current-branch):master'
-
     # issues = "!f() { \
     #     local USER_NAME=\"$1\"; \
     #     curl --user $USER_NAME \
@@ -2077,7 +2058,7 @@ deploy-prod =
     # Show minimal differences in changes between staged changes and the most recent commit, ignoring whitespace.
     swdiff = diff --diff-algorithm=minimal -w --cached
 
-    stage-modified-removed-files = add -u
+    stage-updated-and-deleted-files = add -u
 
     ##? Usage: git ls
     ##?
@@ -2562,12 +2543,13 @@ deploy-prod =
             && git stash pop; \
     }; f"
 
-    # "show-branch -g=N" can't be aliased for N easily, so we stop here:
     sb  = show-branch
+
+    sbs = show-branch --sha1-name
+
     # pg sbt master pu -- if the last line is 'master' and not 'master~'
     # or 'master~N' then pu is a descendent of master
     sbt = show-branch --topics
-    sbs = show-branch --sha1-name
 
     ##? Usage: git outgoing
     ##?
@@ -2632,24 +2614,26 @@ deploy-prod =
     ##?
     ##? Show today's commits.
     today = "!f() { \
+        local author=\"${1-$(git config --get user.name)}\"; \
         git log \
-            --since=midnight \
-            --author=\"${1-$(git config --get user.name)}\" \
-            --no-merges \
             --all \
+            --author=\"$author\" \
+            --since=midnight \
+            --no-merges \
             --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
             --date=format:'%Y-%m-%d %a %H:%M'; \
-    }; f"
+        }; f"
 
     ##? Usage: git yesterday [AUTHOR]
     ##?
     ##? Show yesterday's commits.
     yesterday = "!f() { \
+        local author=\"${1-$(git config --get user.name)}\"; \
         git log \
-            --since='1 day ago midnight' --until=midnight \
-            --author=\"${1-$(git config --get user.name)}\" \
-            --no-merges \
             --all \
+            --author=\"$author\" \
+            --since='1 day ago midnight' --until=midnight \
+            --no-merges \
             --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
@@ -2658,11 +2642,12 @@ deploy-prod =
     ##?
     ##? Show commits from this week.
     recent = "!f() { \
+        local author=\"${1-$(git config --get user.name)}\"; \
         git log \
-            --since='1 week ago' \
-            --author=\"${1-$(git config --get user.name)}\" \
-            --no-merges \
             --all \
+            --author=\"$author\" \
+            --since='1 week ago midnight' \
+            --no-merges \
             --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
@@ -2671,19 +2656,19 @@ deploy-prod =
     # Summarize changes since 24h, suitable for a daily standup meeting.
     standup = "!f() { \
         local today=$(date +%a); \
+        local since; \
         if [ \"$today\" = \"Mon\" ]; then \
             since=\"last.Friday\"; \
         else \
             since=\"yesterday\"; \
         fi; \
-        author=\"${1-$(git config --get user.name)}\"; \
+        local author=\"${1-$(git config --get user.name)}\"; \
         git log \
             --all \
-            --since=\"$since\" \
             --author=\"$author\" \
+            --since=\"$since\" \
             --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
             --date=format:'%Y-%m-%d %a %H:%M'; \
-        printf '\n'; \
     }; f"
 
     # Enable comprehensive debugging output.
