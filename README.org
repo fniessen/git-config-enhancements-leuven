@@ -827,8 +827,15 @@ The first color given is the foreground; the second is the background.", e.g
 
 #+begin_src conf
 [format]
-    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)
+    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(reset) %s%C(auto)%d%C(reset) %C(blue)<%an>%C(reset)
+#+end_src
 
+This format is generally preferable because it maintains the prominence of the
+*commit message* while still clearly indicating the tag and author
+information. The commit message is the most important piece of information and
+should be easily noticeable.
+
+#+begin_src conf
 # https://dev.to/megamattmiller/the-git-aliases-that-get-me-to-friday-1cmj
 [custom.formats]
     ls = "[%C(auto,yellow)%<|(10)%h%C(reset)] [%C(auto,bold blue)%<(15trunc)%cn%C(reset)]  %C(auto)%d% C(reset)%s"
