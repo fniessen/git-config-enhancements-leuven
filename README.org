@@ -1213,6 +1213,35 @@ By default, the GitHub API creates a repository as *public*.
     }; f"
 #+end_src
 
+** SHOW - Check the status of your files
+
+Give the status in the *short format* (preceded by a line showing the /branch name/
+and /tracking info/).
+
+#+begin_src conf
+    ##? Usage: git st
+    ##?
+    ##? Show the status in short format with branch info.
+    st = status -s -b
+#+end_src
+
+In the following example:
+
+#+begin_example
+M  README
+ M lisp/mail/rmail.el
+MM ChangeLog
+#+end_example
+
+- =README= is changed and *staged for commit* (it's *in the index*),
+- =lisp/mail/rmail.el= is changed but *not staged for commit*, and
+- =Changelog= is changed and staged for commit, then *changed again* and the new
+  change is *not staged for commit*.
+
+#+begin_note
+Staging for commit is typically done by ~git add~.
+#+end_note
+
 * Instructions
 
 Start working with your repository.
@@ -2220,6 +2249,34 @@ XXX See doc of git help stash for workflows...
                git fsck --unreachable |
                grep commit | cut -d\  -f3 |
                xargs git log --merges --no-walk --grep=WIP
+
+** SHOW - Show blame information about original authors of lines changed or removed
+
+$ git blame -w  # ignores white space
+$ git blame -M  # ignores moving text
+$ git blame -C  # ignores moving text into other files
+
+git blame -w README.md
+The -w option ignores whitespace changes. If a previous author has modified the
+spacing of a file by switching from tabs to spaces or adding new lines this,
+unfortunately, obscures the output of git blame by showing these changes.
+
+git blame -M README.md
+The -M option detects moved or copied lines within in the same file. This will
+report the original author of the lines instead of the last author that moved or
+copied the lines.
+
+git blame -C README.md
+The -C option detects lines that were moved or copied from other files. This
+will report the original author of the lines instead of the last author that
+moved or copied the lines.
+
+: git blame -L 1509,1511 lisp/ox-html.el
+
+#+begin_src conf
+    praise = blame -w
+    archeology = blame -w -C -n
+#+end_src
 
 * Commits
 
@@ -3231,6 +3288,105 @@ hash in the series:
 Alternatively?
 
 : git log ... | xargs -n 1 git show
+
+** Recent activity and standup reports
+
+Quickly see what has been done today (list commits that aren't merges, on *all
+branches*):
+
+#+begin_src conf
+    ##? Usage: git today [AUTHOR]
+    ##?
+    ##? Show today's commits.
+    today = "!f() { \
+        local AUTHOR=\"${1-}\"; \
+        if [ -z \"$AUTHOR\" ]; then \
+            git log \
+                --all \
+                --since=midnight \
+                --no-merges \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d %C(bold blue)<%an>%C(reset)' \
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        else \
+            git log \
+                --all \
+                -i --author=\"$AUTHOR\" \
+                --since=midnight \
+                --no-merges \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        fi; \
+    }; f"
+
+    ##? Usage: git yesterday [AUTHOR]
+    ##?
+    ##? Show yesterday's commits.
+    yesterday = "!f() { \
+        local AUTHOR=\"${1-}\"; \
+        if [ -z \"$AUTHOR\" ]; then \
+            git log \
+                --all \
+                --since='1 day ago midnight' --until=midnight \
+                --no-merges \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d %C(bold blue)<%an>%C(reset)' \
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        else \
+            git log \
+                --all \
+                -i --author=\"$AUTHOR\" \
+                --since='1 day ago midnight' --until=midnight \
+                --no-merges \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        fi; \
+    }; f"
+
+    ##? Usage: git recent [AUTHOR]
+    ##?
+    ##? Show commits from this week.
+    recent = "!f() { \
+        local AUTHOR=\"${1-}\"; \
+        if [ -z \"$AUTHOR\" ]; then \
+            git log \
+                --all \
+                --since='1 week ago midnight' \
+                --no-merges \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d %C(bold blue)<%an>%C(reset)' \
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        else \
+            git log \
+                --all \
+                -i --author=\"$AUTHOR\" \
+                --since='1 week ago midnight' \
+                --no-merges \
+                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
+                --date=format:'%Y-%m-%d %a %H:%M'; \
+        fi; \
+    }; f"
+#+end_src
+
+Show changes for a daily standup meeting:
+
+#+begin_src conf
+    # Usage: git standup [AUTHOR]
+    # Summarize changes since 24h, suitable for a daily standup meeting.
+    standup = "!f() { \
+        local AUTHOR=\"${1-$(git config --get user.name)}\"; \
+        local today=$(date +%a); \
+        local since; \
+        if [ \"$today\" = \"Mon\" ]; then \
+            since=\"last.Friday\"; \
+        else \
+            since=\"yesterday\"; \
+        fi; \
+        git log \
+            --all \
+            -i --author=\"$AUTHOR\" \
+            --since=\"$since\" \
+            --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
+            --date=format:'%Y-%m-%d %a %H:%M'; \
+    }; f"
+#+end_src
 
 * Branches
 
@@ -5392,6 +5548,18 @@ List the user's public SSH keys:
 : # For BitBucket.
 : curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
 
+** Execute shell command and show output.
+
+Define:
+
+#+begin_src conf
+    # Execute shell command and show output.
+    x = "!exec "
+#+end_src
+
+so that you can do things like ~git x make~.  This works because Shell aliases are
+always executed in the top-level directory.
+
 * ------------------------------------------------------------------------------
 
 * Run on All repositories
@@ -5473,45 +5641,6 @@ Alternatively,
 #+end_src
 
 * Sort out
-
-Define:
-
-#+begin_src conf
-    # Execute shell command and show output.
-    x = "!exec "
-#+end_src
-
-so that you can do things like ~git x make~.  This works because Shell aliases are
-always executed in the top-level directory.
-
-** SHOW - Check the status of your files
-
-Give the status in the *short format* (preceded by a line showing the /branch name/
-and /tracking info/).
-
-#+begin_src conf
-    ##? Usage: git st
-    ##?
-    ##? Show the status in short format with branch info.
-    st = status -s -b
-#+end_src
-
-In the following example:
-
-#+begin_example
-M  README
- M lisp/mail/rmail.el
-MM ChangeLog
-#+end_example
-
-- =README= is changed and *staged for commit* (it's *in the index*),
-- =lisp/mail/rmail.el= is changed but *not staged for commit*, and
-- =Changelog= is changed and staged for commit, then *changed again* and the new
-  change is *not staged for commit*.
-
-#+begin_note
-Staging for commit is typically done by ~git add~.
-#+end_note
 
 ** SHOW - View your changes
 
@@ -5900,34 +6029,6 @@ directory across all local branches:
             fi; \
         done | sort -k1,1r; \
     }; f"
-#+end_src
-
-** SHOW - Show blame information about original authors of lines changed or removed
-
-$ git blame -w  # ignores white space
-$ git blame -M  # ignores moving text
-$ git blame -C  # ignores moving text into other files
-
-git blame -w README.md
-The -w option ignores whitespace changes. If a previous author has modified the
-spacing of a file by switching from tabs to spaces or adding new lines this,
-unfortunately, obscures the output of git blame by showing these changes.
-
-git blame -M README.md
-The -M option detects moved or copied lines within in the same file. This will
-report the original author of the lines instead of the last author that moved or
-copied the lines.
-
-git blame -C README.md
-The -C option detects lines that were moved or copied from other files. This
-will report the original author of the lines instead of the last author that
-moved or copied the lines.
-
-: git blame -L 1509,1511 lisp/ox-html.el
-
-#+begin_src conf
-    praise = blame -w
-    archeology = blame -w -C -n
 #+end_src
 
 ** Merge
@@ -6911,105 +7012,6 @@ alias cav='curl $(pbpaste) | git apply -v --check'
 
 # Verify patch with `patch'
 alias capv='curl $(pbpaste) | patch -p1 --dry-run'
-#+end_src
-
-** Today
-
-Quickly see what has been done today (list commits that aren't merges, on *all
-branches*):
-
-#+begin_src conf
-    ##? Usage: git today [AUTHOR]
-    ##?
-    ##? Show today's commits.
-    today = "!f() { \
-        local AUTHOR=\"${1-}\"; \
-        if [ -z \"$AUTHOR\" ]; then \
-            git log \
-                --all \
-                --since=midnight \
-                --no-merges \
-                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d %C(bold blue)<%an>%C(reset)' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-        else \
-            git log \
-                --all \
-                -i --author=\"$AUTHOR\" \
-                --since=midnight \
-                --no-merges \
-                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-        fi; \
-    }; f"
-
-    ##? Usage: git yesterday [AUTHOR]
-    ##?
-    ##? Show yesterday's commits.
-    yesterday = "!f() { \
-        local AUTHOR=\"${1-}\"; \
-        if [ -z \"$AUTHOR\" ]; then \
-            git log \
-                --all \
-                --since='1 day ago midnight' --until=midnight \
-                --no-merges \
-                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d %C(bold blue)<%an>%C(reset)' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-        else \
-            git log \
-                --all \
-                -i --author=\"$AUTHOR\" \
-                --since='1 day ago midnight' --until=midnight \
-                --no-merges \
-                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-        fi; \
-    }; f"
-
-    ##? Usage: git recent [AUTHOR]
-    ##?
-    ##? Show commits from this week.
-    recent = "!f() { \
-        local AUTHOR=\"${1-}\"; \
-        if [ -z \"$AUTHOR\" ]; then \
-            git log \
-                --all \
-                --since='1 week ago midnight' \
-                --no-merges \
-                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d %C(bold blue)<%an>%C(reset)' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-        else \
-            git log \
-                --all \
-                -i --author=\"$AUTHOR\" \
-                --since='1 week ago midnight' \
-                --no-merges \
-                --pretty='%C(green)%ad%C(auto) - %s%C(auto)%d' \
-                --date=format:'%Y-%m-%d %a %H:%M'; \
-        fi; \
-    }; f"
-#+end_src
-
-Show changes for a daily standup meeting:
-
-#+begin_src conf
-    # Usage: git standup [AUTHOR]
-    # Summarize changes since 24h, suitable for a daily standup meeting.
-    standup = "!f() { \
-        local AUTHOR=\"${1-$(git config --get user.name)}\"; \
-        local today=$(date +%a); \
-        local since; \
-        if [ \"$today\" = \"Mon\" ]; then \
-            since=\"last.Friday\"; \
-        else \
-            since=\"yesterday\"; \
-        fi; \
-        git log \
-            --all \
-            -i --author=\"$AUTHOR\" \
-            --since=\"$since\" \
-            --format=format:'%C(green)%ad%C(reset) - %s%C(auto)%d' \
-            --date=format:'%Y-%m-%d %a %H:%M'; \
-    }; f"
 #+end_src
 
 ** Debugging
