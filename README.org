@@ -2004,9 +2004,9 @@ user wants to have an updated repository.
     stashes = "!f() { \
         stash_list=\"$(git stash list --date=short)\"; \
         if [ -z \"$stash_list\" ]; then \
-            printf 'Nothing stashed\n'; \
+            printf \"$(tput setaf 2)%s$(tput sgr0)\" \"Nothing stashed\"; \
         fi; \
-        printf '%s' \"$stash_list\n\"; \
+        printf \"$(tput setaf 1)%s$(tput sgr0)\n\" \"$stash_list\"; \
     }; f"
 #+end_src
 
@@ -5611,12 +5611,13 @@ always executed in the top-level directory.
         fi; \
         local repo_slug_local; \
         find . -type d -name '.git' \
+            | sort \
             | sed 's_/.git__' \
             | while read -r repo_path; do \
                 repo_slug_local=$(git -C $repo_path repo-slug-local); \
-                printf '\\033[1m%s\\033[0m\n' \"$repo_slug_local\"; \
-                git -C $repo_path -c color.status=always \"$@\" 2>&1; \
-                printf '\n\n'; \
+                printf '\\033[1m%s:\\033[0m\n' \"$repo_slug_local\"; \
+                git -C $repo_path -c color.status=always \"$@\" 2>&1 | sed 's/^/      /'; \
+                printf '\n'; \
             done; \
     }; f"
 #+end_src
