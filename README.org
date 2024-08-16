@@ -3377,18 +3377,18 @@ name, there is *no branch name*. You can't get something that doesn't exist.
 Push the current branch to the remote and establish tracking:
 
 #+begin_src conf
-    ##? Usage: git publish-branch [REMOTE]
+    ##? Usage: git publish-branch
     ##?
-    ##? Push the current branch to a remote repository and set upstream.
+    ##? Push the current branch to the remote repository 'origin' and set it as
+    ##? upstream.
     publish-branch = "!f() { \
-        local REMOTE=${1:-$(git origin); }; \
         local branch=$(git current-branch); \
-        git push -u $REMOTE $branch; \
+        git push -u origin $branch; \
     }; f"
 
     ##? Usage: git unpublish-branch
     ##?
-    ##? Delete the current branch from the remote repository.
+    ##? Delete the current branch from the remote repository 'origin'.
     unpublish-branch = "!f() { \
         local current_branch=$(git current-branch); \
         git delete-remote-branch \"$current_branch\"; \
