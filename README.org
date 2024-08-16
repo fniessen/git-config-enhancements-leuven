@@ -5553,12 +5553,22 @@ List the user's public SSH keys:
 Define:
 
 #+begin_src conf
-    # Execute shell command and show output.
+    ##? Execute a shell command and show its output
     x = "!exec "
 #+end_src
 
 so that you can do things like ~git x make~.  This works because Shell aliases are
 always executed in the top-level directory.
+
+** Show the path to root directory of Git repo
+
+#+begin_src conf
+    ##? Show the absolute path to the root directory of the Git repository.
+    root = rev-parse --show-toplevel
+
+    ##? Show the path relative to the root directory of the Git repository.
+    root-relative = rev-parse --show-prefix
+#+end_src
 
 * ------------------------------------------------------------------------------
 
@@ -7047,22 +7057,6 @@ This command has some useful parameters:
 - ~-x~ to add a line "Cherry-picked commit" in the commit message
 - ~--no-commit~ or ~-n~ to apply the commit changes in the unstaged area (unstead of
   creating a commit in the branch)
-
-** Show the path to root directory of Git repo
-
-#+begin_src conf :tangle no
-    # Get the path cleaned up.
-    root = !pwd -P
-#+end_src
-
-#+begin_note
-This works because Shell aliases are always executed in the top-level directory.
-#+end_note
-
-#+begin_src conf
-    root = rev-parse --show-toplevel
-    root-relative = rev-parse --show-prefix
-#+end_src
 
 ** Sync
 

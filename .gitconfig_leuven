@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240816.1117
+# .gitconfig, Time-stamp: 20240816.1156
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2053,8 +2053,14 @@
     }; f"
 # XXX Test it with tag or branch.
 
-    # Execute shell command and show output.
+    ##? Execute a shell command and show its output
     x = "!exec "
+
+    ##? Show the absolute path to the root directory of the Git repository.
+    root = rev-parse --show-toplevel
+
+    ##? Show the path relative to the root directory of the Git repository.
+    root-relative = rev-parse --show-prefix
 
     ##? Usage: git all-repos COMMAND [ARGS]
     ##?
@@ -2712,9 +2718,6 @@
 
     # cherry-pick without making a commit, and when when recording the commit, append a line that says "(cherry picked from commit ...)"
     cp-nx = cherry-pick --no-commit -x
-
-    root = rev-parse --show-toplevel
-    root-relative = rev-parse --show-prefix
 
     lost = "!git fsck \
                 | awk '/dangling commit/ {print $3}' \
