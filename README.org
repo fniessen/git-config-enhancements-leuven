@@ -3388,6 +3388,25 @@ Show changes for a daily standup meeting:
     }; f"
 #+end_src
 
+** Cherry-pick
+
+Apply the changes introduced by some existing commits; useful for moving small
+chunks of code between branches.
+
+#+begin_src conf
+    ##? Cherry-pick a commit and add a note to the commit message indicating it
+    ##? was cherry-picked.
+    cp = cherry-pick -x
+    # Append a line that says "(cherry picked from commit ...)".
+    # Add a line "Cherry-picked commit" in the commit message.
+
+    ##? Cherry-pick a commit (without committing it) and add a note to the
+    ##? commit message.
+    cp-no-commit = cherry-pick --no-commit -x
+    # Apply the commit changes in the unstaged area (unstead of creating
+    # a commit in the branch).
+#+end_src
+
 * Branches
 
 Terminology:
@@ -5789,7 +5808,10 @@ List commits *showing changed files* (prettier and more concise version of
     ##? Usage: git log-unified-diff
     ##?
     ##? Show commit log with unified diffs.
-    lll = log -u
+    log-unified-diff = log -u
+
+    ##? Alias for 'log-unified-diff'.
+    lll = log-unified-diff
 #+end_src
 
 #+begin_src conf
@@ -7036,27 +7058,6 @@ Sometimes it's nice to see what is going on under the hood. Try this alias:
 Just insert ~debug~ between ~git~ and whatever would usually follow; for example:
 
 : git debug changed
-
-** Abbreviations
-
-Basic shortcuts.
-
-#+begin_src conf
-    cp = cherry-pick -x
-    pick = cherry-pick -s
-
-    # cherry-pick - apply the changes introduced by some existing commits; useful for moving small chunks of code between branches.
-    cp = cherry-pick
-
-    # cherry-pick without making a commit, and when when recording the commit, append a line that says "(cherry picked from commit ...)"
-    cp-nx = cherry-pick --no-commit -x
-#+end_src
-
-This command has some useful parameters:
-- ~-e~ to edit git message
-- ~-x~ to add a line "Cherry-picked commit" in the commit message
-- ~--no-commit~ or ~-n~ to apply the commit changes in the unstaged area (unstead of
-  creating a commit in the branch)
 
 ** Sync
 

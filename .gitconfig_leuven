@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240816.1156
+# .gitconfig, Time-stamp: 20240816.1213
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1194,6 +1194,18 @@
             --date=format:'%Y-%m-%d %a %H:%M'; \
     }; f"
 
+    ##? Cherry-pick a commit and add a note to the commit message indicating it
+    ##? was cherry-picked.
+    cp = cherry-pick -x
+    # Append a line that says "(cherry picked from commit ...)".
+    # Add a line "Cherry-picked commit" in the commit message.
+
+    ##? Cherry-pick a commit (without committing it) and add a note to the
+    ##? commit message.
+    cp-no-commit = cherry-pick --no-commit -x
+    # Apply the commit changes in the unstaged area (unstead of creating
+    # a commit in the branch).
+
     create-branch = checkout -b
 
     ##? Usage: git current-branch
@@ -2173,7 +2185,10 @@
     ##? Usage: git log-unified-diff
     ##?
     ##? Show commit log with unified diffs.
-    lll = log -u
+    log-unified-diff = log -u
+
+    ##? Alias for 'log-unified-diff'.
+    lll = log-unified-diff
 
     # Usage: git last
     # Return the last commit on the current branch.
@@ -2709,15 +2724,6 @@
 
     # Enable comprehensive debugging output.
     debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
-
-    cp = cherry-pick -x
-    pick = cherry-pick -s
-
-    # cherry-pick - apply the changes introduced by some existing commits; useful for moving small chunks of code between branches.
-    cp = cherry-pick
-
-    # cherry-pick without making a commit, and when when recording the commit, append a line that says "(cherry picked from commit ...)"
-    cp-nx = cherry-pick --no-commit -x
 
     lost = "!git fsck \
                 | awk '/dangling commit/ {print $3}' \
