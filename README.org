@@ -3715,13 +3715,18 @@ The following approach:
 
 : up = "!git stash && git pull && git stash pop"
 
-is *unsafe*: if there's nothing to stash, the first command will do nothing, and
-then ~stash pop~ will unstash some random stuff from before.
+is *unsafe*: If there’s nothing to stash, the first command does nothing, and the
+~stash pop~ command may end up applying some old, unrelated changes.
 #+end_warning
 
 See https://www.praqma.com/stories/git-autostash/.
 
-: git rebase -i --autosquash --autostash
+#+begin_src conf :tangle no
+    # Interactive rebase with autosquash and autostash.
+    rebaser = "!f() { \
+        git rebase -i --autosquash --autostash; \
+    }; f"
+#+end_src
 
 Really handy in projects that don't do merge commits.
 
