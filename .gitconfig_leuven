@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240816.2134
+# .gitconfig, Time-stamp: 20240819.1810
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -354,30 +354,40 @@
     ##? Alias for 'search-for-files'.
     find-files = search-for-files
 
-    ##? Usage: git search-for-files-all-branches FILE_NAME
+    ##? Usage: git search-for-files-all-branches PATTERN
     ##?
     ##? Search for a specific file in all local branches.
     ##?
     ##? Arguments:
-    ##?   FILE_NAME                     The name of the file to search for in
+    ##?   PATTERN                       The name of the file to search for in
     ##?                                 all local branches.
     search-for-files-all-branches = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git search-for-files-all-branches FILE_NAME\n'; \
+            printf >&2 'Usage: git search-for-files-all-branches PATTERN\n'; \
             return 2; \
         fi; \
-        local FILE_NAME=\"$1\"; \
-        git local-branches \
+        local PATTERN=\"$1\"; \
+        git remote-branches \
+            | grep -v HEAD \
             | while read -r branch; do \
                   printf \"\n$(tput bold)$(tput setaf 2)$branch:$(tput sgr0)\n\"; \
                   git ls-tree -r --name-only \"$branch\" | \
                   nl -bn -w3 | \
-                  grep --color=auto \"$FILE_NAME\"; \
+                  grep --color=auto \"$PATTERN\"; \
               done; \
     }; f"
 
     ##? Alias for 'search-for-files-all-branches'.
     find-files-all-branches = search-for-files-all-branches
+
+    find-files-all-branches2 = "!f() { \
+        for branch in $(git remote-branches | grep -v HEAD); do \
+            if git ls-tree -r \"$branch\" --name-only \
+                   | grep -q \"$1\"; then \
+                echo \"Found in $branch\"; \
+            fi; \
+        done; \
+    }; f"
 
     # Usage: git search-for-code PATTERN [TREE]
     #
@@ -1300,8 +1310,12 @@
                 --format='%(color:green)%(committerdate:short)%(color:reset) %(HEAD) %(color:green bold)%(refname:short)%(color:reset) %(color:red bold)%(upstream:track)%(color:reset) %(color:yellow)%(objectname:short)%(color:reset) %(contents:subject) %(color:blue)<%(authorname)>%(color:reset)'
 
     # Usage: git remote-branches
+    # List remote branches.
+    remote-branches = branch -r
+
+    # Usage: git remote-branches
     # List remote branches sorted by most recent commit.
-    remote-branches = "!f() { \
+    remote-branches-with-commit-info = "!f() { \
         git fetch --prune && \
         for branch in $(git for-each-ref --format='%(refname:short)' refs/remotes | grep -v HEAD); do \
             printf \"%s\\t%s\n\" \"$(git show -s --format='%Cred%ci %C(green)%h %C(yellow)%cr %C(magenta)%an %C(blue)' $branch | head -n 1)\" \"$branch\"; \
@@ -1310,7 +1324,7 @@
 
     # Iterate over remote branches, show commit info and branch name, and sort
     # by date.
-    remote-branches-with-commit-info = "!f() { \
+    remote-branches-with-commit-info2 = "!f() { \
         git fetch --prune && \
         for branch in $(git branch -r | grep -v HEAD); do \
             echo $(git show --name-only --pretty=\"[%ai] [%ar] [%an] [%h]\" $branch | head -n 1) [${branch}]; \
