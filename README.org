@@ -994,6 +994,26 @@ maintainable. Here are some best practices to keep in mind:
 - Use the *single square bracket* ~[~ for conditional testing, which is more
   universally supported.
 
+  #+begin_note
+  ~[[~ has fewer surprises and is generally safer to use. But it is not
+  portable -- it's a *Bashism*, POSIX doesn't specify what it does.
+
+  For example, you can do
+
+  : [[ -e $b ]]
+
+  to test whether a file exists.
+
+  But with ~[~, you have to quote ~$b~, because it splits the argument and expands
+  things like ~"a*"~ (where ~[[~ takes it literally).
+
+  : [ -e "$b" ]
+
+  That has also to do with how ~[~ can be an external program and receives its
+  argument just normally like every other program (although it can also be
+  a builtin, but then it still has not this special handling).
+  #+end_note
+
 * Repository
 
 For *free private repositories*, see https://bitbucket.org/.
@@ -1469,8 +1489,9 @@ thrown away, the alias to use is ~unmodify~;
     ##?
     ##? Examples:
     ##?   git unmodify                  Restore all modified files.
-    ##?   git unmodify .                Restore all modified files in the current directory.
-    ##?   git unmodify PATH/TO/FILE     Restore a specific modified file:.
+    ##?   git unmodify .                Restore all modified files in the
+    ##?                                 current directory.
+    ##?   git unmodify PATH/TO/FILE     Restore a specific modified file.
     unmodify = "!f() { \
         local FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
@@ -1495,7 +1516,8 @@ thrown away, the alias to use is ~unmodify~;
     ##?
     ##? Examples:
     ##?   git undelete                  Restore all deleted files.
-    ##?   git undelete .                Restore all deleted files in the current directory.
+    ##?   git undelete .                Restore all deleted files in the current
+    ##?                                 directory.
     ##?   git undelete PATH/TO/FILE     Restore a specific deleted file.
     undelete = "!f() { \
         local FILE_TO_RESTORE=\"$1\"; \
@@ -1626,44 +1648,6 @@ List untracked *files* that are *ignored* according to your Git repository's
     # List all tracked files in the repository, sorted by last modification time.
     tracked-files = ls-files -t
     #+end_src
-
-*** Tell if a file is being tracked
-
-#+begin_src conf
-    # Usage: git check-file-status FILENAME
-    # Check the status of a file (tracked, not tracked, or does not exist).
-    check-file-status = "!f() { \
-        if [ -e \"$1\" ]; then \
-            if git ls-files --error-unmatch \"$1\" >/dev/null 2>&1; then \
-                printf \"$1: tracked\n\"; \
-            else \
-                printf \"$1: not tracked\n\"; \
-            fi; \
-        else \
-            printf \"$1: does not exist\n\"; \
-        fi; \
-    }; f"
-#+end_src
-
-#+begin_note
-~[[~ has fewer surprises and is generally safer to use. But it is not portable --
-it's a *Bashism*, POSIX doesn't specify what it does.
-
-For example, you can do
-
-: [[ -e $b ]]
-
-to test whether a file exists.
-
-But with ~[~, you have to quote ~$b~, because it splits the argument and expands
-things like ~"a*"~ (where ~[[~ takes it literally).
-
-: [ -e "$b" ]
-
-That has also to do with how ~[~ can be an external program and receives its
-argument just normally like every other program (although it can also be
-a builtin, but then it still has not this special handling).
-#+end_note
 
 ** Ignoring files
 

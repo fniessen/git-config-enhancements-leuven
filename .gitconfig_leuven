@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240820.1422
+# .gitconfig, Time-stamp: 20240820.1431
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -421,8 +421,9 @@
     ##?
     ##? Examples:
     ##?   git unmodify                  Restore all modified files.
-    ##?   git unmodify .                Restore all modified files in the current directory.
-    ##?   git unmodify PATH/TO/FILE     Restore a specific modified file:.
+    ##?   git unmodify .                Restore all modified files in the
+    ##?                                 current directory.
+    ##?   git unmodify PATH/TO/FILE     Restore a specific modified file.
     unmodify = "!f() { \
         local FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
@@ -447,7 +448,8 @@
     ##?
     ##? Examples:
     ##?   git undelete                  Restore all deleted files.
-    ##?   git undelete .                Restore all deleted files in the current directory.
+    ##?   git undelete .                Restore all deleted files in the current
+    ##?                                 directory.
     ##?   git undelete PATH/TO/FILE     Restore a specific deleted file.
     undelete = "!f() { \
         local FILE_TO_RESTORE=\"$1\"; \
@@ -515,20 +517,6 @@
     # Usage: git tracked-files
     # List all tracked files in the repository, sorted by last modification time.
     tracked-files = ls-files -t
-
-    # Usage: git check-file-status FILENAME
-    # Check the status of a file (tracked, not tracked, or does not exist).
-    check-file-status = "!f() { \
-        if [ -e \"$1\" ]; then \
-            if git ls-files --error-unmatch \"$1\" >/dev/null 2>&1; then \
-                printf \"$1: tracked\n\"; \
-            else \
-                printf \"$1: not tracked\n\"; \
-            fi; \
-        else \
-            printf \"$1: does not exist\n\"; \
-        fi; \
-    }; f"
 
     ##? Usage: git ignore PATTERN
     ##?
