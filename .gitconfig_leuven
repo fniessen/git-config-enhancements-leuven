@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240820.1431
+# .gitconfig, Time-stamp: 20240820.1440
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -996,23 +996,25 @@
 
     # Append the staged changes to the last commit, reusing its message.
     amend-reuse = "!f() { \
-        local upstream=$(git upstream-commit 2>/dev/null); \
+        local upstream_commit=$(git upstream-commit 2>/dev/null); \
         local local_commit=$(git local-commit); \
-        if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
+        if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
             printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
         fi; \
         git commit -v --amend --reuse-message HEAD; \
     }; f"
 
+    ##? Example:
+    ##?   git amend-message "Fix typo in README"
     amend-message = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git amend-message \"NEW_COMMIT_MESSAGE\"\n'; \
+            printf >&2 'Usage: git amend-message NEW_COMMIT_MESSAGE\n'; \
             return 2; \
         fi; \
-        local upstream=$(git upstream-commit 2>/dev/null); \
+        local upstream_commit=$(git upstream-commit 2>/dev/null); \
         local local_commit=$(git local-commit); \
-        if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
+        if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
             printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
         fi; \
@@ -1033,9 +1035,9 @@
         fi; \
         local NAME=\"$1\"; \
         local EMAIL=\"$2\"; \
-        local upstream=$(git upstream-commit 2>/dev/null); \
+        local upstream_commit=$(git upstream-commit 2>/dev/null); \
         local local_commit=$(git local-commit); \
-        if [ -n \"$upstream\" ] && [ \"$upstream\" = \"$local_commit\" ]; then \
+        if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
             printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
         fi; \
