@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240819.1810
+# .gitconfig, Time-stamp: 20240820.1110
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2737,8 +2737,21 @@
         git add -p; \
     }; f"
 
-    # Enable comprehensive debugging output.
-    debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
+    ##? Usage: git trace GIT_COMMAND
+    ##?
+    ##? Enable comprehensive Git trace logging for debugging purposes.
+    trace = "!f() { \
+        set -x; \
+        GIT_TRACE=2 \
+        GIT_CURL_VERBOSE=2 \
+        GIT_TRACE_PERFORMANCE=2 \
+        GIT_TRACE_PACK_ACCESS=2 \
+        GIT_TRACE_PACKET=2 \
+        GIT_TRACE_PACKFILE=2 \
+        GIT_TRACE_SETUP=2 \
+        GIT_TRACE_SHALLOW=2 \
+        git \"$@\"; \
+    }; f"
 
     lost = "!git fsck \
                 | awk '/dangling commit/ {print $3}' \

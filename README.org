@@ -7070,13 +7070,26 @@ alias capv='curl $(pbpaste) | patch -p1 --dry-run'
 Sometimes it's nice to see what is going on under the hood. Try this alias:
 
 #+begin_src conf
-    # Enable comprehensive debugging output.
-    debug = "!set -x; GIT_TRACE=2 GIT_CURL_VERBOSE=2 GIT_TRACE_PERFORMANCE=2 GIT_TRACE_PACK_ACCESS=2 GIT_TRACE_PACKET=2 GIT_TRACE_PACKFILE=2 GIT_TRACE_SETUP=2 GIT_TRACE_SHALLOW=2 git"
+    ##? Usage: git trace GIT_COMMAND
+    ##?
+    ##? Enable comprehensive Git trace logging for debugging purposes.
+    trace = "!f() { \
+        set -x; \
+        GIT_TRACE=2 \
+        GIT_CURL_VERBOSE=2 \
+        GIT_TRACE_PERFORMANCE=2 \
+        GIT_TRACE_PACK_ACCESS=2 \
+        GIT_TRACE_PACKET=2 \
+        GIT_TRACE_PACKFILE=2 \
+        GIT_TRACE_SETUP=2 \
+        GIT_TRACE_SHALLOW=2 \
+        git \"$@\"; \
+    }; f"
 #+end_src
 
-Just insert ~debug~ between ~git~ and whatever would usually follow; for example:
+Just insert ~trace~ between ~git~ and whatever would usually follow; for example:
 
-: git debug changed
+: git trace changed
 
 ** Sync
 
