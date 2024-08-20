@@ -6135,6 +6135,7 @@ directory across all local branches:
         local remote_name=$(git origin); \
         git remote get-url \"$remote_name\"; \
     }; f"
+    # git remote show -n origin | grep "Fetch URL" | cut -d: -f2- | sed 's/^ *//'
 #+end_src
 
 #+begin_note
@@ -6229,17 +6230,31 @@ Show the changes between the last local commit and the *remote* branch:
 
 *** Pull
 
+Get everything new.
+
 Before doing work (in a new branch), *ensure that the working tree is* *up-to-date*
 with the ~origin~ (pull and get latest for all submodules):
 
 #+begin_src conf
-    # Get everything new.
-    update = !git pull                     && git submodule update --init --recursive
-    get    = !git pull --rebase            && git submodule update --init --recursive
-    update = !git pull --rebase --prune $@ && git submodule update --init --recursive
+    ##? Usage: git update [PULL_OPTIONS]
+    ##?
+    ##? Update the repository and submodules, with rebasing and pruning.
+    update = "!f() { \
+        git pull --rebase --prune \"$@\" \
+            && git submodule sync --recursive \
+            && git submodule update --init --recursive; \
+    }; f"
 
-    # Pull in remote changes for the current repository and all its submodules
-    p = !"git pull; git submodule foreach git pull $(git origin) master"
+    ##? Usage: git update2 [PULL_OPTIONS]
+    ##?
+    ##? Update the repository and all submodules, with rebasing, pruning, and
+    ##? proper branch handling.
+    update2 = "!f() { \
+        git pull --rebase --prune \"$@\" \
+            && git submodule sync --recursive \
+            && git submodule update --init --recursive \
+            && git submodule foreach 'git pull --rebase \"$(git r)\" $(git current-branch)'; \
+    }; f"
 #+end_src
 
 [[https://gist.github.com/gitaarik/8735255][Git Submodules basic explanation]]

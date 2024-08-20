@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240820.1440
+# .gitconfig, Time-stamp: 20240820.1501
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2408,6 +2408,7 @@
         local remote_name=$(git origin); \
         git remote get-url \"$remote_name\"; \
     }; f"
+    # git remote show -n origin | grep "Fetch URL" | cut -d: -f2- | sed 's/^ *//'
 
     ##? Usage: git incoming
     ##?
@@ -2451,13 +2452,25 @@
     incoming-diff = diff @{u} HEAD
     # diff with upstream branch
 
-    # Get everything new.
-    update = !git pull                     && git submodule update --init --recursive
-    get    = !git pull --rebase            && git submodule update --init --recursive
-    update = !git pull --rebase --prune $@ && git submodule update --init --recursive
+    ##? Usage: git update [PULL_OPTIONS]
+    ##?
+    ##? Update the repository and submodules, with rebasing and pruning.
+    update = "!f() { \
+        git pull --rebase --prune \"$@\" \
+            && git submodule sync --recursive \
+            && git submodule update --init --recursive; \
+    }; f"
 
-    # Pull in remote changes for the current repository and all its submodules
-    p = !"git pull; git submodule foreach git pull $(git origin) master"
+    ##? Usage: git update2 [PULL_OPTIONS]
+    ##?
+    ##? Update the repository and all submodules, with rebasing, pruning, and
+    ##? proper branch handling.
+    update2 = "!f() { \
+        git pull --rebase --prune \"$@\" \
+            && git submodule sync --recursive \
+            && git submodule update --init --recursive \
+            && git submodule foreach 'git pull --rebase \"$(git r)\" $(git current-branch)'; \
+    }; f"
 
     # Retrieve the timestamp of the most recent pull operation, regardless of changes being present.
     latest-pull-time = "!f() { \
