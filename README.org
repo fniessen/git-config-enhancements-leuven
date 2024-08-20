@@ -3705,8 +3705,8 @@ XXX: Replace ~git branch -r --format~ with ~git for-each-ref --format~ to handle
     # Usage: git branch-edit-desc BRANCH
     # Edit the description of a Git branch.
     branch-edit-desc = "!f() { \
-        if [ -z \"$1\" ]; then \
-            printf >&2 \"Usage: git branch-edit-desc BRANCH\n\"; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git branch-edit-desc BRANCH\n'; \
             return 2; \
         fi; \
         local BRANCH=\"$1\"; \
@@ -3725,8 +3725,8 @@ XXX: Replace ~git branch -r --format~ with ~git for-each-ref --format~ to handle
     # Usage: git branch-show-desc BRANCH
     # Show the description of a Git branch.
     branch-show-desc = "!f() { \
-        if [ -z \"$1\" ]; then \
-            printf >&2 \"Usage: git branch-show-desc BRANCH\n\"; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git branch-show-desc BRANCH\n'; \
             return 2; \
         fi; \
         local BRANCH=\"$1\"; \
@@ -4001,6 +4001,10 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
     ##? Arguments:
     ##?   BRANCH_NAME                   The name of the branch to check.
     has-new-commits = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git has-new-commits BRANCH_NAME\n'; \
+            return 2; \
+        fi; \
         local BRANCH_NAME=\"$1\"; \
         if [ -z \"$BRANCH_NAME\" ]; then \
             printf >&2 'Error: Please provide a branch name as a parameter.\n' \
@@ -4011,7 +4015,8 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
 #+end_src
 
 #+begin_src conf
-    # Iteratively synchronize all local branches with their corresponding remote branches using fast-forward merges.
+    # Iteratively synchronize all local branches with their corresponding remote
+    # branches using fast-forward merges.
     update-all-branches = "!f() { \
         local current_branch=$(git current-branch); \
         local local_branches=$(git local-branches); \
@@ -4042,7 +4047,8 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
 #+begin_src conf
     ##? Usage: git update-all-branches2
     ##?
-    ##? Update all local branches with their remote counterparts, checking for conflicts before updating.
+    ##? Update all local branches with their remote counterparts, checking for
+    ##? conflicts before updating.
     update-all-branches2 = "!f() { \
         local local_branches=$(git local-branches); \
         for branch in $local_branches; do \
@@ -4162,6 +4168,10 @@ Delete a *remote* branch:
     # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
     delete-remote-branch = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git delete-remote-branch BRANCH_NAME\n'; \
+            return 2; \
+        fi; \
         local BRANCH_NAME=\"$1\"; \
         printf \"Are you sure you want to delete the remote branch '%s'? [y/N]\" \"$BRANCH_NAME\"; \
         read -r confirm; \
@@ -4181,6 +4191,10 @@ Delete a *remote* branch:
     ##?
     ##? Delete both local and remote branches.
     delete-branch = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git delete-branch BRANCH_NAME\n'; \
+            return 2; \
+        fi; \
         local BRANCH_NAME=\"$1\"; \
         git delete-local-branch \"$BRANCH_NAME\" \
             && git delete-remote-branch \"$BRANCH_NAME\"; \
@@ -4406,6 +4420,10 @@ Change the tag name but keep it on the same commit.
     # Usage: git rename-tag OLD_TAG NEW_TAG
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { \
+        if [ $# -ne 2 ]; then \
+            printf >&2 'Usage: git rename-tag OLD_TAG NEW_TAG\n'; \
+            return 2; \
+        fi; \
         local OLD_TAG=\"$1\"; \
         local NEW_TAG=\"$2\"; \
         local origin=$(git origin); \
@@ -4422,14 +4440,17 @@ If you have defined a tag and no longer want it defined, use the ~delete-tag~
 alias to remove it.
 
 #+begin_src conf
-    # Delete local and remote tags.
+    ##? Usage: git delete-tag TAG
+    ##?
+    ##? Delete a local and remote tag.
     delete-tag = "!f() { \
-        [ -z \"$1\" ] \
-            && echo \"No tags given as an argument!\" \
-            || (git tag -l \"$1\" | \
-                xargs -I % echo \"git tag -d % \
-                               && git push --delete $(git origin) %\" | \
-                sh); \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git delete-tag TAG\\n'; \
+            return 2; \
+        fi; \
+        local TAG=\"$1\"; \
+        git tag -d \"$TAG\" && \
+        git push \"$(git origin)\" --delete \"$TAG\"; \
     }; f"
 #+end_src
 
@@ -6389,6 +6410,10 @@ Run ~merge-test~ (before ~merge~) to check for any conflicts beforehand.
     ##?
     ##? Test a merge and then abort it.
     merge-test = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git merge-test BRANCH\n'; \
+            return 2; \
+        fi; \
         local BRANCH=\"$1\"; \
         if [ -z \"$BRANCH\" ]; then \
             printf >&2 \"Error: No branch specified.\\n\"; \
@@ -6409,7 +6434,7 @@ Run ~merge-test~ (before ~merge~) to check for any conflicts beforehand.
     ##?   git dry-merge1 feature # Merge the `feature` branch without committing the changes.
     dry-merge1 = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git dry-merge1 BRANCH_NAME\n'; \
+            printf >&2 'Usage: git dry-merge1 BRANCH_TO_MERGE\n'; \
             return 2; \
         fi; \
         local BRANCH_TO_MERGE=\"$1\"; \
@@ -6427,7 +6452,7 @@ Run ~merge-test~ (before ~merge~) to check for any conflicts beforehand.
     ##?   git dry-merge2 feature # Merge the `feature` branch without committing the changes.
     dry-merge2 = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git dry-merge2 BRANCH_NAME\n'; \
+            printf >&2 'Usage: git dry-merge2 BRANCH_TO_MERGE\n'; \
             return 2; \
         fi; \
         local BRANCH_TO_MERGE=\"$1\"; \
@@ -6703,8 +6728,8 @@ cd "$(git root)"
     ##?
     ##? Force checkout to a branch, discarding local changes if necessary.
     force-checkout = "!f() { \
-        if [ -z \"$1\" ]; then \
-            printf >&2 'Error: No branch name provided.\n'; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git force-checkout BRANCH\n'; \
             return 2; \
         fi; \
         local BRANCH=$1; \
@@ -6738,26 +6763,26 @@ cd "$(git root)"
 
 **** Others?
 
+Stash local changes, checkout branch, and reapply stashed changes.
+
 #+begin_src conf
-    # Stash local changes, checkout branch BRANCH, and reapply stashed changes.
+    ##? Usage: git co-autostash BRANCH_NAME
+    ##?
+    ##? Switch to a specified branch, stashing any uncommitted changes if necessary.
+    ##? Only stashes if there are changes and restores the stash after switching.
     co-autostash = "!f() { \
-        local BRANCH=\"$1\"; \
-        git stash push --include-untracked --quiet \
-            && git checkout \"$BRANCH\" \
-            && git stash pop --quiet; \
-    }; f"
-    co-autostash = "!f() { \
-        local BRANCH=\"$1\"; \
-        git stash push --include-untracked \
-            && git checkout \"$BRANCH\" \
-            && git stash pop; \
-    }; f"
-    co-autostash = "!f() { \
-        local BRANCH=\"$1\"; \
-        git diff-index --quiet HEAD || git stash push --include-untracked \
-            && git checkout \"$BRANCH\" \
-            && { git stash list | grep -q \"^stash@{0}: WIP on\"; } \
-            && git stash pop; \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: co-autostash BRANCH_NAME\n'; \
+            return 2; \
+        fi; \
+        local BRANCH_NAME=\"$1\"; \
+        if ! git diff-index --quiet HEAD; then \
+            git stash push --include-untracked --quiet; \
+        fi; \
+        git checkout \"$BRANCH_NAME\"; \
+        if git stash list | grep -q \"^stash@{0}\"; then \
+            git stash pop --quiet; \
+        fi; \
     }; f"
 #+end_src
 
