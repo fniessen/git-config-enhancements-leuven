@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240820.1110
+# .gitconfig, Time-stamp: 20240820.1148
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2753,11 +2753,10 @@
         git \"$@\"; \
     }; f"
 
-    lost = "!git fsck \
+    ##? Usage: git dangling-commits
+    ##?
+    ##? List dangling commits with simplified output (SHA-1 and message).
+    dangling-commits = "!git fsck \
                 | awk '/dangling commit/ {print $3}' \
                 | git show --format='SHA-1: %C(yellow)%h%C(reset)  %s' --stdin \
                 | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
-
-    # Show a graph of the commit history, including dangling commits (not reachable by any reference).
-    dangling-graph-log = !git log --all --pretty=oneline --abbrev-commit --graph \
-                    $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)

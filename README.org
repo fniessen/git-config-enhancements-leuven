@@ -7099,7 +7099,7 @@ Fetch Git objects from upstream and update local branches.
 - If the local branch contains unpushed work, warn about it;
 - If the branch seems merged and its upstream branch was deleted, delete it.
 
-** Dangling
+** Dangling commits
 
 - Dangling blob = Change(s) that made it to the staging area/index but never got
   committed. One thing that is amazing with Git is that once it gets added to
@@ -7109,20 +7109,23 @@ Fetch Git objects from upstream and update local branches.
 - Dangling commit = A commit that isn't linked to any branch or tag either
   directly or by any of its ancestors. You can get these back too!
 
+This alias helps identify *dangling commits* -- those that have been deleted or
+are no longer reachable from any current branch. It's particularly useful if
+branches have been deleted or commits have become orphaned due to operations
+like rebases.
+
 #+begin_src conf
-    lost = "!git fsck \
+    ##? Usage: git dangling-commits
+    ##?
+    ##? List dangling commits with simplified output (SHA-1 and message).
+    dangling-commits = "!git fsck \
                 | awk '/dangling commit/ {print $3}' \
                 | git show --format='SHA-1: %C(yellow)%h%C(reset)  %s' --stdin \
                 | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
 #+end_src
 
-Resurrection of lost commits:
-
-#+begin_src conf
-    # Show a graph of the commit history, including dangling commits (not reachable by any reference).
-    dangling-graph-log = !git log --all --pretty=oneline --abbrev-commit --graph \
-                    $(git fsck --no-reflogs | grep commit | cut -d\\  -f3)
-#+end_src
+By using this alias, you can *locate* these commits and *recover* any important
+*changes* that might otherwise be lost.
 
 * If you get errors...
 
