@@ -1716,9 +1716,13 @@ you'll have to stop tracking them.
 Ignore/unignore changes to *tracked file(s)* only locally, without =.gitignore=:
 
 #+begin_src conf
+    ##? Usage: git skip FILE
+    ##?
     ##? Mark a file as unchanged and hide it from the Git status.
     skip = update-index --assume-unchanged
 
+    ##? Usage: git unskip FILE
+    ##?
     ##? Revert the hidden status of a file, allowing it to be tracked again by
     ##? Git.
     unskip = update-index --no-assume-unchanged
@@ -1738,6 +1742,8 @@ that.
 Skip all:
 
 #+begin_src conf
+    ##? Usage: git skip-all
+    ##?
     ##? Ignore all files currently marked as changed in Git status.
     skip-all = "!git status -s \
             | awk {'print $2'} \
@@ -1747,6 +1753,8 @@ Skip all:
 Unskip all the skipped files:
 
 #+begin_src conf
+    ##? Usage: git unskip-all
+    ##?
     ##? Revert the hidden status of all files currently marked as unchanged in Git
     ##? status, allowing them to be tracked again by Git.
     unskip-all = "!git skipped \
@@ -1756,6 +1764,8 @@ Unskip all the skipped files:
 List ignored files (*marked unchanged*):
 
 #+begin_src conf
+    ##? Usage: git skipped
+    ##?
     ##? List all files currently marked as unchanged and hidden from Git status.
     skipped = "!git ls-files -v \
             | grep '^h' \
