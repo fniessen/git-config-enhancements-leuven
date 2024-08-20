@@ -864,23 +864,23 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     ##?
     ##? List all Git aliases in alphabetical order.
     aliases = "!git config -l \
-                  | grep '^alias\\.' \
-                  | cut -c 7- \
-                  | sort \
-                  | sed 's_=_ = _' \
-                  | sed 's/  */ /g' \
-                  | awk -F ' = ' '{printf \"\\033[1m%s\\033[0m = %s\\n\", $1, $2}'"
+            | grep '^alias\\.' \
+            | cut -c 7- \
+            | sort \
+            | sed 's_=_ = _' \
+            | sed 's/  */ /g' \
+            | awk -F ' = ' '{printf \"\\033[1m%s\\033[0m = %s\\n\", $1, $2}'"
 #+end_src
 
 #+begin_src conf
     grep-aliases = "!git config -l \
-                        | grep '^alias\\.' \
-                        | cut -c 7- \
-                        | sort \
-                        | sed 's_=_ = _' \
-                        | sed 's/  */ /g' \
-                        | awk -F ' = ' '{printf \"\\033[30;47m%s\\033[0m = %s\\n\", $1, $2}' \
-                        | grep --color=auto -i"
+            | grep '^alias\\.' \
+            | cut -c 7- \
+            | sort \
+            | sed 's_=_ = _' \
+            | sed 's/  */ /g' \
+            | awk -F ' = ' '{printf \"\\033[30;47m%s\\033[0m = %s\\n\", $1, $2}' \
+            | grep --color=auto -i"
 #+end_src
 
 #+begin_src conf :tangle no
@@ -1740,8 +1740,8 @@ Skip all:
 #+begin_src conf
     ##? Ignore all files currently marked as changed in Git status.
     skip-all = "!git status -s \
-                    | awk {'print $2'} \
-                    | xargs git skip"
+            | awk {'print $2'} \
+            | xargs git skip"
 #+end_src
 
 Unskip all the skipped files:
@@ -1750,7 +1750,7 @@ Unskip all the skipped files:
     ##? Revert the hidden status of all files currently marked as unchanged in Git
     ##? status, allowing them to be tracked again by Git.
     unskip-all = "!git skipped \
-                    | xargs git unskip"
+            | xargs git unskip"
 #+end_src
 
 List ignored files (*marked unchanged*):
@@ -1758,8 +1758,8 @@ List ignored files (*marked unchanged*):
 #+begin_src conf
     ##? List all files currently marked as unchanged and hidden from Git status.
     skipped = "!git ls-files -v \
-                    | grep '^h' \
-                    | cut -c 3-"
+            | grep '^h' \
+            | cut -c 3-"
 #+end_src
 
 ** Clean
@@ -2094,7 +2094,7 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
 #+begin_src conf
     # Revert the changes introduced by the most recent stash.
     stash-revert = !git stash show -p --no-textconv --binary \
-                       | git apply -R
+            | git apply -R
 #+end_src
 
 *** Restore shelved changes
@@ -2154,9 +2154,9 @@ conflicts, Git will not remove it (but it will still apply it)!
     # Usage: git stashes-clear
     # Remove all stashes from the stash stack.
     stashes-clear = "!git stash list \
-                          | cut -d: -f1 \
-                          | xargs -r -I {} git stash-remove {}"
-                   #+end_src
+            | cut -d: -f1 \
+            | xargs -r -I {} git stash-remove {}"
+#+end_src
 
 *** Workflows
 
@@ -5057,7 +5057,7 @@ Related pull request:
 
 #+begin_src conf
     related-pr-of-commit = "!sh -c 'git log --merges --ancestry-path $1..master \
-                | tail -n 1 ' -"
+            | tail -n 1 ' -"
 #+end_src
 
 Example:
@@ -7119,9 +7119,9 @@ like rebases.
     ##?
     ##? List dangling commits with simplified output (SHA-1 and message).
     dangling-commits = "!git fsck \
-                | awk '/dangling commit/ {print $3}' \
-                | git show --format='SHA-1: %C(yellow)%h%C(reset)  %s' --stdin \
-                | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
+            | awk '/dangling commit/ {print $3}' \
+            | git show --format='SHA-1: %C(yellow)%h%C(reset)  %s' --stdin \
+            | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
 #+end_src
 
 By using this alias, you can *locate* these commits and *recover* any important

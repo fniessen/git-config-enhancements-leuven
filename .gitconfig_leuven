@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240820.1148
+# .gitconfig, Time-stamp: 20240820.1155
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -228,21 +228,21 @@
     ##?
     ##? List all Git aliases in alphabetical order.
     aliases = "!git config -l \
-                  | grep '^alias\\.' \
-                  | cut -c 7- \
-                  | sort \
-                  | sed 's_=_ = _' \
-                  | sed 's/  */ /g' \
-                  | awk -F ' = ' '{printf \"\\033[1m%s\\033[0m = %s\\n\", $1, $2}'"
+            | grep '^alias\\.' \
+            | cut -c 7- \
+            | sort \
+            | sed 's_=_ = _' \
+            | sed 's/  */ /g' \
+            | awk -F ' = ' '{printf \"\\033[1m%s\\033[0m = %s\\n\", $1, $2}'"
 
     grep-aliases = "!git config -l \
-                        | grep '^alias\\.' \
-                        | cut -c 7- \
-                        | sort \
-                        | sed 's_=_ = _' \
-                        | sed 's/  */ /g' \
-                        | awk -F ' = ' '{printf \"\\033[30;47m%s\\033[0m = %s\\n\", $1, $2}' \
-                        | grep --color=auto -i"
+            | grep '^alias\\.' \
+            | cut -c 7- \
+            | sort \
+            | sed 's_=_ = _' \
+            | sed 's/  */ /g' \
+            | awk -F ' = ' '{printf \"\\033[30;47m%s\\033[0m = %s\\n\", $1, $2}' \
+            | grep --color=auto -i"
 
     work-profile = config user.email \"john@work.com\"
 
@@ -565,18 +565,18 @@
 
     ##? Ignore all files currently marked as changed in Git status.
     skip-all = "!git status -s \
-                    | awk {'print $2'} \
-                    | xargs git skip"
+            | awk {'print $2'} \
+            | xargs git skip"
 
     ##? Revert the hidden status of all files currently marked as unchanged in Git
     ##? status, allowing them to be tracked again by Git.
     unskip-all = "!git skipped \
-                    | xargs git unskip"
+            | xargs git unskip"
 
     ##? List all files currently marked as unchanged and hidden from Git status.
     skipped = "!git ls-files -v \
-                    | grep '^h' \
-                    | cut -c 3-"
+            | grep '^h' \
+            | cut -c 3-"
 
     # Usage: git clean-untracked
     # Remove all untracked files and directories (that are not ignored by Git).
@@ -695,7 +695,7 @@
 
     # Revert the changes introduced by the most recent stash.
     stash-revert = !git stash show -p --no-textconv --binary \
-                       | git apply -R
+            | git apply -R
 
     # Usage: git find-stash-id [SEARCH_STRING]
     # Find the stash ID by searching stash descriptions for a specific string.
@@ -731,8 +731,8 @@
     # Usage: git stashes-clear
     # Remove all stashes from the stash stack.
     stashes-clear = "!git stash list \
-                          | cut -d: -f1 \
-                          | xargs -r -I {} git stash-remove {}"
+            | cut -d: -f1 \
+            | xargs -r -I {} git stash-remove {}"
 
     praise = blame -w
     archeology = blame -w -C -n
@@ -1920,7 +1920,7 @@
     }; f"
 
     related-pr-of-commit = "!sh -c 'git log --merges --ancestry-path $1..master \
-                | tail -n 1 ' -"
+            | tail -n 1 ' -"
 
     ##? Usage: git release-tag VERSION
     ##?
@@ -2757,6 +2757,6 @@
     ##?
     ##? List dangling commits with simplified output (SHA-1 and message).
     dangling-commits = "!git fsck \
-                | awk '/dangling commit/ {print $3}' \
-                | git show --format='SHA-1: %C(yellow)%h%C(reset)  %s' --stdin \
-                | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
+            | awk '/dangling commit/ {print $3}' \
+            | git show --format='SHA-1: %C(yellow)%h%C(reset)  %s' --stdin \
+            | awk '/SHA-1/ {sub(\"SHA-1: \", \"\"); print}'"
