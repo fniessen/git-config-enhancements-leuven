@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240820.1501
+# .gitconfig, Time-stamp: 20240910.1433
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2276,7 +2276,7 @@
         if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
             printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
-        git log --follow --all -- \"$FILE_PATH\"; \
+        git log --follow --all -- \"$FILE_PATH\" 2>/dev/null; \
     }; f"
 
     ##? Usage: git related-history FILE_PATH
