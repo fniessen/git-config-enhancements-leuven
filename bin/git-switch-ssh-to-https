@@ -76,8 +76,8 @@ fi
 NEW_URL="https://$SITE/$REPO_OWNER/$REPO_SLUG.git"
 
 # Print the current and new URL for confirmation.
-printf "Current remote repository URL:\n %s\n" "$OLD_URL"
-printf "New remote repository URL:\n %s\n\n" "$NEW_URL"
+printf "Current remote repository URL:\n      %s\n" "$OLD_URL"
+printf "New remote repository URL:\n      %s\n\n" "$NEW_URL"
 
 # Ask for confirmation before updating the remote URL.
 read -p "Do you want to update the remote repository URL? (y/N) " -n 1 -r

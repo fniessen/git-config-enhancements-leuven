@@ -59,8 +59,8 @@ SITE=$(echo "$OLD_URL" | sed -Ene "s#https://([^/]*)/.*#\1#p")
 printf "Debug: SITE = %s\n" "$SITE"
 
 # Get the repository owner and name, with debug info.
-REPO_OWNER=$(echo "$OLD_URL" | sed -Ene "s#https://(.*@)?$SITE/([^/]*)/(.*).git#\2#p")
-REPO_SLUG=$(echo "$OLD_URL" | sed -Ene "s#https://(.*@)?$SITE/([^/]*)/(.*).git#\3#p")
+REPO_OWNER=$(echo "$OLD_URL" | sed -Ene "s#https://(.*@)?$SITE/([^/]*)/([^/.]*)(\.git)?#\2#p")
+REPO_SLUG=$(echo "$OLD_URL" | sed -Ene "s#https://(.*@)?$SITE/([^/]*)/([^/.]*)(\.git)?#\3#p")
 
 # Debug: Print the extracted REPO_OWNER and REPO_SLUG values.
 printf "Debug: REPO_OWNER = %s\n" "$REPO_OWNER"
@@ -76,8 +76,8 @@ fi
 NEW_URL="git@$SITE:$REPO_OWNER/$REPO_SLUG.git"
 
 # Print the current and new URL for confirmation.
-printf "Current remote repository URL:\n %s\n" "$OLD_URL"
-printf "New remote repository URL:\n %s\n\n" "$NEW_URL"
+printf "Current remote repository URL:\n      %s\n" "$OLD_URL"
+printf "New remote repository URL:\n      %s\n\n" "$NEW_URL"
 
 # Ask for confirmation before updating the remote URL.
 read -p "Do you want to update the remote repository URL? (y/N) " -n 1 -r
