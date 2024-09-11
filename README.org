@@ -5296,12 +5296,11 @@ Note that the /output format/ is inferred by the extension of the output file.
     ##?
     ##? Export changed files from a commit or HEAD and create a zip archive.
     export-commit-files = "!f() { \
-        local COMMIT_HASH=${1:-HEAD}; \
+        local COMMIT_HASH=$(git rev-parse --short ${1:-HEAD}); \
         local current_branch=$(git convert-current-branch-name); \
-        local zip_file_name=$(git repo-slug-remote)-commit-${branch_name}-${COMMIT_HASH}.zip; \
+        local zip_file_name=$(git repo-slug-remote)-commit-${current_branch}-${COMMIT_HASH}.zip; \
         git changed-files \"$COMMIT_HASH\" | tr '\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
     }; f"
-    ## XXX If HEAD, convert to commit hash.
 #+end_src
 
 export-commit-files-files = "!f() {
