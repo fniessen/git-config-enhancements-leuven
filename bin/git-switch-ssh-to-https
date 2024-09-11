@@ -17,6 +17,7 @@
 ##? Options:
 ##?   -h, --help                    display this help and exit
 ##?   -V, --version                 display version information and exit
+##?   -d, --debug                   enable debug output
 
 # Set -uo pipefail for undefined variable check and pipeline failure propagation.
 set -uo pipefail
@@ -39,6 +40,7 @@ eval "$args"
 set -e
 
 REMOTE=${REMOTE:-"origin"}
+debug=${debug:-"false"}
 
 # Get the current remote URL.
 OLD_URL=$(git remote -v | awk -v REMOTE="$REMOTE" '$1==REMOTE && $3=="(push)" {print $2}')
@@ -49,22 +51,28 @@ if [[ -z "$OLD_URL" ]]; then
     exit 2
 fi
 
-# Debug: Print the OLD_URL value.
-printf "Debug: OLD_URL = %s\n" "$OLD_URL"
+# Print debug info if debug flag is true.
+if [[ "$debug" == "true" ]]; then
+    printf "Debug: OLD_URL = %s\n" "$OLD_URL"
+fi
 
 # Extract the actual site from the OLD_URL.
 SITE=$(echo "$OLD_URL" | sed -Ene "s#git@([^:]*):.*#\1#p")
 
-# Debug: Print the extracted SITE value.
-printf "Debug: SITE = %s\n" "$SITE"
+# Print debug info if debug flag is true.
+if [[ "$debug" == "true" ]]; then
+    printf "Debug: SITE = %s\n" "$SITE"
+fi
 
 # Get the repository owner and name, with debug info.
 REPO_OWNER=$(echo "$OLD_URL" | sed -Ene "s#git@$SITE[^:]*:([^/]*)/(.*).git#\1#p")
 REPO_SLUG=$(echo "$OLD_URL" | sed -Ene "s#git@$SITE[^:]*:([^/]*)/(.*).git#\2#p")
 
-# Debug: Print the extracted REPO_OWNER and REPO_SLUG values.
-printf "Debug: REPO_OWNER = %s\n" "$REPO_OWNER"
-printf "Debug: REPO_SLUG = %s\n" "$REPO_SLUG"
+# Print debug info if debug flag is true.
+if [[ "$debug" == "true" ]]; then
+    printf "Debug: REPO_OWNER = %s\n" "$REPO_OWNER"
+    printf "Debug: REPO_SLUG = %s\n" "$REPO_SLUG"
+fi
 
 # Check if the repo owner and name are valid.
 if [[ -z "$REPO_OWNER" ]] || [[ -z "$REPO_SLUG" ]]; then
