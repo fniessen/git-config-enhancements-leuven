@@ -7,12 +7,11 @@
 #? This is free software: you are free to change and redistribute it.
 #? There is NO WARRANTY, to the extent permitted by law.
 
-##? Usage: git-switch-https-to-ssh [options] [SITE] [REMOTE]
+##? Usage: git-switch-https-to-ssh [options] [REMOTE]
 ##?
 ##? Convert Git remote URL from HTTPS to SSH.
 ##?
 ##? Arguments:
-##?   SITE                          site to use.  Default to github.com if no site is specified.
 ##?   REMOTE                        remote to use.  Default to origin if no remote is specified.
 ##?
 ##? Options:
@@ -39,7 +38,6 @@ eval "$args"
 # Set -e to exit on non-zero command status.
 set -e
 
-SITE=${SITE:-"github.com"}
 REMOTE=${REMOTE:-"origin"}
 
 # Get the current remote URL.
@@ -51,13 +49,26 @@ if [[ -z "$OLD_URL" ]]; then
     exit 2
 fi
 
-# Get the repository owner and name.
+# Debug: Print the OLD_URL value.
+printf "Debug: OLD_URL = %s\n" "$OLD_URL"
+
+# Extract the actual site from the OLD_URL.
+SITE=$(echo "$OLD_URL" | sed -Ene "s#https://([^/]*)/.*#\1#p")
+
+# Debug: Print the extracted SITE value.
+printf "Debug: SITE = %s\n" "$SITE"
+
+# Get the repository owner and name, with debug info.
 REPO_OWNER=$(echo "$OLD_URL" | sed -Ene "s#https://(.*@)?$SITE/([^/]*)/(.*).git#\2#p")
 REPO_SLUG=$(echo "$OLD_URL" | sed -Ene "s#https://(.*@)?$SITE/([^/]*)/(.*).git#\3#p")
 
+# Debug: Print the extracted REPO_OWNER and REPO_SLUG values.
+printf "Debug: REPO_OWNER = %s\n" "$REPO_OWNER"
+printf "Debug: REPO_SLUG = %s\n" "$REPO_SLUG"
+
 # Check if the repo owner and name are valid.
 if [[ -z "$REPO_OWNER" ]] || [[ -z "$REPO_SLUG" ]]; then
-    printf >&2 "Error: Could not identify Repo Owner or Slug. It's possible that the repo is already using SSH instead of HTTPS.\n"
+    printf >&2 "Error: Could not identify REPO_OWNER or REPO_SLUG. It's possible that the repo is already using SSH instead of HTTPS.\n"
     exit 2
 fi
 
@@ -70,7 +81,7 @@ printf "New remote repository URL:\n %s\n\n" "$NEW_URL"
 
 # Ask for confirmation before updating the remote URL.
 read -p "Do you want to update the remote repository URL? (y/N) " -n 1 -r
-echo
+printf "\n"
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     # Update the remote URL.
     git remote set-url $REMOTE $NEW_URL
