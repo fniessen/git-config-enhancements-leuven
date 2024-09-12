@@ -12,16 +12,26 @@ find . -type d -name ".git" | sort | while read -r repo; do
     cd "$repo_dir" \
         || { printf "$(tput setaf 1)$(tput bold)Failed to change directory to '%s'$(tput sgr0)\n" "$repo_dir"; continue; }
 
-    # Run 'git pull' with a timeout of 30 seconds.
-    output=$(timeout 30 git pull 2>&1)
+    # Run 'git pull' with a timeout of 10 seconds.
+    output=$(timeout 10 git pull 2>&1)
     exit_code=$?
 
     if [ $exit_code -eq 124 ]; then
         printf "$(tput setaf 1)$(tput bold)Timed out while pulling from repository '%s'$(tput sgr0)\n" "$repo_name"
     elif [ $exit_code -ne 0 ]; then
-        printf "$(tput setaf 1)$(tput bold)%s$(tput sgr0)\n" "$output"
+        printf "$(tput setaf 1)$(tput bold)%s$(tput sgr0)\n" "$output" \
+            | sed 's/^/      /'
     else
-        printf "$(tput setaf 2)%s$(tput sgr0)\n" "$output"
+        printf "$(tput setaf 2)%s$(tput sgr0)\n" "$output" \
+            | sed 's/^/      /'
+    fi
+
+    # Display modified files in yellow bold.
+    modified_files=$(git status --porcelain)
+    if [[ -n "$modified_files" ]]; then
+        while IFS= read -r line; do
+            printf "$(tput setaf 3)$(tput bold)        %s$(tput sgr0)\n" "$line"
+        done <<< "$modified_files"
     fi
 
     # Return to the previous directory.
