@@ -7,8 +7,8 @@ else
     verbose=false
 fi
 
-# Find all Git repositories under the current directory.
-find . -type d -name .git | sort | sed 's|\/\.git||' | while read -r repo_path; do
+# Find all Git repositories under the current directory, pruning as necessary.
+find . -type d -name ".git" -prune | sort | sed 's|\/\.git||' | while read -r repo_path; do
     (
         cd "$repo_path" || exit 1
         # Check if the repository has uncommitted changes.

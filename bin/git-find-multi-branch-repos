@@ -2,7 +2,7 @@
 
 # Find Git repositories with more than one branch.
 
-for git_dir in $(find . -name .git -type d -prune); do
+for git_dir in $(find . -type d -name ".git" -prune); do
     # Trim trailing "/.git"
     repo_dir="${git_dir%/.git}"
     # Check if the repository has more than one branch
