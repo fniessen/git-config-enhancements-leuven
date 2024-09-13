@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240913.1341
+# .gitconfig, Time-stamp: 20240913.1544
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2126,7 +2126,7 @@
     ##?                                 Git command
     all-repos = "!f() { \
         if [ $# -lt 1 ]; then \
-            printf >&2 'Usage: git all-repos COMMAND [ARGS]\n'; \
+            printf >&2 'Usage: git all-repos COMMAND [ARGS]\\n'; \
             return 2; \
         fi; \
         local repo_slug_local; \
@@ -2134,10 +2134,13 @@
             | sort \
             | sed 's_/.git__' \
             | while read -r repo_path; do \
-                repo_slug_local=$(git -C $repo_path repo-slug-local); \
-                printf '\\033[1m%s:\\033[0m\n' \"$repo_slug_local\"; \
-                git -C $repo_path -c color.status=always \"$@\" 2>&1 | sed 's/^/      /'; \
-                printf '\n'; \
+                repo_slug_local=$(git -C \"$repo_path\" repo-slug-local); \
+                printf '\\033[1m%s:\\033[0m\\n' \"$repo_slug_local\"; \
+                output=$(git -C \"$repo_path\" -c color.status=always \"$@\" 2>&1); \
+                if [ -n \"$output\" ]; then \
+                    printf '%s\\n' \"$output\" | sed 's/^/      /'; \
+                fi; \
+                printf '\\n'; \
             done; \
     }; f"
 
