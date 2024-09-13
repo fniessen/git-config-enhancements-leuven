@@ -5628,6 +5628,14 @@ always executed in the top-level directory.
 * Run on All repositories
 
 #+begin_src conf
+    # Lists all Git repositories by finding .git directories, sorting the
+    # output, and removing the '/.git' suffix and leading './'.
+    repos = !find . -type d -name '.git' -prune -print \
+            | sed 's|^\\./||' | sed 's|/\\.git$||' | sort
+    # FIXME: Local dir is outputted as '.git'...
+#+end_src
+
+#+begin_src conf
     ##? Usage: git all-repos COMMAND [ARGS]
     ##?
     ##? Run a Git command for each repository in the current directory and its
