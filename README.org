@@ -5630,7 +5630,7 @@ always executed in the top-level directory.
 #+begin_src conf
     # Lists all Git repositories by finding .git directories, sorting the
     # output, and removing the '/.git' suffix and leading './'.
-    repos = !find . -type d -name '.git' -prune -print \
+    repos = !find . -type d -name '.git' -prune -print 2>/dev/null \
             | sed 's|^\\./||' | sed 's|/\\.git$||' | sort
     # FIXME: Local dir is outputted as '.git'...
 #+end_src
