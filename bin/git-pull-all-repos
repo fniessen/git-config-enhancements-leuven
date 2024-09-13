@@ -2,8 +2,9 @@
 
 # Pull the latest changes for each Git repository found in the current directory.
 
-# Find all Git repositories recursively and sort them alphabetically.
-find . -type d -name ".git" | sort | while read -r repo; do
+# Find all Git repositories under the current directory, using -prune to
+# optimize search.
+find . -type d -name ".git" -prune | sort | while read -r repo; do
     repo_dir=$(dirname "$repo")
     repo_name=$(basename "$repo_dir")
     printf "\nPulling latest changes for repository '%s'...\n" "$(tput bold)$repo_name$(tput sgr0)"
@@ -46,7 +47,7 @@ done
 # # Pull the latest changes for each Git repository found in the current directory.
 #
 # # Find all Git repositories recursively and sort them alphabetically.
-# find . -type d -name ".git" | sort | while read -r repo; do
+# find . -type d -name ".git" -prune | sort | while read -r repo; do
 #     repo_dir=$(dirname "$repo")
 #     repo_name=$(basename "$repo_dir")
 #     printf "\nPulling latest changes for repository '%s'...\n" "$(tput bold)$repo_name$(tput sgr0)"
