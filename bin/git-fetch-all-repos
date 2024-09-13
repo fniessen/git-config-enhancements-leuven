@@ -1,2 +1,11 @@
 #!/bin/bash
-find . -name .git -type d | xargs -I {} bash -c "pushd {} && git fetch && popd"
+
+# Find all Git repositories and fetch updates for each.
+find . -type d -name ".git" -prune | while read -r repo; do
+    repo_dir=$(dirname "$repo")
+    printf "Fetching updates for repository in '%s'...\n" "$repo_dir"
+
+    # Change into the directory, fetch updates, and then return to the original
+    # directory.
+    (cd "$repo_dir" && git fetch)
+done
