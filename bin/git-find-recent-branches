@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? git-find-recent-branches, Time-stamp: 20221102.1443
+#? git-find-recent-branches, Time-stamp: 2024-09-19
 #? Copyright (C) 2024 Fabrice Niessen
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -57,9 +57,21 @@ git fetch --prune
 branches=$(git for-each-ref --sort='-committerdate' --format='%(refname:short)' refs/remotes | grep -v HEAD || true)
 
 if [[ -z "$branches" ]]; then
-    printf >&2 "No remote branches found."
+    printf >&2 "No remote branches found.\n"
     exit 2
 fi
+
+# Define color and formatting using 'tput'.
+setup_colors() {
+    RED=$(tput setaf 1)         # Red.
+    GREEN=$(tput setaf 2)       # Green.
+    BLUE=$(tput setaf 4)        # Blue.
+    RESET=$(tput sgr0)          # Reset all attributes.
+    BOLD=$(tput bold)           # Bold text.
+}
+
+# Initialize color and text formatting.
+setup_colors
 
 # Loop through branches and check if they've been modified within the threshold days.
 for branch in $branches; do
@@ -71,6 +83,7 @@ for branch in $branches; do
     if [[ "$last_commit_date" > "$threshold_date" ]]; then
         day_of_week=$(date -d "$last_commit_date" "+%a")
         last_commit_time=$(date -d "$last_commit_time" "+%H:%M")
-        printf "\033[32m%s %s %s\e[0m - Branch \033[1;31m%s\033[0m \033[34m<%s>\033[0m\n" "$last_commit_date" "$day_of_week" "$last_commit_time" "$branch" "$author"
+        printf "${GREEN}%s %s %s${RESET} - Branch ${BOLD}${RED}%s${RESET} ${BLUE}<%s>${RESET}\n" \
+               "$last_commit_date" "$day_of_week" "$last_commit_time" "$branch" "$author"
     fi
 done
