@@ -21,9 +21,9 @@
 # Set -uo pipefail for undefined variable check and pipeline failure propagation.
 set -uo pipefail
 
-# Check if docopts command is available.
+# Check if 'docopts' command is available.
 if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 'Error: docopts command not found.\n'
+    printf >&2 "Error: 'docopts' command not found.\n"
     exit 2
 fi
 
@@ -68,12 +68,9 @@ for branch in $branches; do
     last_commit_time=$(echo "$last_commit_info" | awk '{print $2}')
     author=$(git show -s --format='%an' "$branch" | head -n 1)
     last_commit_date=$(date -d "$last_commit_date" +%Y-%m-%d)
-    day_of_week=$(date -d "$last_commit_date" "+%a")
-    last_commit_time=$(date -d "$last_commit_time" "+%H:%M")
-    timestamp="\e[32m$last_commit_date $day_of_week $last_commit_time\e[0m"
-    author="\e[34m<$author>\e[0m"
-    branch="\e[1;31m$branch\e[0m"
     if [[ "$last_commit_date" > "$threshold_date" ]]; then
-        printf "%s - Branch %s %s\n" "$timestamp" "$branch" "$author"
+        day_of_week=$(date -d "$last_commit_date" "+%a")
+        last_commit_time=$(date -d "$last_commit_time" "+%H:%M")
+        printf "\033[32m%s %s %s\e[0m - Branch \033[1;31m%s\033[0m \033[34m<%s>\033[0m\n" "$last_commit_date" "$day_of_week" "$last_commit_time" "$branch" "$author"
     fi
 done
