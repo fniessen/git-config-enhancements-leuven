@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
-bold=$(tput bold)
-reset=$(tput sgr0)
+# Define tput formatting variables for reuse.
+BOLD=$(tput bold)
+RESET=$(tput sgr0)
 
 if [[ -d .git ]]; then
     # Git repository.
-    printf "Disable .git folder... %sEnable .svn%s folder...\n" "${bold}" "${reset}"
+    printf "Disable .git folder... %sEnable .svn%s folder...\n" "${BOLD}" "${RESET}"
     mv .git .git-bak && mv .svn-bak .svn
     exit 0
 elif [[ -d .svn ]]; then
     # Subversion repository.
-    printf "Disable .svn folder... %sEnable .git%s folder...\n" "${bold}" "${reset}"
+    printf "Disable .svn folder... %sEnable .git%s folder...\n" "${BOLD}" "${RESET}"
     mv .svn .svn-bak && mv .git-bak .git
     exit 0
 else

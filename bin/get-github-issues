@@ -1,7 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Set your GitHub Personal Access Token here.
-GITHUB_TOKEN="..."
+#? get-github-issues, Time-stamp: <2024-09-19 Thu 11:04>
+#? Copyright (C) 2024 Fabrice Niessen
+#?
+#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+#? This is free software: you are free to change and redistribute it.
+#? There is NO WARRANTY, to the extent permitted by law.
+
+##? Usage: get-github-issues [options]
+
+# Source the configuration file.
+if [ -f "~/bin/github-config" ]; then
+    source ~/bin/github-config
+else
+    printf >&2 "Error: Configuration file github-config not found.\n"
+    exit 2
+fi
+
+# Check if required environment variable is set.
+if [ -z "$GITHUB_TOKEN" ]; then
+    printf >&2 "Error: GITHUB_TOKEN environment variable must be set.\n"
+    exit 2
+fi
 
 # Get the remote URL for the 'origin' remote.
 remote_url=$(git remote get-url origin)

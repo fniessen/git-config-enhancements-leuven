@@ -15,5 +15,6 @@ merged_branches=$(git branch --merged "$current_branch" --color=always)
 
 # Print out the list of merged branches with the current branch name in bold.
 
-printf "The following branches have been merged into the %s%s%s branch:\n" "$BOLD" "$current_branch" "$RESET"
+printf "The following branches have been merged into the %s%s%s branch:\n" \
+       "${BOLD}" "$current_branch" "${RESET}"
 printf "%s\n" "$merged_branches"

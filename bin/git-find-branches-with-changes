@@ -9,8 +9,10 @@ fi
 
 filename="$1"
 base="${2:-master}"
-bold=$(tput bold)
-normal=$(tput sgr0)
+
+# Define tput formatting variables for reuse.
+BOLD=$(tput bold)
+RESET=$(tput sgr0)
 
 echo "Searching for branches with changes to $filename related to the $base branch"
 
@@ -22,7 +24,7 @@ for branch in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
     changes=$(git diff $merge_base..$branch --stat -- $filename)
 
     if [[ ! -z $changes ]]; then
-        echo "Changes in branch ${bold}$branch${normal} | Merge Base: $merge_base"
+        echo "Changes in branch ${BOLD}$branch${RESET} | Merge Base: $merge_base"
         # Show change statistics pretty formatted.
         git diff $merge_base..$branch --stat -- $filename
     fi

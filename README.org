@@ -2457,7 +2457,7 @@ List all the changed files *in a commit* (also in a /merge commit/):
     # Create a diff file for the changes in a commit or range of commits.
     download-commit-plain-diff = "!f() { \
         local COMMIT_HASH=${1:-HEAD}; \
-        git diff $COMMIT_HASH^..$COMMIT_HASH > ${1:-HEAD}.diff; \
+        git diff $COMMIT_HASH^..$COMMIT_HASH > $COMMIT_HASH.diff; \
     }; f"
 #+end_src
 
@@ -5559,11 +5559,16 @@ Show an existing issue specified by NUMBER.
 #+end_src
 
 #+begin_src conf
-    # List JIRA issue keys from commit messages.
+    ##? Usage: git issue-keys [LOG-OPTIONS]
+    ##?
+    ##? List unique JIRA issue keys from commit messages.
+    ##?
+    ##? Example:
+    ##?   git issue-keys --since="2 weeks ago"
     issue-keys = "!f() { \
-        echo 'Printing JIRA issue keys'; \
+        printf 'Extracting JIRA issue keys from commit messages...\n'; \
         git log \"$@\" \
-            | egrep -o '[A-Z]+-[0-9]+' \
+            | grep -oE '[A-Z]+-[0-9]+' \
             | sort -u; \
     }; f"
 #+end_src
@@ -5582,11 +5587,27 @@ Show an existing issue specified by NUMBER.
 Download repository, tag or branch.
 
 #+begin_src conf
-    # Put everything in the current repo in a Zip archive.
+    ##? Usage: git download-repository [COMMIT_HASH]
+    ##?
+    ##? Download the contents of the repository at a specific commit (default
+    ##? is HEAD) and save it as a zip file named
+    ##? '<REPO-NAME>-commit-<COMMIT-HASH>.zip'.
+    ##?
+    ##? Examples:
+    ##?   git download-repository       Download the contents of the latest
+    ##?                                 commit as a zip file.
+    ##?   git download-repository abc123
+    ##?                                 Download the contents of commit abc123
+    ##?                                 as a zip file.
+    ##?   git download-repository main  Download the latest commit from the main
+    ##?                                 branch.
+    ##?   git download-repository v1.0.0
+    ##?                                 Download the repository at the v1.0.0
+    ##?                                 tag.
     download-repository = "!f() { \
-        git archive ${1:-HEAD} --format=zip --output=$(basename $(git root))-commit-$(git rev-parse ${1:-HEAD}).zip; \
+        local COMMIT_HASH=${1:-HEAD}; \
+        git archive $COMMIT_HASH --format=zip --output=$(basename $(git root))-commit-$(git rev-parse $COMMIT_HASH).zip; \
     }; f"
-# XXX Test it with tag or branch.
 #+end_src
 
 * Repository settings
@@ -5601,12 +5622,17 @@ List the user's public SSH keys:
 : # For BitBucket.
 : curl https://api.bitbucket.org/2.0/users/fniessen/ssh-keys | jq '.values'
 
-** Execute shell command and show output.
+** Execute shell command and show output
 
 Define:
 
 #+begin_src conf
-    ##? Execute a shell command and show its output
+    ##? Usage: git x COMMAND
+    ##?
+    ##? Execute a shell command and show its output.
+    ##?
+    ##? Example:
+    ##?   git x make
     x = "!exec "
 #+end_src
 
@@ -5616,9 +5642,13 @@ always executed in the top-level directory.
 ** Show the path to root directory of Git repo
 
 #+begin_src conf
+    ##? Usage: git root
+    ##?
     ##? Show the absolute path to the root directory of the Git repository.
     root = rev-parse --show-toplevel
 
+    ##? Usage: git root-relative
+    ##?
     ##? Show the path relative to the root directory of the Git repository.
     root-relative = rev-parse --show-prefix
 #+end_src
@@ -5666,6 +5696,9 @@ always executed in the top-level directory.
             done; \
     }; f"
 #+end_src
+
+*NOTE --* Some commands, like ~st~, are displayed in colors. Others, like ~branches~
+are not...
 
 *** Display a summarized version of the status of each repository
 
