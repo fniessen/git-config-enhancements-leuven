@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20240918.1021
+# .gitconfig, Time-stamp: 20240926.1453
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -867,6 +867,24 @@
         git merge-base --is-ancestor \"$COMMIT1\" \"$COMMIT2\"; \
     }; f"
 
+    ##? Usage: git commits-by [AUTHOR]
+    ##?
+    ##? Show all commits by a specific author, defaulting to the current user's
+    ##? email if not provided.
+    ##?
+    ##? Examples:
+    ##?   git commits-by                Show commits by the current user.
+    ##?   git commits-by "Author Name"  Show commits by a specific author.
+    ##?   git commits-by "author@example.com"
+    ##?                                 Show commits by a specific author.
+    commits-by = "!f() { \
+        local AUTHOR=\"${1:-$(git config --get user.email)}\"; \
+        git log \
+            --all \
+            -i --author=\"$AUTHOR\" \
+            --no-merges; \
+    }; f"
+
     # Search through all commit logs for multiple patterns (case-insensitive)
     # across all branches.
     # Example: git search-commit-messages-or-logic-all-branches "pattern1" "pattern2" "pattern3"
@@ -915,24 +933,6 @@
             CMD=\"$CMD --grep='$PATTERN'\"; \
         done; \
         eval $CMD | sort -r | sed 's/^[^:]*://'; \
-    }; f"
-
-    ##? Usage: git commits-by [AUTHOR]
-    ##?
-    ##? Show all commits by a specific author, defaulting to the current user's
-    ##? email if not provided.
-    ##?
-    ##? Examples:
-    ##?   git commits-by                Show commits by the current user.
-    ##?   git commits-by "Author Name"  Show commits by a specific author.
-    ##?   git commits-by "author@example.com"
-    ##?                                 Show commits by a specific author.
-    commits-by = "!f() { \
-        local AUTHOR=\"${1:-$(git config --get user.email)}\"; \
-        git log \
-            --all \
-            -i --author=\"$AUTHOR\" \
-            --no-merges; \
     }; f"
 
     ##? Usage: git search-commit-diffs REGEXP [PATH]

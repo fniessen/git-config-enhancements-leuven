@@ -2617,7 +2617,29 @@ Therefore, Git cannot determine "which branch was which" before merge commits.
 : curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/search?scope=commits&search=bye
 : curl --request GET --header "PRIVATE-TOKEN: YOUR_ACCESS_TOKEN" https://gitlab.example.com/api/v4/groups/3/search?scope=issues&search=file
 
-*** Search in the commit messages
+*** Search by author
+
+#+begin_src conf
+    ##? Usage: git commits-by [AUTHOR]
+    ##?
+    ##? Show all commits by a specific author, defaulting to the current user's
+    ##? email if not provided.
+    ##?
+    ##? Examples:
+    ##?   git commits-by                Show commits by the current user.
+    ##?   git commits-by "Author Name"  Show commits by a specific author.
+    ##?   git commits-by "author@example.com"
+    ##?                                 Show commits by a specific author.
+    commits-by = "!f() { \
+        local AUTHOR=\"${1:-$(git config --get user.email)}\"; \
+        git log \
+            --all \
+            -i --author=\"$AUTHOR\" \
+            --no-merges; \
+    }; f"
+    #+end_src
+
+*** Search commit messages
 
 You can find commits that contain particular words in the commit message. For
 example, ~fix typo~ matches commits containing the words ~fix~ *and* ~typo~.
@@ -2716,29 +2738,7 @@ Show the *last commit* whose *message matches a regexp*:
 : # Show the LATEST merge commit.
 : git show :/^Merge
 
-*** Search by Author
-
-#+begin_src conf
-    ##? Usage: git commits-by [AUTHOR]
-    ##?
-    ##? Show all commits by a specific author, defaulting to the current user's
-    ##? email if not provided.
-    ##?
-    ##? Examples:
-    ##?   git commits-by                Show commits by the current user.
-    ##?   git commits-by "Author Name"  Show commits by a specific author.
-    ##?   git commits-by "author@example.com"
-    ##?                                 Show commits by a specific author.
-    commits-by = "!f() { \
-        local AUTHOR=\"${1:-$(git config --get user.email)}\"; \
-        git log \
-            --all \
-            -i --author=\"$AUTHOR\" \
-            --no-merges; \
-    }; f"
-    #+end_src
-
-*** Search on File Changes
+*** Search by changes in the content
 
 There are two key differences between ~-S~ and ~-G~ in Git:
 
@@ -2856,7 +2856,11 @@ in the code changes (diff) across all branches.
     }; f"
 #+end_src
 
-*** Search in files
+**** Search for commits where a regexp is added, removed, or modified
+
+: git log --all -p -- '*.sql' | grep -E -C 2 'rule_type'
+
+** Search in files
 
 #+begin_src conf
     # Usage: git search-all-commits SEARCH_TERM
