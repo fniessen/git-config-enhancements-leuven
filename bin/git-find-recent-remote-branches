@@ -69,6 +69,9 @@ setup_colors() {
 # Initialize color and text formatting.
 setup_colors
 
+# Array to hold formatted branch details.
+output=()
+
 # Loop through each remote branch to check for recent modifications.
 for branch in $branches; do
     # Capture the output of the git log command for the last commit
@@ -84,10 +87,15 @@ for branch in $branches; do
         last_commit_time=$(printf "%s" "$last_commit_info" | awk '{print $2}')
         author=$(printf "%s" "$last_commit_info" | awk '{$1=$2=$3=""; print $0}' | xargs)
 
-        # Print branch details if it has recent commits.
+        # Format the output for this branch and store it in an array.
         day_of_week=$(date -d "$last_commit_date" "+%a")
         last_commit_time=$(date -d "$last_commit_time" "+%H:%M")
-        printf "${GREEN}%s %s %s${RESET} - Branch ${BOLD}${RED}%s${RESET} ${BLUE}<%s>${RESET}\n" \
-               "$last_commit_date" "$day_of_week" "$last_commit_time" "$branch" "$author"
+        formatted_output=$(printf "$GREEN%s %s %s$RESET - Branch $BOLD$RED%s$RESET $BLUE<%s>$RESET\n" \
+                                  "$last_commit_date" "$day_of_week" "$last_commit_time" "$branch" "$author")
+        # Append to the output array.
+        output+=("$formatted_output")
     fi
 done
+
+# Sort the collected output based on the date and time (in reverse).
+printf "%s\n" "${output[@]}" | sort -r --key=1,1 --key=2,2 --key=3,3
