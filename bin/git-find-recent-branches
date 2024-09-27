@@ -7,16 +7,21 @@
 #? This is free software: you are free to change and redistribute it.
 #? There is NO WARRANTY, to the extent permitted by law.
 
-##? Usage: git-find-recent-branches [options] [THRESHOLD]
+##? Usage: git-find-recent-branches [options]
 ##?
-##? Find Git branches modified recently.
-##?
-##? Arguments:
-##?   THRESHOLD                     specify the threshold in days [default: 7].
+##? Find Git remote branches that have been modified recently.
 ##?
 ##? Options:
+##?   --since=DATE                  specify the date from which to show branches
+##?                                 [default: 1 week ago]
 ##?   -h, --help                    display this help and exit
 ##?   -V, --version                 display version information and exit
+##?
+##? Examples:
+##?   git-find-recent-branches      find branches modified since last Friday
+##?                                 or yesterday
+##?   git-find-recent-branches --since="2 weeks ago"
+##?                                 find branches modified since 2 weeks ago
 
 # Set -uo pipefail for undefined variable check and pipeline failure propagation.
 set -uo pipefail
@@ -38,20 +43,11 @@ eval "$args"
 # Set -e to exit on non-zero command status.
 set -e
 
-# Set the threshold.
-THRESHOLD=${1:-7}
+# Set the since date. Default to '1.week.ago' if not provided.
+since=${since:-'1.week.ago'}
 
-# Validate that THRESHOLD is a numeric value.
-if ! [[ "$THRESHOLD" =~ ^[0-9]+$ ]]; then
-    printf >&2 'Error: THRESHOLD must be a numeric value.\n'
-    exit 2
-fi
-
-# Convert threshold to date format.
-threshold_date=$(date -d "$THRESHOLD days ago" +%Y-%m-%d)
-
-# Fetch remote branches and filter by last commit date.
-git fetch --prune
+# Fetch latest changes and remote branches, pruning deleted branches.
+git fetch --prune > /dev/null 2>&1
 
 # Get the list of remote branches, exit gracefully if there are no branches.
 branches=$(git for-each-ref --sort='-committerdate' --format='%(refname:short)' refs/remotes | grep -v HEAD || true)
@@ -73,14 +69,22 @@ setup_colors() {
 # Initialize color and text formatting.
 setup_colors
 
-# Loop through branches and check if they've been modified within the threshold days.
+# Loop through each remote branch to check for recent modifications.
 for branch in $branches; do
-    last_commit_info=$(git show -s --format='%ci' "$branch" | head -n 1)
-    last_commit_date=$(echo "$last_commit_info" | awk '{print $1}')
-    last_commit_time=$(echo "$last_commit_info" | awk '{print $2}')
-    author=$(git show -s --format='%an' "$branch" | head -n 1)
-    last_commit_date=$(date -d "$last_commit_date" +%Y-%m-%d)
-    if [[ "$last_commit_date" > "$threshold_date" ]]; then
+    # Capture the output of the git log command for the last commit
+    # since the specified date for the current branch.
+    commit_info=$(git log -1 --since="$since" "$branch" 2>/dev/null)
+
+    # Check if the output contains at least one line (indicating a recent
+    # commit).
+    if [[ -n "$commit_info" ]]; then
+        # Retrieve the date and author of the last commit on the branch.
+        last_commit_info=$(git show -s --format='%ci %an' "$branch")
+        last_commit_date=$(echo "$last_commit_info" | awk '{print $1}')
+        last_commit_time=$(echo "$last_commit_info" | awk '{print $2}')
+        author=$(echo "$last_commit_info" | awk '{$1=$2=$3=""; print $0}' | xargs)
+
+        # Print branch details if it has recent commits.
         day_of_week=$(date -d "$last_commit_date" "+%a")
         last_commit_time=$(date -d "$last_commit_time" "+%H:%M")
         printf "${GREEN}%s %s %s${RESET} - Branch ${BOLD}${RED}%s${RESET} ${BLUE}<%s>${RESET}\n" \
