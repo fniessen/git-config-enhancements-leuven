@@ -80,9 +80,9 @@ for branch in $branches; do
     if [[ -n "$commit_info" ]]; then
         # Retrieve the date and author of the last commit on the branch.
         last_commit_info=$(git show -s --format='%ci %an' "$branch")
-        last_commit_date=$(echo "$last_commit_info" | awk '{print $1}')
-        last_commit_time=$(echo "$last_commit_info" | awk '{print $2}')
-        author=$(echo "$last_commit_info" | awk '{$1=$2=$3=""; print $0}' | xargs)
+        last_commit_date=$(printf "%s" "$last_commit_info" | awk '{print $1}')
+        last_commit_time=$(printf "%s" "$last_commit_info" | awk '{print $2}')
+        author=$(printf "%s" "$last_commit_info" | awk '{$1=$2=$3=""; print $0}' | xargs)
 
         # Print branch details if it has recent commits.
         day_of_week=$(date -d "$last_commit_date" "+%a")
