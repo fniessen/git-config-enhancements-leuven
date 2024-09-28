@@ -26,13 +26,58 @@ else
 fi
 
 # Make API request to list your public repositories.
-repos=$(curl -s -H "Authorization: token $token" "https://api.github.com/users/$username/repos?type=public&sort=updated")
+repos_response=$(curl -s -H "Authorization: token $token" "https://api.github.com/users/$username/repos?type=public&sort=updated")
+
+# Check if curl request failed (e.g., due to network or authentication issues).
+if [[ -z "$repos_response" ]]; then
+    printf >&2 "Error: Unable to reach GitHub. Please check your internet connection or GitHub token.\n"
+    exit 1
+fi
+
+# Check for an API error message.
+api_error=$(echo "$repos_response" | jq -r '.message?')
+if [[ "$api_error" != "null" ]]; then
+    printf >&2 "Error from GitHub API: %s\n" "$api_error"
+    exit 1
+fi
+
+# Extract the repository names from the response.
+repos=$(echo "$repos_response" | jq -r '.[].name')
+
+# Check if there are any repositories returned.
+if [[ -z "$repos" ]]; then
+    printf "No public repositories found for user %s.\n" "$username"
+    exit 0
+fi
 
 # Loop through each repository and get its open issues.
-for repo in $(echo "${repos}" | jq -r '.[].name' | sort); do
-    num_issues=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo" | jq '.open_issues')
-    issues=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/issues?state=open" | jq -r '.[] | "  #" + (.number | tostring) + " - " + .title')
+for repo in $(echo "$repos" | sort); do
+    repo_response=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo")
+
+    # Check if the curl request to get repository details failed.
+    if [[ -z "$repo_response" ]]; then
+        printf >&2 "Error: Unable to fetch data for repo %s. Please check your connection.\n" "$repo"
+        continue
+    fi
+
+    num_issues=$(echo "$repo_response" | jq '.open_issues')
+
+    # Fetch the open issues for the repository.
+    issues_response=$(curl -s -H "Authorization: token $token" "https://api.github.com/repos/$username/$repo/issues?state=open")
+
+    # Check if the curl request to get issues failed.
+    if [[ -z "$issues_response" ]]; then
+        printf >&2 "Error: Unable to fetch issues for repo %s. Please check your connection.\n" "$repo"
+        continue
+    fi
+
+    # Extract the list of issues (number and title).
+    issues=$(echo "$issues_response" | jq -r '.[] | "  #" + (.number | tostring) + " - " + .title')
+
+    # Only print repo and issue information if issues are present.
     if [[ "$issues" ]]; then
         printf "%s: %d open issues\n%s\n\n" "$repo" "$num_issues" "$issues"
+    else
+        printf "%s: No open issues\n\n" "$repo"
     fi
 done
