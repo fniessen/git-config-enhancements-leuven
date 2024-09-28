@@ -15,10 +15,10 @@ fi
 if [[ "$#" -eq 2 ]]; then
     username="$1"
     token="$2"
+elif [[ -f "$HOME/.secret/.github_config" ]]; then
+    source "$HOME/.secret/.github_config"
 elif [[ -f "$HOME/.github_config" ]]; then
     source "$HOME/.github_config"
-elif [[ -f ".github_config" ]]; then
-    source ".github_config"
 else
     printf "No GitHub username and personal access token found. Using default values.\n"
     username="$default_username"
