@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? get-github-issues, Time-stamp: <2024-09-24 Tue 16:06>
+#? get-github-issues, Time-stamp: <2024-10-04 Fri 15:10>
 #? Copyright (C) 2024 Fabrice Niessen
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -9,7 +9,7 @@
 
 ##? Usage: get-github-issues [options]
 
-config_file="$HOME/github-config"
+config_file="$HOME/.secret/github-config"
 
 # Source the configuration file.
 if [ -f "$config_file" ]; then
