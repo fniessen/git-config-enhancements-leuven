@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? get-github-issues, Time-stamp: <2024-09-24 Tue 15:43>
+#? get-github-issues, Time-stamp: <2024-09-24 Tue 16:06>
 #? Copyright (C) 2024 Fabrice Niessen
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -9,11 +9,13 @@
 
 ##? Usage: get-github-issues [options]
 
+config_file="$HOME/github-config"
+
 # Source the configuration file.
-if [ -f "$HOME/bin/github-config" ]; then
-    source "$HOME/bin/github-config"
+if [ -f "$config_file" ]; then
+    source "$config_file"
 else
-    printf >&2 "Error: Configuration file github-config not found.\n"
+    printf >&2 "Error: Configuration file '%s' not found.\n" "$config_file"
     exit 2
 fi
 
