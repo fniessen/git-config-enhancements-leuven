@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+#? git-touch-updates, Time-stamp: 20221102.1443
+#? Copyright (C) 2024 Fabrice Niessen
+#?
+#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+#? This is free software: you are free to change and redistribute it.
+#? There is NO WARRANTY, to the extent permitted by law.
+
+##? Usage: git-touch-updates [options]
+##?
+##? Update file modification times to the timestamp of their latest Git commit.
+
+printf "NOTE: This script may take a while to run.\n"
+
+# If no arguments are provided, recursively list all git-controlled files and
+# pass them for processing.
+if [ $# -eq 0 ]; then
+    git ls-files -z | xargs -0 bash "$0"
+    exit $?
+fi
+
+# Function to update file modification time.
+update_file_time() {
+    local file="$1"
+
+    # Extract timestamp for the file from git log (single git call for each
+    # file).
+    local timestamp=$(git log --pretty=format:%cd -n 1 \
+                          --date=format:%Y%m%d%H%M.%S --date-order -- "$file")
+
+    # If no timestamp was found, print an error and skip the file.
+    if [ -z "$timestamp" ]; then
+        printf "ERROR: Skipping '%s' -- no git log found\n" "$file" >&2
+        return
+    fi
+
+    # Update the file modification time.
+    touch -m -t "$timestamp" "$file"
+}
+
+# Export the function so it can be used by xargs in parallel.
+export -f update_file_time
+
+# Parallelize the modification time updates using xargs and process the files
+# concurrently.
+printf '%s\0' "$@" | xargs -0 -n 1 -P 8 bash -c 'update_file_time "$0"'

@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+#? git-touch-updates, Time-stamp: 20221102.1443
+#? Copyright (C) 2024 Fabrice Niessen
+#?
+#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+#? This is free software: you are free to change and redistribute it.
+#? There is NO WARRANTY, to the extent permitted by law.
+
+##? Usage: git-touch-updates [options]
+##?
+##? Update file modification times to the timestamp of their latest Git commit.
+
+printf "NOTE: This script may take a while to run.\n"
+
+# If no arguments are provided, recursively list all git-controlled files and
+# pass them for processing.
+if [ $# -eq 0 ]; then
+    git ls-files -z | xargs -0 bash "$0"
+    exit $?
+fi
+
+# Function to update file modification time.
+update_file_time() {
+    local file="$1"
+    local timestamp="$2"
+
+    # Update the file modification time.
+    touch -m -t "$timestamp" "$file"
+}
+
+# Create a temporary file to hold the latest commits and timestamps.
+temp_file=$(mktemp)
+
+# Get the latest commit times for all files in one go.
+git log --pretty=format:'%H %cd' --date=format:%Y%m%d%H%M.%S --date-order -- "$@" | while IFS= read -r line; do
+    commit=$(echo "$line" | awk '{print $1}')
+    timestamp=$(echo "$line" | cut -d ' ' -f 2-)
+
+    # Get the files associated with this commit hash.
+    files=$(git diff-tree --no-commit-id --name-only -r "$commit")
+
+    # Assign the timestamp to each affected file.
+    while IFS= read -r file; do
+        echo "$file $timestamp" >> "$temp_file"
+    done <<< "$files"
+done
+
+# Now, process each file and update its modification time if a timestamp is found.
+while IFS= read -r line; do
+    file=$(echo "$line" | cut -d ' ' -f 1-)
+    timestamp=$(echo "$line" | awk '{print $NF}')
+
+    # Check if the file exists and is a regular file.
+    if [ -f "$file" ]; then
+        update_file_time "$file" "$timestamp"
+    else
+        printf "ERROR: Skipping '%s' -- no git log found\n" "$file" >&2
+    fi
+done < "$temp_file"
+
+# Clean up temporary file.
+rm -f "$temp_file"
