@@ -11,6 +11,17 @@
 ##?
 ##? Update file modification times to the timestamp of their latest Git commit.
 
+# To automate this after each 'git pull' or 'git checkout', follow these steps:
+# 1. Copy this script to a suitable location, e.g., /PATH/TO/git-touch-updates
+# 2. In your repository, go to .git/hooks/
+# 3. Create or edit the following Git hooks:
+#    - post-checkout: runs after each 'git checkout'
+#    - post-merge: runs after each 'git pull'
+# 4. Add this line to both hooks:
+#    /PATH/TO/git-touch-updates
+# 5. Make sure the hooks are executable:
+#    chmod +x .git/hooks/post-checkout .git/hooks/post-merge
+
 printf "NOTE: This script may take a while to run.\n"
 
 # If no arguments are provided, recursively list all git-controlled files and
