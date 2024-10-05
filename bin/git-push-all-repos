@@ -19,17 +19,18 @@ find . -type d -name ".git" -prune 2>/dev/null | sort | while read -r repo; do
         printf "$(tput setaf 7)$(tput bold)$(tput setab 1)Timed out while pushing changes for repository '%s'$(tput sgr0)\n" "$repo_name"
     elif [ $exit_code -ne 0 ]; then
         printf "$(tput setaf 1)$(tput bold)%s$(tput sgr0)\n" "$output" \
-            | sed 's/^/      /'
+            | sed 's/^/        /'
     else
         printf "$(tput setaf 2)%s$(tput sgr0)\n" "$output" \
-            | sed 's/^/      /'
+            | sed 's/^/        /'
     fi
 
     # Display modified files in yellow bold if there are any.
     modified_files=$(git -C "$repo_dir" status --porcelain)
     if [[ -n "$modified_files" ]]; then
         while IFS= read -r line; do
-            printf "$(tput setaf 3)$(tput bold)        %s$(tput sgr0)\n" "$line"
+            printf "$(tput setaf 3)$(tput bold)%s$(tput sgr0)\n" "$line" \
+                | sed 's/^/        /'
         done <<< "$modified_files"
     fi
 done
