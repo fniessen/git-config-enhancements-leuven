@@ -1026,6 +1026,8 @@ Set email addresses for you:
     work-profile = config user.email \"john@work.com\"
 #+end_src
 
+
+
 #+begin_src conf
     ##? Usage: git whoami
     ##?
@@ -7366,15 +7368,31 @@ branch (using ~git push --force~) and someone needs a talkin' to.
 
 * Local configuration
 
-Your =.gitconfig= file might resemble the following configuration:
+Your =.gitconfig= file might look like the following configuration:
 
 #+begin_src conf :tangle no
 [include]
     path = .gitconfig_leuven
 
 [user]
-    email = your_email@example.com
     name = Your Name
+    email = home.email@example.com
+
+# Include common configuration for client projects.
+[includeIf "gitdir:~/1-Clients/"]
+    path = ~/1-Clients/.gitconfig
+#+end_src
+
+If you need to change the user email for client projects, you can use an
+~includeIf~ directive to apply a common =.gitconfig= for /all projects located under/
+=~/1-Clients/=.
+
+For work projects, create a =.gitconfig= file in the projects' directory to
+specify the configuration for those projects:
+
+#+begin_src conf :tangle no
+[user]
+    email = work.email@example.com
 #+end_src
 
 * Contribute to the project!
