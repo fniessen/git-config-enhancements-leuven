@@ -1495,6 +1495,10 @@ thrown away, the alias to use is ~unmodify~;
     ##?                                 current directory.
     ##?   git unmodify PATH/TO/FILE     Restore a specific modified file.
     unmodify = "!f() { \
+        if [ $# -gt 1 ]; then \
+            printf >&2 'Usage: git unmodify [FILE_TO_RESTORE]\n'; \
+            return 2; \
+        fi; \
         local FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
             git status --porcelain \
@@ -1522,6 +1526,10 @@ thrown away, the alias to use is ~unmodify~;
     ##?                                 directory.
     ##?   git undelete PATH/TO/FILE     Restore a specific deleted file.
     undelete = "!f() { \
+        if [ $# -gt 1 ]; then \
+            printf >&2 'Usage: git undelete [FILE_TO_RESTORE]\n'; \
+            return 2; \
+        fi; \
         local FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
             git status --porcelain \
@@ -4663,7 +4671,7 @@ current branch and the specified branch.
     }; f"
 #+end_src
 
-TODO: Remove hard-coded master
+*************** TODO Remove hard-coded master
 
 *How to find all the commits made only on a specific branch?*  Assuming that your
 branch was created off of ~master~, then /while on the specific branch/ (that is,
@@ -5961,8 +5969,7 @@ List commits *showing changed files* (prettier and more concise version of
     # }; f"
 #+end_src
 
-TODO: More information with lastn2 (for file renames), but missing newline after
-merge commits...
+*************** TODO More information with lastn2 (for file renames), but missing newline after merge commits...
 
 *** Show the commit history of a file
 
@@ -6199,22 +6206,25 @@ directory across all local branches:
 #+begin_src conf
     # Given a merge commit, find the span of commits that exist(ed).
     # Not so useful in itself, but used by other aliases.
-    # Thanks to Rob Miller for the merge-span-* aliaes.
+    # Thanks to Rob Miller for the merge-span-* aliases.
     merge-span = "!f() { \
-        echo $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f1)\"$1\"$(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f2); \
+        printf '%s%s%s' \
+            $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f1) \
+            \"$1\" \
+            $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f2); \
     }; f"
 
-    # Find the commits that were introduced by a merge
+    # Find the commits that were introduced by a merge.
     merge-span-log = "!f() { \
         git log $(git merge-span .. \"$1\"); \
     }; f"
 
-    # Show the changes that were introduced by a merge
+    # Show the changes that were introduced by a merge.
     merge-span-diff = "!f() { \
         git diff $(git merge-span ... \"$1\"); \
     }; f"
 
-    # Show the changes that were introduced by a merge, in your difftool
+    # Show the changes that were introduced by a merge, in your difftool.
     merge-span-difftool = "!f() { \
         git difftool $(git merge-span ... \"$1\"); \
     }; f"
@@ -6260,8 +6270,11 @@ What was going on, while you were away?
         git fetch \
             && git log HEAD..@{u}; \
     }; f"
-    # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
+    #+end_src
 
+*************** TODO Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
+
+    #+begin_src conf
     ##? Alias for 'incoming'.
     in = incoming
 #+end_src
@@ -6293,8 +6306,9 @@ depending on the remote's name), and you can use ~@{u}~ to represent it.
     who-changed = "!f() { \
         git shortlog HEAD..$(git origin)/$1; \
     }; f"
-    # TODO: Add fetch?
 #+end_src
+
+*************** TODO Add fetch?
 
 Show a *single diffstat* (number of added and deleted lines for *all changed
 files*):
@@ -7010,7 +7024,8 @@ the next time you do a push.
     out = outgoing
 #+end_src
 
-TODO: Fix missing newline at the end...
+*************** TODO Fix missing newline at the end...
+
 Hence, wrong count of lines (with shell alias "W")...
 
 #+begin_src conf

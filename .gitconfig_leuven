@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20241119.1227
+# .gitconfig, Time-stamp: 20241120.1155
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -425,6 +425,10 @@
     ##?                                 current directory.
     ##?   git unmodify PATH/TO/FILE     Restore a specific modified file.
     unmodify = "!f() { \
+        if [ $# -gt 1 ]; then \
+            printf >&2 'Usage: git unmodify [FILE_TO_RESTORE]\n'; \
+            return 2; \
+        fi; \
         local FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
             git status --porcelain \
@@ -452,6 +456,10 @@
     ##?                                 directory.
     ##?   git undelete PATH/TO/FILE     Restore a specific deleted file.
     undelete = "!f() { \
+        if [ $# -gt 1 ]; then \
+            printf >&2 'Usage: git undelete [FILE_TO_RESTORE]\n'; \
+            return 2; \
+        fi; \
         local FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
             git status --porcelain \
@@ -2445,22 +2453,25 @@
 
     # Given a merge commit, find the span of commits that exist(ed).
     # Not so useful in itself, but used by other aliases.
-    # Thanks to Rob Miller for the merge-span-* aliaes.
+    # Thanks to Rob Miller for the merge-span-* aliases.
     merge-span = "!f() { \
-        echo $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f1)\"$1\"$(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f2); \
+        printf '%s%s%s' \
+            $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f1) \
+            \"$1\" \
+            $(git log -1 --merges --pretty=format:%P $2 | cut -d' ' -f2); \
     }; f"
 
-    # Find the commits that were introduced by a merge
+    # Find the commits that were introduced by a merge.
     merge-span-log = "!f() { \
         git log $(git merge-span .. \"$1\"); \
     }; f"
 
-    # Show the changes that were introduced by a merge
+    # Show the changes that were introduced by a merge.
     merge-span-diff = "!f() { \
         git diff $(git merge-span ... \"$1\"); \
     }; f"
 
-    # Show the changes that were introduced by a merge, in your difftool
+    # Show the changes that were introduced by a merge, in your difftool.
     merge-span-difftool = "!f() { \
         git difftool $(git merge-span ... \"$1\"); \
     }; f"
@@ -2481,7 +2492,6 @@
         git fetch \
             && git log HEAD..@{u}; \
     }; f"
-    # TODO: Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
     ##? Alias for 'incoming'.
     in = incoming
@@ -2501,7 +2511,6 @@
     who-changed = "!f() { \
         git shortlog HEAD..$(git origin)/$1; \
     }; f"
-    # TODO: Add fetch?
 
     ##? Fetch updates from the remote repository and shows the difference
     ##? statistics between local HEAD and @{u}.
