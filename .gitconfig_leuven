@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20241220.1138
+# .gitconfig, Time-stamp: 20241220.1457
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -835,16 +835,14 @@
 
     ##? Usage: git branches-containing COMMIT_HASH
     ##?
-    ##? List branches containing a specific commit.
+    ##? List branches containing a specific commit (latest first).
     branches-containing = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git branches-containing COMMIT_HASH\n'; \
             return 2; \
         fi; \
         local COMMIT_HASH=\"$1\"; \
-        git branch --all --contains \"$COMMIT_HASH\" | sed 's/^[* ]*//g' | while read branch; do \
-            printf '%s %s\n' $(git log -1 --format='%ct' \"$branch\") \"$branch\"; \
-        done | sort -n -r | awk '{print $2}'; \
+        git branch --all --sort=-committerdate --contains \"$COMMIT_HASH\"; \
     }; f"
 
     ##? Usage: git latest-branch-containing COMMIT_HASH
@@ -856,7 +854,7 @@
             return 2; \
         fi; \
         local COMMIT_HASH=\"$1\"; \
-        git branch --all --sort=-committerdate --contains \"$COMMIT_HASH\" | head -n 1; \
+        git branches-containing \"$COMMIT_HASH\" | head -n 1; \
     }; f"
 
     ##? Usage: git oldest-branch-containing COMMIT_HASH
@@ -868,7 +866,7 @@
             return 2; \
         fi; \
         local COMMIT_HASH=\"$1\"; \
-        git branch --all --sort=committerdate --contains \"$COMMIT_HASH\" | head -n 1; \
+        git branches-containing \"$COMMIT_HASH\" | tail -n 1; \
     }; f"
 
     ##? Usage: git tags-containing COMMIT_HASH
