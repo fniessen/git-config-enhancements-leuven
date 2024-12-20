@@ -3262,15 +3262,15 @@ a polished and cohesive history, showcasing your attention to detail and
 effective skills -- so that people think you are smart.
 
 #+begin_src conf
-    # Usage: git squash NUMBER_OF_COMMITS_TO_UNDO
+    # Usage: git squash NUM_OF_COMMITS_TO_UNDO
     # Create a new commit that combines the changes introduced by a specified
     # number of previous commits into a single commit.
     squash = "!f() { \
         if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git squash NUMBER_OF_COMMITS_TO_UNDO\n'; \
+            printf >&2 'Usage: git squash NUM_OF_COMMITS_TO_UNDO\n'; \
             return 2; \
         fi; \
-        local num_commits_to_undo=$1; \
+        local NUM_OF_COMMITS_TO_UNDO=$1; \
         local upstream_branch=$(git upstream-branch 2>/dev/null); \
         if [ -z \"$upstream_branch\" ]; then \
             printf >&2 'Warning: No upstream branch configured for the current branch.\n'; \
@@ -3278,11 +3278,11 @@ effective skills -- so that people think you are smart.
             return 2; \
         fi; \
         local num_unpushed=$(git rev-list $upstream_branch..HEAD --count); \
-        if [ $num_commits_to_undo -le $num_unpushed ]; then \
-            git squash-force $num_commits_to_undo; \
+        if [ $NUM_OF_COMMITS_TO_UNDO -le $num_unpushed ]; then \
+            git squash-force $NUM_OF_COMMITS_TO_UNDO; \
         else \
             printf >&2 'Error: Cannot squash %d commits. There are only %d unpushed commits.\n' \
-                   $num_commits_to_undo $num_unpushed; \
+                   $NUM_OF_COMMITS_TO_UNDO $num_unpushed; \
             return 2; \
         fi; \
     }; f"
@@ -3291,7 +3291,7 @@ effective skills -- so that people think you are smart.
 Alias without safety checks:
 
 #+begin_src conf
-    # Usage: git squash-force NUMBER_OF_COMMITS_TO_UNDO
+    # Usage: git squash-force NUM_OF_COMMITS_TO_UNDO
     # Create a new commit that combines the changes introduced by a specified
     # number of previous commits without safety checks.
     squash-force = "!f() { \
