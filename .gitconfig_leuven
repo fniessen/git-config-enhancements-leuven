@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: 20241220.1457
+# .gitconfig, Time-stamp: 20241220.1504
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -835,7 +835,8 @@
 
     ##? Usage: git branches-containing COMMIT_HASH
     ##?
-    ##? List branches containing a specific commit (latest first).
+    ##? List all branches (including remote branches) that contain the specified
+    ##? commit, sorted by the latest commit date.
     branches-containing = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git branches-containing COMMIT_HASH\n'; \
@@ -847,7 +848,8 @@
 
     ##? Usage: git latest-branch-containing COMMIT_HASH
     ##?
-    ##? Find the latest branch containing a specific commit, sorted by recency.
+    ##? Find the latest branch (including remote branches) that contains the
+    ##? specified commit.
     latest-branch-containing = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git latest-branch-containing COMMIT_HASH\n'; \
@@ -859,7 +861,8 @@
 
     ##? Usage: git oldest-branch-containing COMMIT_HASH
     ##?
-    ##? Find the oldest branch containing a specific commit, sorted by recency.
+    ##? Find the oldest branch (including remote branches) that contains the
+    ##? specified commit.
     oldest-branch-containing = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git oldest-branch-containing COMMIT_HASH\n'; \
