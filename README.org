@@ -2601,16 +2601,21 @@ This command lists all tags that contain the specified commit hash:
 #+begin_src conf
     ##? Usage: git tags-containing COMMIT_HASH
     ##?
-    ##? List tags containing a specific commit.
+    ##? List tags containing a specific commit, sorted by the most recent commit
+    ##? date.
     tags-containing = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git tags-containing COMMIT_HASH\n'; \
             return 2; \
         fi; \
         local COMMIT_HASH=\"$1\"; \
-        git tag -l --contains \"$COMMIT_HASH\" \
-            | sort -r; \
-    }; f"
+        git tag --contains \"$COMMIT_HASH\" \
+            | while read tag; do \
+                commit_hash=$(git rev-list -n 1 \"$tag\"); \
+                commit_date=$(git log -1 --format='%ct' \"$commit_hash\"); \
+                printf \"%s %s\n\" \"$commit_date\" \"$tag\"; \
+            done | sort -n -r | awk '{print $2}'; \
+        }; f"
 #+end_src
 
 ** Check if one commit is an ancestor of another
