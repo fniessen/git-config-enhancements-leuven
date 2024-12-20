@@ -2554,7 +2554,7 @@ a specified *commit hash* among their ancestors.
 *** List all branches containing a specific commit
 
 The following command lists all branches (both local and remote) that contain
-the specified commit hash, sorted by the most recent commit:
+the specified commit hash, sorted by the most recent commit date:
 
 #+begin_src conf
     ##? Usage: git branches-containing COMMIT_HASH
@@ -2571,54 +2571,28 @@ the specified commit hash, sorted by the most recent commit:
     }; f"
 #+end_src
 
-This command will also include *remote tracking branches*, which are local
-branches that track remote branches directly.
+This command includes:
+
+- *Local branches:* Branches that exist in your local repository.
+- *Remote-tracking branches:* Local representations of branches on remote
+  repositories. These are branches that track remote branches directly.
+
+By sorting the branches by the latest commit date, this command helps you easily
+identify which branches have recently incorporated the specified commit.
 
 **** Find the latest branch containing a specific commit
 
-To find the most recent branch that contains a given commit (sorted by recency),
-use the following command:
+To locate the most recently updated branch (including remote branches) that
+contains a given commit, use the following command:
 
-#+begin_src conf
-    ##? Usage: git latest-branch-containing COMMIT_HASH
-    ##?
-    ##? Find the latest branch (including remote branches) that contains the
-    ##? specified commit.
-    latest-branch-containing = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git latest-branch-containing COMMIT_HASH\n'; \
-            return 2; \
-        fi; \
-        local COMMIT_HASH=\"$1\"; \
-        git branches-containing \"$COMMIT_HASH\" | head -n 1; \
-    }; f"
-#+end_src
-
-This command sorts branches by the most recent commit date, and returns the
-latest branch containing the specified commit.
+: git branches-containing COMMIT_HASH | head -n 1
 
 **** Find the oldest branch containing a specific commit
 
-To identify the oldest branch that contains a given commit (sorted by recency),
-use the following command:
+To identify the branch that was updated the earliest (including remote branches)
+and contains a given commit, use the following command:
 
-#+begin_src conf
-    ##? Usage: git oldest-branch-containing COMMIT_HASH
-    ##?
-    ##? Find the oldest branch (including remote branches) that contains the
-    ##? specified commit.
-    oldest-branch-containing = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git oldest-branch-containing COMMIT_HASH\n'; \
-            return 2; \
-        fi; \
-        local COMMIT_HASH=\"$1\"; \
-        git branches-containing \"$COMMIT_HASH\" | tail -n 1; \
-    }; f"
-#+end_src
-
-This command sorts branches by the oldest commit date and returns the oldest
-branch containing the commit.
+: git branches-containing COMMIT_HASH | tail -n 1
 
 *** List all tags containing a specific commit
 
