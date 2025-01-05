@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? git-switch-ssh-to-https, Time-stamp: 20221102.1443
-#? Copyright (C) 2022-2024 Fabrice Niessen
+#? git-switch-ssh-to-https, Time-stamp: <2025-01-05 Sun 12:26>
+#? Copyright (C) 2022-2024 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
