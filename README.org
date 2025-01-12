@@ -5729,6 +5729,12 @@ always executed in the top-level directory.
 
 * ------------------------------------------------------------------------------
 
+* Disable your local ~/.gitconfig by faking out $HOME
+
+Run ~git show~ command in a temporary ~HOME~ directory set to ~/dev/null~.
+
+: HOME=/dev/null git show
+
 * Run on All repositories
 
 #+begin_src conf
