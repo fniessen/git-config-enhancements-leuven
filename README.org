@@ -1803,10 +1803,14 @@ want, use ~git clean-untracked-dry~.
 #+end_src
 
 If you wish to safeguard the current state of your current branch, you can
-perform the following:
+perform the following steps:
 
-: git commit -a -m "Saving my work, just in case"
-: git branch my-saved-work
+#+begin_src shell :tangle no
+git checkout -b my-saved-work
+git add -A
+git commit -m "Saving work, just in case"
+git checkout ORIGINAL_BRANCH_NAME
+#+end_src
 
 *** Delete all untracked files and also ignored files
 
@@ -1825,6 +1829,8 @@ and directories:
 ~git clean~ will *remove any files* from the tracked root directory *that are not
 under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
 #+end_note
+
+*WARNING -- BE CAREFUL WITH THIS!*
 
 To check what ~git clean-all~ will delete, and be sure it's what you want, use ~git
 clean-all-dry~.
@@ -2381,16 +2387,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                                            |
-|----------+--------------------------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                                          |
-| fix      | A bug fix                                                                                              |
+| Label    | Description                                                                          |
+|----------+--------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                        |
+| fix      | A bug fix                                                                            |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                                              |
-| perf     | A code change that improves performance                                                                |
-| test     | Adding missing or correcting existing tests                                                            |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
-| doc      | Documentation only changes                                                                             |
+| refactor | A code change that neither fixes a bug nor adds a feature                            |
+| perf     | A code change that improves performance                                              |
+| test     | Adding missing or correcting existing tests                                          |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
+| doc      | Documentation only changes                                                           |
 
 ** Interactive committing (Cherry-pick style recording)
 
