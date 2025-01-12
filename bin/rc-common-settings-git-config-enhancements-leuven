@@ -26,6 +26,8 @@ if command -v tig &> /dev/null; then
     alias tigb='tig blame'
     alias tigall='tig --all'
     alias tigreleases='tig --all --simplify-by-decoration'
+    # See http://jonas.nitro.dk/tig/manual.html
+    # and http://stackoverflow.com/tags/tig/hot.
 fi
 
 # Function to iterate over commit hashes and execute a given Git command.

@@ -5731,8 +5731,8 @@ always executed in the top-level directory.
 
 * Git with time-based filters
 
-These aliases use ~G~ (for Git) as the prefix, followed by ~D~ for day, ~W~ for week,
-~M~ for month, and ~Y~ for year.
+These global aliases (for Zsh) use ~G~ (for Git) as the prefix, followed by ~D~ for
+day, ~W~ for week, ~M~ for month, and ~Y~ for year.
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-git-config-enhancements-leuven
 # Hey Emacs, this is a -*- sh -*- file ...
