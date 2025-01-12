@@ -5729,6 +5729,33 @@ always executed in the top-level directory.
 
 * ------------------------------------------------------------------------------
 
+* Git with time-based filters
+
+These aliases use ~G~ (for Git) as the prefix, followed by ~D~ for day, ~W~ for week,
+~M~ for month, and ~Y~ for year.
+
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-git-config-enhancements-leuven
+# Hey Emacs, this is a -*- sh -*- file ...
+
+# Check if 'git' command is available.
+if ! command -v git &>/dev/null; then
+    printf >&2 "Error: The 'git' utility is not installed. Please install it.\n"
+else
+    # Git aliases with time-based filters.
+    alias -g GD=' --since=1.day.ago'
+    alias -g GW=' --since=1.week.ago'
+    alias -g GM=' --since=1.month.ago'
+    alias -g GY=' --since=1.year.ago'
+fi
+#+end_src
+
+You can use these aliases in Git commands to filter commits based on time, for
+example:
+
+: git log GW
+
+This will show Git logs for commits made within the last week.
+
 * Disable your local ~/.gitconfig by faking out $HOME
 
 Run ~git show~ command in a temporary ~HOME~ directory set to ~/dev/null~.

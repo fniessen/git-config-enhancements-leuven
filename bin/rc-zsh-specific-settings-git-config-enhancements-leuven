@@ -1,0 +1,12 @@
+# Hey Emacs, this is a -*- sh -*- file ...
+
+# Check if 'git' command is available.
+if ! command -v git &>/dev/null; then
+    printf >&2 "Error: The 'git' utility is not installed. Please install it.\n"
+else
+    # Git aliases with time-based filters.
+    alias -g GD=' --since=1.day.ago'
+    alias -g GW=' --since=1.week.ago'
+    alias -g GM=' --since=1.month.ago'
+    alias -g GY=' --since=1.year.ago'
+fi
