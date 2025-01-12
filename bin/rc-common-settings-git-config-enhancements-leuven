@@ -15,20 +15,6 @@ fi
 
 # Go to the root directory of your Git repo.
 alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
-                                        ## The above command will not throw an
-                                        ## error if you aren't in a Git
-                                        ## directory.
-
-# Check if 'tig' command is installed.
-if command -v tig &> /dev/null; then
-    # Aliases for 'tig' commands.
-    alias tigs='tig status'             # Use it all of the time!
-    alias tigb='tig blame'
-    alias tigall='tig --all'
-    alias tigreleases='tig --all --simplify-by-decoration'
-    # See http://jonas.nitro.dk/tig/manual.html
-    # and http://stackoverflow.com/tags/tig/hot.
-fi
 
 # Function to iterate over commit hashes and execute a given Git command.
 #
@@ -72,3 +58,12 @@ git-iterate-commits() {
         git "$git_command" "$commit_hash"
     done
 }
+
+# Check if 'tig' command is installed.
+if command -v tig &> /dev/null; then
+    # Aliases for 'tig' commands.
+    alias tigs='tig status'             # Use it all of the time!
+    alias tigb='tig blame'
+    alias tigall='tig --all'
+    alias tigreleases='tig --all --simplify-by-decoration'
+fi
