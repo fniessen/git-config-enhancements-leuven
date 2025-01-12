@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250112.1322>
+# .gitconfig, Time-stamp: <20250112.1336>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -337,7 +337,8 @@
 
     ##? Usage: git search-for-files PATTERN
     ##?
-    ##? List all files in the current branch matching a case-insensitive search pattern.
+    ##? List all files in the current branch matching a case-insensitive search
+    ##? pattern.
     ##?
     ##? Arguments:
     ##?   PATTERN                       Pattern
@@ -497,29 +498,29 @@
     # List files that have been deleted in the working directory.
     deleted-files = ls-files --deleted
 
-    ##? Usage: git all-untracked-files
+    ##? Usage: git ignored-and-untracked-files
     ##?
-    ##? List all untracked files.
-    all-untracked-files = ls-files --others
+    ##? List both ignored and untracked files.
+    ignored-and-untracked-files = ls-files --others
 
-    # Usage: git backup-all-untracked-files
-    # Create a backup archive of all untracked files in the repository.
-    backup-all-untracked-files = "!f() { \
+    # Usage: git backup-ignored-and-untracked-files
+    # Create a backup archive of all ignored and untracked files in the repository.
+    backup-ignored-and-untracked-files = "!f() { \
         local repo_slug_remote=\"$(git repo-slug-remote)\"; \
         local current_date=$(date +'%Y-%m-%d'); \
         local backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
-        git all-untracked-files -z \
+        git ignored-and-untracked-files -z \
             | xargs -0 tar rvf ~/$backup_filename; \
     }; f"
 
-    ##? Usage: git untracked-files-excluding-ignored
+    ##? Usage: git untracked-files
     ##?
     ##? List untracked files, excluding Git-ignored files.
-    untracked-files-excluding-ignored = ls-files --others --exclude-standard
+    untracked-files = ls-files --others --exclude-standard
 
     ##? Usage: git ignored-files
     ##?
-    ##? List ignored files.
+    ##? List only ignored files.
     ignored-files = ls-files --others --ignored --exclude-standard
 
     # Usage: git tracked-files
