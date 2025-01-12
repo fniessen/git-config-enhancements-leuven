@@ -1789,9 +1789,11 @@ To *remove only ignored files and directories*, use the following command:
 
 : git clean-ignored
 
-This command deletes all files and directories listed in =.gitignore=, while
-leaving *untracked files untouched*. Staged changes, such as modified but
-uncommitted files, are also preserved.
+This command removes all files and directories specified in =.gitignore=, while
+keeping *untracked files untouched*. Any staged changes, including modified but
+uncommitted files, remain unaffected.
+
+It is commonly used to clean up ignored build artifacts or temporary files.
 
 #+begin_src conf
     # Usage: git clean-ignored
@@ -1813,7 +1815,7 @@ without actually deleting them, use:
 #+begin_src conf
     # Usage: git clean-ignored-dry
     # Display files and directories that would be removed by git clean-ignored.
-    clean-ignored-dry = clean -n -d -X
+    clean-ignored-dry = clean --dry-run -d -X
 #+end_src
 
 *** Delete ignored and untracked files
@@ -1823,9 +1825,10 @@ directories*, use:
 
 : git clean-all
 
-This command is especially dangerous because it removes files and directories
-that are not under Git tracking. Be cautious as *deleted files cannot be
-recovered*.
+This command is especially dangerous because it removes *all* files and
+directories that are not under Git tracking (e.g., work-in-progress files or
+configuration files not committed to the repository). Be cautious as *deleted
+files cannot be recovered* unless you have a backup.
 
 #+begin_src conf
     # Usage: git clean-all
@@ -1849,7 +1852,7 @@ actually deleting them, use:
 #+begin_src conf
     # Usage: git clean-all-dry
     # Display files and directories that would be removed by git clean-all.
-    clean-all-dry = clean -n -d -x
+    clean-all-dry = clean --dry-run -d -x
 #+end_src
 
 *** Safeguarding your work before cleaning
