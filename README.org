@@ -1783,14 +1783,15 @@ How to remove ignored files (that are still on the repository)?
 
 : git ignored-files -z | xargs -0 rm
 
-*** Delete all ignored files
+*** Delete ignored files
 
-To *remove only ignored files and directories*, you can run ~git clean-ignored~.
+To *remove only ignored files and directories*, use the following command:
 
-Only ignored files (and directories) -- not unknown files -- are deleted: it
-*leaves all untracked files untouched*.
+: git clean-ignored
 
-It won't remove staged changes, like modified files still uncommitted.
+This command deletes all files and directories listed in =.gitignore=, while
+leaving *untracked files untouched*. Staged changes, such as modified but
+uncommitted files, are also preserved.
 
 #+begin_src conf
     # Usage: git clean-ignored
@@ -1799,24 +1800,32 @@ It won't remove staged changes, like modified files still uncommitted.
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 #+end_src
 
-It will preserve files and directories that are listed in =.gitignore=.
+*WARNING:* These commands are irreversible and can lead to permanent data loss if
+used carelessly. Proceed with caution.
 
-*WARNING -- BE CAREFUL WITH THIS!*
+**** Check before deleting ignored files
 
-To check what ~git clean-ignored~ will delete, and be sure it's what you want, use
-~git clean-ignored-dry~.
+To preview what files and directories would be removed by ~git clean-ignored~
+without actually deleting them, use:
+
+: git clean-ignored-dry
 
 #+begin_src conf
     # Usage: git clean-ignored-dry
-    # Show what files and directories would be removed by the clean-ignored
-    # alias without actually removing them.
+    # Display files and directories that would be removed by git clean-ignored.
     clean-ignored-dry = clean -n -d -X
 #+end_src
 
-*** Delete all ignored files and also all untracked files
+*** Delete ignored and untracked files
 
-*PLAY WITH FIRE VERSION* which will wipe out *all ignored and untracked files and
-directories*:
+For a more aggressive cleanup that *removes both ignored and untracked files and
+directories*, use:
+
+: git clean-all
+
+This command is especially dangerous because it removes files and directories
+that are not under Git tracking. Be cautious as *deleted files cannot be
+recovered*.
 
 #+begin_src conf
     # Usage: git clean-all
@@ -1826,31 +1835,37 @@ directories*:
 #+end_src
 
 #+begin_note
-~git clean~ will *remove any files* from the tracked root directory *that are not
-under Git tracking* (whereas ~git reset --hard~ will /not remove untracked files/).
+The behavior of ~git clean~ differs from ~git reset --hard~, which does not affect
+untracked files.
 #+end_note
 
-*WARNING -- BE CAREFUL WITH THIS!*
+**** Check before deleting ignored and untracked files
 
-To check what ~git clean-all~ will delete, and be sure it's what you want, use ~git
-clean-all-dry~.
+To preview what files and directories would be removed by ~git clean-all~ without
+actually deleting them, use:
+
+: git clean-all-dry
 
 #+begin_src conf
     # Usage: git clean-all-dry
-    # Show what files and directories would be removed by the clean-all alias
-    # without actually removing them.
+    # Display files and directories that would be removed by git clean-all.
     clean-all-dry = clean -n -d -x
 #+end_src
 
-If you wish to safeguard the current state of your current branch, you can
-perform the following steps:
+*** Safeguarding your work before cleaning
 
-#+begin_src shell :tangle no
+Before running any of the above commands, it’s a good idea to save the current
+state of your branch. Follow these steps:
+
+#+begin_src conf :tangle no
 git checkout -b my-saved-work
 git add -A
 git commit -m "Saving work, just in case"
 git checkout ORIGINAL_BRANCH_NAME
 #+end_src
+
+*Note:* Always use the ~-dry~ variants of the commands first to verify which files
+will be deleted.
 
 *** Hg shelve untracked files
 
@@ -2391,16 +2406,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                          |
-|----------+--------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                        |
-| fix      | A bug fix                                                                            |
+| Label    | Description                                                                                            |
+|----------+--------------------------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                                          |
+| fix      | A bug fix                                                                                              |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                            |
-| perf     | A code change that improves performance                                              |
-| test     | Adding missing or correcting existing tests                                          |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
-| doc      | Documentation only changes                                                           |
+| refactor | A code change that neither fixes a bug nor adds a feature                                              |
+| perf     | A code change that improves performance                                                                |
+| test     | Adding missing or correcting existing tests                                                            |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
+| doc      | Documentation only changes                                                                             |
 
 ** Interactive committing (Cherry-pick style recording)
 

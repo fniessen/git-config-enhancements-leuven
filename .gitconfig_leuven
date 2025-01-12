@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250112.1230>
+# .gitconfig, Time-stamp: <20250112.1257>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -590,8 +590,7 @@
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 
     # Usage: git clean-ignored-dry
-    # Show what files and directories would be removed by the clean-ignored
-    # alias without actually removing them.
+    # Display files and directories that would be removed by git clean-ignored.
     clean-ignored-dry = clean -n -d -X
 
     # Usage: git clean-all
@@ -600,8 +599,7 @@
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 
     # Usage: git clean-all-dry
-    # Show what files and directories would be removed by the clean-all alias
-    # without actually removing them.
+    # Display files and directories that would be removed by git clean-all.
     clean-all-dry = clean -n -d -x
 
     # Remove files marked as deleted in the Git repository.
