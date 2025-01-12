@@ -1773,10 +1773,10 @@ List ignored files (*marked unchanged*):
 Be careful when using the ~git clean~ command, as it cannot be undone.
 #+end_warning
 
-| alias         | removes ignored files | removes untracked files |
-|---------------+-----------------------+-------------------------|
-| clean-ignored | Yes                   | No                      |
-| clean-all     | Yes                   | Yes                     |
+| alias                       | removes ignored files | removes untracked files |
+|-----------------------------+-----------------------+-------------------------|
+| clean-ignored               | Yes                   | No                      |
+| clean-ignored-and-untracked | Yes                   | Yes                     |
 
 *** Delete only ignored files
 
@@ -1826,7 +1826,7 @@ without actually deleting them, use:
 For a more aggressive cleanup that *removes both ignored and untracked files and
 directories*, use:
 
-: git clean-all
+: git clean-ignored-and-untracked
 
 This command is especially dangerous because it removes *all* files and
 directories that are not under Git tracking (e.g., work-in-progress files or
@@ -1834,10 +1834,10 @@ configuration files not committed to the repository). Be cautious as *deleted
 files cannot be recovered* unless you have a backup.
 
 #+begin_src conf
-    ##? Usage: git clean-all
+    ##? Usage: git clean-ignored-and-untracked
     ##?
     ##? Remove both ignored and untracked files and directories.
-    clean-all = clean -f -d -x
+    clean-ignored-and-untracked = clean -f -d -x
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 #+end_src
 
@@ -1848,16 +1848,17 @@ untracked files.
 
 **** Check before deleting ignored and untracked files
 
-To preview what files and directories would be removed by ~git clean-all~ without
-actually deleting them, use:
+To preview what files and directories would be removed by ~git
+clean-ignored-and-untracked~ without actually deleting them, use:
 
-: git clean-all-dry-run
+: git clean-ignored-and-untracked-dry-run
 
 #+begin_src conf
-    ##? Usage: git clean-all-dry-run
+    ##? Usage: git clean-ignored-and-untracked-dry-run
     ##?
-    ##? Display files and directories that would be removed by git clean-all.
-    clean-all-dry-run = clean --dry-run -d -x
+    ##? Display files and directories that would be removed by git
+    ##? clean-ignored-and-untracked.
+    clean-ignored-and-untracked-dry-run = clean --dry-run -d -x
 #+end_src
 
 *** Safeguarding your work before cleaning

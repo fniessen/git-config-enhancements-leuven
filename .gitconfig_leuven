@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250112.1336>
+# .gitconfig, Time-stamp: <20250112.1443>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -596,16 +596,17 @@
     ##? Display files and directories that would be removed by git clean-ignored.
     clean-ignored-dry-run = clean --dry-run -d -X
 
-    ##? Usage: git clean-all
+    ##? Usage: git clean-ignored-and-untracked
     ##?
     ##? Remove both ignored and untracked files and directories.
-    clean-all = clean -f -d -x
+    clean-ignored-and-untracked = clean -f -d -x
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 
-    ##? Usage: git clean-all-dry-run
+    ##? Usage: git clean-ignored-and-untracked-dry-run
     ##?
-    ##? Display files and directories that would be removed by git clean-all.
-    clean-all-dry-run = clean --dry-run -d -x
+    ##? Display files and directories that would be removed by git
+    ##? clean-ignored-and-untracked.
+    clean-ignored-and-untracked-dry-run = clean --dry-run -d -x
 
     # Remove files marked as deleted in the Git repository.
     remove-deleted = "!f() { \
