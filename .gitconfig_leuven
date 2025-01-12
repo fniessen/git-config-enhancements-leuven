@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <2025-01-05 Sun 12:27>
+# .gitconfig, Time-stamp: <20250112.1230>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -584,19 +584,18 @@
             | grep '^h' \
             | cut -c 3-"
 
-    # Usage: git clean-untracked
-    # Remove all untracked files and directories (that are not ignored by Git).
-    clean-untracked = clean -f -d -X
+    # Usage: git clean-ignored
+    # Remove only ignored files and directories.
+    clean-ignored = clean -f -d -X
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 
-    # Usage: git clean-untracked-dry
-    # Show what files and directories would be removed by the clean-untracked
+    # Usage: git clean-ignored-dry
+    # Show what files and directories would be removed by the clean-ignored
     # alias without actually removing them.
-    clean-untracked-dry = clean -n -d -X
+    clean-ignored-dry = clean -n -d -X
 
     # Usage: git clean-all
-    # Delete all untracked files and directories, including those that are
-    # ignored by Git.
+    # Remove both ignored and untracked files and directories.
     clean-all = clean -f -d -x
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 

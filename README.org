@@ -14,7 +14,7 @@
 
 #+name: current-time
 #+begin_src emacs-lisp :eval yes :results value silent :tangle no :exports none
-(format-time-string "%Y%m%d.%H%M")
+(format-time-string "<%Y%m%d.%H%M>")
 #+end_src
 
 # - http://doc.bazaar.canonical.com/beta/en/user-reference/tags-help.html
@@ -1772,19 +1772,30 @@ List ignored files (*marked unchanged*):
 Be careful when using the ~git clean~ command, as it cannot be undone.
 #+end_warning
 
-*** Delete all untracked files
+| alias         | removes ignored files | removes untracked files |
+|---------------+-----------------------+-------------------------|
+| clean-ignored | Yes                   | No                      |
+| clean-all     | Yes                   | Yes                     |
 
-To delete all files (and directories) unknown to Git, you can run ~git
-clean-untracked~.
+*** Delete only ignored files
 
-Only unknown files, not ignored files, are deleted.
+How to remove ignored files (that are still on the repository)?
+
+: git ignored-files -z | xargs -0 rm
+
+*** Delete all ignored files
+
+To *remove only ignored files and directories*, you can run ~git clean-ignored~.
+
+Only ignored files (and directories) -- not unknown files -- are deleted: it
+*leaves all untracked files untouched*.
 
 It won't remove staged changes, like modified files still uncommitted.
 
 #+begin_src conf
-    # Usage: git clean-untracked
-    # Remove all untracked files and directories (that are not ignored by Git).
-    clean-untracked = clean -f -d -X
+    # Usage: git clean-ignored
+    # Remove only ignored files and directories.
+    clean-ignored = clean -f -d -X
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 #+end_src
 
@@ -1792,35 +1803,24 @@ It will preserve files and directories that are listed in =.gitignore=.
 
 *WARNING -- BE CAREFUL WITH THIS!*
 
-To check what ~git clean-untracked~ will delete, and be sure it's what you
-want, use ~git clean-untracked-dry~.
+To check what ~git clean-ignored~ will delete, and be sure it's what you want, use
+~git clean-ignored-dry~.
 
 #+begin_src conf
-    # Usage: git clean-untracked-dry
-    # Show what files and directories would be removed by the clean-untracked
+    # Usage: git clean-ignored-dry
+    # Show what files and directories would be removed by the clean-ignored
     # alias without actually removing them.
-    clean-untracked-dry = clean -n -d -X
+    clean-ignored-dry = clean -n -d -X
 #+end_src
 
-If you wish to safeguard the current state of your current branch, you can
-perform the following steps:
+*** Delete all ignored files and also all untracked files
 
-#+begin_src shell :tangle no
-git checkout -b my-saved-work
-git add -A
-git commit -m "Saving work, just in case"
-git checkout ORIGINAL_BRANCH_NAME
-#+end_src
-
-*** Delete all untracked files and also ignored files
-
-*PLAY WITH FIRE VERSION* which will wipe out all the *ignored and untracked* files
-and directories:
+*PLAY WITH FIRE VERSION* which will wipe out *all ignored and untracked files and
+directories*:
 
 #+begin_src conf
     # Usage: git clean-all
-    # Delete all untracked files and directories, including those that are
-    # ignored by Git.
+    # Remove both ignored and untracked files and directories.
     clean-all = clean -f -d -x
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 #+end_src
@@ -1842,11 +1842,15 @@ clean-all-dry~.
     clean-all-dry = clean -n -d -x
 #+end_src
 
-*** Delete only ignored files
+If you wish to safeguard the current state of your current branch, you can
+perform the following steps:
 
-How to remove ignored files (that are still on the repository)?
-
-: git ignored-files -z | xargs -0 rm
+#+begin_src shell :tangle no
+git checkout -b my-saved-work
+git add -A
+git commit -m "Saving work, just in case"
+git checkout ORIGINAL_BRANCH_NAME
+#+end_src
 
 *** Hg shelve untracked files
 
