@@ -5847,6 +5847,7 @@ else
     alias -g GD=' --since=1.day.ago'
     alias -g GW=' --since=1.week.ago'
     alias -g GM=' --since=1.month.ago'
+    alias -g G3M=' --since=3.months.ago'
     alias -g GY=' --since=1.year.ago'
 fi
 #+end_src
