@@ -1910,9 +1910,16 @@ Before running any of the above commands, it’s a good idea to save the current
 state of your branch. Follow these steps:
 
 #+begin_src conf :tangle no
-git checkout -b my-saved-work
+# Create a new branch named "my-work-backup" and switch to it.
+git checkout -b my-work-backup
+
+# Stage all changes (including new, modified, and deleted files).
 git add -A
-git commit -m "Saving work, just in case"
+
+# Commit the staged changes with a message describing the commit.
+git commit -m "Safe commit: Preserve current state"
+
+# Switch back to the original branch.
 git checkout ORIGINAL_BRANCH_NAME
 #+end_src
 

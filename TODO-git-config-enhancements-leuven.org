@@ -5,6 +5,29 @@
 
 * Tasks
 
+** TODO Fix alias 'delete-gone-branches'
+
+#+begin_src shell
+$ g br
+2025-01-08 * stack-2/jira/UBSW-1248 [gone] f76520a2f UBSW-1248 <Catalin Purice>
+2025-01-08   stack-2/feature/UBSW-1122 [behind 39] 835ef1c72 [UBSW-1121, CFMD-686] Add missing USE to the script <Loicq Grégory>
+2024-12-23   stack-2/develop [behind 24] 1c9e52889 Revert AD auth commits <aremis_b_timmerman>
+2024-12-19   teams-integration  4ea0ac3e1 Merge branch 'stack-2/develop' of bitbucket.org:AREMIS_Version_Control/ubs into teams-integration <Flavio>
+2024-11-22   hotfix/UBSW-1171  a486a4e58 UBSW-1107 Fix for pentest Add new license <Flavio>
+2024-11-05   feature/UBSW-1134  7f0ca8bb5 UBSW-1134 / CFMD-700 <Flavio>
+2024-09-25   UBSW-1082  5520ab3ef UBSW-1082 as asked by Fabrice modify master script and remove new one <SofianeSMAIL>
+2024-09-16   BuildingInfo [behind 39] 0e1c55536 Merge branch 'develop' into BuildingInfo <Gregory Loicq>
+2024-09-04   staging [behind 1] cc15a7e56 Merge remote-tracking branch 'origin/develop' into develop <Catalin Purice>
+2024-08-07   feature/building_access_data_model_and_gwe  8f98ea999 pathway changes by Lucian <f.occhipinti@aremis.com>
+2024-02-16   tests-outlook-integration-fni  651e639e4 Add files and settings from Sofiane <Fabrice Niessen>
+
+fni@BENB-163:~/1-Clients/ubs/ubs-stack-2 (stack-2/jira/UBSW-1248 *dirty ?untracked)
+$ g delete-gone-branches
+Deleting gone branches:
+error: branch '*' not found
+123
+#+end_src
+
 ** TODO Use white bold on red background color for the 'upstream track' param in alias 'br'
 
 ** BitBucket API
@@ -119,40 +142,6 @@ http://monkeypatch.me/blog/mixing-professional-and-personal-git-configurations.h
 ** TODO Git Quick Start For Emacs Devs
 
 http://www.emacswiki.org/emacs/GitQuickStartForEmacsDevs
-
-** TODO Work in progress which I can't commit (from Stephen J. Turnbull)
-
-#+begin_verse
->> With git pull, if there are changes in the working directory, the
->> merge (i.e. merge from remote/master into master) part of the
->> operation is aborted before it starts, giving a message describing its
->> refusal.  It does this even when there are no conflicts to deal with.
->
-> What are we supposed to do in that case, if we're not yet ready to
-> commit our files?
-
-If you have work-in-progress and feel unable to commit, but at the
-same time feel the need to pull into that workspace, I suggest you get
-up and walk around, fight off the pull urge, then finish the commit
-after your head cools off.
-
-If that isn't satisfactory, then
-
-> or putting our work into a new branch, like:
->
-> --8<---------------cut here---------------start------------->8---
-> git create-branch new-branch-name
-> git commit -a -m "Edited"
-> git checkout master
-> git pull
-> ...
-> --8<---------------cut here---------------end--------------->8---
-
-is one way to go.
-
-If you need the pulled code for your work, then a quick stash is the
-better idea.
-#+end_verse
 
 ** Git the simple guide
 
