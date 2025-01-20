@@ -12,9 +12,9 @@
 https://rdrr.io/github/rgray1/bbcodelibrary/src/R/callapi.R (using curl)
 https://medium.com/dataseries/how-to-make-your-own-bitbucket-app-b2c79c9bf99
 
-** NEW See function teachgit in https://github.com/matthewmccullough/dotfiles/blob/master/shellactivities
+** MAYB See function teachgit in https://github.com/matthewmccullough/dotfiles/blob/master/shellactivities
 
-** NEW CircleCI: Continuous Integration and Delivery
+** MAYB CircleCI: Continuous Integration and Delivery
 
 * Notes
 
