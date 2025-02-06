@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+
+#? git-check-jar-changes, Time-stamp: <2025-02-06 Thu 13:20>
+#? Copyright (C) 2025 Fabrice Niessen. All rights reserved.
+#?
+#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+#? This is free software: you are free to change and redistribute it.
+#? There is NO WARRANTY, to the extent permitted by law.
+
+##? Usage: git-check-jar-changes [options]
+##?
+##? Check if any JAR files have been added and removed in the last few commits
+##? since a specified date, but only if those commits also contain changes to
+##? '.java' files.
+##?
+##? Options:
+##?   --since=DATE                  specify the date from which to show commits
+##?   -h, --help                    display this help and exit
+##?   -V, --version                 display version information and exit
+##?
+##? Examples:
+##?   git-check-jar-changes         check changes since yesterday or last Friday
+##?   git-check-jar-changes --since="2 weeks ago"
+##?                                 check changes since 2 weeks ago
+
+# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+set -uo pipefail
+
+# Check if required commands are available.
+for cmd in docopts; do
+    if ! command -v "$cmd" > /dev/null 2>&1; then
+        printf >&2 "Error: '%s' command not found.\n" "$cmd"
+        exit 2
+    fi
+done
+
+# Extract help and version information from the script.
+help=$(grep "^##?" "$0" | cut -c 5-)
+version=$(grep "^#?" "$0" | cut -c 4-)
+
+# Parse command-line arguments using docopts.
+args="$(docopts -h "$help" -V "$version" : "$@")"
+eval "$args"
+
+# Set -e to exit on non-zero command status.
+set -e
+
+# Function to check for JAR changes in a commit
+check_jar_changes() {
+    local commit="$1"
+    local added_jars deleted_jars
+
+    # Check for added JAR files in the commit.
+    added_jars=$(git diff-tree --no-commit-id --name-only -r "$commit" | grep -E '\.jar$')
+    # Check for deleted JAR files in the commit.
+    deleted_jars=$(git diff-tree --no-commit-id --name-only -r "$commit" | grep -E '\.jar$' | xargs -I {} git diff --diff-filter=D --name-only "$commit" -- {})
+
+    # If JAR files were added, set the flag and print a message.
+    if [[ -n "$added_jars" ]]; then
+        new_jar_found=true
+        printf "New JAR found in commit.\n" | sed 's/^/      /'
+    fi
+
+    # If JAR files were deleted, set the flag and print a message.
+    if [[ -n "$deleted_jars" ]]; then
+        old_jar_deleted=true
+        printf "Old JAR deleted in commit.\n" | sed 's/^/      /'
+    fi
+}
+
+# Function to determine the "since" date based on the current day.
+get_since_date() {
+    today=$(date +%a)
+    if [ "$today" = "Mon" ]; then
+        printf "last Friday\n"
+    else
+        printf "yesterday\n"
+    fi
+}
+
+# Set +e to continue script execution even if commands fail temporarily.
+set +e
+
+# If "since" date is not provided, determine it based on the current day.
+if [ -z "$since" ]; then
+    since="$(get_since_date)"
+fi
+
+# Get the list of commits from the specified "since" date.
+commits=$(git log --all --since="$since 00:00" --pretty=format:"%H")
+
+# Check if there are no commits in the given date range.
+if [ -z "$commits" ]; then
+    printf "No commits found since %s.\n" "$since"
+    exit 1
+fi
+
+# Initialize flags for added JAR and deleted JAR, and for valid commits
+new_jar_found=false
+old_jar_deleted=false
+found_valid_commit=false
+
+# Loop through each commit to check for changes.
+while read -r commit; do
+    # Print the commit hash being checked.
+    printf "Checking commit %s...\n" "$(git rev-parse --short "$commit")"
+
+    # Check if any Java files were modified or added in the commit.
+    java_files_changed=$(git diff-tree --no-commit-id --name-only -r "$commit" | grep -E '\.java$')
+
+    # If Java files changed, check for JAR changes (added and deleted).
+    if [[ -n "$java_files_changed" ]]; then
+        printf "Java files modified/added in commit.\n" | sed 's/^/      /'
+        found_valid_commit=true
+        check_jar_changes "$commit"
+
+        # Check if both conditions (new JAR added, old JAR deleted) were met for
+        # this commit.
+        if $new_jar_found && $old_jar_deleted; then
+            printf "Both conditions met: A new JAR was added and an old JAR was deleted in commit.\n" | sed 's/^/      /'
+            found_valid_commit=true
+        else
+            printf "\033[31mConditions not met for commit %s: Either a new JAR wasn't added or an old JAR wasn't deleted.\033[0m\n" "$commit" | sed 's/^/      /'
+        fi
+    fi
+done <<< "$commits"
+
+# Final check: If no valid commit was found and no Java files were changed,
+# print a failure message.
+if ! $found_valid_commit; then
+    if [ -z "$java_files_changed" ]; then
+        printf "No Java files were modified or added in any of the commits since %s.\n" "$since"
+    else
+        printf "No commit met both conditions: A new JAR wasn't added and an old JAR wasn't deleted.\n"
+    fi
+    exit 1
+else
+    # Exit with a success code if at least one commit met the conditions.
+    exit 0
+fi
