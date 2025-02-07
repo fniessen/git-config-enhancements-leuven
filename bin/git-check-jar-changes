@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? git-check-jar-changes, Time-stamp: <2025-02-06 Thu 13:20>
+#? git-check-jar-changes, Time-stamp: <2025-02-07 Fri 10:49>
 #? Copyright (C) 2025 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -45,23 +45,24 @@ eval "$args"
 # Set -e to exit on non-zero command status.
 set -e
 
-# Function to check for JAR changes in a commit
+# Declare global variables for tracking JAR changes.
+declare -g new_jar_found=false
+declare -g old_jar_deleted=false
+
+# Function to check for JAR changes in a commit.
 check_jar_changes() {
     local commit="$1"
-    local added_jars deleted_jars
 
     # Check for added JAR files in the commit.
-    added_jars=$(git diff-tree --no-commit-id --name-only -r "$commit" | grep -E '\.jar$')
+    added_jars=$(git diff-tree --no-commit-id --name-status -r "$commit" | awk '$1 == "A" && $2 ~ /\.jar$/ {print $2}')
     # Check for deleted JAR files in the commit.
-    deleted_jars=$(git diff-tree --no-commit-id --name-only -r "$commit" | grep -E '\.jar$' | xargs -I {} git diff --diff-filter=D --name-only "$commit" -- {})
+    deleted_jars=$(git diff-tree --no-commit-id --name-status -r "$commit" | awk '$1 == "D" && $2 ~ /\.jar$/ {print $2}')
 
-    # If JAR files were added, set the flag and print a message.
     if [[ -n "$added_jars" ]]; then
         new_jar_found=true
         printf "New JAR found in commit.\n" | sed 's/^/      /'
     fi
 
-    # If JAR files were deleted, set the flag and print a message.
     if [[ -n "$deleted_jars" ]]; then
         old_jar_deleted=true
         printf "Old JAR deleted in commit.\n" | sed 's/^/      /'
@@ -95,46 +96,43 @@ if [ -z "$commits" ]; then
     exit 1
 fi
 
-# Initialize flags for added JAR and deleted JAR, and for valid commits
-new_jar_found=false
-old_jar_deleted=false
+# Initialize tracking variables.
 found_valid_commit=false
+any_java_changes=false
 
 # Loop through each commit to check for changes.
 while read -r commit; do
-    # Print the commit hash being checked.
+    # Reset flags for each commit.
+    new_jar_found=false
+    old_jar_deleted=false
+
     printf "Checking commit %s...\n" "$(git rev-parse --short "$commit")"
 
     # Check if any Java files were modified or added in the commit.
-    java_files_changed=$(git diff-tree --no-commit-id --name-only -r "$commit" | grep -E '\.java$')
+    java_files_changed=$(git diff-tree --no-commit-id --name-only -r "$commit" | grep -E '\.java$' || true)
 
-    # If Java files changed, check for JAR changes (added and deleted).
     if [[ -n "$java_files_changed" ]]; then
+        any_java_changes=true
         printf "Java files modified/added in commit.\n" | sed 's/^/      /'
-        found_valid_commit=true
         check_jar_changes "$commit"
 
-        # Check if both conditions (new JAR added, old JAR deleted) were met for
-        # this commit.
         if $new_jar_found && $old_jar_deleted; then
             printf "Both conditions met: A new JAR was added and an old JAR was deleted in commit.\n" | sed 's/^/      /'
             found_valid_commit=true
         else
-            printf "\033[31mConditions not met for commit %s: Either a new JAR wasn't added or an old JAR wasn't deleted.\033[0m\n" "$commit" | sed 's/^/      /'
+            printf "\033[31mConditions not met for commit %s: Either a new JAR wasn't added or an old JAR wasn't deleted.\033[0m\n" "$(git rev-parse --short "$commit")" | sed 's/^/      /'
         fi
     fi
 done <<< "$commits"
 
-# Final check: If no valid commit was found and no Java files were changed,
-# print a failure message.
+# Final check: If no valid commit was found, print a failure message.
 if ! $found_valid_commit; then
-    if [ -z "$java_files_changed" ]; then
+    if ! $any_java_changes; then
         printf "No Java files were modified or added in any of the commits since %s.\n" "$since"
     else
         printf "No commit met both conditions: A new JAR wasn't added and an old JAR wasn't deleted.\n"
     fi
     exit 1
 else
-    # Exit with a success code if at least one commit met the conditions.
     exit 0
 fi
