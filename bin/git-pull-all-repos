@@ -5,7 +5,7 @@
 # Find all Git repositories under the current directory, using -prune to
 # optimize search.
 # Redirect stderr to /dev/null to avoid 'permission denied' errors.
-find . -type d -name ".git" -prune 2>/dev/null | sort | while read -r repo; do
+find . -type d -name ".git" -prune 2> /dev/null | sort -V | while read -r repo; do
     repo_dir=$(dirname "$repo")
     repo_name=$(basename "$repo_dir")
     printf "\nPulling latest changes for repository '%s'...\n" "$(tput bold)$repo_name$(tput sgr0)"
