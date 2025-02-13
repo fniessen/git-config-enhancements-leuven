@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250112.1443>
+# .gitconfig, Time-stamp: <20250213.1523>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -50,13 +50,13 @@
 
 [core]
     # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
-    editor = sh -c 'command -v $GIT_EDITOR >/dev/null 2>&1 && exec $GIT_EDITOR || echo "Please install $GIT_EDITOR or set another editor"'
-    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd >/dev/null 2>&1 && exec $cmd; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd >/dev/null 2>&1 && exec $cmd; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd >/dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor."; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-    editor = sh -c 'for cmd in emacsclient emacs; do command -v $cmd >/dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor." && break; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
+    editor = sh -c 'command -v $GIT_EDITOR > /dev/null 2>&1 && exec $GIT_EDITOR || echo "Please install $GIT_EDITOR or set another editor"'
+    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd > /dev/null 2>&1 && exec $cmd; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
+    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd > /dev/null 2>&1 && exec $cmd; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
+    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor."; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
+    editor = sh -c 'for cmd in emacsclient emacs; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor." && break; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
 ## XXX À tester:
-    editor = sh -c 'command -v emacsclient >/dev/null 2>&1 && echo emacsclient || echo "No suitable editor found. Please install Emacs."'
+    editor = sh -c 'command -v emacsclient > /dev/null 2>&1 && echo emacsclient || echo "No suitable editor found. Please install Emacs."'
 
     # Set Emacsclient as the default editor.
     editor = emacsclient -a emacs
@@ -72,10 +72,10 @@
     # Set Git pager to use less with custom flags and diff-so-fancy.
     pager = "!sh -c '~/bin/git-pager'"
     pager = "!f() { \
-        if command -v diff-so-fancy &>/dev/null; then \
-            echo 'Using diff-so-fancy pager' && diff-so-fancy | LESS=less --tabs=4 -FRX \"$@\"; \
+        if command -v diff-so-fancy > /dev/null 2>&1; then \
+            printf 'Using diff-so-fancy pager\n' && diff-so-fancy | LESS=less --tabs=4 -FRX \"$@\"; \
         else \
-            echo 'Using default pager' && LESS=less --tabs=4 -FRX \"$@\"; \
+            printf 'Using default pager\n' && LESS=less --tabs=4 -FRX \"$@\"; \
         fi; \
     }; f"
     pager = LESS= less --tabs=4 -FRX
@@ -628,18 +628,18 @@
     stash-all = !git add -A \
                 && git stash
 
-    # Usage: git stash-untracked
+    # Usage: git stash-include-untracked
     # Stash changes, including untracked files, for later retrieval.
-    stash-untracked = stash push --include-untracked
+    stash-include-untracked = stash push --include-untracked
 
     # Usage: git snapshot
     # Create a snapshot stash with a timestamp and immediately apply it.
-    snapshot = !git stash push -m "snapshot-$(date +'%Y%m%d_%H%M')" \
+    snapshot = !git stash push -m "snapshot-$(date +'%F_%H-%M')" \
                 && git stash apply "stash@{0}"
 
     # Usage: git checkpoint
     # Create a new temporary stash with a timestamp and restore staged changes.
-    checkpoint = !git stash push -m "$(date +%F--%T)" \
+    checkpoint = !git stash push -m "$(date +%F-%H-%M)" \
                 && git stash pop --index
 
     # Usage: git checkpoint-recover [TIME_INTERVAL]
@@ -650,7 +650,7 @@
             | grep commit \
             | cut -d' ' -f3 \
             | while read HASH; do \
-                  git rev-parse --verify --no-revs --quiet $HASH^2 2>/dev/null \
+                  git rev-parse --verify --no-revs --quiet $HASH^2 2> /dev/null \
                       && echo $HASH \
                       | xargs git rev-list --since=${1:-1day} -1; \
               done \
@@ -1013,7 +1013,7 @@
 
     # Append the staged changes to the last commit, reusing its message.
     amend-reuse = "!f() { \
-        local upstream_commit=$(git upstream-commit 2>/dev/null); \
+        local upstream_commit=$(git upstream-commit 2> /dev/null); \
         local local_commit=$(git local-commit); \
         if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
             printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
@@ -1029,7 +1029,7 @@
             printf >&2 'Usage: git amend-message NEW_COMMIT_MESSAGE\n'; \
             return 2; \
         fi; \
-        local upstream_commit=$(git upstream-commit 2>/dev/null); \
+        local upstream_commit=$(git upstream-commit 2> /dev/null); \
         local local_commit=$(git local-commit); \
         if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
             printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
@@ -1052,7 +1052,7 @@
         fi; \
         local NAME=\"$1\"; \
         local EMAIL=\"$2\"; \
-        local upstream_commit=$(git upstream-commit 2>/dev/null); \
+        local upstream_commit=$(git upstream-commit 2> /dev/null); \
         local local_commit=$(git local-commit); \
         if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
             printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
@@ -1100,7 +1100,7 @@
             return 2; \
         fi; \
         local NUM_OF_COMMITS_TO_UNDO=$1; \
-        local upstream_branch=$(git upstream-branch 2>/dev/null); \
+        local upstream_branch=$(git upstream-branch 2> /dev/null); \
         if [ -z \"$upstream_branch\" ]; then \
             printf >&2 'Warning: No upstream branch configured for the current branch.\n'; \
             printf >&2 'Consider using 'squash-force' alias.\n'; \
@@ -1239,7 +1239,7 @@
     ##?
     ##? Get the current branch name.
     current-branch = "!f() { \
-        branch_name=\"$(git branch --show-current 2>/dev/null)\"; \
+        branch_name=\"$(git branch --show-current 2> /dev/null)\"; \
         if [ -z \"$branch_name\" ]; then \
             printf >&2 'Unable to determine current branch.\n'; \
             return 2; \
@@ -1251,7 +1251,7 @@
     # The alternative methods
     #     current-branch = rev-parse --abbrev-ref HEAD
     # and
-    #     current-branch = symbolic-ref --short HEAD 2>/dev/null
+    #     current-branch = symbolic-ref --short HEAD 2> /dev/null
     # are less readable, less convenient and less user-friendly.
 
     ##? Usage: git convert-current-branch-name
@@ -1306,7 +1306,7 @@
             return 2; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
-        git rev-parse --verify \"$BRANCH_NAME\" >/dev/null 2>&1; \
+        git rev-parse --verify \"$BRANCH_NAME\" > /dev/null 2>&1; \
     }; f"
 
     # Usage: git verify-remote-branch BRANCH_NAME
@@ -1317,7 +1317,7 @@
             return 2; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
-        git rev-parse --verify \"$(git origin)/$BRANCH_NAME\" >/dev/null 2>&1; \
+        git rev-parse --verify \"$(git origin)/$BRANCH_NAME\" > /dev/null 2>&1; \
     }; f"
 
     # Usage: git br
@@ -1432,7 +1432,7 @@
         if [ $merge_status -eq 0 ]; then \
             printf \"\\033[1mBranch synced:\\033[0m '%s' successfully synced with '%s'\\n\" \"$current_branch\" \"$main_branch\"; \
         else \
-            git merge --abort 2>/dev/null; \
+            git merge --abort 2> /dev/null; \
             printf >&2 \"\\033[1mUnable to sync branch:\\033[0m You can't merge until you resolve all merge conflicts.\\n\"; \
             return 2; \
         fi \
@@ -1804,7 +1804,7 @@
     common-ancestor = "!f() { \
         local MAIN_BRANCH=${1:-$(git main-branch)}; \
         local CURRENT_BRANCH=${2:-$(git rev-parse --abbrev-ref HEAD)}; \
-        local base=$(git merge-base $MAIN_BRANCH $CURRENT_BRANCH 2>/dev/null); \
+        local base=$(git merge-base $MAIN_BRANCH $CURRENT_BRANCH 2> /dev/null); \
         if [ -z \"$base\" ]; then \
             printf >&2 '%s\n' \"Error: Unable to find common ancestor between branches '$MAIN_BRANCH' and '$CURRENT_BRANCH'. Branches may not exist or be valid.\"; \
             return 2; \
@@ -2157,7 +2157,7 @@
 
     # Lists all Git repositories by finding .git directories, sorting the
     # output, and removing the '/.git' suffix and leading './'.
-    repos = !find . -type d -name '.git' -prune -print 2>/dev/null \
+    repos = !find . -type d -name '.git' -prune -print 2> /dev/null \
             | sed 's|^\\./||' | sed 's|/\\.git$||' | sort
     # FIXME: Local dir is outputted as '.git'...
 
@@ -2331,7 +2331,7 @@
         if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
             printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
-        git log --follow --all -- \"$FILE_PATH\" 2>/dev/null; \
+        git log --follow --all -- \"$FILE_PATH\" 2> /dev/null; \
     }; f"
 
     ##? Usage: git related-history FILE_PATH
@@ -2743,11 +2743,11 @@
         git checkout \"$BRANCH\"; \
     }; f"
 
-    ##? Usage: git co-autostash BRANCH_NAME
+    ##? Usage: git co-autostash-include-untracked BRANCH_NAME
     ##?
     ##? Switch to a specified branch, stashing any uncommitted changes if necessary.
     ##? Only stashes if there are changes and restores the stash after switching.
-    co-autostash = "!f() { \
+    co-autostash-include-untracked = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: co-autostash BRANCH_NAME\n'; \
             return 2; \
@@ -2795,8 +2795,11 @@
     ##? Alias for 'outgoing-all-branches'.
     out-all = outgoing-all-branches
 
-    # Usage: git divergence BRANCH_NAME
-    divergence = "!f() { \
+    ##? Usage: git compare-remote-branch [BRANCH_NAME]
+    ##?
+    ##? Show a visual comparison of the local branch against its remote
+    ##? counterpart.
+    compare-remote-branch = "!f() { \
         git log --cherry-pick --left-right --graph \"$1\"...$(git origin)/\"$1\"; \
     }; f"
 
