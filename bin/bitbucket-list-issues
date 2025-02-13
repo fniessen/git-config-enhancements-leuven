@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Check if curl and json_pp are installed.
-if ! command -v curl &> /dev/null || ! command -v json_pp &> /dev/null; then
-    echo >&2 "Error: This script requires curl and json_pp to be installed."
+if ! command -v curl > /dev/null 2>&1 || ! command -v json_pp > /dev/null 2>&1; then
+    printf >&2 "Error: This script requires curl and json_pp to be installed.\n"
     exit 2
 fi
 

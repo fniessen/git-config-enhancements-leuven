@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 
 # Check if 'git' command is available.
-if ! command -v git &>/dev/null; then
+if ! command -v git > /dev/null 2>&1; then
     printf >&2 "Error: The 'git' utility is not installed. Please install it.\n"
 else
     # Alias 'g' to 'git'.
@@ -9,7 +9,7 @@ else
 fi
 
 # Check if 'zip' utility is installed.
-if ! command -v zip &>/dev/null; then
+if ! command -v zip > /dev/null 2>&1; then
     printf >&2 "Error: The 'zip' utility is not installed. Please install it.\n"
 fi
 
@@ -60,9 +60,9 @@ git-iterate-commits() {
 }
 
 # Check if 'tig' command is installed.
-if command -v tig &> /dev/null; then
+if command -v tig > /dev/null 2>&1; then
     # Aliases for 'tig' commands.
-    alias tigs='tig status'             # Use it all of the time!
+    alias tigs='tig status'               # Use it all of the time!
     alias tigb='tig blame'
     alias tigall='tig --all'
     alias tigreleases='tig --all --simplify-by-decoration'

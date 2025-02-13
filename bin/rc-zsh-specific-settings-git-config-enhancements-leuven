@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 
 # Check if 'git' command is available.
-if ! command -v git &>/dev/null; then
+if ! command -v git > /dev/null 2>&1; then
     printf >&2 "Error: The 'git' utility is not installed. Please install it.\n"
 else
     # Global aliases (for Zsh) with time-based filters.

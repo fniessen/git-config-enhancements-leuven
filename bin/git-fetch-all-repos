@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Find all Git repositories and fetch updates for each.
 find . -type d -name ".git" -prune | while read -r repo; do

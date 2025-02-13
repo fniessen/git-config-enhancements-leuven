@@ -3,7 +3,7 @@
 # Find all Git branches that have changes affecting a specific file.
 
 if [[ ! -f "$1" ]]; then
-    echo "Usage: $0 <filename> [<base>]"
+    printf "Usage: %s <filename> [<base>]\n" "$0"
     exit 1
 fi
 
@@ -14,7 +14,7 @@ base="${2:-master}"
 BOLD=$(tput bold)
 RESET=$(tput sgr0)
 
-echo "Searching for branches with changes to $filename related to the $base branch"
+printf "Searching for branches with changes to %s related to the %s branch\n" "$filename" "$base"
 
 # We look through all the local branches using plumbing.
 for branch in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
@@ -23,8 +23,8 @@ for branch in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
     # Check if there are any changes in a given path.
     changes=$(git diff $merge_base..$branch --stat -- $filename)
 
-    if [[ ! -z $changes ]]; then
-        echo "Changes in branch ${BOLD}$branch${RESET} | Merge Base: $merge_base"
+    if [[ -n "$changes" ]]; then
+        printf "Changes in branch ${BOLD}%s${RESET} | Merge Base: %s\n" "$branch" "$merge_base"
         # Show change statistics pretty formatted.
         git diff $merge_base..$branch --stat -- $filename
     fi

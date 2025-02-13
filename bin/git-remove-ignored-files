@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Loop through each file in the Git repository that is covered by the ignore
 # patterns and exists on the filesystem, and remove them from the repository.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Set the URL for the Bitbucket Jira API.
 URL="https://bitbucket.org/AREMIS_Version_Control/consilium/jira/rest/api/2/search?site=a9f62296-96a2-4231-97bd-cbd756a80cc9&statuses=new&statuses=indeterminate&sort=-updated&page=1"
@@ -9,7 +9,7 @@ curl -s -o issues.json "$URL"
 # Check if the request was successful.
 if [ $? -eq 0 ]; then
     # Check if the JSON response is valid.
-    if jq empty issues.json >/dev/null 2>&1; then
+    if jq empty issues.json > /dev/null 2>&1; then
         # Parse the JSON response to list the issues.
         jq -r '.issues[] | "\(.key) - \(.fields.summary)"' issues.json
         rm issues.json  # Remove the temporary JSON file

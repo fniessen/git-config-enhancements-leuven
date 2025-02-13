@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? git-find-recent-branches, Time-stamp: <2025-01-05 Sun 12:26>
+#? git-find-recent-branches, Time-stamp: <2025-02-06 Thu 10:29>
 #? Copyright (C) 2024 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -76,7 +76,7 @@ output=()
 for branch in $branches; do
     # Capture the output of the git log command for the last commit
     # since the specified date for the current branch.
-    commit_info=$(git log -1 --since="$since" "$branch" 2>/dev/null)
+    commit_info=$(git log -1 --since="$since" "$branch" 2> /dev/null)
 
     # Check if the output contains at least one line (indicating a recent
     # commit).
