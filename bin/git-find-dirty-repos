@@ -1,16 +1,53 @@
 #!/usr/bin/env bash
 
-# Check if the '-v' flag is provided.
-if [[ "$1" = "-v" ]]; then
-    verbose=true
-else
-    verbose=false
+#? git-find-dirty-repos, Time-stamp: <2025-02-19 Wed 11:32>
+#? Copyright (C) 2024-2025 Fabrice Niessen. All rights reserved.
+#?
+#? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+#? This is free software: you are free to change and redistribute it.
+#? There is NO WARRANTY, to the extent permitted by law.
+
+##? Usage: git-find-dirty-repos [options]
+##?
+##? Find all Git repositories with uncommitted changes (dirty state).
+##?
+##? Options:
+##?   -v, --verbose                 enable verbose output, showing git status
+##?                                 for dirty repositories
+##?   -h, --help                    display this help and exit
+##?   -V, --version                 display version information and exit
+
+# Custom exit codes.
+GENERIC_ERROR=64
+INVALID_INPUT=65
+FILE_NOT_FOUND=66
+ARGUMENT_ERROR=67
+
+# Set -uo pipefail for undefined variable check and pipeline failure propagation.
+set -uo pipefail
+
+# Check if 'docopts' command is available.
+if ! command -v docopts > /dev/null 2>&1; then
+    printf >&2 "Error: 'docopts' command not found.\n"
+    exit $INVALID_INPUT
 fi
 
+# Extract help and version information from the script.
+help=$(grep "^##?" "$0" | cut -c 5-)
+version=$(grep "^#?" "$0" | cut -c 4-)
+
+# Parse command-line arguments using docopts.
+args="$(docopts -h "$help" -V "$version" : "$@")"
+eval "$args"
+
+# Set -e to exit on non-zero command status.
+set -e
+
 # Find all Git repositories under the current directory, pruning as necessary.
-find . -type d -name ".git" -prune | sort | sed 's|\/\.git||' | while read -r repo_path; do
+find . -type d -name ".git" -prune | sort -V | sed 's|\/\.git||' | while read -r repo_path; do
     (
-        cd "$repo_path" || exit 1
+        cd "$repo_path" || exit $FILE_NOT_FOUND
+
         # Check if the repository has uncommitted changes.
         if isdirty=$(git status -s | grep "^.*"); then
             if $verbose; then
@@ -22,4 +59,4 @@ find . -type d -name ".git" -prune | sort | sed 's|\/\.git||' | while read -r re
             fi
         fi
     )
-done
+done || exit $GENERIC_ERROR
