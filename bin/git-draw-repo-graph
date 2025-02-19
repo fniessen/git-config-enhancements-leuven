@@ -167,7 +167,7 @@ print_dot_objects() {
         `git rev-parse --short=4 $1` if /([a-f0-9]{40})/'
   done
 
-  git fsck --cache --unreachable --dangling 2>/dev/null |
+  git fsck --cache --unreachable --dangling 2> /dev/null |
    perl -ne 'print "  _" . substr(`git rev-parse --short=4 $1`,0,-1) .
      " [style=dotted]\n" if /^(?:dangling|unreachable)\b.*?([a-f0-9]{40})/'
 }
@@ -326,12 +326,9 @@ if [ ! -d .git ]; then
   echo "Not a git repository" >&2
   exit 1
 fi
-if ! which perl >&2 >/dev/null; then
-  cat >&2 <<EOF
-perl not found. If you have apt-get, you can install it with 'sudo apt-get
-install perl'.
-EOF
-  exit 1
+if ! command -v perl > /dev/null 2>&1; then
+    printf >&2 "perl not found. If you have apt-get, you can install it with 'sudo apt-get install perl'.\n"
+    exit 1
 fi
 
 # generate .dot file
@@ -342,13 +339,10 @@ fi
 print_dot >"$dotfilename" || exit 1
 
 # build and image out of the .dot file
-if ! which dot >&2 >/dev/null; then
-  cat >&2 <<EOF
-dot (part of graphviz) not found. Either use the --print-only option, or
-install graphviz. If you have apt-get, you can do that with 'sudo apt-get
-install graphviz'.
-EOF
-  exit 1
+if ! command -v dot > /dev/null 2>&1; then
+    printf >&2 "dot (part of graphviz) not found. Either use the --print-only option, or install graphviz.\n"
+    printf >&2 "If you have apt-get, you can do that with 'sudo apt-get install graphviz'.\n"
+    exit 1
 fi
 dot -Tpng "$dotfilename" > "$imgfilename" || exit 1
 
@@ -356,13 +350,10 @@ dot -Tpng "$dotfilename" > "$imgfilename" || exit 1
 if [ "$image_only" = 1 ] ; then
   exit 0
 fi
-if ! which display >&2 >/dev/null; then
-  cat >&2 <<EOF
-display (part of imagemagick) not found. Image '$imgfilename' was generated,
-but I cannot display it. Either use the --image-only option, or install
-imagemagick. If you have apt-get, you can do that with 'sudo apt-get install
-imagemagick'.
-EOF
-  exit 1
+if ! command -v display > /dev/null 2>&1; then
+    printf >&2 "display (part of ImageMagick) not found. Image '%s' was generated,\n" "$imgfilename"
+    printf >&2 "but I cannot display it. Either use the --image-only option, or install ImageMagick.\n"
+    printf >&2 "If you have apt-get, you can do that with 'sudo apt-get install imagemagick'.\n"
+    exit 1
 fi
 display "$imgfilename"
