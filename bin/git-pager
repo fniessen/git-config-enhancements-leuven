@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-if command -v diff-so-fancy &>/dev/null; then
-  echo "diff-so-fancy | LESS=less --tabs=4 -FRX"
+if command -v diff-so-fancy > /dev/null 2>&1; then
+    printf "diff-so-fancy | LESS=less --tabs=4 -FRX\n"
 else
-  echo "LESS=less --tabs=4 -FRX"
+    printf "LESS=less --tabs=4 -FRX\n"
 fi
