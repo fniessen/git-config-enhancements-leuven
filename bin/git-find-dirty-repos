@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? git-find-dirty-repos, Time-stamp: <2025-02-19 Wed 11:32>
+#? git-find-dirty-repos, Time-stamp: <2025-02-19 Wed 11:35>
 #? Copyright (C) 2024-2025 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -44,7 +44,7 @@ eval "$args"
 set -e
 
 # Find all Git repositories under the current directory, pruning as necessary.
-find . -type d -name ".git" -prune | sort -V | sed 's|\/\.git||' | while read -r repo_path; do
+find . -type d -name ".git" -prune | sort -V | sed 's|^\./||' | sed 's|\/\.git||' | while read -r repo_path; do
     (
         cd "$repo_path" || exit $FILE_NOT_FOUND
 
@@ -53,7 +53,7 @@ find . -type d -name ".git" -prune | sort -V | sed 's|\/\.git||' | while read -r
             if $verbose; then
                 printf "\n"
             fi
-            printf "DIRTY: %s\n" "$repo_path"
+            printf "%s\n" "$repo_path"
             if $verbose; then
                 git status -s
             fi
