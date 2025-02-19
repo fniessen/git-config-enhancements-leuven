@@ -7461,20 +7461,23 @@ If you want to see all *unpushed* commits from *all branches*, do this:
 
 *** Comparing local and remote branches
 
-The command ~compare-remote-branch~ is useful for quickly identifying differences
-between a local branch and its remote version. It helps determine which commits
+The command ~compare-remote-branch-log~ is useful for quickly showing how a local
+branch and its remote version have *diverged*. It helps determine which commits
 are unique to the local branch (see also ~git out~) and which exist only on the
 remote (see also ~git in~). This can be helpful before merging, rebasing, or
 pushing changes.
 
 #+begin_src conf
-    ##? Usage: git compare-remote-branch [BRANCH_NAME]
+    ##? Usage: git compare-remote-branch-log [BRANCH_NAME]
     ##?
     ##? Show a visual comparison of the local branch against its remote
     ##? counterpart.
-    compare-remote-branch = "!f() { \
+    compare-remote-branch-log = "!f() { \
         git log --cherry-pick --left-right --graph \"$1\"...$(git origin)/\"$1\"; \
     }; f"
+
+    ##? Alias for 'compare-remote-branch-log'.
+    in-out = compare-remote-branch-log
 #+end_src
 
 ** PUBLISH - Find out if a change is part of a release
