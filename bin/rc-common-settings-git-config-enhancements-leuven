@@ -2,18 +2,18 @@
 
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
-    printf >&2 "Error: The 'git' utility is not installed. Please install it.\n"
+    printf >&2 "Error: 'git' is not installed. Please install it.\n"
 else
-    # Alias 'g' to 'git'.
+    # Set 'g' as an alias for 'git'.
     alias g=git
 fi
 
-# Check if 'zip' utility is installed.
+# Check if 'zip' command is available.
 if ! command -v zip > /dev/null 2>&1; then
-    printf >&2 "Error: The 'zip' utility is not installed. Please install it.\n"
+    printf >&2 "Error: 'zip' is not installed. Please install it.\n"
 fi
 
-# Go to the root directory of your Git repo.
+# Go to the root of your Git repository.
 alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
 
 # Function to iterate over commit hashes and execute a given Git command.

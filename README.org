@@ -29,46 +29,47 @@ shortcuts and customization options to *boost your productivity*.  Browse the
 contents, try them out, and feel free to contribute your own enhancements.
 Let's make Git even better together!
 
-* Shell
-
-** Alias setup
-
-If ~git~ is installed, an alias is created so you can use ~g~ in place of ~git~
-on the command line.
+* Shell settings
 
 #+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
 # Hey Emacs, this is a -*- sh -*- file ...
+#+end_src
 
+** Alias setup
+
+If Git is installed on your system, an alias is set up so you can type ~g~ instead
+of ~git~ on the command line.
+
+#+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
-    printf >&2 "Error: The 'git' utility is not installed. Please install it.\n"
+    printf >&2 "Error: 'git' is not installed. Please install it.\n"
 else
-    # Alias 'g' to 'git'.
+    # Set 'g' as an alias for 'git'.
     alias g=git
 fi
 #+end_src
 
 ** Zip tool check
 
-If the ~zip~ command is not found, an error message prompts the user to install
-it.
+If the ~zip~ command isn't found, you'll see an error message prompting you to
+install it.
 
 #+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
-# Check if 'zip' utility is installed.
+# Check if 'zip' command is available.
 if ! command -v zip > /dev/null 2>&1; then
-    printf >&2 "Error: The 'zip' utility is not installed. Please install it.\n"
+    printf >&2 "Error: 'zip' is not installed. Please install it.\n"
 fi
 #+end_src
 
 ** cdroot alias
 
-This alias changes the current directory to the root of the Git repository. It
-uses ~git rev-parse --show-toplevel~ to determine the root of the repository and
-ensures that no error is thrown if you aren't currently in a Git repository
-directory.
+This alias lets you switch to the root directory of your Git repository. It uses
+~git rev-parse --show-toplevel~ to find the repository's root and won't throw an
+error if you're not in a Git repository.
 
 #+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
-# Go to the root directory of your Git repo.
+# Go to the root of your Git repository.
 alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
 #+end_src
 
@@ -1914,7 +1915,7 @@ clean-ignored-and-untracked~ without actually deleting them, use:
 
 *** Safeguarding your work before cleaning
 
-Before running any of the above commands, it’s a good idea to save the current
+Before running any of the above commands, it's a good idea to save the current
 state of your branch. Follow these steps:
 
 #+begin_src conf :tangle no
@@ -4640,7 +4641,7 @@ The following approach:
 
 : up = "!git stash && git pull && git stash pop"
 
-is *unsafe*: If there’s nothing to stash, the first command does nothing, and the
+is *unsafe*: If there's nothing to stash, the first command does nothing, and the
 ~stash pop~ command may end up applying some old, unrelated changes.
 #+end_warning
 
