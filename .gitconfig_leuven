@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250213.1624>
+# .gitconfig, Time-stamp: <20250227.1100>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -50,13 +50,20 @@
 
 [core]
     # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
-    editor = sh -c 'command -v $GIT_EDITOR > /dev/null 2>&1 && exec $GIT_EDITOR || echo "Please install $GIT_EDITOR or set another editor"'
-    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd > /dev/null 2>&1 && exec $cmd; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd > /dev/null 2>&1 && exec $cmd; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor."; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-    editor = sh -c 'for cmd in emacsclient emacs; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor." && break; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-## XXX À tester:
-    editor = sh -c 'command -v emacsclient > /dev/null 2>&1 && echo emacsclient || echo "No suitable editor found. Please install Emacs."'
+
+    # editor = sh -c 'command -v $GIT_EDITOR > /dev/null 2>&1 && exec $GIT_EDITOR || echo "Please install $GIT_EDITOR or set another editor"'
+    # # (No editor name displayed!)
+    # # Aborting commit due to empty commit message.
+
+    # editor = sh -c 'command -v emacsclient > /dev/null 2>&1 && echo emacsclient || echo "No suitable editor found. Please install Emacs."'
+    # # emacsclient
+    # # Aborting commit due to empty commit message.
+
+    # editor = sh -c 'for cmd in emacsclient emacs; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor." && break; done; echo "No suitable editor found. Please install Emacs."'
+    # # Syntax error: Unterminated quoted string
+
+    # editor = sh -c 'for cmd in emacsclient emacs; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo \"Using $cmd as the editor.\" && break; done; echo \"No suitable editor found. Please install Emacs.\"'
+    # # Syntax error: Unterminated quoted string
 
     # Set Emacsclient as the default editor.
     editor = emacsclient -a emacs

@@ -350,19 +350,27 @@ Supported editors include:
 #+begin_src conf
 [core]
     # editor = notepad++.exe -multiInst -notabbar -nosession -noPlugin
-    editor = sh -c 'command -v $GIT_EDITOR > /dev/null 2>&1 && exec $GIT_EDITOR || echo "Please install $GIT_EDITOR or set another editor"'
-    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd > /dev/null 2>&1 && exec $cmd; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd > /dev/null 2>&1 && exec $cmd; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-    editor = sh -c 'for cmd in emacsclient emacs notepad++; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor."; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-    editor = sh -c 'for cmd in emacsclient emacs; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor." && break; done; echo "No suitable editor found. Please install Emacs or Notepad++."'
-## XXX À tester:
-    editor = sh -c 'command -v emacsclient > /dev/null 2>&1 && echo emacsclient || echo "No suitable editor found. Please install Emacs."'
+
+    # editor = sh -c 'command -v $GIT_EDITOR > /dev/null 2>&1 && exec $GIT_EDITOR || echo "Please install $GIT_EDITOR or set another editor"'
+    # # (No editor name displayed!)
+    # # Aborting commit due to empty commit message.
+
+    # editor = sh -c 'command -v emacsclient > /dev/null 2>&1 && echo emacsclient || echo "No suitable editor found. Please install Emacs."'
+    # # emacsclient
+    # # Aborting commit due to empty commit message.
+
+    # editor = sh -c 'for cmd in emacsclient emacs; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo "Using $cmd as the editor." && break; done; echo "No suitable editor found. Please install Emacs."'
+    # # Syntax error: Unterminated quoted string
+
+    # editor = sh -c 'for cmd in emacsclient emacs; do command -v $cmd > /dev/null 2>&1 && exec $cmd && echo \"Using $cmd as the editor.\" && break; done; echo \"No suitable editor found. Please install Emacs.\"'
+    # # Syntax error: Unterminated quoted string
 
     # Set Emacsclient as the default editor.
     editor = emacsclient -a emacs
 #+end_src
 
-To *test the above*, use ~git record~ or ~git revert~.
+To *test the ~editor~ setting*, run a Git command that launches an editor, such as
+~git commit --amend~, ~git revert~, or ~git record~.
 
 ** Delete ".orig" files
 
@@ -3605,13 +3613,13 @@ commit history, it efficiently narrows down the problematic commit.
 
    : git bisect start BAD-COMMIT GOOD-COMMIT
 
-2. Mark a Commit as Bad
+2. Mark a commit as bad
 
    Once the bisect session starts, mark the current commit as bad:
 
    : git bisect bad
 
-3. Iterate Through Commits
+3. Iterate through commits
 
    After marking commits as either bad (~git bisect bad~) or good (~git bisect
    good~), ~git bisect~ automatically checks out the next commit for
@@ -3619,20 +3627,20 @@ commit history, it efficiently narrows down the problematic commit.
 
    Continue marking commits until ~git bisect~ isolates the first bad commit.
 
-4. Identify the First Bad Commit
+4. Identify the first bad commit
 
    When the faulty commit is found, ~git bisect~ outputs its hash:
 
    : git bisect bad
    : 2ddcca36c8bcfa251724fe342c8327451988be0d is the first bad commit
 
-5. Inspect the Problematic Commit
+5. Inspect the problematic commit
 
    You can review the commit to understand what changes were introduced:
 
    : git show HEAD
 
-6. Reset to Your Original State
+6. Reset to your original state
 
    After identifying the bad commit, reset your repository to the branch you
    were on before starting git bisect:
