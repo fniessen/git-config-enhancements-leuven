@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250227.1100>
+# .gitconfig, Time-stamp: <20250227.1108>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -780,6 +780,177 @@
 
     ##? Show current commit of current branch.
     local-commit = "!git rev-parse @"
+
+    ##? Usage: git ls
+    ##?
+    ##? Display the commit log.  Alias for 'log'.
+    ls = log
+
+    ##? Usage: git ll
+    ##?
+    ##? Show medium formatted log with abbreviated commit hashes and file statistics.
+    ll = log --pretty=medium --abbrev-commit --stat
+
+    ##? Usage: git log-unified-diff
+    ##?
+    ##? Show commit log with unified diffs.
+    log-unified-diff = log -u
+
+    ##? Alias for 'log-unified-diff'.
+    lll = log-unified-diff
+
+    # Usage: git last
+    # Return the last commit on the current branch.
+    last = log -1 --stat
+
+    # Usage: git lastn [N]
+    # Show the last N commits on the current branch.
+    lastn = "!f() { \
+        git show --name-only $(git rev-list -${1:-1} HEAD); \
+    }; f"
+
+    # lastn2 = "!f() { \
+    #     git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
+    # }; f"
+
+    ##? Usage: git file-history FILE_PATH
+    ##?
+    ##? Show the commit history of a specific file or directory.
+    file-history = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git file-history FILE_PATH\n'; \
+            return 2; \
+        fi; \
+        local FILE_PATH=\"$1\"; \
+        if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
+            printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
+        fi; \
+        git log --follow -- \"$FILE_PATH\"; \
+    }; f"
+
+    # Usage: git file-history-follow-copy-without-merge-commits FILENAME
+    # Show commit history with file copies and renames.
+    file-history-follow-copy-without-merge-commits = log --follow --date-order -C
+    # ... BUT WITHOUT MERGE COMMITS
+
+    # Usage: git file-history-follow-copy FILENAME
+    # Show commit history of a file, including copies, renames, and merges.
+    file-history-follow-copy = log --follow --date-order -C --find-renames --merges
+
+    ##? Usage: git file-history-all-branches FILE_PATH
+    ##?
+    ##? Show the commit history of a specific file or directory across all branches.
+    file-history-all-branches = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git file-history-all-branches FILE_PATH\n'; \
+            return 2; \
+        fi; \
+        local FILE_PATH=\"$1\"; \
+        if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
+            printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
+        fi; \
+        git log --follow --all -- \"$FILE_PATH\" 2> /dev/null; \
+    }; f"
+
+    ##? Usage: git related-history FILE_PATH
+    ##?
+    ##? Show all commits that modified a specific file, including the commit message and file list.
+    ##?
+    ##? Note:
+    ##?   "rename from" files are not included in the output of this command.
+    related-history = "!f() { \
+        local FILE_PATH=\"$1\"; \
+        if [ ! -e \"$FILE_PATH\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
+            return 2; \
+        fi; \
+        git show --name-only $(git rev-list HEAD -- \"$FILE_PATH\"); \
+    }; f"
+
+    # DEBUG version:
+    # related-files = "!f() { \
+    #     if [ ! -e \"$1\" ]; then \
+    #         echo \"Error: File '$1' not found in the working tree.\"; \
+    #         return 2; \
+    #     fi; \
+    #     local hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
+    #     echo \"\nHashes: \n$hashes\"; \
+    #     local files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
+    #     echo \"\nFiles: \n$files\"; \
+    #     local sorted_files=$(echo \"$files\" | sort); \
+    #     echo \"\nSorted Files: \n$sorted_files\"; \
+    #     local unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
+    #     echo \"\nUnique Files: \n$unique_files\"; \
+    # }; f"
+
+    ##? Usage: git related-files FILE_PATH
+    ##?
+    ##? Generate a list of which files changed together with a file.
+    related-files = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git related-files FILE_PATH\n'; \
+            return 2; \
+        fi; \
+        local FILE_PATH=\"$1\"; \
+        if [ ! -e \"$FILE_PATH\" ]; then \
+            printf >&2 \"Error: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
+            return 2; \
+        fi; \
+        printf \"Unique Files:\n\"; \
+        git log --format=format:%H -- \"$FILE_PATH\" \
+            | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
+            | sort \
+            | uniq -c | sort -b -n -r; \
+    }; f"
+
+    ##? Usage: git file-last-commit FILE_PATH
+    ##?
+    ##? Show the last commit that modified the specified FILE_PATH.
+    file-last-commit = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git file-last-commit FILE_PATH\n'; \
+            return 2; \
+        fi; \
+        local FILE_PATH=\"$1\"; \
+        git log -n 1 --all --date-order -- \"$FILE_PATH\"; \
+    }; f"
+
+    ##? Usage: git file-last-commits FILE_PATH
+    ##?
+    ##? Show the most recent commits for a specific file or directory across all local branches.
+    file-last-commits = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git file-last-commits FILE_PATH\n'; \
+            return 2; \
+        fi; \
+        local FILE_PATH=\"$1\"; \
+        local local_branches=$(git local-branches); \
+        for branch in $local_branches; do \
+            printf \"$(git log --decorate=no -1 \
+                               --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
+                               --color=always $branch -- \"$FILE_PATH\") $(tput bold)$branch$(tput sgr0)\n\"; \
+        done | sort -r | sed 's#^[0-9]*:##g'; \
+    }; f"
+
+    ##? Alias for 'file-last-commits'.
+    wwflu = file-last-commits
+
+    file-last-commits2 = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git file-last-commits2 FILE_PATH\n'; \
+            return 2; \
+        fi; \
+        local FILE_PATH=\"$1\"; \
+        git for-each-ref --format=\"%(refname:short) %(objectname)\" refs/heads/ | \
+        while read branch commit_hash; do \
+            local commit_info=$(git log -n 1 \
+                                    --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
+                                    --date=format-local:'%Y-%m-%d' \"$commit_hash\" -- \"$FILE_PATH\"); \
+            if [ -n \"$commit_info\" ]; then \
+                printf \"%s \\e[32;1m%s\\e[0m\n\" \"$commit_info\" \"$branch\" \
+            fi; \
+        done | sort -k1,1r; \
+    }; f"
 
     # Usage: git changed-files [COMMIT_HASH]
     # Show all files modified in each commit, including merge commits.
@@ -2269,177 +2440,6 @@
     swdiff = diff --diff-algorithm=minimal -w --cached
 
     stage-updated-and-deleted-files = add -u
-
-    ##? Usage: git ls
-    ##?
-    ##? Display the commit log.  Alias for 'log'.
-    ls = log
-
-    ##? Usage: git ll
-    ##?
-    ##? Show medium formatted log with abbreviated commit hashes and file statistics.
-    ll = log --pretty=medium --abbrev-commit --stat
-
-    ##? Usage: git log-unified-diff
-    ##?
-    ##? Show commit log with unified diffs.
-    log-unified-diff = log -u
-
-    ##? Alias for 'log-unified-diff'.
-    lll = log-unified-diff
-
-    # Usage: git last
-    # Return the last commit on the current branch.
-    last = log -1 --stat
-
-    # Usage: git lastn [N]
-    # Show the last N commits on the current branch.
-    lastn = "!f() { \
-        git show --name-only $(git rev-list -${1:-1} HEAD); \
-    }; f"
-
-    # lastn2 = "!f() { \
-    #     git log -${1:-1} --stat $(git rev-list -${1:-1} HEAD); \
-    # }; f"
-
-    ##? Usage: git file-history FILE_PATH
-    ##?
-    ##? Show the commit history of a specific file or directory.
-    file-history = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history FILE_PATH\n'; \
-            return 2; \
-        fi; \
-        local FILE_PATH=\"$1\"; \
-        if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
-            printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
-        fi; \
-        git log --follow -- \"$FILE_PATH\"; \
-    }; f"
-
-    # Usage: git file-history-follow-copy-without-merge-commits FILENAME
-    # Show commit history with file copies and renames.
-    file-history-follow-copy-without-merge-commits = log --follow --date-order -C
-    # ... BUT WITHOUT MERGE COMMITS
-
-    # Usage: git file-history-follow-copy FILENAME
-    # Show commit history of a file, including copies, renames, and merges.
-    file-history-follow-copy = log --follow --date-order -C --find-renames --merges
-
-    ##? Usage: git file-history-all-branches FILE_PATH
-    ##?
-    ##? Show the commit history of a specific file or directory across all branches.
-    file-history-all-branches = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-history-all-branches FILE_PATH\n'; \
-            return 2; \
-        fi; \
-        local FILE_PATH=\"$1\"; \
-        if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
-            printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
-        fi; \
-        git log --follow --all -- \"$FILE_PATH\" 2> /dev/null; \
-    }; f"
-
-    ##? Usage: git related-history FILE_PATH
-    ##?
-    ##? Show all commits that modified a specific file, including the commit message and file list.
-    ##?
-    ##? Note:
-    ##?   "rename from" files are not included in the output of this command.
-    related-history = "!f() { \
-        local FILE_PATH=\"$1\"; \
-        if [ ! -e \"$FILE_PATH\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
-            return 2; \
-        fi; \
-        git show --name-only $(git rev-list HEAD -- \"$FILE_PATH\"); \
-    }; f"
-
-    # DEBUG version:
-    # related-files = "!f() { \
-    #     if [ ! -e \"$1\" ]; then \
-    #         echo \"Error: File '$1' not found in the working tree.\"; \
-    #         return 2; \
-    #     fi; \
-    #     local hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
-    #     echo \"\nHashes: \n$hashes\"; \
-    #     local files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
-    #     echo \"\nFiles: \n$files\"; \
-    #     local sorted_files=$(echo \"$files\" | sort); \
-    #     echo \"\nSorted Files: \n$sorted_files\"; \
-    #     local unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
-    #     echo \"\nUnique Files: \n$unique_files\"; \
-    # }; f"
-
-    ##? Usage: git related-files FILE_PATH
-    ##?
-    ##? Generate a list of which files changed together with a file.
-    related-files = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git related-files FILE_PATH\n'; \
-            return 2; \
-        fi; \
-        local FILE_PATH=\"$1\"; \
-        if [ ! -e \"$FILE_PATH\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
-            return 2; \
-        fi; \
-        printf \"Unique Files:\n\"; \
-        git log --format=format:%H -- \"$FILE_PATH\" \
-            | xargs -L 1 git diff-tree --no-commit-id --name-only -r \
-            | sort \
-            | uniq -c | sort -b -n -r; \
-    }; f"
-
-    ##? Usage: git file-last-commit FILE_PATH
-    ##?
-    ##? Show the last commit that modified the specified FILE_PATH.
-    file-last-commit = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-last-commit FILE_PATH\n'; \
-            return 2; \
-        fi; \
-        local FILE_PATH=\"$1\"; \
-        git log -n 1 --all --date-order -- \"$FILE_PATH\"; \
-    }; f"
-
-    ##? Usage: git file-last-commits FILE_PATH
-    ##?
-    ##? Show the most recent commits for a specific file or directory across all local branches.
-    file-last-commits = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-last-commits FILE_PATH\n'; \
-            return 2; \
-        fi; \
-        local FILE_PATH=\"$1\"; \
-        local local_branches=$(git local-branches); \
-        for branch in $local_branches; do \
-            printf \"$(git log --decorate=no -1 \
-                               --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
-                               --color=always $branch -- \"$FILE_PATH\") $(tput bold)$branch$(tput sgr0)\n\"; \
-        done | sort -r | sed 's#^[0-9]*:##g'; \
-    }; f"
-
-    ##? Alias for 'file-last-commits'.
-    wwflu = file-last-commits
-
-    file-last-commits2 = "!f() { \
-        if [ $# -ne 1 ]; then \
-            printf >&2 'Usage: git file-last-commits2 FILE_PATH\n'; \
-            return 2; \
-        fi; \
-        local FILE_PATH=\"$1\"; \
-        git for-each-ref --format=\"%(refname:short) %(objectname)\" refs/heads/ | \
-        while read branch commit_hash; do \
-            local commit_info=$(git log -n 1 \
-                                    --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
-                                    --date=format-local:'%Y-%m-%d' \"$commit_hash\" -- \"$FILE_PATH\"); \
-            if [ -n \"$commit_info\" ]; then \
-                printf \"%s \\e[32;1m%s\\e[0m\n\" \"$commit_info\" \"$branch\" \
-            fi; \
-        done | sort -k1,1r; \
-    }; f"
 
     # Given a merge commit, find the span of commits that exist(ed).
     # Not so useful in itself, but used by other aliases.
