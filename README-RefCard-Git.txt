@@ -142,187 +142,6 @@ Find when some code was removed?  =git bisect= with a "test" script that greps
 for the code and returns "true" if the code exists and "false" if it does
 not.
 
-* Git Bisect
-
-#+begin_src sh
-git bisect start v2.6.27 v2.6.25
-git bisect start BAD-COMMIT GOOD-COMMIT
-#+end_src
-
-#+begin_src sh
-git bisect bad
-#+end_src
-
-And after a few more steps like that, "git bisect" will eventually find a first bad commit:
-
-#+begin_src sh
-git bisect bad
-2ddcca36c8bcfa251724fe342c8327451988be0d is the first bad commit
-#+end_src
-
-At this point we can see what the commit does, check it out (if it's not
-already checked out) or tinker with it, for example:
-
-#+begin_src sh
-git show HEAD
-#+end_src
-
-And when we are finished we can use "git bisect reset" to go back to the
-branch we were in before we started bisecting:
-
-#+begin_src sh
-git bisect reset
-#+end_src
-
-** Bisecting build failures
-
-#+begin_src sh
-git bisect start BAD GOOD
-git bisect run make
-#+end_src
-
-** Passing sh -c "some commands" to "git bisect run"
-
-For example:
-
-#+begin_src sh
-git bisect run sh -c "make || exit 125; ./my_app | grep 'good output'"
-#+end_src
-
-On the other hand if you do this often, then it can be worth having scripts to
-avoid too much typing.
-
-** Finding performance regressions
-
-This script can be passed to "git bisect run" to find the commit that
-introduced a performance regression:
-
-#+begin_src sh
-#!/bin/sh
-
-# Build errors are not what I am interested in.
-make my_app || exit 255
-
-# We are checking if it stops in a reasonable amount of time, so
-# let it run in the background...
-
-./my_app >log 2>&1 &
-
-# ... and grab its process ID.
-pid=$!
-
-# ... and then wait for sufficiently long.
-sleep $NORMAL_TIME
-
-# ... and then see if the process is still there.
-if kill -0 $pid
-then
-        # It is still running -- that is bad.
-        kill $pid; sleep 1; kill $pid;
-        exit 1
-else
-        # It has already finished (the $pid process was no more),
-        # and we are happy.
-        exit 0
-fi
-#+end_src
-
-** Git bisect
-
-  git tag --contains 9c878a8290c071fbe5e97bc33c300ef2f07d6153
-
-I bisected and came up with this as the bad commit:
-
-,----
-| commit 5cb80c7e5b9bcae180b799d2a49c78d529e029f0                        |
-| Author: Eric Schulte <eric.schulte@gmx.com>                            |
-| Date:   Mon Mar 12 13:23:53 2012 -0400                                 |
-|                                                                        |
-| apply :shebang and :padline to shell script execution                  |
-|                                                                        |
-| * lisp/ob-sh.el (org-babel-execute:sh): Pass all params to subroutine. |
-| (org-babel-sh-evaluate): Apply :shebang and :padline to shell script   |
-| execution.                                                             |
-`----
-
-Reverting it caused a merge conflict that I didn't have the patience to
-resolve.  But I made branches, one with this commit as its tip and one
-with its predecessor:
-
-    git checkout -b foo 5cb80c7
-    git checkout -b bar de09874
-
-Testing on foo gives me an error, testing on bar gives the correct
-result.  So I'm pretty sure this commit introduced the problem.
-
-** New branch from Emacs-240000
-
-Recipe for how to start a new branch off of emacs-24?
-
-Assuming you are already on emacs-24 branch:
-
-#+BEGIN_SRC sh
-git checkout -b NEW_BRANCH
-git commit -m "first commit"
-git push -u origin NEW_BRANCH
-#+END_SRC
-
-Substitue the name of the new branch for NEW_BRANCH
-
-And minor note -- this assumes your current tree (working directory) is already
-at the commit that should be the branch point.  If not, then you'll need to "git
-checkout COMMIT" first (i.e. "git checkout emacs-24").
-
-Or you can use this syntax to create and switch to a new branch based on
-any other COMMIT:
-
-  git checkout -b NEW_BRANCH COMMIT
-
-So for example, assuming you didn't change any of the defaults when you
-originally cloned or branched, the following commands should work.
-
-Create local NEW_BRANCH from the tip of your local emacs-24 branch:
-
-  git checkout -b NEW_BRANCH emacs-24
-
-or if you want to start from the tip of your current upstream emacs-24
-(from the most recently fetched tip):
-
-  git checkout -b NEW_BRANCH origin/emacs-24
-
-    Please note that this sets origin/emacs-24 as the upstream branch of
-    NEW_BRANCH, which is something you don't want to do when creating a
-    feature branch.
-
-or from a commit you find some other way:
-
-  git checkout -b NEW_BRANCH SHA1
-
-** Git Bisect Emacs version with Org file
-
-See "[BUG] Marker points into wrong buffer"
-
-#+begin_src sh
-#!/bin/bash
-make maintainer-clean > /dev/null 2>&1
-./autogen.sh  > /dev/null 2>&1
-./configure --prefix=/usr --sysconfdir=/etc --libexecdir=/usr/lib \
-    --localstatedir=/var --without-x --without-sound   > /dev/null 2>&1
-make  > /dev/null 2>&1
-./src/emacs -l ./test.el --batch | grep 0
-#+end_src
-
-#+begin_src emacs-lisp :tangle test.el
-#!/usr/bin/emacs --script
-(defun yes-or-no-p (&rest body) t)
-(defun message (&rest body ))
-(progn
-  (require 'ox)
-  (with-temp-buffer (insert-file "test.org")
-                    (org-latex-export-as-latex))
-  (print 0))
-#+end_src
-
 * Notes
 
 For the ~--fixes~ replacement, I liked the idea of using notes, as per
@@ -356,12 +175,6 @@ git checkout HEAD@{2}
 #+end_src
 
 for instance.  No need to deal with pesky tar files.
-
-** Revert
-
-#+begin_src sh
-git checkout -f master ;; to overwrite all local changes
-#+end_src
 
 ** Revert
 
@@ -405,21 +218,6 @@ In other words, it's is a diff between A and B in the graph below.
     o---o---A---o---o----o master
              \
               \--o---o---B foo
-
-* Git online search!
-  :PROPERTIES:
-  :Created:  [2014-11-13 Thu 06:19]
-  :END:
-
-  I noticed a few references to bzr revisions are still in the history. They
-  all refer to merges from the emacs-24 branch. I am not sure if it worth
-  fixing though.
-
-  git log --online, press '/' to search and search for 'emacs-24'.
-
-  Example: git rev 0121d32
-
-  From [[http://mid.gmane.org/CAOrdkqPqjcrVOo=fMnRZmYomk4cO=r5_fvNqXE2xQbOn0qXK5w%40mail.gmail.com][Email from Christoph: Re: New Git repository is up.]]
 
 * Git workflow
 
@@ -562,43 +360,7 @@ will switch to cloning from 'next', and then our work to maintain the
 integrity of 'master' won't mean a whole lot (which is what happened last
 time).  We need to keep all the branches relevant to the users who track them.
 
-* Switching from old git tree
-
-I suppose you could add your old repo as a local remote to the new one, and
-cherry-pick your commits, i.e.:
-
-git remote add old /local/path/to/old
-
-# Fetch the data to your new repo
-git fetch old
-
-# Find the commits to pick somehow
-git log old/master                      # ... or whichever branch you were using
-                                        # in the old repo.
-
-# Copy to new repo
-git cherry-pick <sha-of-commit>
-
 * Git log
-
-just do:
-
-  git log some-branch
-
-to get a log of all commits in the local branch 'some-branch'.
-Alternatively so see what's in the same branch on the remote:
-
-  git log origin/some-branch
-
-this will not include any commits you've made to your local copy of
-'some-branch' (and assumes that you're remote is called origin).
-
-Another useful feature I use a lot is:
-
-  git log some-branch -- path/to/a/file
-
-this restricts the log to only those commits on 'some-branch' that
-touch 'path/to/a/file'.
 
 ** O
 
