@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
+# Perform a case-insensitive git log search for commit messages matching given
+# patterns.
+
 cmd=("log" "--all-match")
 for var in "$@"
 do
     cmd+=('--grep')
+    cmd+=("-i")                         # Make the search for commit messages
+                                        # case-insensitive.
     cmd+=("$var")
 done
 git "${cmd[@]}"
