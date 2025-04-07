@@ -12,5 +12,5 @@ else
     alias -g GY=' --since=1.year.ago'
 
     # Global alias to exclude .git directories/files from grep results
-    alias -g GNG="grep -v '.git'"
+    alias -g GNG="grep -v '.git'"       # "grep no git".
 fi
