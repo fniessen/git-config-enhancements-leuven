@@ -371,7 +371,7 @@ Supported editors include:
 #+end_src
 
 To *test the ~editor~ setting*, run a Git command that launches an editor, such as
-~git commit --amend~, ~git revert~, or ~git record~.
+~git commit --amend~, ~git revert~, ~git squash~, or ~git record~.
 
 ** Delete ".orig" files
 
@@ -1501,7 +1501,7 @@ The ~--~ signals the /end of options/, that the rest of the parameters are limit
 More readable output, *with grouping* (like Ripgrep, ~rg~, or ~ack~):
 
 #+begin_src conf
-    # Usage: git git-search SEARCH_TERM
+    # Usage: git grep-all SEARCH_TERM
     # Search for a string in all Git-tracked files.
     grep-all = "!f() { \
         git rev-list --all \

@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250227.1108>
+# .gitconfig, Time-stamp: <20250407.1306>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -409,7 +409,7 @@
     # Alias for 'search-for-code'.
     ack = search-for-code
 
-    # Usage: git git-search SEARCH_TERM
+    # Usage: git grep-all SEARCH_TERM
     # Search for a string in all Git-tracked files.
     grep-all = "!f() { \
         git rev-list --all \
