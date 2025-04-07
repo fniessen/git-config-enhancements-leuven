@@ -10,4 +10,7 @@ else
     alias -g GM=' --since=1.month.ago'
     alias -g G3M=' --since=3.months.ago'
     alias -g GY=' --since=1.year.ago'
+
+    # Global alias to exclude .git directories/files from grep results
+    alias -g GNG="grep -v '.git'"
 fi
