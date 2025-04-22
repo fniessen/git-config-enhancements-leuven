@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? git-check-jar-changes, Time-stamp: <2025-02-11 Tue 10:28>
+#? git-check-jar-changes, Time-stamp: <2025-04-08 Tue 14:19>
 #? Copyright (C) 2025 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -118,7 +118,7 @@ while read -r commit; do
             # Get additional commit info: date, time, day, title, and author.
             commit_info=$(git log -1 --date=format-local:'%Y-%m-%d %a %H:%M' --format="%cd - %s <%an>" "$commit")
 
-            printf "\033[31mConditions not met for commit %s: Either a new JAR wasn't added or an old JAR wasn't deleted.\n      %s\033[0m\n" \
+            printf "\033[1;37;41mConditions not met for commit %s: Either a new JAR wasn't added or an old JAR wasn't deleted.\033[0m\n      \033[1;37;41m%s\033[0m\n" \
                    "$(git rev-parse --short "$commit")" "$commit_info" | sed 's/^/      /'
         fi
     fi
