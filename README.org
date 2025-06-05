@@ -1529,12 +1529,8 @@ and http://gitimmersion.com/lab_14.html.
 *Undo* the local changes *in the working tree*: roll a file back to its last
 committed version, removing all the changes detected by Git.
 
-#+begin_tip
-It can also recover *deleted files* -- if the deletion has not been committed.
-#+end_tip
-
 If you decide that the changes you have made since the last commit ought to be
-thrown away, the alias to use is ~unmodify~;
+thrown away, the alias to use is ~unmodify~:
 
 #+begin_src conf
     ##? Usage: git unmodify [FILE_TO_RESTORE]
@@ -1856,8 +1852,10 @@ It is commonly used to clean up ignored build artifacts or temporary files.
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 #+end_src
 
-*WARNING:* These commands are irreversible and can lead to permanent data loss if
-used carelessly. Proceed with caution.
+#+begin_warning
+These commands are irreversible and can lead to permanent data loss if used
+carelessly. Proceed with caution.
+#+end_warning
 
 **** Check before deleting ignored files
 
@@ -2588,7 +2586,7 @@ List commits *showing changed files* (prettier and more concise version of
 
 *List of commits* that modified the *specified file*:
 
-#+begin_src conf \
+#+begin_src conf
     ##? Usage: git file-history FILE_PATH
     ##?
     ##? Show the commit history of a specific file or directory.
@@ -2598,10 +2596,10 @@ List commits *showing changed files* (prettier and more concise version of
             return 2; \
         fi; \
         local FILE_PATH=\"$1\"; \
-        if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
-            printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
+        if ! git ls-tree -r HEAD --name-only 2> /dev/null | grep -q \"^$FILE_PATH$\"; then \
+            printf >&2 \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
-        git log --follow -- \"$FILE_PATH\"; \
+        git log --follow -- \"$FILE_PATH\" 2> /dev/null; \
     }; f"
 #+end_src
 
@@ -2648,8 +2646,8 @@ branch:
             return 2; \
         fi; \
         local FILE_PATH=\"$1\"; \
-        if ! git ls-tree -r HEAD --name-only | grep -q \"^$FILE_PATH$\"; then \
-            printf \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
+        if ! git ls-tree -r HEAD --name-only 2> /dev/null | grep -q \"^$FILE_PATH$\"; then \
+            printf >&2 \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
         git log --follow --all -- \"$FILE_PATH\" 2> /dev/null; \
     }; f"
@@ -3577,8 +3575,8 @@ This is a useful technique if your pull fails to merge the new stuff from
 upstream: ~git reset HEAD~1~, pull again, fix the conflicts, then commit your
 changes again.
 
-This can also be a useful technique to slice a single big commit to different
-small commits to haste review process.
+This is useful for splitting a large commit into smaller, more manageable
+commits to simplify the review process.
 
 **** Hard option -- Regenerate both the index and working tree
 
@@ -3647,12 +3645,19 @@ a polished and cohesive history, showcasing your attention to detail and
 effective skills -- so that people think you are smart.
 
 #+begin_src conf
-    # Usage: git squash NUM_OF_COMMITS_TO_UNDO
-    # Create a new commit that combines the changes introduced by a specified
-    # number of previous commits into a single commit.
+    ##? Usage: git squash NUM_OF_COMMITS_TO_UNDO
+    ##?
+    ##? Create a new commit that combines the changes introduced by the
+    ##? specified number of previous unpushed commits.
+    ##?
+    ##? Falls back to 'git squash-force' if all checks pass.
     squash = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git squash NUM_OF_COMMITS_TO_UNDO\n'; \
+            return 2; \
+        fi; \
+        if ! printf '%s' \"$1\" | grep -Eq '^[0-9]+$'; then \
+            printf >&2 'Error: Argument must be a non-negative integer.\n'; \
             return 2; \
         fi; \
         local NUM_OF_COMMITS_TO_UNDO=$1; \
@@ -3676,12 +3681,18 @@ effective skills -- so that people think you are smart.
 Alias without safety checks:
 
 #+begin_src conf
-    # Usage: git squash-force NUM_OF_COMMITS_TO_UNDO
-    # Create a new commit that combines the changes introduced by a specified
-    # number of previous commits without safety checks.
+    ##? Usage: git squash-force NUM_OF_COMMITS_TO_UNDO
+    ##?
+
+    ##? Create a new commit that combines the changes introduced by the
+    ##? specified number of previous commits, without safety checks.
+    ##?
+    ##? Use with caution: it rewrites history regardless of push state.
     squash-force = "!f() { \
-        git reset --soft HEAD~$1 \
-            && git commit --edit -m\"$(git log --reverse --format=%B HEAD..HEAD@{1})\"; \
+        local NUM_OF_COMMITS_TO_UNDO=$1; \
+        local COMMIT_MSG=$(git log --reverse --format=%B -n $NUM_OF_COMMITS_TO_UNDO); \
+        git reset --soft HEAD~$NUM_OF_COMMITS_TO_UNDO \
+            && git commit --edit -m \"$COMMIT_MSG\"; \
     }; f"
 #+end_src
 
@@ -3907,181 +3918,62 @@ chunks of code between branches.
 
 ** Using git bisect to find a faulty commit
 
-The ~git bisect~ command is a powerful tool for identifying which commit
-introduced a bug in your codebase. By performing a binary search through your
-commit history, it efficiently narrows down the problematic commit.
+Git Bisect is an interactive tool used to identify which commit in your
+project's history introduced a bug or regression. By performing a binary search
+through your commit history, it efficiently narrows down the problematic commit.
 
 *** Step-by-step guide to using git bisect
 
-1. Start the bisect session
+You start by specifying a range between two commits (by tag or commit hash):
+- one where the issue isn't present (the "good" commit) and
+- another where it is (the "bad" commit).
 
-   Use the ~git bisect start~ command to begin. You need to specify a range
-   between a known good commit and a known bad commit.
+Then, run
 
-   Example with tags:
+: git bisect start
+: git bisect bad  # HEAD (bug present)
+: git bisect good abc1234
 
-   : git bisect start v2.6.27 v2.6.25
+Git Bisect guides you through a binary search process by checking out the
+*midpoint* between known good and bad commits. At each step, you mark the current
+commit as either good (~git bisect good~) or bad (~git bisect bad~). This continues
+until Git pinpoints the exact commit that introduced the bug or regression.
 
-   Example with commit hashes:
+: 2ddcca36c8bcfa251724fe342c8327451988be0d is the first bad commit
 
-   : git bisect start BAD-COMMIT GOOD-COMMIT
+You can review the commit to understand what changes were introduced:
 
-2. Mark a commit as bad
+After identifying the bad commit, reset your repository to the branch you were
+on before starting git bisect:
 
-   Once the bisect session starts, mark the current commit as bad:
+: git bisect reset
 
-   : git bisect bad
+*** Automate Git Bisect with a Script
 
-3. Iterate through commits
+You can automate the tests with a script:
 
-   After marking commits as either bad (~git bisect bad~) or good (~git bisect
-   good~), ~git bisect~ automatically checks out the next commit for
-   testing. Repeat this process for each commit it suggests.
+#+begin_src shell :tangle no
+git bisect start
+git bisect bad
+git bisect good abc1234
+git bisect run ./test-script.sh
+#+end_src
 
-   Continue marking commits until ~git bisect~ isolates the first bad commit.
+The script ~test-script.sh~ must return:
 
-4. Identify the first bad commit
+- ~0~ if the commit is *good*
+- ~1~ (or any non-zero code) if the commit is *bad*
 
-   When the faulty commit is found, ~git bisect~ outputs its hash:
-
-   : git bisect bad
-   : 2ddcca36c8bcfa251724fe342c8327451988be0d is the first bad commit
-
-5. Inspect the problematic commit
-
-   You can review the commit to understand what changes were introduced:
-
-   : git show HEAD
-
-6. Reset to your original state
-
-   After identifying the bad commit, reset your repository to the branch you
-   were on before starting git bisect:
-
-   : git bisect reset
-
-*** Practical Notes
-
-- *Testing Each Commit:* Each time ~git bisect~ checks out a commit, you must test
-  it to determine whether it is good or bad. This might involve running
-  a script, performing manual testing, or executing a specific test suite.
-
-- *Automating the Process:* For automated testing, use the ~--term~ options with
-  ~git bisect~ to specify custom test scripts for marking commits as good or
-  bad.
-
-By using ~git bisect~, you can quickly pinpoint regressions and minimize time
-spent troubleshooting complex histories.
-
-*** Using sh -c with git bisect run
-
-You can pass a series of commands to ~git bisect run~ using ~sh -c~. This is
-particularly useful for automating the testing process during a bisect
-session. Here's an example:
-
-: git bisect run sh -c "make || exit 125; ./my_app | grep 'good output'"
-
-- ~make || exit 125~: If the build fails, the exit 125 ensures git bisect skips
-  the current commit as untestable.
-
-- ~./my_app | grep 'good output'~: Runs your application and checks for specific
-  output to determine if the commit is good or bad.
-
-**** Simplifying Frequent Commands
-
-If you find yourself using similar command sequences often, it's a good idea to
-create a reusable script. For example:
-
-1. Create a script file
-
-   Save your commands in a script file (e.g., =test-script.sh=):
-
-   #+begin_src shell :tangle no
-   #!/bin/sh
-   make || exit 125
-   ./my_app | grep 'good output'
-   #+end_src
-
-2. Make the script executable
-
-   : chmod +x test-script.sh
-
-3. Use the script with ~git bisect run~
-
-   : git bisect run ./test-script.sh
-
-This approach reduces typing, improves consistency, and makes it easier to reuse
-the same logic across multiple bisect sessions.
-
-*** Using git bisect run to Find Performance Regressions
-
-When investigating performance regressions, you can automate the process using
-a script that identifies commits introducing performance issues. This script can
-be passed to git bisect run:
-
-*Example script*
+For example:
 
 #+begin_src shell :tangle no
 #!/bin/sh
-
-# Build the application. Ignore build errors, as they are not the focus here.
-make my_app || exit 255
-
-# Run the application in the background to monitor its runtime behavior.
-./my_app >log 2>&1 &
-
-# Capture the process ID of the running application.
-pid=$!
-
-# Wait for a predefined normal runtime duration.
-sleep $NORMAL_TIME
-
-# Check if the application is still running.
-if kill -0 $pid 2> /dev/null; then
-    # The process is still running, indicating a regression.
-    kill $pid; sleep 1; kill $pid
-    exit 1
-else
-    # The process has completed within the expected time frame.
-    exit 0
-fi
+make || exit 255
+./my_app | grep 'good output'
 #+end_src
 
-*How it works*
-
-1. Building the Application
-
-   The script starts by building the application with ~make my_app~. If the build
-   fails, the script exits with code ~255~, signaling ~git bisect~ to skip the
-   commit as untestable.
-
-2. Running the Application
-
-   The application is executed in the background with ./my_app, and its output
-   is redirected to a log file. The process ID (~pid~) is captured for monitoring.
-
-3. Monitoring Runtime
-
-   The script waits for a predefined period (~$NORMAL_TIME~) to simulate the
-   expected runtime of the application.
-
-4. Checking for Regressions
-   + If the process is still running after the wait, the script identifies the
-     commit as bad (~exit 1~).
-   + If the process has completed, the commit is marked as good (~exit 0~).
-
-*Using the Script with ~git bisect~*
-
-1. Make the script executable:
-
-   : chmod +x check-regression.sh
-
-2. Run ~git bisect~ with the script:
-
-   : git bisect run ./check-regression.sh
-
-This method helps identify commits that introduced performance issues by
-analyzing application runtime behavior in an automated manner.
+This approach reduces typing, improves consistency, and makes it easier to reuse
+the same logic across multiple bisect sessions.
 
 *** Using Git Bisect with Emacs and Org Files
 
@@ -4147,7 +4039,7 @@ The Emacs Lisp script performs the following actions:
 
 2. Run ~git bisect~ with the Bash script:
 
-   git bisect run ./test.sh
+   git bisect run ./test-script.sh
 
 This approach combines the power of Git Bisect and Emacs scripting to
 efficiently identify commits introducing bugs in workflows involving Org-mode.
@@ -4336,7 +4228,7 @@ Then:
 and commit subject line for each head, along with the name of the upstream
 branch (if any).
 
-(Sort by Last updated)
+(Sorted by last updated)
 
 : git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads
 
@@ -4901,7 +4793,7 @@ Delete a *remote* branch:
         if [ \"$confirm\" = \"y\" ] || [ \"$confirm\" = \"Y\" ]; then \
             git push $(git origin) --delete \"$BRANCH_NAME\"; \
         else \
-            printf \"Branch deletion cancelled.\"; \
+            printf \"Branch deletion cancelled.\n\"; \
         fi \
     }; f"
     # = "Close source branch" (after merging).
@@ -5100,7 +4992,7 @@ Push all your tags (a regular push won't push a tag):
 
 ** List the repository tags
 
-List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
+Display all tags in the repository, using /version-aware sorting/:
 
 #+begin_src conf
     # List tags.
@@ -5109,6 +5001,9 @@ List tags using (better) version sorting (not going from =v0.1= to =v0.10=):
     # Show a list of tag names and the commits they reference.
     tags-show-ids = show-ref --tags
 #+end_src
+
+This ensures that tags like ~v0.10~ correctly follow ~v0.9~ (unlike simple
+lexicographic sorting, which would sort ~v0.10~ before ~v0.9~).
 
 : # Show annotated and lightweight tags.
 : git show-ref -d --tags \
@@ -7171,7 +7066,7 @@ interesting stuff, such as:
   branch. See the git config man page for more possible options.
 
 #+begin_src conf
-    # Shortcut for checkout.
+    ##? Shortcut for checkout.
     co = checkout
 #+end_src
 
