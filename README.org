@@ -73,6 +73,13 @@ error if you're not in a Git repository.
 alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
 #+end_src
 
+** Filtering ~.git~ from Grep output
+
+#+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
+# Exclude .git directories/files from grep results.
+alias gng="grep -v '.git'"              # "grep no git".
+#+end_src
+
 * Table of Contents                                                   :TOC_1_gh:
 - [[#foreword][Foreword]]
 - [[#overview][Overview]]
@@ -2830,6 +2837,9 @@ else
     alias -g GM=' --since=1.month.ago'
     alias -g G3M=' --since=3.months.ago'
     alias -g GY=' --since=1.year.ago'
+
+    # Global alias to exclude .git directories/files from grep results.
+    alias -g GNG="grep -v '.git'"       # "grep no git".
 fi
 #+end_src
 
