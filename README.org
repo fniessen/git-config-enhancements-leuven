@@ -3438,6 +3438,10 @@ prompting you for the message you've already entered!
 Oh, you made a typo!
 
 #+begin_src conf
+    ##? Usage: git amend-message NEW_COMMIT_MESSAGE
+    ##?
+    ##? Safely amend the last commit message, only if it hasn’t been pushed.
+    ##?
     ##? Example:
     ##?   git amend-message "Fix typo in README"
     amend-message = "!f() { \
@@ -3585,8 +3589,7 @@ This is a useful technique if your pull fails to merge the new stuff from
 upstream: ~git reset HEAD~1~, pull again, fix the conflicts, then commit your
 changes again.
 
-This is useful for splitting a large commit into smaller, more manageable
-commits to simplify the review process.
+This is useful for splitting a large commit into smaller, reviewable parts.
 
 **** Hard option -- Regenerate both the index and working tree
 
