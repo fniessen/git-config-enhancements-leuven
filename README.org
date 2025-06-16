@@ -1467,8 +1467,28 @@ specified path*).
 Find all instances of the specified string in code files *with a certain file
 extension*.
 
-#+begin_src conf :tangle no
-    search-for-code-in-extension = "XXX"
+#+begin_src conf
+    # Usage: git search-for-code-in-extension EXTENSION PATTERN
+    #
+    # Search for a specific code pattern in files with a given extension across
+    # all local branches.
+    #
+    # Arguments:
+    #   EXTENSION                      The file extension to search within.
+    #   PATTERN                        The code pattern to search for.
+    search-for-code-in-extension = "!f() { \
+        if [ $# -ne 2 ]; then \
+            printf >&2 'Usage: git search-for-code-in-extension EXTENSION PATTERN\n'; \
+            return 2; \
+        fi; \
+        local EXTENSION=\"$1\"; \
+        local PATTERN=\"$2\"; \
+        git local-branches | \
+        while read -r branch; do \
+            printf \"\n$(tput bold)$(tput setaf 2)Branch: $branch$(tput sgr0)\n\"; \
+            git grep -n -- \"$PATTERN\" \"$branch\" -- \":*.$EXTENSION\"; \
+        done; \
+    }; f"
 #+end_src
 
 *** Find files that contain multiple terms, not necessarily on the same line
@@ -2479,16 +2499,16 @@ support.
 
 This is a handy table for labels [[https://github.com/angular/angular/blob/master/CONTRIBUTING.md][Angular's commit standards and guidelines]]:
 
-| Label    | Description                                                                                            |
-|----------+--------------------------------------------------------------------------------------------------------|
-| feat     | A new feature                                                                                          |
-| fix      | A bug fix                                                                                              |
+| Label    | Description                                                                          |
+|----------+--------------------------------------------------------------------------------------|
+| feat     | A new feature                                                                        |
+| fix      | A bug fix                                                                            |
 | style    | Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc) |
-| refactor | A code change that neither fixes a bug nor adds a feature                                              |
-| perf     | A code change that improves performance                                                                |
-| test     | Adding missing or correcting existing tests                                                            |
-| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation         |
-| doc      | Documentation only changes                                                                             |
+| refactor | A code change that neither fixes a bug nor adds a feature                            |
+| perf     | A code change that improves performance                                              |
+| test     | Adding missing or correcting existing tests                                          |
+| chore    | Changes to the build process or auxiliary tools and libraries such as documentation generation |
+| doc      | Documentation only changes                                                           |
 
 ** Interactive committing (Cherry-pick style recording)
 

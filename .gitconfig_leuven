@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250605.1438>
+# .gitconfig, Time-stamp: <20250616.2052>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -408,6 +408,28 @@
 
     # Alias for 'search-for-code'.
     ack = search-for-code
+
+    # Usage: git search-for-code-in-extension EXTENSION PATTERN
+    #
+    # Search for a specific code pattern in files with a given extension across
+    # all local branches.
+    #
+    # Arguments:
+    #   EXTENSION                      The file extension to search within.
+    #   PATTERN                        The code pattern to search for.
+    search-for-code-in-extension = "!f() { \
+        if [ $# -ne 2 ]; then \
+            printf >&2 'Usage: git search-for-code-in-extension EXTENSION PATTERN\n'; \
+            return 2; \
+        fi; \
+        local EXTENSION=\"$1\"; \
+        local PATTERN=\"$2\"; \
+        git local-branches | \
+        while read -r branch; do \
+            printf \"\n$(tput bold)$(tput setaf 2)Branch: $branch$(tput sgr0)\n\"; \
+            git grep -n -- \"$PATTERN\" \"$branch\" -- \":*.$EXTENSION\"; \
+        done; \
+    }; f"
 
     # Usage: git grep-all SEARCH_TERM
     # Search for a string in all Git-tracked files.
