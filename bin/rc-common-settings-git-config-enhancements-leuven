@@ -2,7 +2,7 @@
 
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
-    printf >&2 "Error: 'git' is not installed. Please install it.\n"
+    printf >&2 "ERROR: 'git' is not installed. Please install it.\n"
 else
     # Set 'g' as an alias for 'git'.
     alias g=git
@@ -10,7 +10,7 @@ fi
 
 # Check if 'zip' command is available.
 if ! command -v zip > /dev/null 2>&1; then
-    printf >&2 "Error: 'zip' is not installed. Please install it.\n"
+    printf >&2 "ERROR: 'zip' is not installed. Please install it.\n"
 fi
 
 # Go to the root of your Git repository.

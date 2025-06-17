@@ -2,7 +2,7 @@
 
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
-    printf >&2 "Error: The 'git' utility is not installed. Please install it.\n"
+    printf >&2 "ERROR: The 'git' utility is not installed. Please install it.\n"
 else
     # Global aliases (for Zsh) with time-based filters.
     alias -g GD=' --since=1.day.ago'
