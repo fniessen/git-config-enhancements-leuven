@@ -922,24 +922,29 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     ##? Usage: git aliases
     ##?
     ##? List all Git aliases in alphabetical order.
-    aliases = "!git config -l \
+    aliases = "!f() { \
+        git config -l \
             | grep '^alias\\.' \
             | cut -c 7- \
             | sort \
             | sed 's_=_ = _' \
             | sed 's/  */ /g' \
-            | awk -F ' = ' '{printf \"\\033[1m%s\\033[0m = %s\\n\", $1, $2}'"
+            | awk -F ' = ' '{printf \"\\033[1m%s\\033[0m = %s\\n\", $1, $2}'; \
+    }; f"
 #+end_src
 
 #+begin_src conf
-    grep-aliases = "!git config -l \
-            | grep '^alias\\.' \
-            | cut -c 7- \
-            | sort \
-            | sed 's_=_ = _' \
-            | sed 's/  */ /g' \
-            | awk -F ' = ' '{printf \"\\033[30;47m%s\\033[0m = %s\\n\", $1, $2}' \
-            | grep --color=auto -i"
+    ##? Usage: git grep-aliases PATTERN
+    ##?
+    ##? List all Git aliases in alphabetical order and highlight the matching pattern.
+    grep-aliases = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git grep-aliases PATTERN\n'; \
+            return 2; \
+        fi; \
+        local PATTERN=\"$1\"; \
+        git aliases | grep --color=auto -i \"$PATTERN\"; \
+    }; f"
 #+end_src
 
 #+begin_src conf :tangle no
@@ -1105,12 +1110,21 @@ Then, in the working copy:
     ##?
     ##? Initialize a new Git repository with an initial commit.
     init-repository = "!f() { \
-        git init \
-            && if [ -z \"$(ls -A)\" ]; then \
-                   touch .gitignore; \
-               fi \
-            && git add . \
-            && git commit -m 'Initial commit'; \
+        git init || { \
+            printf >&2 'Error: git init failed. Aborting.\n'; \
+            return 2; \
+        }; \
+        if [ -z \"$(ls -A)\" ]; then \
+            touch .gitignore; \
+        fi; \
+        git add . || { \
+            printf >&2 'Error: git add failed.\n'; \
+            return 2; \
+        }; \
+        git commit -m 'Initial commit' || { \
+            printf >&2 'Error: git commit failed.\n'; \
+            return 2; \
+        }; \
     }; f"
 #+end_src
 
@@ -2208,7 +2222,7 @@ https://stackoverflow.com/questions/11269256/how-to-name-and-retrieve-a-stash-by
 
 #+begin_src conf
     # Find stash with name like text.
-    stash-apply = "!f() { \
+    stash-apply2 = "!f() { \
         git stash apply stash^{/$@}; \
     }; f"
 #+end_src
@@ -3064,7 +3078,7 @@ This command lists all tags that contain the specified commit hash:
     is-ancestor = "!f() { \
         if [ \"$#\" -ne 2 ]; then \
             printf >&2 'Usage: git is-ancestor COMMIT1 COMMIT2\n'; \
-            exit 2; \
+            return 2; \
         fi; \
         local COMMIT1=\"$1\"; \
         local COMMIT2=\"$2\"; \
@@ -3199,7 +3213,7 @@ Show commits that match *all* of the following patterns
 
 : curl -H "Accept: application/vnd.github.cloak-preview" \
 :     https://api.github.com/search/commits\?q\=repo:fniessen/org-html-themes+local+css \
-:     | jq '.items[] | {commit}'
+:     | jq '.items[] | { commit; }'
 
 Add ~--name-status~ to show only names and status of *changed files*.
 
@@ -4661,7 +4675,7 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
         local BRANCH_NAME=\"$1\"; \
         if [ -z \"$BRANCH_NAME\" ]; then \
             printf >&2 'Error: Please provide a branch name as a parameter.\n' \
-            exit 2; \
+            return 2; \
         fi; \
         [ $(git rev-list --count $(git origin)/\"$BRANCH_NAME\"..\"$BRANCH_NAME\") -gt 0 ]; \
     }; f"
@@ -5670,24 +5684,53 @@ If everything is OK, you can merge the pull request.
         fi \
     }; f"
 
+    # Usage: git merge-pr REMOTE PR_NUMBER
+    #
+    # Merge a GitHub PR with a formatted commit message.
+    #
     # Merge given pull request into the current branch.
     # The commit message will have the same for as if done using the
     # merge button on github.com
+    #
     # Example:
     #   git merge-pr $(git origin) 5
-    merge-pr = "!sh -c '\
-        local USER_AND_REPO=$(git remote show $1 | grep \"Fetch URL:\" | sed -E \"s/.*github.com[:\\/]([a-zA-Z_\\-]+)\\/([a-zA-Z_\\-]+)\\.git$/\\1 \\2/\"); \
-        local USER=$(echo $USER_AND_REPO | cut -d\" \" -f1); \
-        local REPO=$(echo $USER_AND_REPO | cut -d\" \" -f2); \
+    merge-pr = "!f() { \
+        if [ $# -ne 2 ]; then \
+            printf >&2 'Usage: git merge-pr REMOTE PR_NUMBER\\n'; \
+            return 2; \
+        fi; \
+        local USER_AND_REPO=$(git remote show \"$1\" | grep 'Fetch URL:' | sed -E 's/.*github.com[:\\/]([a-zA-Z_-]+)\\/([a-zA-Z_-]+)\\.git$/\\1 \\2/'); \
+        if [ -z \"$USER_AND_REPO\" ]; then \
+            printf >&2 'Error: Could not determine GitHub user/repo from remote\\n'; \
+            return 2; \
+        fi; \
+        local USER=$(printf \"%s\" \"$USER_AND_REPO\" | cut -d' ' -f1); \
+        local REPO=$(printf \"%s\" \"$USER_AND_REPO\" | cut -d' ' -f2); \
         local TMP_FILE=$(mktemp); \
-        curl -si https://api.github.com/repos/$USER/$REPO/pulls/$2 > $TMP_FILE; \
-        local PULL_AUTHOR=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"login\\\": \\\"/) value=\\\\$2}{if (head && value) print value; if (head && value) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
-        local PULL_REF=$(cat $TMP_FILE | awk \"{if (/ *\\\"head\\\"/) head=\\\\$1; if (/ *\\\"ref\\\": \\\"/) label=\\\\$2}{if (head && label) print label; if (head && label) exit}\" | sed -E \"s/\\\"([^\\\"]+)\\\".*/\\1/\"); \
-        local PULL_TITLE=$(cat $TMP_FILE | grep \"\\\"title\\\": \" | sed \"s/^ *\\\"title\\\": \\\"//\" | sed \"s/\\\",$//\"); \
-        rm $TMP_FILE; \
-        git fetch $1 pull/$2/head; \
-        git merge --no-ff -m \"Merged pull request #$2 from $PULL_AUTHOR/$PULL_REF\n\n$PULL_TITLE\" FETCH_HEAD; \
-        ' -"
+        curl -s \"https://api.github.com/repos/$USER/$REPO/pulls/$2\" > \"$TMP_FILE\"; \
+        if ! grep -q '\"title\":' \"$TMP_FILE\"; then \
+            printf >&2 'Error: Failed to fetch PR #%s\\n' \"$2\"; \
+            rm -f \"$TMP_FILE\"; \
+            return 2; \
+        fi; \
+        local PULL_AUTHOR=$(awk '/\"head\":/{flag=1} flag&&/\"login\": \"/{print \\$2; exit}' \"$TMP_FILE\" | sed -E 's/\"([^\"]+)\".*/\\1/'); \
+        local PULL_REF=$(awk '/\"head\":/{flag=1} flag&&/\"ref\": \"/{print \\$2; exit}' \"$TMP_FILE\" | sed -E 's/\"([^\"]+)\".*/\\1/'); \
+        local PULL_TITLE=$(grep '\"title\": ' \"$TMP_FILE\" | sed 's/^ *\"title\": \"//' | sed 's/\",$//'); \
+        rm -f \"$TMP_FILE\"; \
+        if [ -z \"$PULL_AUTHOR\" ] || [ -z \"$PULL_REF\" ] || [ -z \"$PULL_TITLE\" ]; then \
+            printf >&2 'Error: Failed to parse PR details\\n'; \
+            return 2; \
+        fi; \
+        git fetch \"$1\" \"pull/$2/head\" || { \
+            printf >&2 'Error: Failed to fetch PR #%s\\n' \"$2\"; \
+            return 2; \
+        }; \
+        git merge --no-ff -m \"Merged pull request #$2 from $PULL_AUTHOR/$PULL_REF\\n\\n$PULL_TITLE\" FETCH_HEAD || { \
+            printf >&2 'Error: Merge failed\\n'; \
+            return 2; \
+        }; \
+        printf 'Merged PR #%s\\n' \"$2\"; \
+    }; f"
 #+end_src
 
 This is actually quite useful if you are a maintainer of a project on
@@ -6927,9 +6970,14 @@ See if the merge is applicable to the current working tree and/or the index file
 and *detects conflicts*:
 
 #+begin_src conf
-    # Usage: git merge-dry-run BRANCH_NAME
-    # Check how the merge of BRANCH_NAME into master will go
+    # Usage: git merge-dry-run BRANCH
+    #
+    # Check how the merge of BRANCH into master will go
     merge-dry-run = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git merge-dry-run BRANCH\n'; \
+            return 2; \
+        fi; \
         if grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD \"$1\") FETCH_HEAD \"$1\"); then \
             printf 'Merge conflicts!\n' \
         else \
@@ -7710,16 +7758,15 @@ all along.  You could then push.  So, something like:
 # Commit all changes and attempt to push, pulling in changes if necessary and
 # re-pushing; on failure, restore to previous state with changes uncomitted.
 git commit -am Foo \
-    && {
-        git push \
-            || {
-                { git pull --rebase || handle-pull-conflicts; } \
-                      && git push;
-            }
+    && { \
+        git push || { \
+            { git pull --rebase || handle-pull-conflicts; } \
+                && git push; \
+        } \
     } \
-    || {
-        git reset --soft HEAD^
-        printf 'Commit failed.\n'
+    || { \
+        git reset --soft HEAD^ \
+        printf 'Commit failed.\n' \
     }
 #+end_src
 
