@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250616.2052>
+# .gitconfig, Time-stamp: <2025-06-17 Tue 11:26>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1104,9 +1104,10 @@
 
     # Search through all commit logs for multiple patterns (case-insensitive)
     # across all branches.
-    # Example: git search-commit-messages-or-logic-all-branches "pattern1" "pattern2" "pattern3"
-    # See also git search-commit-messages-or-logic PATTERN... (for current branch!!!)
-    search-commit-messages-or-logic-all-branches = "!f() { \
+    #
+    # Example: git find-commit-messages-any-all-branches "pattern1" "pattern2" "pattern3"
+    # See also git find-commit-messages-any PATTERN... (for current branch!!!)
+    find-commit-messages-any-all-branches = "!f() { \
         if [ $# -eq 0 ]; then \
             printf >&2 'Error: No search pattern provided\n'; \
             return 2; \
@@ -1114,16 +1115,16 @@
         git log --all -i $(printf -- '--grep=%s ' \"$@\"); \
     }; f"
 
-    # Usage: git search-commit-messages-or-logic PATTERN...
+    # Usage: git find-commit-messages-any PATTERN...
     #
     # Search for commit messages that match any of the provided patterns (OR logic, like in BitBucket).
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
     # (FOR CURRENT BRANCH ONLY!!!)
-    search-commit-messages-or-logic = "!f() { \
+    find-commit-messages-any = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
-            printf >&2 'Usage: git search-commit-messages-or-logic PATTERN...\n'; \
+            printf >&2 'Usage: git find-commit-messages-any PATTERN...\n'; \
             return 2; \
         fi; \
         for PATTERN in \"$@\"; do \
@@ -1133,16 +1134,16 @@
     }; f"
     # XXX Add all, date short...
 
-    # Usage: git search-commit-messages-and-logic PATTERN...
+    # Usage: git find-commit-messages-all PATTERN...
     #
     # Search for commits that match all provided patterns in commit messages (AND logic, like in Gitlab).
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
     # (FOR CURRENT BRANCH ONLY!!!)
-    search-commit-messages-and-logic = "!f() { \
+    find-commit-messages-all = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
-            printf >&2 'Usage: git search-commit-messages-and-logic PATTERN...\n'; \
+            printf >&2 'Usage: git find-commit-messages-all PATTERN...\n'; \
             return 2; \
         fi; \
         CMD=\"git log --all-match -i --format='%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)' --color=always\"; \
@@ -1152,7 +1153,7 @@
         eval $CMD | sort -r | sed 's/^[^:]*://'; \
     }; f"
 
-    ##? Usage: git search-commit-diffs REGEXP [PATH]
+    ##? Usage: git find-commit-diffs REGEXP [PATH]
     ##?
     ##? Search Git log for a specific regular expression and show the patch. The
     ##? path can be a file, directory, or file pattern (e.g., *.txt). If no path
@@ -1161,9 +1162,9 @@
     ##? modified.
     ##?
     ##? Examples:
-    ##?   git search-commit-diffs "fix" "*.js"
-    ##?   git search-commit-diffs "bugfix"
-    search-commit-diffs = "!f() { \
+    ##?   git find-commit-diffs "fix" "*.js"
+    ##?   git find-commit-diffs "bugfix"
+    find-commit-diffs = "!f() { \
         if [ -n \"$2\" ]; then \
             git log -p -G \"$1\" \"$2\"; \
         else \
@@ -1171,13 +1172,13 @@
         fi \
     }; f"
 
-    ##? Usage: git search-commit-diffs-all-branches REGEXP
+    ##? Usage: git find-commit-diffs-all-branches REGEXP
     ##?
     ##? Search for changes containing a specific regular expression across all
     ##? branches.
     ##? Shows patches where the regular expression is added, removed, or
     ##? modified.
-    search-commit-diffs-all-branches = "!f() { \
+    find-commit-diffs-all-branches = "!f() { \
         git log --all -G \"$1\"; \
     }; f"
 

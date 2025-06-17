@@ -13,7 +13,7 @@
 #+PROPERTY:  header-args :tangle .gitconfig_leuven :eval no
 
 #+name: current-time
-#+begin_src emacs-lisp :eval yes :results value silent :tangle no :exports none
+#+begin_src emacs-lisp :eval yes :results value :tangle no
 (format-time-string "<%Y%m%d.%H%M>")
 #+end_src
 
@@ -3117,12 +3117,15 @@ If you want to find all commits (*across all branches*, showing names and status
 of changed files) where *log message* matches a specified pattern (regular
 expression), use:
 
+Show commits that match *any* of the following patterns
+
 #+begin_src conf
     # Search through all commit logs for multiple patterns (case-insensitive)
     # across all branches.
-    # Example: git search-commit-messages-or-logic-all-branches "pattern1" "pattern2" "pattern3"
-    # See also git search-commit-messages-or-logic PATTERN... (for current branch!!!)
-    search-commit-messages-or-logic-all-branches = "!f() { \
+    #
+    # Example: git find-commit-messages-any-all-branches "pattern1" "pattern2" "pattern3"
+    # See also git find-commit-messages-any PATTERN... (for current branch!!!)
+    find-commit-messages-any-all-branches = "!f() { \
         if [ $# -eq 0 ]; then \
             printf >&2 'Error: No search pattern provided\n'; \
             return 2; \
@@ -3140,16 +3143,16 @@ Here's the alias which simply loops over each argument and calls ~git
 log --grep~. Equivalent of calling ~git log --grep=A --grep=B --grep=C ...~:
 
 #+begin_src conf
-    # Usage: git search-commit-messages-or-logic PATTERN...
+    # Usage: git find-commit-messages-any PATTERN...
     #
     # Search for commit messages that match any of the provided patterns (OR logic, like in BitBucket).
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
     # (FOR CURRENT BRANCH ONLY!!!)
-    search-commit-messages-or-logic = "!f() { \
+    find-commit-messages-any = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
-            printf >&2 'Usage: git search-commit-messages-or-logic PATTERN...\n'; \
+            printf >&2 'Usage: git find-commit-messages-any PATTERN...\n'; \
             return 2; \
         fi; \
         for PATTERN in \"$@\"; do \
@@ -3171,17 +3174,19 @@ somewhere, use the *AND* semantic:
 
 : git log --grep=FOO --grep=BAR --all-match
 
+Show commits that match *all* of the following patterns
+
 #+begin_src conf
-    # Usage: git search-commit-messages-and-logic PATTERN...
+    # Usage: git find-commit-messages-all PATTERN...
     #
     # Search for commits that match all provided patterns in commit messages (AND logic, like in Gitlab).
     #
     # This will search commit messages for the provided patterns and list the
     # matching commits.
     # (FOR CURRENT BRANCH ONLY!!!)
-    search-commit-messages-and-logic = "!f() { \
+    find-commit-messages-all = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
-            printf >&2 'Usage: git search-commit-messages-and-logic PATTERN...\n'; \
+            printf >&2 'Usage: git find-commit-messages-all PATTERN...\n'; \
             return 2; \
         fi; \
         CMD=\"git log --all-match -i --format='%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)' --color=always\"; \
@@ -3290,7 +3295,7 @@ any *line* that was added, removed, or changed.
 : git log --since="1 week ago" --all --full-history -G "foo"
 
 #+begin_src conf
-    ##? Usage: git search-commit-diffs REGEXP [PATH]
+    ##? Usage: git find-commit-diffs REGEXP [PATH]
     ##?
     ##? Search Git log for a specific regular expression and show the patch. The
     ##? path can be a file, directory, or file pattern (e.g., *.txt). If no path
@@ -3299,9 +3304,9 @@ any *line* that was added, removed, or changed.
     ##? modified.
     ##?
     ##? Examples:
-    ##?   git search-commit-diffs "fix" "*.js"
-    ##?   git search-commit-diffs "bugfix"
-    search-commit-diffs = "!f() { \
+    ##?   git find-commit-diffs "fix" "*.js"
+    ##?   git find-commit-diffs "bugfix"
+    find-commit-diffs = "!f() { \
         if [ -n \"$2\" ]; then \
             git log -p -G \"$1\" \"$2\"; \
         else \
@@ -3310,17 +3315,17 @@ any *line* that was added, removed, or changed.
     }; f"
 #+end_src
 
-The alias ~search-commit-diffs-all-branches~ searches for string-related changes
+The alias ~find-commit-diffs-all-branches~ searches for string-related changes
 in the code changes (diff) across all branches.
 
 #+begin_src conf
-    ##? Usage: git search-commit-diffs-all-branches REGEXP
+    ##? Usage: git find-commit-diffs-all-branches REGEXP
     ##?
     ##? Search for changes containing a specific regular expression across all
     ##? branches.
     ##? Shows patches where the regular expression is added, removed, or
     ##? modified.
-    search-commit-diffs-all-branches = "!f() { \
+    find-commit-diffs-all-branches = "!f() { \
         git log --all -G \"$1\"; \
     }; f"
 #+end_src
