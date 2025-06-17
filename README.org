@@ -6110,9 +6110,10 @@ Testing.
     ##? Check for whitespace errors in the changes.
     whitespace-errors = diff --check
 
-    # Check if any file in repo has windows line endings
-    # Currently do not work as alias, works from comand line directly. There is a problem with \r
-    check-eol = grep --files-with-matches $'\\r' HEAD
+    ##? Check if any file in the repository has Windows line endings.
+    check-eol = "!f() { \
+        git grep --files-with-matches $'\\r' -- ':(exclude)*.git/*'; \
+    }; f"
 #+end_src
 
 * Deployments (to different environments)
