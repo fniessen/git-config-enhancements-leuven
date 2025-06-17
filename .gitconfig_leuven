@@ -272,18 +272,18 @@
     ##? Initialize a new Git repository with an initial commit.
     init-repository = "!f() { \
         git init || { \
-            printf >&2 'Error: git init failed. Aborting.\n'; \
+            printf >&2 'ERROR: git init failed. Aborting.\n'; \
             return 2; \
         }; \
         if [ -z \"$(ls -A)\" ]; then \
             touch .gitignore; \
         fi; \
         git add . || { \
-            printf >&2 'Error: git add failed.\n'; \
+            printf >&2 'ERROR: git add failed.\n'; \
             return 2; \
         }; \
         git commit -m 'Initial commit' || { \
-            printf >&2 'Error: git commit failed.\n'; \
+            printf >&2 'ERROR: git commit failed.\n'; \
             return 2; \
         }; \
     }; f"
@@ -483,7 +483,7 @@
             if git status --porcelain \"$FILE_TO_RESTORE\" | grep -qE '^ M'; then \
                 git checkout -- \"$FILE_TO_RESTORE\"; \
             else \
-                printf >&2 \"Error: File '%s' is not modified.\n\" \"$FILE_TO_RESTORE\"; \
+                printf >&2 \"ERROR: File '%s' is not modified.\n\" \"$FILE_TO_RESTORE\"; \
                 return 2; \
             fi; \
         fi; \
@@ -514,7 +514,7 @@
             if git status --porcelain \"$FILE_TO_RESTORE\" | grep -qE '^ D'; then \
                 git checkout -- \"$FILE_TO_RESTORE\"; \
             else \
-                printf >&2 \"Error: File '%s' is not deleted.\n\" \"$FILE_TO_RESTORE\"; \
+                printf >&2 \"ERROR: File '%s' is not deleted.\n\" \"$FILE_TO_RESTORE\"; \
                 return 2; \
             fi; \
         fi; \
@@ -576,7 +576,7 @@
     ignore = "!f() { \
         local PATTERN=\"$1\"; \
         if [ -z \"$PATTERN\" ]; then \
-            printf >&2 'Error: No pattern provided.\\nUsage: git ignore PATTERN\\n' >&2; \
+            printf >&2 'ERROR: No pattern provided.\\nUsage: git ignore PATTERN\\n' >&2; \
             return 2; \
         fi; \
         if [ ! -e .gitignore ]; then \
@@ -805,7 +805,7 @@
     # Interactively stage changes and commit, or abort.
     commit-interactive = "!f() { \
         if [ \"$(git root)\" != \"$(pwd)\" ]; then \
-            printf >&2 'Error: Not at the root of the Git repository.\n'; \
+            printf >&2 'ERROR: Not at the root of the Git repository.\n'; \
             return 2; \
         fi; \
         (git add -p -- \"$@\" && git commit) || git reset; \
@@ -897,7 +897,7 @@
     related-history = "!f() { \
         local FILE_PATH=\"$1\"; \
         if [ ! -e \"$FILE_PATH\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
+            printf >&2 \"ERROR: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
             return 2; \
         fi; \
         git show --name-only $(git rev-list HEAD -- \"$FILE_PATH\"); \
@@ -906,7 +906,7 @@
     # DEBUG version:
     # related-files = "!f() { \
     #     if [ ! -e \"$1\" ]; then \
-    #         echo \"Error: File '$1' not found in the working tree.\"; \
+    #         echo \"ERROR: File '$1' not found in the working tree.\"; \
     #         return 2; \
     #     fi; \
     #     local hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
@@ -929,7 +929,7 @@
         fi; \
         local FILE_PATH=\"$1\"; \
         if [ ! -e \"$FILE_PATH\" ]; then \
-            printf >&2 \"Error: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
+            printf >&2 \"ERROR: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
             return 2; \
         fi; \
         printf \"Unique Files:\n\"; \
@@ -1123,7 +1123,7 @@
     # See also git find-commit-messages-any PATTERN... (for current branch!!!)
     find-commit-messages-any-all-branches = "!f() { \
         if [ $# -eq 0 ]; then \
-            printf >&2 'Error: No search pattern provided\n'; \
+            printf >&2 'ERROR: No search pattern provided\n'; \
             return 2; \
         fi; \
         git log --all -i $(printf -- '--grep=%s ' \"$@\"); \
@@ -1231,7 +1231,7 @@
         local upstream_commit=$(git upstream-commit 2> /dev/null); \
         local local_commit=$(git local-commit); \
         if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
-            printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
+            printf >&2 'ERROR: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
         fi; \
         git commit -v --amend --reuse-message HEAD; \
@@ -1251,7 +1251,7 @@
         local upstream_commit=$(git upstream-commit 2> /dev/null); \
         local local_commit=$(git local-commit); \
         if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
-            printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
+            printf >&2 'ERROR: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
         fi; \
         git commit --amend -m \"$1\"; \
@@ -1274,7 +1274,7 @@
         local upstream_commit=$(git upstream-commit 2> /dev/null); \
         local local_commit=$(git local-commit); \
         if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
-            printf >&2 'Error: The commit has already been pushed to the remote repository.\n'; \
+            printf >&2 'ERROR: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
         fi; \
         git commit --amend --author=\"$NAME <$EMAIL>\" --reuse-message HEAD; \
@@ -1322,7 +1322,7 @@
             return 2; \
         fi; \
         if ! printf '%s' \"$1\" | grep -Eq '^[0-9]+$'; then \
-            printf >&2 'Error: Argument must be a non-negative integer.\n'; \
+            printf >&2 'ERROR: Argument must be a non-negative integer.\n'; \
             return 2; \
         fi; \
         local NUM_OF_COMMITS_TO_UNDO=$1; \
@@ -1336,7 +1336,7 @@
         if [ $NUM_OF_COMMITS_TO_UNDO -le $num_unpushed ]; then \
             git squash-force $NUM_OF_COMMITS_TO_UNDO; \
         else \
-            printf >&2 'Error: Cannot squash %d commits. There are only %d unpushed commits.\n' \
+            printf >&2 'ERROR: Cannot squash %d commits. There are only %d unpushed commits.\n' \
                    $NUM_OF_COMMITS_TO_UNDO $num_unpushed; \
             return 2; \
         fi; \
@@ -1735,7 +1735,7 @@
         fi; \
         local BRANCH_NAME=\"$1\"; \
         if [ -z \"$BRANCH_NAME\" ]; then \
-            printf >&2 'Error: Please provide a branch name as a parameter.\n' \
+            printf >&2 'ERROR: Please provide a branch name as a parameter.\n' \
             return 2; \
         fi; \
         [ $(git rev-list --count $(git origin)/\"$BRANCH_NAME\"..\"$BRANCH_NAME\") -gt 0 ]; \
@@ -1783,7 +1783,7 @@
                     if git pull $(git origin) $branch:$branch; then \
                         printf \"\n\"; \
                     else \
-                        printf \"\\e[91mError: Pull failed for branch '%s'.\\e[0m\n\" \"$branch\"; \
+                        printf \"\\e[91mERROR: Pull failed for branch '%s'.\\e[0m\n\" \"$branch\"; \
                         if git rebase --abort > /dev/null 2>&1; then \
                             printf \"Rebase operation aborted.\n\n\"; \
                         else \
@@ -2013,11 +2013,11 @@
         local current_branch=$(git current-branch); \
         local OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
-            printf >&2 \"Error: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
+            printf >&2 \"ERROR: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
             return 2; \
         fi; \
         if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
-            printf >&2 \"Error: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
+            printf >&2 \"ERROR: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
         local commits_missing_to_current=$(git rev-list --count \"$OTHER_BRANCH\"..\"$current_branch\"); \
@@ -2038,7 +2038,7 @@
         local CURRENT_BRANCH=${2:-$(git rev-parse --abbrev-ref HEAD)}; \
         local base=$(git merge-base $MAIN_BRANCH $CURRENT_BRANCH 2> /dev/null); \
         if [ -z \"$base\" ]; then \
-            printf >&2 '%s\n' \"Error: Unable to find common ancestor between branches '$MAIN_BRANCH' and '$CURRENT_BRANCH'. Branches may not exist or be valid.\"; \
+            printf >&2 '%s\n' \"ERROR: Unable to find common ancestor between branches '$MAIN_BRANCH' and '$CURRENT_BRANCH'. Branches may not exist or be valid.\"; \
             return 2; \
         else \
             local short_base=$(git rev-parse --short $base); \
@@ -2066,11 +2066,11 @@
         local current_branch=$(git current-branch); \
         local OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
-            printf >&2 \"Error: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
+            printf >&2 \"ERROR: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
             return 2; \
         fi; \
         if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
-            printf >&2 \"Error: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
+            printf >&2 \"ERROR: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
         local missing_files_to_current=$(git diff --name-only \"$OTHER_BRANCH\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
@@ -2082,11 +2082,11 @@
         local current_branch=$(git current-branch); \
         local OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
-            printf >&2 \"Error: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
+            printf >&2 \"ERROR: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
             return 2; \
         fi; \
         if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
-            printf >&2 \"Error: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
+            printf >&2 \"ERROR: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
         git diff --name-only \"$OTHER_BRANCH\"...\"$current_branch\"; \
@@ -2183,7 +2183,7 @@
         fi; \
         local USER_AND_REPO=$(git remote show \"$1\" | grep 'Fetch URL:' | sed -E 's/.*github.com[:\\/]([a-zA-Z_-]+)\\/([a-zA-Z_-]+)\\.git$/\\1 \\2/'); \
         if [ -z \"$USER_AND_REPO\" ]; then \
-            printf >&2 'Error: Could not determine GitHub user/repo from remote\\n'; \
+            printf >&2 'ERROR: Could not determine GitHub user/repo from remote\\n'; \
             return 2; \
         fi; \
         local USER=$(printf \"%s\" \"$USER_AND_REPO\" | cut -d' ' -f1); \
@@ -2191,7 +2191,7 @@
         local TMP_FILE=$(mktemp); \
         curl -s \"https://api.github.com/repos/$USER/$REPO/pulls/$2\" > \"$TMP_FILE\"; \
         if ! grep -q '\"title\":' \"$TMP_FILE\"; then \
-            printf >&2 'Error: Failed to fetch PR #%s\\n' \"$2\"; \
+            printf >&2 'ERROR: Failed to fetch PR #%s\\n' \"$2\"; \
             rm -f \"$TMP_FILE\"; \
             return 2; \
         fi; \
@@ -2200,15 +2200,15 @@
         local PULL_TITLE=$(grep '\"title\": ' \"$TMP_FILE\" | sed 's/^ *\"title\": \"//' | sed 's/\",$//'); \
         rm -f \"$TMP_FILE\"; \
         if [ -z \"$PULL_AUTHOR\" ] || [ -z \"$PULL_REF\" ] || [ -z \"$PULL_TITLE\" ]; then \
-            printf >&2 'Error: Failed to parse PR details\\n'; \
+            printf >&2 'ERROR: Failed to parse PR details\\n'; \
             return 2; \
         fi; \
         git fetch \"$1\" \"pull/$2/head\" || { \
-            printf >&2 'Error: Failed to fetch PR #%s\\n' \"$2\"; \
+            printf >&2 'ERROR: Failed to fetch PR #%s\\n' \"$2\"; \
             return 2; \
         }; \
         git merge --no-ff -m \"Merged pull request #$2 from $PULL_AUTHOR/$PULL_REF\\n\\n$PULL_TITLE\" FETCH_HEAD || { \
-            printf >&2 'Error: Merge failed\\n'; \
+            printf >&2 'ERROR: Merge failed\\n'; \
             return 2; \
         }; \
         printf 'Merged PR #%s\\n' \"$2\"; \
@@ -2693,7 +2693,7 @@
         fi; \
         local BRANCH=\"$1\"; \
         if [ -z \"$BRANCH\" ]; then \
-            printf >&2 \"Error: No branch specified.\\n\"; \
+            printf >&2 \"ERROR: No branch specified.\\n\"; \
             return 2; \
         fi; \
         git merge --no-commit --no-ff \"$BRANCH\"; \
