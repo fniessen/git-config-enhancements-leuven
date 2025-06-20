@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#? git-find-recent-branches, Time-stamp: <2025-02-06 Thu 10:29>
-#? Copyright (C) 2024 Fabrice Niessen. All rights reserved.
+#? git-find-recent-branches, Time-stamp: <2025-06-20 Fri 11:05>
+#? Copyright (C) 2024, 2025 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
@@ -23,13 +23,27 @@
 ##?   git-find-recent-branches --since="2 weeks ago"
 ##?                                 find branches modified since 2 weeks ago
 
+# BSD sysexits.h exit codes.
+EX_OK=0
+EX_UNAVAILABLE=69
+
 # Set -uo pipefail for undefined variable check and pipeline failure propagation.
 set -uo pipefail
 
+# Define color and formatting variables.
+RESET=$(tput sgr0)
+BOLD=$(tput bold)
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+BLUE=$(tput setaf 4)
+WHITE=$(tput setaf 7)
+RED_BG=$(tput setab 1)
+ERROR="${BOLD}${WHITE}${RED_BG}"
+
 # Check if 'docopts' command is available.
 if ! command -v docopts > /dev/null 2>&1; then
-    printf >&2 "Error: 'docopts' command not found.\n"
-    exit 2
+    printf >&2 "${ERROR}ERROR: 'docopts' command not found.${RESET}\n"
+    exit $EX_UNAVAILABLE                # Service unavailable.
 fi
 
 # Extract help and version information from the script.
@@ -56,18 +70,6 @@ if [[ -z "$branches" ]]; then
     printf >&2 "No remote branches found.\n"
     exit 2
 fi
-
-# Define color and formatting using 'tput'.
-setup_colors() {
-    RED=$(tput setaf 1)         # Red.
-    GREEN=$(tput setaf 2)       # Green.
-    BLUE=$(tput setaf 4)        # Blue.
-    RESET=$(tput sgr0)          # Reset all attributes.
-    BOLD=$(tput bold)           # Bold text.
-}
-
-# Initialize color and text formatting.
-setup_colors
 
 # Array to hold formatted branch details.
 output=()
@@ -99,3 +101,6 @@ done
 
 # Sort the collected output based on the date and time (in reverse).
 printf "%s\n" "${output[@]}" | sort -r --key=1,1 --key=2,2 --key=3,3
+
+# Exit with a success code.
+exit $EX_OK
