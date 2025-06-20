@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <2025-06-17 Tue 11:29>
+# .gitconfig, Time-stamp: <20250620.0854>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -250,7 +250,7 @@
     grep-aliases = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git grep-aliases PATTERN\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local PATTERN=\"$1\"; \
         git aliases | grep --color=auto -i \"$PATTERN\"; \
@@ -366,7 +366,7 @@
     search-for-files = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git search-for-files PATTERN\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local PATTERN=\"$1\"; \
         git ls-tree -r --name-only HEAD \
@@ -386,7 +386,7 @@
     search-for-files-all-branches = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git search-for-files-all-branches PATTERN\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local PATTERN=\"$1\"; \
         git remote-branches \
@@ -434,7 +434,7 @@
     search-for-code-in-extension = "!f() { \
         if [ $# -ne 2 ]; then \
             printf >&2 'Usage: git search-for-code-in-extension EXTENSION PATTERN\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local EXTENSION=\"$1\"; \
         local PATTERN=\"$2\"; \
@@ -471,7 +471,7 @@
     unmodify = "!f() { \
         if [ $# -gt 1 ]; then \
             printf >&2 'Usage: git unmodify [FILE_TO_RESTORE]\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
@@ -502,7 +502,7 @@
     undelete = "!f() { \
         if [ $# -gt 1 ]; then \
             printf >&2 'Usage: git undelete [FILE_TO_RESTORE]\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
@@ -855,7 +855,7 @@
     file-history = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git file-history FILE_PATH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FILE_PATH=\"$1\"; \
         if ! git ls-tree -r HEAD --name-only 2> /dev/null | grep -q \"^$FILE_PATH$\"; then \
@@ -879,7 +879,7 @@
     file-history-all-branches = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git file-history-all-branches FILE_PATH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FILE_PATH=\"$1\"; \
         if ! git ls-tree -r HEAD --name-only 2> /dev/null | grep -q \"^$FILE_PATH$\"; then \
@@ -925,7 +925,7 @@
     related-files = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git related-files FILE_PATH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FILE_PATH=\"$1\"; \
         if [ ! -e \"$FILE_PATH\" ]; then \
@@ -945,7 +945,7 @@
     file-last-commit = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git file-last-commit FILE_PATH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FILE_PATH=\"$1\"; \
         git log -n 1 --all --date-order -- \"$FILE_PATH\"; \
@@ -957,7 +957,7 @@
     file-last-commits = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git file-last-commits FILE_PATH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FILE_PATH=\"$1\"; \
         local local_branches=$(git local-branches); \
@@ -974,7 +974,7 @@
     file-last-commits2 = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git file-last-commits2 FILE_PATH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FILE_PATH=\"$1\"; \
         git for-each-ref --format=\"%(refname:short) %(objectname)\" refs/heads/ | \
@@ -1057,7 +1057,7 @@
     branches-containing = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git branches-containing COMMIT_HASH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local COMMIT_HASH=\"$1\"; \
         git branch --all --sort=-committerdate --contains \"$COMMIT_HASH\"; \
@@ -1070,7 +1070,7 @@
     tags-containing = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git tags-containing COMMIT_HASH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local COMMIT_HASH=\"$1\"; \
         git tag --contains \"$COMMIT_HASH\" \
@@ -1091,7 +1091,7 @@
     is-ancestor = "!f() { \
         if [ \"$#\" -ne 2 ]; then \
             printf >&2 'Usage: git is-ancestor COMMIT1 COMMIT2\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local COMMIT1=\"$1\"; \
         local COMMIT2=\"$2\"; \
@@ -1139,7 +1139,7 @@
     find-commit-messages-any = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
             printf >&2 'Usage: git find-commit-messages-any PATTERN...\n'; \
-            return 2; \
+            return 64; \
         fi; \
         for PATTERN in \"$@\"; do \
             git log --grep=\"$PATTERN\" -i --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)\" --color=always; \
@@ -1158,7 +1158,7 @@
     find-commit-messages-all = "!f() { \
         if [ \"$#\" -eq 0 ]; then \
             printf >&2 'Usage: git find-commit-messages-all PATTERN...\n'; \
-            return 2; \
+            return 64; \
         fi; \
         CMD=\"git log --all-match -i --format='%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(bold blue)<%an>%C(reset)' --color=always\"; \
         for PATTERN in \"$@\"; do \
@@ -1200,7 +1200,7 @@
     search-all-commits = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git search-all-commits SEARCH_TERM\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local SEARCH_TERM=\"$1\"; \
         git rev-list --all | xargs git grep -F \"$SEARCH_TERM\"; \
@@ -1246,7 +1246,7 @@
     amend-message = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git amend-message NEW_COMMIT_MESSAGE\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local upstream_commit=$(git upstream-commit 2> /dev/null); \
         local local_commit=$(git local-commit); \
@@ -1267,7 +1267,7 @@
     amend-author = "!f() { \
         if [ $# -ne 2 ]; then \
             printf >&2 'Usage: git amend-author NAME EMAIL\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local NAME=\"$1\"; \
         local EMAIL=\"$2\"; \
@@ -1319,7 +1319,7 @@
     squash = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git squash NUM_OF_COMMITS_TO_UNDO\n'; \
-            return 2; \
+            return 64; \
         fi; \
         if ! printf '%s' \"$1\" | grep -Eq '^[0-9]+$'; then \
             printf >&2 'ERROR: Argument must be a non-negative integer.\n'; \
@@ -1535,7 +1535,7 @@
     verify-local-branch = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git verify-local-branch BRANCH_NAME\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
         git rev-parse --verify \"$BRANCH_NAME\" > /dev/null 2>&1; \
@@ -1546,7 +1546,7 @@
     verify-remote-branch = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git verify-remote-branch BRANCH_NAME\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
         git rev-parse --verify \"$(git origin)/$BRANCH_NAME\" > /dev/null 2>&1; \
@@ -1585,7 +1585,7 @@
     branch-edit-desc = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git branch-edit-desc BRANCH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH=\"$1\"; \
         description_file=\".git/refs/heads/$BRANCH.description\"; \
@@ -1605,7 +1605,7 @@
     branch-show-desc = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git branch-show-desc BRANCH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH=\"$1\"; \
         git config --get branch.\"$BRANCH\".description; \
@@ -1731,7 +1731,7 @@
     has-new-commits = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git has-new-commits BRANCH_NAME\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
         if [ -z \"$BRANCH_NAME\" ]; then \
@@ -1825,7 +1825,7 @@
     delete-remote-branch = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git delete-remote-branch BRANCH_NAME\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
         printf \"Are you sure you want to delete the remote branch '%s'? [y/N]\" \"$BRANCH_NAME\"; \
@@ -1844,7 +1844,7 @@
     delete-branch = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git delete-branch BRANCH_NAME\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
         git delete-local-branch \"$BRANCH_NAME\" \
@@ -1924,7 +1924,7 @@
     rename-tag = "!f() { \
         if [ $# -ne 2 ]; then \
             printf >&2 'Usage: git rename-tag OLD_TAG NEW_TAG\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local OLD_TAG=\"$1\"; \
         local NEW_TAG=\"$2\"; \
@@ -1941,7 +1941,7 @@
     delete-tag = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git delete-tag TAG\\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local TAG=\"$1\"; \
         git tag -d \"$TAG\" && \
@@ -1957,7 +1957,7 @@
     compare-commits = "!f() { \
         if [ \"$#\" -ne 2 ]; then \
             printf >&2 'Usage: git compare-commits FROM TO\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FROM=\"$1\"; \
         local TO=\"$2\"; \
@@ -1973,7 +1973,7 @@
     compare-changed-files = "!f() { \
         if [ \"$#\" -ne 2 ]; then \
             printf >&2 'Usage: git compare-changed-files FROM TO\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FROM=\"$1\"; \
         local TO=\"$2\"; \
@@ -1991,7 +1991,7 @@
     compare = "!f() { \
         if [ \"$#\" -ne 2 ]; then \
             printf >&2 'Usage: git compare FROM TO\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local FROM=\"$1\"; \
         local TO=\"$2\"; \
@@ -2179,7 +2179,7 @@
     merge-pr = "!f() { \
         if [ $# -ne 2 ]; then \
             printf >&2 'Usage: git merge-pr REMOTE PR_NUMBER\\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local USER_AND_REPO=$(git remote show \"$1\" | grep 'Fetch URL:' | sed -E 's/.*github.com[:\\/]([a-zA-Z_-]+)\\/([a-zA-Z_-]+)\\.git$/\\1 \\2/'); \
         if [ -z \"$USER_AND_REPO\" ]; then \
@@ -2227,7 +2227,7 @@
     release-tag = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git release-tag VERSION\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local VERSION=\"$1\"; \
         git tag -a v\"$VERSION\" -m \"Release version $VERSION\" \
@@ -2436,7 +2436,7 @@
     all-repos = "!f() { \
         if [ $# -lt 1 ]; then \
             printf >&2 'Usage: git all-repos COMMAND [ARGS]\\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local repo_slug_local; \
         find . -type d -name '.git' \
@@ -2488,7 +2488,7 @@
     diff-commits-ago = "!f() { \
         if [ $# -lt 1 ] || [ $# -gt 2 ]; then \
             printf >&2 'Usage: git diff-commits-ago NUMBER [FILE]\n'; \
-            return 2; \
+            return 64; \
         fi; \
         if [ $# -eq 2 ]; then \
             git diff --patch-with-stat HEAD~$1 -- \"$2\"; \
@@ -2690,7 +2690,7 @@
     merge-test = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git merge-test BRANCH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH=\"$1\"; \
         if [ -z \"$BRANCH\" ]; then \
@@ -2711,7 +2711,7 @@
     dry-merge1 = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git dry-merge1 BRANCH_TO_MERGE\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH_TO_MERGE=\"$1\"; \
         git merge --no-commit \"$BRANCH_TO_MERGE\"; \
@@ -2727,7 +2727,7 @@
     dry-merge2 = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git dry-merge2 BRANCH_TO_MERGE\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH_TO_MERGE=\"$1\"; \
         git merge --no-commit --no-ff \"$BRANCH_TO_MERGE\"; \
@@ -2739,7 +2739,7 @@
     merge-dry-run = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git merge-dry-run BRANCH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         if grep -q 'changed in both' <<< $(git merge-tree $(git merge-base FETCH_HEAD \"$1\") FETCH_HEAD \"$1\"); then \
             printf 'Merge conflicts!\n' \
@@ -2820,7 +2820,7 @@
     force-checkout = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: git force-checkout BRANCH\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH=$1; \
         git checkout \"$BRANCH\" 2>&1 | { \
@@ -2846,7 +2846,7 @@
     co-autostash-include-untracked = "!f() { \
         if [ $# -ne 1 ]; then \
             printf >&2 'Usage: co-autostash BRANCH_NAME\n'; \
-            return 2; \
+            return 64; \
         fi; \
         local BRANCH_NAME=\"$1\"; \
         if ! git diff-index --quiet HEAD; then \
