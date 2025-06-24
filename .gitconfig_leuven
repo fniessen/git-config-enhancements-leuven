@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250624.1123>
+# .gitconfig, Time-stamp: <20250624.1134>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1093,9 +1093,8 @@
     # Word-wise diff (working dir vs index).
     wdf = diff --color-words
 
-    # Minimal, whitespace-insensitive diff (working dir vs index).
-    mindf = diff --diff-algorithm=minimal -w
-    mindf2 = diff -w --word-diff-regex=. --color-words -U0
+    # Minimal (char-level), whitespace-insensitive diff (working dir vs index).
+    mindf = diff -w --word-diff-regex=. --color-words -U0
 
     # Line-wise diff of staged changes (index vs HEAD).
     dfc = diff --cached
@@ -1103,8 +1102,8 @@
     # Word-wise diff of staged changes (index vs HEAD).
     wdfc = diff --color-words --cached
 
-    # Minimal, whitespace-insensitive diff of stage changes (index vs HEAD).
-    mindfc = diff --diff-algorithm=minimal -w --cached
+    # Minimal (char-level), whitespace-insensitive diff of stage changes (index vs HEAD).
+    mindfc = diff -w --word-diff-regex=. --color-words -U0 --cached
 
     # Usage: git dir-diff
     # Open Meld with directory comparison for all modified files.

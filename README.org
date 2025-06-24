@@ -3039,9 +3039,8 @@ last commit it was touched.
     # Word-wise diff (working dir vs index).
     wdf = diff --color-words
 
-    # Minimal, whitespace-insensitive diff (working dir vs index).
-    mindf = diff --diff-algorithm=minimal -w
-    mindf2 = diff -w --word-diff-regex=. --color-words -U0
+    # Minimal (char-level), whitespace-insensitive diff (working dir vs index).
+    mindf = diff -w --word-diff-regex=. --color-words -U0
 #+end_src
 
 *** Changes between the working tree and the latest commit (HEAD)
@@ -3062,8 +3061,8 @@ your commit changes (to make sure you don't need to use the undo commands):
     # Word-wise diff of staged changes (index vs HEAD).
     wdfc = diff --color-words --cached
 
-    # Minimal, whitespace-insensitive diff of stage changes (index vs HEAD).
-    mindfc = diff --diff-algorithm=minimal -w --cached
+    # Minimal (char-level), whitespace-insensitive diff of stage changes (index vs HEAD).
+    mindfc = diff -w --word-diff-regex=. --color-words -U0 --cached
 #+end_src
 
 *** Performing directory diffs (Comparing folders)
