@@ -1241,7 +1241,8 @@ Fetch URL: git@bitbucket.org-something:user/slug
     ##?
     ##? Get the owner of the repository from the remote URL.
     repo-owner = "!f() { \
-        local remote_url=$(git config --get remote.$(git origin).url); \
+        local remote_name=$(git origin) \
+        local remote_url=$(git config --get remote.$remote_name.url) \
         git remote show $remote_url -n \
             | grep 'Fetch URL:' \
             | sed -E 's_^.*[/:](.*)/.*$_\\1_' \
@@ -1254,7 +1255,8 @@ Fetch URL: git@bitbucket.org-something:user/slug
     ##?
     ##? Get the repository slug from the remote URL.
     repo-slug-remote = "!f() { \
-        local remote_url=$(git config --get remote.$(git origin).url); \
+        local remote_name=$(git origin) \
+        local remote_url=$(git config --get remote.$remote_name.url) \
         git remote show $remote_url -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
             | sed 's_\\.git$__'; \
@@ -1442,6 +1444,10 @@ Search files in all branches.
 
 #+begin_src conf
     find-files-all-branches2 = "!f() { \
+        if [ $# -ne 1 ]; then \
+            printf >&2 'Usage: git find-files-all-branches2 PATTERN\n'; \
+            return 64; \
+        fi; \
         for branch in $(git remote-branches | grep -v HEAD); do \
             if git ls-tree -r \"$branch\" --name-only \
                    | grep -q \"$1\"; then \
@@ -1548,7 +1554,10 @@ More readable output, *with grouping* (like Ripgrep, ~rg~, or ~ack~):
         git rev-list --all \
           | xargs git grep \"$1\"; \
     }; f"
-    # IN ALL COMMITS, NOT IN ALL BRANCHES???!!! LOTS OF DUPLICATES!!!
+    # Issue: This will search ALL COMMITS, not just all files, and will generate
+    # MANY DUPLICATES.
+    # Suggestion: Add a warning in the docstring, or use a different approach if
+    # you want to search all files in ALL BRANCHES.
 #+end_src
 
 Print the name of each *file with matches*:
@@ -1594,7 +1603,7 @@ thrown away, the alias to use is ~unmodify~:
             git status --porcelain \
                 | grep -E '^ M' \
                 | sed 's_^ M __' \
-                | xargs -I {} git checkout -- \"{}\"; \
+                | xargs -I {} git checkout -- \"{}\" || true; \
         else \
             if git status --porcelain \"$FILE_TO_RESTORE\" | grep -qE '^ M'; then \
                 git checkout -- \"$FILE_TO_RESTORE\"; \
@@ -1625,7 +1634,7 @@ thrown away, the alias to use is ~unmodify~:
             git status --porcelain \
                 | grep -E '^ D' \
                 | sed 's_^ D __' \
-                | xargs -I {} git checkout -- \"{}\"; \
+                | xargs -I {} git checkout -- \"{}\" || true; \
         else \
             if git status --porcelain \"$FILE_TO_RESTORE\" | grep -qE '^ D'; then \
                 git checkout -- \"$FILE_TO_RESTORE\"; \
@@ -2902,6 +2911,19 @@ List all the changed files *in a commit* (also in a /merge commit/):
 
 ** Get the diff of a commit
 
+Show changes with word-level granularity and color highlighting.
+
+#+begin_src conf
+    # Show commit with word-wise diff.
+    wshow = show --color-words
+
+    # Show commit with minimal (char-level), whitespace-insensitive diff.
+    minshow = show -w --word-diff-regex=. --color-words -U0
+#+end_src
+
+: git show 23231bf66
+: = git difftool 23231bf66^..23231bf66
+
 #+begin_src conf
     # Usage: git download-email-patch
     # Generate a patch file for the current branch using the git format-patch command.
@@ -2917,19 +2939,6 @@ List all the changed files *in a commit* (also in a /merge commit/):
         git diff $COMMIT_HASH^..$COMMIT_HASH > $COMMIT_HASH.diff; \
     }; f"
 #+end_src
-
-Show changes with word-level granularity and color highlighting.
-
-#+begin_src conf
-    # Show commit with word-wise diff.
-    wshow = show --color-words
-
-    # Show commit with minimal (char-level), whitespace-insensitive diff.
-    minshow = show -w --word-diff-regex=. --color-words -U0
-#+end_src
-
-: git show 23231bf66
-: = git difftool 23231bf66^..23231bf66
 
 Use a generic rev syntax (rev-parse) to transparently allow complex rev
 expressions.
