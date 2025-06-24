@@ -2918,8 +2918,6 @@ List all the changed files *in a commit* (also in a /merge commit/):
     }; f"
 #+end_src
 
-** Diff
-
 Show changes with word-level granularity and color highlighting.
 
 #+begin_src conf
@@ -2986,6 +2984,8 @@ Usage:
 This opens your configured ~difftool~ with the changes to =Path/to/File.cpp= in the
 last commit it was touched.
 
+** Diff
+
 *** View your changes
 
 #+begin_src conf
@@ -3044,12 +3044,6 @@ last commit it was touched.
 
     # Minimal (char-level), whitespace-insensitive diff (working dir vs index).
     mindf = diff -w --word-diff-regex=. --color-words -U0
-#+end_src
-
-*** Changes between the working tree and the latest commit (HEAD)
-
-#+begin_src conf :tangle no
-    diff-all = diff HEAD
 #+end_src
 
 *** Changes between the index (staged for the next commit) and the latest commit (HEAD)
