@@ -2925,6 +2925,9 @@ Show changes with word-level granularity and color highlighting.
 #+begin_src conf
     # Show commit with word-wise diff.
     wshow = show --color-words
+
+    # Show commit with minimal (char-level), whitespace-insensitive diff.
+    minshow = show -w --word-diff-regex=. --color-words -U0
 #+end_src
 
 : git show 23231bf66

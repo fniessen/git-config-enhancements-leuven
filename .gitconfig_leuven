@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250624.1134>
+# .gitconfig, Time-stamp: <20250624.1140>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1014,6 +1014,9 @@
 
     # Show commit with word-wise diff.
     wshow = show --color-words
+
+    # Show commit with minimal (char-level), whitespace-insensitive diff.
+    minshow = show -w --word-diff-regex=. --color-words -U0
 
     ##? Usage: git difftool-parent [COMMIT_HASH]
     ##?
