@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250620.0854>
+# .gitconfig, Time-stamp: <20250624.1123>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -1012,8 +1012,8 @@
         git diff $COMMIT_HASH^..$COMMIT_HASH > $COMMIT_HASH.diff; \
     }; f"
 
-    # Show changes with word-level granularity and color highlighting.
-    show-words = show --color-words
+    # Show commit with word-wise diff.
+    wshow = show --color-words
 
     ##? Usage: git difftool-parent [COMMIT_HASH]
     ##?
@@ -1045,6 +1045,66 @@
         local last_modified_commit_hash=$(git rev-list -1 HEAD -- \"$FILE_PATH\"); \
         git difftool \"$last_modified_commit_hash\"^ -- \"$FILE_PATH\"; \
     }; f"
+
+    ##? Usage: git diff-stat [FILE]
+    ##?
+    ##? Show changes with statistics (between working directory and index) if
+    ##? there are any.
+    ##?
+    ##? Examples:
+    ##?   git diff-stat                 Show differences for all files.
+    ##?   git diff-stat file.txt        Show differences only for "file.txt".
+    diff-stat = "!f() { \
+        git diff-index --quiet HEAD -- || clear; \
+        git diff --patch-with-stat; \
+    }; f"
+
+    ##? Usage: git diff-commits-ago NUMBER [FILE]
+    ##?
+    ##? Show diff (with stats) between HEAD and the state `NUMBER' commits ago.
+    ##? Optionally, specify a FILE to show differences for a specific file.
+    ##?
+    ##? Examples:
+    ##?   git diff-commits-ago 2        Show differences between HEAD and
+    ##?                                 2 commits ago for all files.
+    ##?   git diff-commits-ago 2 file.txt
+    ##?                                 Show differences for "file.txt" between
+    ##?                                 HEAD and 2 commits ago.
+    diff-commits-ago = "!f() { \
+        if [ $# -lt 1 ] || [ $# -gt 2 ]; then \
+            printf >&2 'Usage: git diff-commits-ago NUMBER [FILE]\n'; \
+            return 64; \
+        fi; \
+        if [ $# -eq 2 ]; then \
+            git diff --patch-with-stat HEAD~$1 -- \"$2\"; \
+        else \
+            git diff --patch-with-stat HEAD~$1; \
+        fi; \
+        git diff-index --quiet HEAD -- || clear; \
+    }; f"
+
+    # Ignore whitespace when comparing the same lines. This indicates empty
+    # lines added or deleted.
+    diff-ignore-whitespace = diff -w
+
+    # Line-wise diff (working dir vs index).
+    df = diff
+
+    # Word-wise diff (working dir vs index).
+    wdf = diff --color-words
+
+    # Minimal, whitespace-insensitive diff (working dir vs index).
+    mindf = diff --diff-algorithm=minimal -w
+    mindf2 = diff -w --word-diff-regex=. --color-words -U0
+
+    # Line-wise diff of staged changes (index vs HEAD).
+    dfc = diff --cached
+
+    # Word-wise diff of staged changes (index vs HEAD).
+    wdfc = diff --color-words --cached
+
+    # Minimal, whitespace-insensitive diff of stage changes (index vs HEAD).
+    mindfc = diff --diff-algorithm=minimal -w --cached
 
     # Usage: git dir-diff
     # Open Meld with directory comparison for all modified files.
@@ -2460,68 +2520,6 @@
     # Usage: git push-all-repos
     # Push the changes in all Git repositories of the current directory.
     push-all-repos = !$HOME/bin/git-push-all-repos
-
-    ##? Usage: git diff-stat [FILE]
-    ##?
-    ##? Show changes with statistics (between working directory and index) if
-    ##? there are any.
-    ##?
-    ##? Examples:
-    ##?   git diff-stat                 Show differences for all files.
-    ##?   git diff-stat file.txt        Show differences only for "file.txt".
-    diff-stat = "!f() { \
-        git diff-index --quiet HEAD -- || clear; \
-        git diff --patch-with-stat; \
-    }; f"
-
-    ##? Usage: git diff-commits-ago NUMBER [FILE]
-    ##?
-    ##? Show diff (with stats) between HEAD and the state `NUMBER' commits ago.
-    ##? Optionally, specify a FILE to show differences for a specific file.
-    ##?
-    ##? Examples:
-    ##?   git diff-commits-ago 2        Show differences between HEAD and
-    ##?                                 2 commits ago for all files.
-    ##?   git diff-commits-ago 2 file.txt
-    ##?                                 Show differences for "file.txt" between
-    ##?                                 HEAD and 2 commits ago.
-    diff-commits-ago = "!f() { \
-        if [ $# -lt 1 ] || [ $# -gt 2 ]; then \
-            printf >&2 'Usage: git diff-commits-ago NUMBER [FILE]\n'; \
-            return 64; \
-        fi; \
-        if [ $# -eq 2 ]; then \
-            git diff --patch-with-stat HEAD~$1 -- \"$2\"; \
-        else \
-            git diff --patch-with-stat HEAD~$1; \
-        fi; \
-        git diff-index --quiet HEAD -- || clear; \
-    }; f"
-
-    # Ignore whitespace when comparing the same lines. This indicates empty
-    # lines added or deleted.
-    diff-ignore-whitespace = diff -w
-
-    # Diff line-wise.
-    df = diff
-
-    # Diff word-wise.
-    dw = diff --color-words
-
-    # Configure git-diff to produce the absolutely most minimal diff possible.
-    dw-min = diff -w --word-diff-regex=. --color-words -U0
-
-    # Show minimal differences in changes between working directory and the most recent commit, ignoring whitespace.
-    wdiff = diff --diff-algorithm=minimal -w
-
-    # Diff staged line-wise.
-    df-staged = diff --cached
-
-    # Diff staged word-wise.
-    dw-staged = diff --color-words --cached
-
-    # Show minimal differences in changes between staged changes and the most recent commit, ignoring whitespace.
-    swdiff = diff --diff-algorithm=minimal -w --cached
 
     stage-updated-and-deleted-files = add -u
 
