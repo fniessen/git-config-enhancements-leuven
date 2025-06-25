@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250625.1341>
+# .gitconfig, Time-stamp: <20250625.1539>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -252,7 +252,7 @@
             printf >&2 'Usage: git grep-aliases PATTERN\n'; \
             return 64; \
         fi; \
-        local PATTERN=\"$1\"; \
+        PATTERN=\"$1\"; \
         git aliases | grep --color=auto -i \"$PATTERN\"; \
     }; f"
 
@@ -262,8 +262,8 @@
     ##?
     ##? Display the current git user's name and email.
     whoami = "!f() { \
-        local name=\"$(git config user.name)\"; \
-        local email=\"$(git config user.email)\"; \
+        name=\"$(git config user.name)\"; \
+        email=\"$(git config user.email)\"; \
         printf '%s <%s>\n' \"$name\" \"$email\"; \
     }; f"
 
@@ -297,7 +297,7 @@
     ##?
     ##? Get the default remote name, defaulting to 'origin' if not set.
     origin = "!f() { \
-        local default_remote=$(git config --get clone.defaultRemoteName); \
+        default_remote=$(git config --get clone.defaultRemoteName); \
         printf \"%s\n\" \"${default_remote:-origin}\"; \
     }; f"
     ### git remote show
@@ -308,8 +308,8 @@
     ##?
     ##? Get the owner of the repository from the remote URL.
     repo-owner = "!f() { \
-        local remote_name=$(git origin); \
-        local remote_url=$(git config --get remote.$remote_name.url); \
+        remote_name=$(git origin); \
+        remote_url=$(git config --get remote.$remote_name.url); \
         git remote show $remote_url -n \
             | grep 'Fetch URL:' \
             | sed -E 's_^.*[/:](.*)/.*$_\\1_' \
@@ -320,8 +320,8 @@
     ##?
     ##? Get the repository slug from the remote URL.
     repo-slug-remote = "!f() { \
-        local remote_name=$(git origin); \
-        local remote_url=$(git config --get remote.$remote_name.url); \
+        remote_name=$(git origin); \
+        remote_url=$(git config --get remote.$remote_name.url); \
         git remote show $remote_url -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
             | sed 's_\\.git$__'; \
@@ -331,7 +331,7 @@
     ##?
     ##? Get the repository slug from the local directory name.
     repo-slug-local = "!f() { \
-        local repo_name=$(basename \"$(git root)\"); \
+        repo_name=$(basename \"$(git root)\"); \
         printf \"%s\n\" \"$repo_name\"; \
     }; f"
 
@@ -370,7 +370,7 @@
             printf >&2 'Usage: git search-for-files PATTERN\n'; \
             return 64; \
         fi; \
-        local PATTERN=\"$1\"; \
+        PATTERN=\"$1\"; \
         git ls-tree -r --name-only HEAD \
             | grep -i --color=auto \"$PATTERN\"; \
     }; f"
@@ -390,7 +390,7 @@
             printf >&2 'Usage: git search-for-files-all-branches PATTERN\n'; \
             return 64; \
         fi; \
-        local PATTERN=\"$1\"; \
+        PATTERN=\"$1\"; \
         git remote-branches \
             | grep -v HEAD \
             | while read -r branch; do \
@@ -442,8 +442,8 @@
             printf >&2 'Usage: git search-for-code-in-extension EXTENSION PATTERN\n'; \
             return 64; \
         fi; \
-        local EXTENSION=\"$1\"; \
-        local PATTERN=\"$2\"; \
+        EXTENSION=\"$1\"; \
+        PATTERN=\"$2\"; \
         git local-branches | \
         while read -r branch; do \
             printf \"\n$(tput bold)$(tput setaf 2)Branch: $branch$(tput sgr0)\n\"; \
@@ -482,7 +482,7 @@
             printf >&2 'Usage: git unmodify [FILE_TO_RESTORE]\n'; \
             return 64; \
         fi; \
-        local FILE_TO_RESTORE=\"$1\"; \
+        FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
             git status --porcelain \
                 | grep -E '^ M' \
@@ -513,7 +513,7 @@
             printf >&2 'Usage: git undelete [FILE_TO_RESTORE]\n'; \
             return 64; \
         fi; \
-        local FILE_TO_RESTORE=\"$1\"; \
+        FILE_TO_RESTORE=\"$1\"; \
         if [ -z \"$FILE_TO_RESTORE\" ]; then \
             git status --porcelain \
                 | grep -E '^ D' \
@@ -558,9 +558,9 @@
     # Usage: git backup-ignored-and-untracked-files
     # Create a backup archive of all ignored and untracked files in the repository.
     backup-ignored-and-untracked-files = "!f() { \
-        local repo_slug_remote=\"$(git repo-slug-remote)\"; \
-        local current_date=$(date +'%Y-%m-%d'); \
-        local backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
+        repo_slug_remote=\"$(git repo-slug-remote)\"; \
+        current_date=$(date +'%Y-%m-%d'); \
+        backup_filename=\"$repo_slug_remote-$current_date-untracked.zip\"; \
         git ignored-and-untracked-files -z \
             | xargs -0 tar rvf ~/$backup_filename; \
     }; f"
@@ -583,7 +583,7 @@
     ##?
     ##? Add a pattern to .gitignore.
     ignore = "!f() { \
-        local PATTERN=\"$1\"; \
+        PATTERN=\"$1\"; \
         if [ -z \"$PATTERN\" ]; then \
             printf >&2 'ERROR: No pattern provided.\\nUsage: git ignore PATTERN\\n' >&2; \
             return 2; \
@@ -892,7 +892,7 @@
             printf >&2 'Usage: git file-history FILE_PATH\n'; \
             return 64; \
         fi; \
-        local FILE_PATH=\"$1\"; \
+        FILE_PATH=\"$1\"; \
         if ! git ls-tree -r HEAD --name-only 2> /dev/null | grep -q \"^$FILE_PATH$\"; then \
             printf >&2 \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
@@ -916,7 +916,7 @@
             printf >&2 'Usage: git file-history-all-branches FILE_PATH\n'; \
             return 64; \
         fi; \
-        local FILE_PATH=\"$1\"; \
+        FILE_PATH=\"$1\"; \
         if ! git ls-tree -r HEAD --name-only 2> /dev/null | grep -q \"^$FILE_PATH$\"; then \
             printf >&2 \"\\e[1;33mWarning: File '%s' not found in the current branch of the repository.\\e[0m\n\" \"$FILE_PATH\"; \
         fi; \
@@ -930,7 +930,7 @@
     ##? Note:
     ##?   "rename from" files are not included in the output of this command.
     related-history = "!f() { \
-        local FILE_PATH=\"$1\"; \
+        FILE_PATH=\"$1\"; \
         if [ ! -e \"$FILE_PATH\" ]; then \
             printf >&2 \"ERROR: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
             return 2; \
@@ -944,13 +944,13 @@
     #         echo \"ERROR: File '$1' not found in the working tree.\"; \
     #         return 2; \
     #     fi; \
-    #     local hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
+    #     hashes=$(git --no-pager log --format=format:%H -- \"$1\"); \
     #     echo \"\nHashes: \n$hashes\"; \
-    #     local files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
+    #     files=$(echo \"$hashes\" | xargs -I % sh -c 'echo \"Processing hash: %\" && git diff-tree --no-commit-id --name-only -r % && echo \"\";'); \
     #     echo \"\nFiles: \n$files\"; \
-    #     local sorted_files=$(echo \"$files\" | sort); \
+    #     sorted_files=$(echo \"$files\" | sort); \
     #     echo \"\nSorted Files: \n$sorted_files\"; \
-    #     local unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
+    #     unique_files=$(echo \"$sorted_files\" | uniq -c | sort -b -n -r); \
     #     echo \"\nUnique Files: \n$unique_files\"; \
     # }; f"
 
@@ -962,7 +962,7 @@
             printf >&2 'Usage: git related-files FILE_PATH\n'; \
             return 64; \
         fi; \
-        local FILE_PATH=\"$1\"; \
+        FILE_PATH=\"$1\"; \
         if [ ! -e \"$FILE_PATH\" ]; then \
             printf >&2 \"ERROR: File '%s' not found in the working tree.\n\" \"$FILE_PATH\"; \
             return 2; \
@@ -982,7 +982,7 @@
             printf >&2 'Usage: git file-last-commit FILE_PATH\n'; \
             return 64; \
         fi; \
-        local FILE_PATH=\"$1\"; \
+        FILE_PATH=\"$1\"; \
         git log -n 1 --all --date-order -- \"$FILE_PATH\"; \
     }; f"
 
@@ -994,8 +994,8 @@
             printf >&2 'Usage: git file-last-commits FILE_PATH\n'; \
             return 64; \
         fi; \
-        local FILE_PATH=\"$1\"; \
-        local local_branches=$(git local-branches); \
+        FILE_PATH=\"$1\"; \
+        local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             printf \"$(git log --decorate=no -1 \
                                --format=\"%at:%C(green)%ad%C(reset) %C(yellow)%h%C(auto)%d%C(reset) %s %C(blue)<%an>%C(reset)\" \
@@ -1011,10 +1011,10 @@
             printf >&2 'Usage: git file-last-commits2 FILE_PATH\n'; \
             return 64; \
         fi; \
-        local FILE_PATH=\"$1\"; \
+        FILE_PATH=\"$1\"; \
         git for-each-ref --format=\"%(refname:short) %(objectname)\" refs/heads/ | \
         while read branch commit_hash; do \
-            local commit_info=$(git log -n 1 \
+            commit_info=$(git log -n 1 \
                                     --pretty=format:'\\e[32m%ad \\e[33m%h \\e[0m%s \\e[34m<%an>\\e[0m' \
                                     --date=format-local:'%Y-%m-%d' \"$commit_hash\" -- \"$FILE_PATH\"); \
             if [ -n \"$commit_info\" ]; then \
@@ -1029,7 +1029,7 @@
     #   git changed-files             List files modified in last commit
     #   git changed-files bada55      List files modified in the commit with hash 'bada55'
     changed-files = "!f() { \
-        local COMMIT_HASH=${1:-HEAD}; \
+        COMMIT_HASH=${1:-HEAD}; \
         git diff --name-only $COMMIT_HASH^..$COMMIT_HASH; \
     }; f"
 
@@ -1042,14 +1042,14 @@
     # Usage: git download-email-patch
     # Generate a patch file for the current branch using the git format-patch command.
     download-email-patch = "!f() { \
-        local current_branch=$(git current-branch); \
+        current_branch=$(git current-branch); \
         git format-patch $current_branch.patch; \
     }; f"
 
     # Usage: git download-commit-plain-diff [COMMIT_HASH]
     # Create a diff file for the changes in a commit or range of commits.
     download-commit-plain-diff = "!f() { \
-        local COMMIT_HASH=${1:-HEAD}; \
+        COMMIT_HASH=${1:-HEAD}; \
         git diff $COMMIT_HASH^..$COMMIT_HASH > $COMMIT_HASH.diff; \
     }; f"
 
@@ -1057,7 +1057,7 @@
     ##?
     ##? Launch difftool for changes between specified commit and its parent.
     difftool-parent = "!f() { \
-        local COMMIT_HASH=${1:-HEAD}; \
+        COMMIT_HASH=${1:-HEAD}; \
         git difftool $COMMIT_HASH^..$COMMIT_HASH; \
     }; f"
 
@@ -1066,9 +1066,9 @@
     ##? Compare FILE_PATH between the current version and COMMIT_HASH using
     ##? Emacs' ediff.
     ediff-commit = "!f() { \
-        local COMMIT_HASH=\"$1\"; \
-        local FILE_PATH=\"$2\"; \
-        local current_file=\"$FILE_PATH\"; \
+        COMMIT_HASH=\"$1\"; \
+        FILE_PATH=\"$2\"; \
+        current_file=\"$FILE_PATH\"; \
         git show ${COMMIT_HASH}:\"$FILE_PATH\" > /tmp/ediff-temp-${COMMIT_HASH}; \
         emacs --eval \"(ediff-files \\\"$current_file\\\" \\\"/tmp/ediff-temp-${COMMIT_HASH}\\\")\"; \
         rm /tmp/ediff-temp-${COMMIT_HASH}; \
@@ -1079,8 +1079,8 @@
     ##? Compare the current version of FILE_PATH with its state in the last
     ##? commit that modified it, using difftool.
     difftool-last-modified = "!f() { \
-        local FILE_PATH=\"$1\"; \
-        local last_modified_commit_hash=$(git rev-list -1 HEAD -- \"$FILE_PATH\"); \
+        FILE_PATH=\"$1\"; \
+        last_modified_commit_hash=$(git rev-list -1 HEAD -- \"$FILE_PATH\"); \
         git difftool \"$last_modified_commit_hash\"^ -- \"$FILE_PATH\"; \
     }; f"
 
@@ -1156,7 +1156,7 @@
             printf >&2 'Usage: git branches-containing COMMIT_HASH\n'; \
             return 64; \
         fi; \
-        local COMMIT_HASH=\"$1\"; \
+        COMMIT_HASH=\"$1\"; \
         git branch --all --sort=-committerdate --contains \"$COMMIT_HASH\"; \
     }; f"
 
@@ -1169,7 +1169,7 @@
             printf >&2 'Usage: git tags-containing COMMIT_HASH\n'; \
             return 64; \
         fi; \
-        local COMMIT_HASH=\"$1\"; \
+        COMMIT_HASH=\"$1\"; \
         git tag --contains \"$COMMIT_HASH\" \
             | while read tag; do \
                 commit_hash=$(git rev-list -n 1 \"$tag\"); \
@@ -1190,8 +1190,8 @@
             printf >&2 'Usage: git is-ancestor COMMIT1 COMMIT2\n'; \
             return 64; \
         fi; \
-        local COMMIT1=\"$1\"; \
-        local COMMIT2=\"$2\"; \
+        COMMIT1=\"$1\"; \
+        COMMIT2=\"$2\"; \
         git merge-base --is-ancestor \"$COMMIT1\" \"$COMMIT2\"; \
     }; f"
 
@@ -1206,7 +1206,7 @@
     ##?   git commits-by "author@example.com"
     ##?                                 Show commits by a specific author.
     commits-by = "!f() { \
-        local AUTHOR=\"${1:-$(git config --get user.email)}\"; \
+        AUTHOR=\"${1:-$(git config --get user.email)}\"; \
         git log \
             --all \
             -i --author=\"$AUTHOR\" \
@@ -1299,7 +1299,7 @@
             printf >&2 'Usage: git search-all-commits SEARCH_TERM\n'; \
             return 64; \
         fi; \
-        local SEARCH_TERM=\"$1\"; \
+        SEARCH_TERM=\"$1\"; \
         git rev-list --all | xargs git grep -F \"$SEARCH_TERM\"; \
     }; f"
 
@@ -1325,8 +1325,8 @@
 
     # Append the staged changes to the last commit, reusing its message.
     amend-reuse = "!f() { \
-        local upstream_commit=$(git upstream-commit 2> /dev/null); \
-        local local_commit=$(git local-commit); \
+        upstream_commit=$(git upstream-commit 2> /dev/null); \
+        local_commit=$(git local-commit); \
         if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
             printf >&2 'ERROR: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
@@ -1345,8 +1345,8 @@
             printf >&2 'Usage: git amend-message NEW_COMMIT_MESSAGE\n'; \
             return 64; \
         fi; \
-        local upstream_commit=$(git upstream-commit 2> /dev/null); \
-        local local_commit=$(git local-commit); \
+        upstream_commit=$(git upstream-commit 2> /dev/null); \
+        local_commit=$(git local-commit); \
         if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
             printf >&2 'ERROR: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
@@ -1366,10 +1366,10 @@
             printf >&2 'Usage: git amend-author NAME EMAIL\n'; \
             return 64; \
         fi; \
-        local NAME=\"$1\"; \
-        local EMAIL=\"$2\"; \
-        local upstream_commit=$(git upstream-commit 2> /dev/null); \
-        local local_commit=$(git local-commit); \
+        NAME=\"$1\"; \
+        EMAIL=\"$2\"; \
+        upstream_commit=$(git upstream-commit 2> /dev/null); \
+        local_commit=$(git local-commit); \
         if [ -n \"$upstream_commit\" ] && [ \"$upstream_commit\" = \"$local_commit\" ]; then \
             printf >&2 'ERROR: The commit has already been pushed to the remote repository.\n'; \
             return 2; \
@@ -1379,7 +1379,7 @@
 
     # Edit history.
     recommit2 = "!f() { \
-        local TARGET=$(git rev-parse \"$1\"); \
+        TARGET=$(git rev-parse \"$1\"); \
         git commit --fixup=$TARGET ${@:2} \
             && GIT_EDITOR=true git rebase --interactive --autostash --autosquash $TARGET~; \
     }; f"
@@ -1387,7 +1387,7 @@
 
     # Checkout the commit in question, and amend its message.
     reword2 = "!f() { \
-        local current_branch=$(git current-branch); \
+        current_branch=$(git current-branch); \
         git checkout \"$1\"; \
         git commit --amend; \
         git checkout $current_branch; \
@@ -1422,14 +1422,14 @@
             printf >&2 'ERROR: Argument must be a non-negative integer.\n'; \
             return 2; \
         fi; \
-        local NUM_OF_COMMITS_TO_UNDO=$1; \
-        local upstream_branch=$(git upstream-branch 2> /dev/null); \
+        NUM_OF_COMMITS_TO_UNDO=$1; \
+        upstream_branch=$(git upstream-branch 2> /dev/null); \
         if [ -z \"$upstream_branch\" ]; then \
             printf >&2 'Warning: No upstream branch configured for the current branch.\n'; \
             printf >&2 'Consider using 'squash-force' alias.\n'; \
             return 2; \
         fi; \
-        local num_unpushed=$(git rev-list $upstream_branch..HEAD --count); \
+        num_unpushed=$(git rev-list $upstream_branch..HEAD --count); \
         if [ $NUM_OF_COMMITS_TO_UNDO -le $num_unpushed ]; then \
             git squash-force $NUM_OF_COMMITS_TO_UNDO; \
         else \
@@ -1447,8 +1447,8 @@
     ##?
     ##? Use with caution: it rewrites history regardless of push state.
     squash-force = "!f() { \
-        local NUM_OF_COMMITS_TO_UNDO=$1; \
-        local COMMIT_MSG=$(git log --reverse --format=%B -n $NUM_OF_COMMITS_TO_UNDO); \
+        NUM_OF_COMMITS_TO_UNDO=$1; \
+        COMMIT_MSG=$(git log --reverse --format=%B -n $NUM_OF_COMMITS_TO_UNDO); \
         git reset --soft HEAD~$NUM_OF_COMMITS_TO_UNDO \
             && git commit --edit -m \"$COMMIT_MSG\"; \
     }; f"
@@ -1466,7 +1466,7 @@
     ##?
     ##? Show today's commits.
     today = "!f() { \
-        local AUTHOR=\"${1-}\"; \
+        AUTHOR=\"${1-}\"; \
         if [ -z \"$AUTHOR\" ]; then \
             git log \
                 --all \
@@ -1489,7 +1489,7 @@
     ##?
     ##? Show yesterday's commits.
     yesterday = "!f() { \
-        local AUTHOR=\"${1-}\"; \
+        AUTHOR=\"${1-}\"; \
         if [ -z \"$AUTHOR\" ]; then \
             git log \
                 --all \
@@ -1512,7 +1512,7 @@
     ##?
     ##? Show commits from this week.
     recent = "!f() { \
-        local AUTHOR=\"${1-}\"; \
+        AUTHOR=\"${1-}\"; \
         if [ -z \"$AUTHOR\" ]; then \
             git log \
                 --all \
@@ -1534,9 +1534,9 @@
     # Usage: git standup [AUTHOR]
     # Summarize changes since 24h, suitable for a daily standup meeting.
     standup = "!f() { \
-        local AUTHOR=\"${1-$(git config --get user.name)}\"; \
-        local today=$(date +%a); \
-        local since; \
+        AUTHOR=\"${1-$(git config --get user.name)}\"; \
+        today=$(date +%a); \
+        since; \
         if [ \"$today\" = \"Mon\" ]; then \
             since=\"last.Friday\"; \
         else \
@@ -1596,7 +1596,7 @@
     ##? Push the current branch to the remote repository 'origin' and set it as
     ##? upstream.
     publish-branch = "!f() { \
-        local branch=$(git current-branch); \
+        branch=$(git current-branch); \
         git push -u origin $branch; \
     }; f"
 
@@ -1604,7 +1604,7 @@
     ##?
     ##? Delete the current branch from the remote repository 'origin'.
     unpublish-branch = "!f() { \
-        local current_branch=$(git current-branch); \
+        current_branch=$(git current-branch); \
         git delete-remote-branch \"$current_branch\"; \
     }; f"
 
@@ -1634,7 +1634,7 @@
             printf >&2 'Usage: git verify-local-branch BRANCH_NAME\n'; \
             return 64; \
         fi; \
-        local BRANCH_NAME=\"$1\"; \
+        BRANCH_NAME=\"$1\"; \
         git rev-parse --verify \"$BRANCH_NAME\" > /dev/null 2>&1; \
     }; f"
 
@@ -1645,7 +1645,7 @@
             printf >&2 'Usage: git verify-remote-branch BRANCH_NAME\n'; \
             return 64; \
         fi; \
-        local BRANCH_NAME=\"$1\"; \
+        BRANCH_NAME=\"$1\"; \
         git rev-parse --verify \"$(git origin)/$BRANCH_NAME\" > /dev/null 2>&1; \
     }; f"
 
@@ -1684,7 +1684,7 @@
             printf >&2 'Usage: git branch-edit-desc BRANCH\n'; \
             return 64; \
         fi; \
-        local BRANCH=\"$1\"; \
+        BRANCH=\"$1\"; \
         description_file=\".git/refs/heads/$BRANCH.description\"; \
         mkdir -p \"$(dirname \"$description_file\")\"; \
         touch \"$description_file\"; \
@@ -1704,7 +1704,7 @@
             printf >&2 'Usage: git branch-show-desc BRANCH\n'; \
             return 64; \
         fi; \
-        local BRANCH=\"$1\"; \
+        BRANCH=\"$1\"; \
         git config --get branch.\"$BRANCH\".description; \
     }; f"
 
@@ -1754,10 +1754,10 @@
     ##? current branch.
     sync-main = "!f() { \
         git fetch; \
-        local main_branch=$(git main-branch); \
-        local current_branch=$(git current-branch); \
+        main_branch=$(git main-branch); \
+        current_branch=$(git current-branch); \
         git merge $(git origin)/$main_branch; \
-        local merge_status=$?; \
+        merge_status=$?; \
         if [ $merge_status -eq 0 ]; then \
             printf \"\\033[1mBranch synced:\\033[0m '%s' successfully synced with '%s'\\n\" \"$current_branch\" \"$main_branch\"; \
         else \
@@ -1785,7 +1785,7 @@
     ##? Auto-stash changes (including untracked files if any), pull with rebase,
     ##? and restore stashed changes (if any).
     pull-autostash-include-untracked = "!f() { \
-        local changes=$(git status --porcelain); \
+        changes=$(git status --porcelain); \
         if [ -n \"$changes\" ]; then \
             git stash push --include-untracked -m 'autostash'; \
             git pull --rebase; \
@@ -1830,7 +1830,7 @@
             printf >&2 'Usage: git has-new-commits BRANCH_NAME\n'; \
             return 64; \
         fi; \
-        local BRANCH_NAME=\"$1\"; \
+        BRANCH_NAME=\"$1\"; \
         if [ -z \"$BRANCH_NAME\" ]; then \
             printf >&2 'ERROR: Please provide a branch name as a parameter.\n' \
             return 2; \
@@ -1841,8 +1841,8 @@
     # Iteratively synchronize all local branches with their corresponding remote
     # branches using fast-forward merges.
     update-all-branches = "!f() { \
-        local current_branch=$(git current-branch); \
-        local local_branches=$(git local-branches); \
+        current_branch=$(git current-branch); \
+        local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             if [ \"$branch\" != \"$current_branch\" ]; then \
                 printf 'Switching to branch: \\e[1m%s\\e[0m\n' \"$branch\"; \
@@ -1871,7 +1871,7 @@
     ##? Update all local branches with their remote counterparts, checking for
     ##? conflicts before updating.
     update-all-branches2 = "!f() { \
-        local local_branches=$(git local-branches); \
+        local_branches=$(git local-branches); \
         for branch in $local_branches; do \
             printf \"Checking for conflicts in \\e[1m%s\\e[0m...\n\" \"$branch\"; \
             if git check-remote-branch \"$branch\"; then \
@@ -1905,8 +1905,8 @@
     ##? Delete local branches that are fully merged into the specified branch,
     ##? excluding master, main, and develop.
     delete-merged-branches = "!f() { \
-        local BASE_BRANCH=$(git main-branch); \
-        local target_branch=${1-$BASE_BRANCH}; \
+        BASE_BRANCH=$(git main-branch); \
+        target_branch=${1-$BASE_BRANCH}; \
         branches=$(git branch --merged \"$target_branch\" \
                     | grep -v \"^\\s*$target_branch$\" \
                     | grep -Ev '^(\\s*)(master|main|develop)$'); \
@@ -1924,7 +1924,7 @@
             printf >&2 'Usage: git delete-remote-branch BRANCH_NAME\n'; \
             return 64; \
         fi; \
-        local BRANCH_NAME=\"$1\"; \
+        BRANCH_NAME=\"$1\"; \
         printf \"Are you sure you want to delete the remote branch '%s'? [y/N]\" \"$BRANCH_NAME\"; \
         read -r confirm; \
         if [ \"$confirm\" = \"y\" ] || [ \"$confirm\" = \"Y\" ]; then \
@@ -1943,7 +1943,7 @@
             printf >&2 'Usage: git delete-branch BRANCH_NAME\n'; \
             return 64; \
         fi; \
-        local BRANCH_NAME=\"$1\"; \
+        BRANCH_NAME=\"$1\"; \
         git delete-local-branch \"$BRANCH_NAME\" \
             && git delete-remote-branch \"$BRANCH_NAME\"; \
     }; f"
@@ -1959,7 +1959,7 @@
     ##?
     ##? Delete local branches that are tracking remote branches that are gone.
     delete-gone-branches = "!f() { \
-        local gone_branches=$(git branch -vv | awk '/: gone]/{print $1}'); \
+        gone_branches=$(git branch -vv | awk '/: gone]/{print $1}'); \
         if [ -n \"$gone_branches\" ]; then \
             printf \"Deleting gone branches:\n\"; \
             printf \"%s\n\" \"$gone_branches\" | xargs -n 1 git delete-local-branch; \
@@ -1990,8 +1990,8 @@
     ##?
     ##? Publish a Git tag to a remote repository.
     publish-tag = "!f() { \
-        local TAG_NAME=$1; \
-        local REMOTE_NAME=${2:-$(git origin)}; \
+        TAG_NAME=$1; \
+        REMOTE_NAME=${2:-$(git origin)}; \
         git push $REMOTE_NAME refs/tags/$TAG_NAME; \
     }; f"
 
@@ -1999,8 +1999,8 @@
     ##?
     ##? Remove a published Git tag from a remote repository.
     unpublish-tag = "!f() { \
-        local TAG_NAME=$1; \
-        local REMOTE_NAME=${2:-$(git origin)}; \
+        TAG_NAME=$1; \
+        REMOTE_NAME=${2:-$(git origin)}; \
         git push $REMOTE_NAME :refs/tags/$TAG_NAME; \
     }; f"
 
@@ -2023,9 +2023,9 @@
             printf >&2 'Usage: git rename-tag OLD_TAG NEW_TAG\n'; \
             return 64; \
         fi; \
-        local OLD_TAG=\"$1\"; \
-        local NEW_TAG=\"$2\"; \
-        local origin=$(git origin); \
+        OLD_TAG=\"$1\"; \
+        NEW_TAG=\"$2\"; \
+        origin=$(git origin); \
         git tag \"$NEW_TAG\" \"$OLD_TAG\"; \
         git tag -d \"$OLD_TAG\"; \
         git push \"$origin\" \"$NEW_TAG\"; \
@@ -2040,7 +2040,7 @@
             printf >&2 'Usage: git delete-tag TAG\\n'; \
             return 64; \
         fi; \
-        local TAG=\"$1\"; \
+        TAG=\"$1\"; \
         git tag -d \"$TAG\" && \
         git push \"$(git origin)\" --delete \"$TAG\"; \
     }; f"
@@ -2056,8 +2056,8 @@
             printf >&2 'Usage: git compare-commits FROM TO\n'; \
             return 64; \
         fi; \
-        local FROM=\"$1\"; \
-        local TO=\"$2\"; \
+        FROM=\"$1\"; \
+        TO=\"$2\"; \
         git log \"$FROM\"...\"$TO\"; \
     }; f"
 
@@ -2072,8 +2072,8 @@
             printf >&2 'Usage: git compare-changed-files FROM TO\n'; \
             return 64; \
         fi; \
-        local FROM=\"$1\"; \
-        local TO=\"$2\"; \
+        FROM=\"$1\"; \
+        TO=\"$2\"; \
         git diff --stat \"$FROM\"...\"$TO\"; \
     }; f"
 
@@ -2090,8 +2090,8 @@
             printf >&2 'Usage: git compare FROM TO\n'; \
             return 64; \
         fi; \
-        local FROM=\"$1\"; \
-        local TO=\"$2\"; \
+        FROM=\"$1\"; \
+        TO=\"$2\"; \
         git diff \"$FROM\"...\"$TO\"; \
     }; f"
     # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
@@ -2107,8 +2107,8 @@
     # Usage: git missing [OTHER_BRANCH]
     # Show the missing commits between the current branch and another branch.
     missing = "!f() { \
-        local current_branch=$(git current-branch); \
-        local OTHER_BRANCH=${1:-$(git main-branch)}; \
+        current_branch=$(git current-branch); \
+        OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
             printf >&2 \"ERROR: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
             return 2; \
@@ -2117,8 +2117,8 @@
             printf >&2 \"ERROR: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
-        local commits_missing_to_current=$(git rev-list --count \"$OTHER_BRANCH\"..\"$current_branch\"); \
-        local commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$OTHER_BRANCH\"); \
+        commits_missing_to_current=$(git rev-list --count \"$OTHER_BRANCH\"..\"$current_branch\"); \
+        commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$OTHER_BRANCH\"); \
         printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
             \"$OTHER_BRANCH\" \"$current_branch\" \"$commits_missing_to_current\"; \
         git --no-pager log \"$OTHER_BRANCH\"..\"$current_branch\"; \
@@ -2131,14 +2131,14 @@
     ##? Get the merge base commit hash between two branches. Defaults to main
     ##? and current branch if not specified.
     common-ancestor = "!f() { \
-        local MAIN_BRANCH=${1:-$(git main-branch)}; \
-        local CURRENT_BRANCH=${2:-$(git rev-parse --abbrev-ref HEAD)}; \
-        local base=$(git merge-base $MAIN_BRANCH $CURRENT_BRANCH 2> /dev/null); \
+        MAIN_BRANCH=${1:-$(git main-branch)}; \
+        CURRENT_BRANCH=${2:-$(git rev-parse --abbrev-ref HEAD)}; \
+        base=$(git merge-base $MAIN_BRANCH $CURRENT_BRANCH 2> /dev/null); \
         if [ -z \"$base\" ]; then \
             printf >&2 '%s\n' \"ERROR: Unable to find common ancestor between branches '$MAIN_BRANCH' and '$CURRENT_BRANCH'. Branches may not exist or be valid.\"; \
             return 2; \
         else \
-            local short_base=$(git rev-parse --short $base); \
+            short_base=$(git rev-parse --short $base); \
             printf '%s\n' \"$short_base\"; \
         fi \
     }; f"
@@ -2160,8 +2160,8 @@
     #   git missing-files             list changed files between this and main
     #   git missing-files feature/7   list changed files between this and the 'feature/7' branch
     missing-files = "!f() { \
-        local current_branch=$(git current-branch); \
-        local OTHER_BRANCH=${1:-$(git main-branch)}; \
+        current_branch=$(git current-branch); \
+        OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
             printf >&2 \"ERROR: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
             return 2; \
@@ -2170,14 +2170,14 @@
             printf >&2 \"ERROR: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
-        local missing_files_to_current=$(git diff --name-only \"$OTHER_BRANCH\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
+        missing_files_to_current=$(git diff --name-only \"$OTHER_BRANCH\"...\"$current_branch\" | wc -l | tr -d '[:space:]'); \
         printf \"$(tput bold)Files missing in '%s' but present in '%s':$(tput sgr0) %d files\n\" \"$OTHER_BRANCH\" \"$current_branch\" \"$missing_files_to_current\"; \
         git diff --stat \"$OTHER_BRANCH\"...\"$current_branch\"; \
     }; f"
 
     missing-files-name-only = "!f() { \
-        local current_branch=$(git current-branch); \
-        local OTHER_BRANCH=${1:-$(git main-branch)}; \
+        current_branch=$(git current-branch); \
+        OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
             printf >&2 \"ERROR: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
             return 2; \
@@ -2231,7 +2231,7 @@
     contributors = authors
 
     pull-request-bb = "!f() { \
-        local USER_NAME=\"$1\"; \
+        USER_NAME=\"$1\"; \
         curl --user $USER_NAME https://bitbucket.org/$(git repo-owner)/$(git repo-slug-remote)/pull-requests/new?source=$(git current-branch)&t=1; \
     }; f"
 
@@ -2278,23 +2278,23 @@
             printf >&2 'Usage: git merge-pr REMOTE PR_NUMBER\\n'; \
             return 64; \
         fi; \
-        local USER_AND_REPO=$(git remote show \"$1\" | grep 'Fetch URL:' | sed -E 's/.*github.com[:\\/]([a-zA-Z_-]+)\\/([a-zA-Z_-]+)\\.git$/\\1 \\2/'); \
+        USER_AND_REPO=$(git remote show \"$1\" | grep 'Fetch URL:' | sed -E 's/.*github.com[:\\/]([a-zA-Z_-]+)\\/([a-zA-Z_-]+)\\.git$/\\1 \\2/'); \
         if [ -z \"$USER_AND_REPO\" ]; then \
             printf >&2 'ERROR: Could not determine GitHub user/repo from remote\\n'; \
             return 2; \
         fi; \
-        local USER=$(printf \"%s\" \"$USER_AND_REPO\" | cut -d' ' -f1); \
-        local REPO=$(printf \"%s\" \"$USER_AND_REPO\" | cut -d' ' -f2); \
-        local TMP_FILE=$(mktemp); \
+        USER=$(printf \"%s\" \"$USER_AND_REPO\" | cut -d' ' -f1); \
+        REPO=$(printf \"%s\" \"$USER_AND_REPO\" | cut -d' ' -f2); \
+        TMP_FILE=$(mktemp); \
         curl -s \"https://api.github.com/repos/$USER/$REPO/pulls/$2\" > \"$TMP_FILE\"; \
         if ! grep -q '\"title\":' \"$TMP_FILE\"; then \
             printf >&2 'ERROR: Failed to fetch PR #%s\\n' \"$2\"; \
             rm -f \"$TMP_FILE\"; \
             return 2; \
         fi; \
-        local PULL_AUTHOR=$(awk '/\"head\":/{flag=1} flag&&/\"login\": \"/{print \\$2; exit}' \"$TMP_FILE\" | sed -E 's/\"([^\"]+)\".*/\\1/'); \
-        local PULL_REF=$(awk '/\"head\":/{flag=1} flag&&/\"ref\": \"/{print \\$2; exit}' \"$TMP_FILE\" | sed -E 's/\"([^\"]+)\".*/\\1/'); \
-        local PULL_TITLE=$(grep '\"title\": ' \"$TMP_FILE\" | sed 's/^ *\"title\": \"//' | sed 's/\",$//'); \
+        PULL_AUTHOR=$(awk '/\"head\":/{flag=1} flag&&/\"login\": \"/{print \\$2; exit}' \"$TMP_FILE\" | sed -E 's/\"([^\"]+)\".*/\\1/'); \
+        PULL_REF=$(awk '/\"head\":/{flag=1} flag&&/\"ref\": \"/{print \\$2; exit}' \"$TMP_FILE\" | sed -E 's/\"([^\"]+)\".*/\\1/'); \
+        PULL_TITLE=$(grep '\"title\": ' \"$TMP_FILE\" | sed 's/^ *\"title\": \"//' | sed 's/\",$//'); \
         rm -f \"$TMP_FILE\"; \
         if [ -z \"$PULL_AUTHOR\" ] || [ -z \"$PULL_REF\" ] || [ -z \"$PULL_TITLE\" ]; then \
             printf >&2 'ERROR: Failed to parse PR details\\n'; \
@@ -2326,7 +2326,7 @@
             printf >&2 'Usage: git release-tag VERSION\n'; \
             return 64; \
         fi; \
-        local VERSION=\"$1\"; \
+        VERSION=\"$1\"; \
         git tag -a v\"$VERSION\" -m \"Release version $VERSION\" \
             && git push --tags \
             && git push; \
@@ -2358,7 +2358,7 @@
 
     ##? Archive the current tag as a zip file.
     archive-current-tag = "!f() { \
-        local tag=$(git current-tag); \
+        tag=$(git current-tag); \
         git archive --format=zip --output=${tag}.zip HEAD; \
     }; f"
 
@@ -2366,7 +2366,7 @@
     ##?
     ##? Export the current branch to a diff file.
     export-branch-diff = "!f() { \
-        local current_branch=$(git current-branch); \
+        current_branch=$(git current-branch); \
         git format-patch --stdout $current_branch > $current_branch.diff; \
     }; f"
 
@@ -2374,15 +2374,15 @@
     ##?
     ##? Export and zip changed files from the current branch compared to the main branch.
     export-changed-files = "!f() { \
-        local current_branch=$(git convert-current-branch-name); \
-        local main_branch=$(git main-branch); \
-        local changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
+        current_branch=$(git convert-current-branch-name); \
+        main_branch=$(git main-branch); \
+        changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
         if [ -z \"$changed_files\" ]; then \
             printf >&2 'No changed files to export.\n'; \
             return 2; \
         fi; \
-        local date=$(date +'%Y-%m-%d'); \
-        local zip_file=\"$date-$(git repo-slug-remote)-changed-files-$current_branch.zip\"; \
+        date=$(date +'%Y-%m-%d'); \
+        zip_file=\"$date-$(git repo-slug-remote)-changed-files-$current_branch.zip\"; \
         zip -9 ~/$zip_file $changed_files; \
         printf 'Exported changed files saved as %s\n' $zip_file; \
     }; f"
@@ -2397,9 +2397,9 @@
     ##?
     ##? Export changed files from a commit or HEAD and create a zip archive.
     export-commit-files = "!f() { \
-        local COMMIT_HASH=$(git rev-parse --short ${1:-HEAD}); \
-        local current_branch=$(git convert-current-branch-name); \
-        local zip_file_name=$(git repo-slug-remote)-commit-${current_branch}-${COMMIT_HASH}.zip; \
+        COMMIT_HASH=$(git rev-parse --short ${1:-HEAD}); \
+        current_branch=$(git convert-current-branch-name); \
+        zip_file_name=$(git repo-slug-remote)-commit-${current_branch}-${COMMIT_HASH}.zip; \
         git changed-files \"$COMMIT_HASH\" | tr '\n' '\\0' | xargs -0 zip -9 \"$zip_file_name\"; \
     }; f"
 
@@ -2425,7 +2425,7 @@
     }; f"
 
     # issues = "!f() { \
-    #     local USER_NAME=\"$1\"; \
+    #     USER_NAME=\"$1\"; \
     #     curl --user $USER_NAME \
     #         https://api.bitbucket.org/2.0/repositories/$(git repo-owner)/$(git repo-slug-remote)/issues \
     #         | jq -C --compact-output '.values | .[] | [.id, .title, .type, .priority, .state, .votes, .assignee.display_name, .created_on, .updated_on]' \
@@ -2446,13 +2446,13 @@
     show-issue = "!f() { \
         REPO_OWNER=\"YourUsername\"; \
         REPO_SLUG_REMOTE=\"YourRepository\"; \
-        local ISSUE_NUMBER=\"$1\"; \
+        ISSUE_NUMBER=\"$1\"; \
         URL=\"https://github.com/$REPO_OWNER/$REPO_SLUG_REMOTE/issues/$ISSUE_NUMBER\"; \
         open \"$URL\"; \
     }; f"
 
     browse-issues = "!f() { \
-        local url=$(git config --get remote.$(git origin).url); \
+        url=$(git config --get remote.$(git origin).url); \
         xdg-open ${url/.git}/issues/\"$1\"; \
     }; f"
 
@@ -2470,7 +2470,7 @@
     }; f"
 
     browse-wiki = "!f() { \
-        local url=$(git config --get remote.$(git origin).url); \
+        url=$(git config --get remote.$(git origin).url); \
         xdg-open ${url/.git}/wiki; \
     }; f"
 
@@ -2492,7 +2492,7 @@
     ##?                                 Download the repository at the v1.0.0
     ##?                                 tag.
     download-repository = "!f() { \
-        local COMMIT_HASH=${1:-HEAD}; \
+        COMMIT_HASH=${1:-HEAD}; \
         git archive $COMMIT_HASH --format=zip --output=$(basename $(git root))-commit-$(git rev-parse $COMMIT_HASH).zip; \
     }; f"
 
@@ -2535,7 +2535,7 @@
             printf >&2 'Usage: git all-repos COMMAND [ARGS]\\n'; \
             return 64; \
         fi; \
-        local repo_slug_local; \
+        repo_slug_local; \
         find . -type d -name '.git' \
             | sort \
             | sed 's_/.git__' \
@@ -2589,7 +2589,7 @@
     ##?
     ##? Get the default remote name and print its URL.
     r = "!f() { \
-        local remote_name=$(git origin); \
+        remote_name=$(git origin); \
         git remote get-url \"$remote_name\"; \
     }; f"
     # git remote show -n origin | grep "Fetch URL" | cut -d: -f2- | sed 's/^ *//'
@@ -2656,15 +2656,15 @@
 
     # Retrieve the timestamp of the most recent pull operation, regardless of changes being present.
     latest-pull-time = "!f() { \
-        local fetch_head_time=$(stat -c %y $(git root)/.git/FETCH_HEAD | cut -d'.' -f1); \
+        fetch_head_time=$(stat -c %y $(git root)/.git/FETCH_HEAD | cut -d'.' -f1); \
         printf \"Latest pull time: %s\n\" \"$fetch_head_time\"; \
     }; f"
     # For the latest pull (even if there's nothing new).
 
     # Retrieve the timestamp of the last update to your current branch from the remote master branch, considering changes received.
     latest-update-time = "!f() { \
-        local current_branch=$(git current-branch); \
-        local update_time=$(stat -c %y $(git root)/.git/refs/heads/$current_branch | cut -d'.' -f1); \
+        current_branch=$(git current-branch); \
+        update_time=$(stat -c %y $(git root)/.git/refs/heads/$current_branch | cut -d'.' -f1); \
         printf \"Latest update time for branch '%s': %s\n\" \"$current_branch\" \"$update_time\"; \
     }; f"
     # For the latest pull resulting in changes coming in from the remote master
@@ -2692,7 +2692,7 @@
     ##?
     ##? Merge changes from the current branch into the main branch.
     merge-into-main = "!f() { \
-        local current_branch=\"$(git current-branch)\"; \
+        current_branch=\"$(git current-branch)\"; \
         if [ -z \"$current_branch\" ]; then \
             printf >&2 'Unable to determine current branch.\n'; \
             return 2; \
@@ -2710,8 +2710,8 @@
     # Usage: git merge-update-push TARGET_BRANCH
     # Merge changes from the current branch into the specified target branch, updates it, and pushes changes.
     merge-update-push = "!f() { \
-        local current_branch=\"$(git current-branch)\"; \
-        local TARGET_BRANCH=\"$1\"; \
+        current_branch=\"$(git current-branch)\"; \
+        TARGET_BRANCH=\"$1\"; \
         git checkout \"$TARGET_BRANCH\" \
             && git pull \
             && git merge \"$current_branch\" \
@@ -2727,7 +2727,7 @@
             printf >&2 'Usage: git merge-test BRANCH\n'; \
             return 64; \
         fi; \
-        local BRANCH=\"$1\"; \
+        BRANCH=\"$1\"; \
         if [ -z \"$BRANCH\" ]; then \
             printf >&2 \"ERROR: No branch specified.\\n\"; \
             return 2; \
@@ -2748,7 +2748,7 @@
             printf >&2 'Usage: git dry-merge1 BRANCH_TO_MERGE\n'; \
             return 64; \
         fi; \
-        local BRANCH_TO_MERGE=\"$1\"; \
+        BRANCH_TO_MERGE=\"$1\"; \
         git merge --no-commit \"$BRANCH_TO_MERGE\"; \
         git reset; \
     }; f"
@@ -2764,7 +2764,7 @@
             printf >&2 'Usage: git dry-merge2 BRANCH_TO_MERGE\n'; \
             return 64; \
         fi; \
-        local BRANCH_TO_MERGE=\"$1\"; \
+        BRANCH_TO_MERGE=\"$1\"; \
         git merge --no-commit --no-ff \"$BRANCH_TO_MERGE\"; \
     }; f"
 
@@ -2857,7 +2857,7 @@
             printf >&2 'Usage: git force-checkout BRANCH\n'; \
             return 64; \
         fi; \
-        local BRANCH=$1; \
+        BRANCH=$1; \
         git checkout \"$BRANCH\" 2>&1 | { \
             while IFS= read -r line; do \
                 if printf \"%s\n\" \"$line\" | grep -q \"error: Your local changes to the following files would be overwritten by checkout:\"; then \
@@ -2883,7 +2883,7 @@
             printf >&2 'Usage: co-autostash BRANCH_NAME\n'; \
             return 64; \
         fi; \
-        local BRANCH_NAME=\"$1\"; \
+        BRANCH_NAME=\"$1\"; \
         if ! git diff-index --quiet HEAD; then \
             git stash push --include-untracked --quiet; \
         fi; \
