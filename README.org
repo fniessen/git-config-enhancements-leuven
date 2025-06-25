@@ -938,7 +938,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     ##?
     ##? List all Git aliases in alphabetical order and highlight the matching pattern.
     grep-aliases = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git grep-aliases PATTERN\n'; \
             return 64; \
         fi; \
@@ -955,7 +955,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     ##? Arguments:
     ##?   ALIAS_NAME                    The name of the custom Git alias.
     h = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git h ALIAS_NAME\n'; \
             return 64; \
         fi; \
@@ -980,7 +980,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     # Arguments:
     #   ALIAS_NAME    The name of the custom Git alias.
     h = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git h ALIAS_NAME\n'; \
             return 64; \
         fi; \
@@ -1016,7 +1016,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     # Arguments:
     #   ALIAS_NAME    The name of the custom Git alias.
     h = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git h ALIAS_NAME\n'; \
             return 64; \
         fi; \
@@ -1401,7 +1401,7 @@ Search files (by file path) in the current branch.
     ##? Arguments:
     ##?   PATTERN                       Pattern
     search-for-files = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git search-for-files PATTERN\n'; \
             return 64; \
         fi; \
@@ -1427,7 +1427,7 @@ Search files in all branches.
     ##?   PATTERN                       The name of the file to search for in
     ##?                                 all local branches.
     search-for-files-all-branches = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git search-for-files-all-branches PATTERN\n'; \
             return 64; \
         fi; \
@@ -1448,7 +1448,7 @@ Search files in all branches.
 
 #+begin_src conf
     find-files-all-branches2 = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git find-files-all-branches2 PATTERN\n'; \
             return 64; \
         fi; \
@@ -1501,7 +1501,7 @@ extension*.
     #   EXTENSION                      The file extension to search within.
     #   PATTERN                        The code pattern to search for.
     search-for-code-in-extension = "!f() { \
-        if [ $# -ne 2 ]; then \
+        if [ $# -ne 2 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git search-for-code-in-extension EXTENSION PATTERN\n'; \
             return 64; \
         fi; \
@@ -1598,7 +1598,7 @@ thrown away, the alias to use is ~unmodify~:
     ##?                                 current directory.
     ##?   git unmodify PATH/TO/FILE     Restore a specific modified file.
     unmodify = "!f() { \
-        if [ $# -gt 1 ]; then \
+        if [ $# -gt 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git unmodify [FILE_TO_RESTORE]\n'; \
             return 64; \
         fi; \
@@ -1629,7 +1629,7 @@ thrown away, the alias to use is ~unmodify~:
     ##?                                 directory.
     ##?   git undelete PATH/TO/FILE     Restore a specific deleted file.
     undelete = "!f() { \
-        if [ $# -gt 1 ]; then \
+        if [ $# -gt 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git undelete [FILE_TO_RESTORE]\n'; \
             return 64; \
         fi; \
@@ -2697,7 +2697,7 @@ List commits *showing changed files* (prettier and more concise version of
     ##?
     ##? Show the commit history of a specific file or directory.
     file-history = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git file-history FILE_PATH\n'; \
             return 64; \
         fi; \
@@ -2747,7 +2747,7 @@ branch:
     ##?
     ##? Show the commit history of a specific file or directory across all branches.
     file-history-all-branches = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git file-history-all-branches FILE_PATH\n'; \
             return 64; \
         fi; \
@@ -2829,7 +2829,7 @@ each commit:
     ##?
     ##? Generate a list of which files changed together with a file.
     related-files = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git related-files FILE_PATH\n'; \
             return 64; \
         fi; \
@@ -2856,7 +2856,7 @@ branches, use the following alias:
     ##?
     ##? Show the last commit that modified the specified FILE_PATH.
     file-last-commit = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git file-last-commit FILE_PATH\n'; \
             return 64; \
         fi; \
@@ -2880,7 +2880,7 @@ directory across all local branches:
     ##?
     ##? Show the most recent commits for a specific file or directory across all local branches.
     file-last-commits = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git file-last-commits FILE_PATH\n'; \
             return 64; \
         fi; \
@@ -2901,7 +2901,7 @@ directory across all local branches:
 
 #+begin_src conf
     file-last-commits2 = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git file-last-commits2 FILE_PATH\n'; \
             return 64; \
         fi; \
@@ -3079,7 +3079,7 @@ last commit it was touched.
     ##?                                 Show differences for "file.txt" between
     ##?                                 HEAD and 2 commits ago.
     diff-commits-ago = "!f() { \
-        if [ $# -lt 1 ] || [ $# -gt 2 ]; then \
+        if [ $# -lt 1 ] || [ $# -gt 2 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git diff-commits-ago NUMBER [FILE]\n'; \
             return 64; \
         fi; \
@@ -3156,7 +3156,7 @@ the specified commit hash, sorted by the most recent commit date:
     ##? List all branches (including remote branches) that contain the specified
     ##? commit, sorted by the latest commit date.
     branches-containing = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git branches-containing COMMIT_HASH\n'; \
             return 64; \
         fi; \
@@ -3198,7 +3198,7 @@ This command lists all tags that contain the specified commit hash:
     ##? List tags containing a specific commit, sorted by the most recent commit
     ##? date.
     tags-containing = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git tags-containing COMMIT_HASH\n'; \
             return 64; \
         fi; \
@@ -3223,7 +3223,7 @@ This command lists all tags that contain the specified commit hash:
     ##?   COMMIT1                       The first commit to check for ancestry
     ##?   COMMIT2                       The second commit to check for ancestry
     is-ancestor = "!f() { \
-        if [ \"$#\" -ne 2 ]; then \
+        if [ $# -ne 2 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git is-ancestor COMMIT1 COMMIT2\n'; \
             return 64; \
         fi; \
@@ -3312,7 +3312,7 @@ log --grep~. Equivalent of calling ~git log --grep=A --grep=B --grep=C ...~:
     # matching commits.
     # (FOR CURRENT BRANCH ONLY!!!)
     find-commit-messages-any = "!f() { \
-        if [ \"$#\" -eq 0 ]; then \
+        if [ $# -eq 0 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git find-commit-messages-any PATTERN...\n'; \
             return 64; \
         fi; \
@@ -3346,7 +3346,7 @@ Show commits that match *all* of the following patterns
     # matching commits.
     # (FOR CURRENT BRANCH ONLY!!!)
     find-commit-messages-all = "!f() { \
-        if [ \"$#\" -eq 0 ]; then \
+        if [ $# -eq 0 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git find-commit-messages-all PATTERN...\n'; \
             return 64; \
         fi; \
@@ -3500,7 +3500,7 @@ in the code changes (diff) across all branches.
 #+begin_src conf
     # Usage: git search-all-commits SEARCH_TERM
     search-all-commits = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git search-all-commits SEARCH_TERM\n'; \
             return 64; \
         fi; \
@@ -3631,7 +3631,7 @@ Oh, you made a typo!
     ##? Example:
     ##?   git amend-message "Fix typo in README"
     amend-message = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git amend-message NEW_COMMIT_MESSAGE\n'; \
             return 64; \
         fi; \
@@ -3660,7 +3660,7 @@ to open your commit editor and reword the message.
     ##? Amend the last commit with a new author and reuse the commit message,
     ##? only if the commit has not been pushed.
     amend-author = "!f() { \
-        if [ $# -ne 2 ]; then \
+        if [ $# -ne 2 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git amend-author NAME EMAIL\n'; \
             return 64; \
         fi; \
@@ -3851,7 +3851,7 @@ effective skills -- so that people think you are smart.
     ##?
     ##? Falls back to 'git squash-force' if all checks pass.
     squash = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git squash NUM_OF_COMMITS_TO_UNDO\n'; \
             return 64; \
         fi; \
@@ -4455,7 +4455,7 @@ branch (if any).
     # Usage: git verify-local-branch BRANCH_NAME
     # Verify if a local branch exists.
     verify-local-branch = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git verify-local-branch BRANCH_NAME\n'; \
             return 64; \
         fi; \
@@ -4466,7 +4466,7 @@ branch (if any).
     # Usage: git verify-remote-branch BRANCH_NAME
     # Check if a remote branch exists.
     verify-remote-branch = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git verify-remote-branch BRANCH_NAME\n'; \
             return 64; \
         fi; \
@@ -4519,7 +4519,7 @@ XXX: Replace ~git branch -r --format~ with ~git for-each-ref --format~ to handle
     # Usage: git branch-edit-desc BRANCH
     # Edit the description of a Git branch.
     branch-edit-desc = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git branch-edit-desc BRANCH\n'; \
             return 64; \
         fi; \
@@ -4539,7 +4539,7 @@ XXX: Replace ~git branch -r --format~ with ~git for-each-ref --format~ to handle
     # Usage: git branch-show-desc BRANCH
     # Show the description of a Git branch.
     branch-show-desc = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git branch-show-desc BRANCH\n'; \
             return 64; \
         fi; \
@@ -4815,7 +4815,7 @@ See script =git-update-all= at [[https://stackoverflow.com/questions/4318161/can
     ##? Arguments:
     ##?   BRANCH_NAME                   The name of the branch to check.
     has-new-commits = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git has-new-commits BRANCH_NAME\n'; \
             return 64; \
         fi; \
@@ -4982,7 +4982,7 @@ Delete a *remote* branch:
     # Usage: git delete-remote-branch BRANCH_NAME
     # Delete a remote branch.
     delete-remote-branch = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git delete-remote-branch BRANCH_NAME\n'; \
             return 64; \
         fi; \
@@ -5005,7 +5005,7 @@ Delete a *remote* branch:
     ##?
     ##? Delete both local and remote branches.
     delete-branch = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git delete-branch BRANCH_NAME\n'; \
             return 64; \
         fi; \
@@ -5237,7 +5237,7 @@ Change the tag name but keep it on the same commit.
     # Usage: git rename-tag OLD_TAG NEW_TAG
     # Rename a tag (locally and remotely).
     rename-tag = "!f() { \
-        if [ $# -ne 2 ]; then \
+        if [ $# -ne 2 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git rename-tag OLD_TAG NEW_TAG\n'; \
             return 64; \
         fi; \
@@ -5261,7 +5261,7 @@ alias to remove it.
     ##?
     ##? Delete a local and remote tag.
     delete-tag = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git delete-tag TAG\\n'; \
             return 64; \
         fi; \
@@ -5325,7 +5325,7 @@ You can see:
     ##? Example:
     ##?   git compare-commits branch1 branch2
     compare-commits = "!f() { \
-        if [ \"$#\" -ne 2 ]; then \
+        if [ $# -ne 2 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git compare-commits FROM TO\n'; \
             return 64; \
         fi; \
@@ -5347,7 +5347,7 @@ List all the changed *files between 2 commits*:
     ##? Example:
     ##?   git compare-changed-files branch1 branch2
     compare-changed-files = "!f() { \
-        if [ \"$#\" -ne 2 ]; then \
+        if [ $# -ne 2 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git compare-changed-files FROM TO\n'; \
             return 64; \
         fi; \
@@ -5375,7 +5375,7 @@ View all diffs.
     ##?   git compare branch1 branch2
     ##?   git compare master@{1day} master
     compare = "!f() { \
-        if [ \"$#\" -ne 2 ]; then \
+        if [ $# -ne 2 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git compare FROM TO\n'; \
             return 64; \
         fi; \
@@ -5842,7 +5842,7 @@ If everything is OK, you can merge the pull request.
     # Example:
     #   git merge-pr $(git origin) 5
     merge-pr = "!f() { \
-        if [ $# -ne 2 ]; then \
+        if [ $# -ne 2 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git merge-pr REMOTE PR_NUMBER\\n'; \
             return 64; \
         fi; \
@@ -6028,7 +6028,7 @@ Tag and push changes to the repository:
     ##?
     ##? Create a tagged release version in Git and push it to the remote repository.
     release-tag = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git release-tag VERSION\n'; \
             return 64; \
         fi; \
@@ -6558,7 +6558,7 @@ Run ~git show~ command in a temporary ~HOME~ directory set to ~/dev/null~.
     ##?   ARGS                          Additional arguments to be passed to the
     ##?                                 Git command
     all-repos = "!f() { \
-        if [ $# -lt 1 ]; then \
+        if [ $# -lt 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git all-repos COMMAND [ARGS]\\n'; \
             return 64; \
         fi; \
@@ -6966,7 +6966,7 @@ Run ~merge-test~ (before ~merge~) to check for any conflicts beforehand.
     ##?
     ##? Test a merge and then abort it.
     merge-test = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git merge-test BRANCH\n'; \
             return 64; \
         fi; \
@@ -6989,7 +6989,7 @@ Run ~merge-test~ (before ~merge~) to check for any conflicts beforehand.
     ##? Example:
     ##?   git dry-merge1 feature # Merge the `feature` branch without committing the changes.
     dry-merge1 = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git dry-merge1 BRANCH_TO_MERGE\n'; \
             return 64; \
         fi; \
@@ -7007,7 +7007,7 @@ Run ~merge-test~ (before ~merge~) to check for any conflicts beforehand.
     ##? Example:
     ##?   git dry-merge2 feature # Merge the `feature` branch without committing the changes.
     dry-merge2 = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git dry-merge2 BRANCH_TO_MERGE\n'; \
             return 64; \
         fi; \
@@ -7031,7 +7031,7 @@ and *detects conflicts*:
     #
     # Check how the merge of BRANCH into master will go
     merge-dry-run = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git merge-dry-run BRANCH\n'; \
             return 64; \
         fi; \
@@ -7289,7 +7289,7 @@ cd "$(git root)"
     ##?
     ##? Force checkout to a branch, discarding local changes if necessary.
     force-checkout = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: git force-checkout BRANCH\n'; \
             return 64; \
         fi; \
@@ -7332,7 +7332,7 @@ Stash local changes, checkout branch, and reapply stashed changes.
     ##? Switch to a specified branch, stashing any uncommitted changes if necessary.
     ##? Only stashes if there are changes and restores the stash after switching.
     co-autostash-include-untracked = "!f() { \
-        if [ $# -ne 1 ]; then \
+        if [ $# -ne 1 ] || [ \"$1\" = \"-h\" ] || [ \"$1\" = \"--help\" ]; then \
             printf >&2 'Usage: co-autostash BRANCH_NAME\n'; \
             return 64; \
         fi; \
