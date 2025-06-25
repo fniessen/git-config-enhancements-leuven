@@ -1241,8 +1241,8 @@ Fetch URL: git@bitbucket.org-something:user/slug
     ##?
     ##? Get the owner of the repository from the remote URL.
     repo-owner = "!f() { \
-        local remote_name=$(git origin) \
-        local remote_url=$(git config --get remote.$remote_name.url) \
+        local remote_name=$(git origin); \
+        local remote_url=$(git config --get remote.$remote_name.url); \
         git remote show $remote_url -n \
             | grep 'Fetch URL:' \
             | sed -E 's_^.*[/:](.*)/.*$_\\1_' \
@@ -1255,8 +1255,8 @@ Fetch URL: git@bitbucket.org-something:user/slug
     ##?
     ##? Get the repository slug from the remote URL.
     repo-slug-remote = "!f() { \
-        local remote_name=$(git origin) \
-        local remote_url=$(git config --get remote.$remote_name.url) \
+        local remote_name=$(git origin); \
+        local remote_url=$(git config --get remote.$remote_name.url); \
         git remote show $remote_url -n \
             | awk -F/ '/Fetch URL:/{print $NF}' \
             | sed 's_\\.git$__'; \
@@ -1296,6 +1296,10 @@ XXX default-branch???
     # when the remote repository does not have a default branch.
     ### git symbolic-ref --short refs/remotes/origin/$(git rev-parse --abbrev-ref @{u})
 #+end_src
+
+Consider using
+: git symbolic-ref --short refs/remotes/$(git origin)/HEAD 2> /dev/null | sed 's|^refs/heads/||'
+?
 
 *** Create a new repository in GitHub
 
@@ -1787,11 +1791,26 @@ Quickly add a file or directory to =.gitignore=:
         fi; \
         printf '%s\\n' \"$PATTERN\" >> .gitignore; \
     }; f"
+#+end_src
 
+*Note that adding the .gitignore and the file specification will have no effect
+on files that are already being tracked.* If you're already tracking these,
+you'll have to stop tracking them.
+
+*** Ignore untracked files
+
+Add all untracked files to =.gitignore=.
+
+#+begin_src conf
     ##? Usage: git ignore-untracked
     ##?
     ##? Add all untracked files to .gitignore except .gitignore itself.
     ignore-untracked = "!f() { \
+        git ls-files --others --exclude-standard \
+            | grep -vF .gitignore \
+            >> \"${GIT_PREFIX}.gitignore\"; \
+    }; f"
+    ignore-untracked2 = "!f() { \
         git status --porcelain \
             | grep '^??' \
             | cut -c 4- \
@@ -1800,9 +1819,7 @@ Quickly add a file or directory to =.gitignore=:
     }; f"
 #+end_src
 
-*Note that adding the .gitignore and the file specification will have no effect
-on files that are already being tracked.* If you're already tracking these,
-you'll have to stop tracking them.
+This appends all untracked files (except =.gitignore= itself) to your =.gitignore=.
 
 *** ~assume-unchanged~ command
 
@@ -1838,9 +1855,9 @@ Skip all:
     ##? Usage: git skip-all
     ##?
     ##? Ignore all files currently marked as changed in Git status.
-    skip-all = "!git status -s \
-            | awk {'print $2'} \
-            | xargs git skip"
+    skip-all = "!git status -z -s \
+            | awk 'BEGIN { RS=\"\\0\"; ORS=\"\\0\" } { print $2 }' \
+            | xargs -0 git skip"
 #+end_src
 
 Unskip all the skipped files:
@@ -1851,7 +1868,8 @@ Unskip all the skipped files:
     ##? Revert the hidden status of all files currently marked as unchanged in Git
     ##? status, allowing them to be tracked again by Git.
     unskip-all = "!git skipped \
-            | xargs git unskip"
+            | tr '\\n' '\\0' \
+            | xargs -0 git unskip"
 #+end_src
 
 List ignored files (*marked unchanged*):
@@ -1871,22 +1889,34 @@ List ignored files (*marked unchanged*):
 Be careful when using the ~git clean~ command, as it cannot be undone.
 #+end_warning
 
-| alias                       | removes ignored files | removes untracked files |
-|-----------------------------+-----------------------+-------------------------|
-| clean-ignored               | Yes                   | No                      |
-| clean-ignored-and-untracked | Yes                   | Yes                     |
+| Alias                | Removes untracked | Removes ignored | Danger level |
+|----------------------+-------------------+-----------------+--------------|
+| clean-only-untracked | Yes               | No              | Low          |
+| clean-only-ignored   | No                | Yes             | Medium       |
+| clean-all            | Yes               | Yes             | High         |
 
-*** Delete only ignored files
+*** Remove only untracked files and directories
 
-How to remove ignored files (that are still on the repository)?
+Delete all untracked files, like ~hg purge --unknown~.
+
+#+begin_src conf
+    # Usage: git clean-untracked
+    # Remove all untracked files (like 'hg purge --unknown').
+    clean-only-untracked = clean -f -d
+#+end_src
+
+- This will *delete all untracked files and directories*.
+- *Warning:* This operation cannot be undone!
+
+*** Delete only ignored files and directories
+
+To remove only ignored files:
 
 : git ignored-files -z | xargs -0 rm
 
-*** Delete ignored files
-
 To *remove only ignored files and directories*, use the following command:
 
-: git clean-ignored
+: git clean-only-ignored
 
 This command removes all files and directories specified in =.gitignore=, while
 keeping *untracked files untouched*. Any staged changes, including modified but
@@ -1895,10 +1925,10 @@ uncommitted files, remain unaffected.
 It is commonly used to clean up ignored build artifacts or temporary files.
 
 #+begin_src conf
-    ##? Usage: git clean-ignored
+    ##? Usage: git clean-only-ignored
     ##?
     ##? Remove only ignored files and directories.
-    clean-ignored = clean -f -d -X
+    clean-only-ignored = clean -f -d -X
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 #+end_src
 
@@ -1909,24 +1939,25 @@ carelessly. Proceed with caution.
 
 **** Check before deleting ignored files
 
-To preview what files and directories would be removed by ~git clean-ignored~
+To preview what files and directories would be removed by ~git clean-only-ignored~
 without actually deleting them, use:
 
-: git clean-ignored-dry-run
+: git clean-only-ignored-dry-run
 
 #+begin_src conf
-    ##? Usage: git clean-ignored-dry-run
+    ##? Usage: git clean-only-ignored-dry-run
     ##?
-    ##? Display files and directories that would be removed by git clean-ignored.
-    clean-ignored-dry-run = clean --dry-run -d -X
+    ##? Display files and directories that would be removed by git
+    ##? clean-only-ignored.
+    clean-only-ignored-dry-run = clean --dry-run -d -X
 #+end_src
 
-*** Delete ignored and untracked files
+*** Delete all ignored and untracked files and directories
 
 For a more aggressive cleanup that *removes both ignored and untracked files and
 directories*, use:
 
-: git clean-ignored-and-untracked
+: git clean-all
 
 This command is especially dangerous because it removes *all* files and
 directories that are not under Git tracking (e.g., work-in-progress files or
@@ -1934,10 +1965,10 @@ configuration files not committed to the repository). Be cautious as *deleted
 files cannot be recovered* unless you have a backup.
 
 #+begin_src conf
-    ##? Usage: git clean-ignored-and-untracked
+    ##? Usage: git clean-all
     ##?
-    ##? Remove both ignored and untracked files and directories.
-    clean-ignored-and-untracked = clean -f -d -x
+    ##? Remove all ignored and untracked files and directories.
+    clean-all = clean -f -d -x
     # THIS COMMAND MAY DELETE FILES THAT CANNOT BE RECOVERED.
 #+end_src
 
@@ -1949,16 +1980,15 @@ untracked files.
 **** Check before deleting ignored and untracked files
 
 To preview what files and directories would be removed by ~git
-clean-ignored-and-untracked~ without actually deleting them, use:
+clean-all~ without actually deleting them, use:
 
-: git clean-ignored-and-untracked-dry-run
+: git clean-all-dry-run
 
 #+begin_src conf
-    ##? Usage: git clean-ignored-and-untracked-dry-run
+    ##? Usage: git clean-all-dry-run
     ##?
-    ##? Display files and directories that would be removed by git
-    ##? clean-ignored-and-untracked.
-    clean-ignored-and-untracked-dry-run = clean --dry-run -d -x
+    ##? Display files and directories that would be removed by git clean-all.
+    clean-all-dry-run = clean --dry-run -d -x
 #+end_src
 
 *** Safeguarding your work before cleaning
@@ -1985,9 +2015,37 @@ files will be deleted.
 
 *** Hg shelve untracked files
 
-*** Hg ignore untracked files
+*Git does not natively stash untracked files by default, but you can use:*
 
-*** Hg remove untracked files
+#+begin_src conf
+    ##? Usage: git stash-all
+    ##?
+    ##? Stash all modified and untracked files.
+    stash-all = "!f() { \
+        git stash push --include-untracked -m 'Stash modified and untracked files'; \
+    }; f"
+#+end_src
+
+- This will stash both modified and untracked files.
+- If you want to stash ONLY untracked files, see the note below.
+
+**** Notes
+
+If you want to *stash only untracked files* (and not modified tracked files), you
+can use:
+
+#+begin_src conf
+    ##? Usage: git stash-only-untracked
+    ##?
+    ##? Stash only the untracked files (like 'hg shelve --unknown').
+    stash-only-untracked = "!f() { \
+      untracked=$(git ls-files --others --exclude-standard -z); \
+      [ -z \"$untracked\" ] && printf '%s\\n' 'No untracked files to stash' && exit 0; \
+      printf \"%s\" \"$untracked\" | xargs -0 git update-index --add --intent-to-add && \
+      git stash push -m 'Stash only untracked files' && \
+      git reset; \
+    }; f"
+#+end_src
 
 *** Forget all missing files
 
@@ -2000,15 +2058,13 @@ https://www.commandlinefu.com/commands/view/3502/git-remove-files-which-have-bee
 Stage manually deleted files:
 
 #+begin_src conf
-    # Remove files marked as deleted in the Git repository.
+    ##? Usage: git remove-deleted
+    ##?
+    ##? Remove all files that have been deleted from the working directory but
+    ##? are still staged in Git.
     remove-deleted = "!f() { \
-        git status \
-            | grep deleted \
-            | sed 's_deleted:__g' \
-            | sed 's_[#| ]__g' \
-            | sed 's/^[ \t]*//' \
-            | sed 's/[ \t]*$//' \
-            | xargs -d '\n' git rm; \
+        git ls-files --deleted -z \
+            | xargs -0 git rm; \
     }; f"
 #+end_src
 
