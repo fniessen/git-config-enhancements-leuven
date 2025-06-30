@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250630.1113>
+# .gitconfig, Time-stamp: <20250630.1149>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2514,7 +2514,7 @@
     ##? Show the path relative to the root directory of the Git repository.
     root-relative = rev-parse --show-prefix
 
-    # Lists all Git repositories by finding .git directories, sorting the
+    # List all Git repositories by finding .git directories, sorting the
     # output, and removing the '/.git' suffix and leading './'.
     repos = !find . -type d -name '.git' -prune -print 2> /dev/null \
             | sed 's|^\\./||' | sed 's|/\\.git$||' | sort
@@ -2603,9 +2603,6 @@
 
     ##? Alias for 'incoming'.
     in = incoming
-
-    # Show log of new commits after you fetched, with stats, excluding merges
-    log-fresh = log --no-merges --stat ORIG_HEAD..
 
     # Usage: git incoming-on-branch BRANCH_NAME
     # Show new commits found in the remote repository.
@@ -2903,11 +2900,15 @@
     ##? Usage: git outgoing
     ##?
     ##? Show the commits on the local branch that are not on the remote branch
-    ##? (local commits not pushed).
+    ##? (local commits not pushed yet).
     outgoing = log @{u}..HEAD
 
     ##? Alias for 'outgoing'.
     out = outgoing
+
+    # Show new commits since the last rebase/reset/merge, with stats, excluding
+    # merges.
+    recent-changes = log --no-merges --stat ORIG_HEAD..
 
     ##? Usage: git outgoing-files
     ##?

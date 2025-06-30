@@ -4166,7 +4166,7 @@ The script ~test-script.sh~ must return:
 For example:
 
 #+begin_src shell :tangle no
-#!/bin/sh
+#!/usr/bin/env sh
 make || exit 255
 ./my_app | grep 'good output'
 #+end_src
@@ -6539,7 +6539,7 @@ Run ~git show~ command in a temporary ~HOME~ directory set to ~/dev/null~.
 * Run on All repositories
 
 #+begin_src conf
-    # Lists all Git repositories by finding .git directories, sorting the
+    # List all Git repositories by finding .git directories, sorting the
     # output, and removing the '/.git' suffix and leading './'.
     repos = !find . -type d -name '.git' -prune -print 2> /dev/null \
             | sed 's|^\\./||' | sed 's|/\\.git$||' | sort
@@ -6722,11 +6722,6 @@ What was going on, while you were away?
     #+begin_src conf
     ##? Alias for 'incoming'.
     in = incoming
-#+end_src
-
-#+begin_src conf
-    # Show log of new commits after you fetched, with stats, excluding merges
-    log-fresh = log --no-merges --stat ORIG_HEAD..
 #+end_src
 
 #+begin_tip
@@ -7467,16 +7462,20 @@ the next time you do a push.
     ##? Usage: git outgoing
     ##?
     ##? Show the commits on the local branch that are not on the remote branch
-    ##? (local commits not pushed).
+    ##? (local commits not pushed yet).
     outgoing = log @{u}..HEAD
 
     ##? Alias for 'outgoing'.
     out = outgoing
 #+end_src
 
-*************** TODO Fix missing newline at the end...
+*************** TODO Fix missing newline at the end... Otherwise, wrong count of lines (with shell alias "W")...
 
-Hence, wrong count of lines (with shell alias "W")...
+#+begin_src conf
+    # Show new commits since the last rebase/reset/merge, with stats, excluding
+    # merges.
+    recent-changes = log --no-merges --stat ORIG_HEAD..
+#+end_src
 
 #+begin_src conf
     ##? Usage: git outgoing-files
@@ -7645,30 +7644,18 @@ patches.
 
 *** Shell patch aliases
 
+Copy a patch URL to the clipboard, then run one of these commands to download
+the patch and apply it.
+
 #+begin_src shell :tangle no
-# Copy a patch URL to the clipboard, then run one of these commands to download
-# the patch and apply it. Hat tip to @chrisjlee for making me reconsider curl.
+# Download a patch from a URL in the clipboard and verify it.
+alias git-patch-verify='curl "$(pbpaste)" | git apply --check --verbose'
 
-# Apply
-alias cap='curl $(pbpaste) | git apply -v'
+# Download a patch from a URL in the clipboard and apply it.
+alias git-patch-apply='curl "$(pbpaste)" | git apply --verbose'
 
-# Apply and stage
-alias cape='curl $(pbpaste) | git apply -v --index'
-
-# Apply with `patch'
-alias capp='curl $(pbpaste) | patch -p1'
-
-# Reverse apply
-alias carp='curl $(pbpaste) | git apply -Rv'
-
-# Reverse apply and stage
-alias carpe='curl $(pbpaste) | git apply -Rv --index'
-
-# Verify patch
-alias cav='curl $(pbpaste) | git apply -v --check'
-
-# Verify patch with `patch'
-alias capv='curl $(pbpaste) | patch -p1 --dry-run'
+# Download a patch from a URL in the clipboard, apply it, and stage the changes.
+alias git-patch-apply-stage='curl "$(pbpaste)" | git apply --verbose --index'
 #+end_src
 
 ** Debugging
