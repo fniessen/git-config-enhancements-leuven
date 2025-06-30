@@ -3954,9 +3954,9 @@ git-iterate-commits() {
     printf "Last executed command: $(tput bold)%s$(tput sgr0)\n" "$previous_command"
 
     # Define colors using tput.
-    gray=$(tput setaf 8)                # Gray.
-    orange=$(tput setaf 3)              # Orange.
-    reset=$(tput sgr0)                  # Reset to default color.
+    local gray=$(tput setaf 8)          # Gray.
+    local orange=$(tput setaf 3)        # Orange.
+    local reset=$(tput sgr0)            # Reset to default color.
 
     # Execute the previous command and loop through its output line by line,
     # processing each line immediately.
