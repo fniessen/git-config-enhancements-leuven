@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250625.1558>
+# .gitconfig, Time-stamp: <20250630.1113>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -2535,7 +2535,6 @@
             printf >&2 'Usage: git all-repos COMMAND [ARGS]\\n'; \
             return 64; \
         fi; \
-        repo_slug_local; \
         find . -type d -name '.git' \
             | sort \
             | sed 's_/.git__' \

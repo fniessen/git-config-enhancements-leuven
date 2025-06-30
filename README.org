@@ -3944,10 +3944,10 @@ you need to perform operations on a series of commits.
 #                                 Call the 'git-iterate-commits' function with the
 #                                 'changed-files' Git command.
 git-iterate-commits() {
-    git_command="$1"
+    local git_command="$1"
 
     # Get the previous shell command dynamically.
-    previous_command=$(fc -ln -1)
+    local previous_command=$(fc -ln -1)
     previous_command="${previous_command##+([[:space:]])}"
 
     # Display the last executed command for debug purposes.
@@ -6562,7 +6562,6 @@ Run ~git show~ command in a temporary ~HOME~ directory set to ~/dev/null~.
             printf >&2 'Usage: git all-repos COMMAND [ARGS]\\n'; \
             return 64; \
         fi; \
-        repo_slug_local; \
         find . -type d -name '.git' \
             | sort \
             | sed 's_/.git__' \
