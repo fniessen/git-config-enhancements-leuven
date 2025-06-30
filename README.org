@@ -175,7 +175,7 @@ committer and author of a change in every commit.
 You should "override" the above with your personal details in the file
 =.gitconfig=.
 
-** Auto-Prune
+** Auto-prune
 
 On *fetch* / pull, automatically remove local branches that no longer exist on the
 remote:
@@ -186,7 +186,7 @@ remote:
     prune = true
 #+end_src
 
-** Default Branch Name
+** Default branch name
 
 Using ~master~ as the name for the initial branch.
 
@@ -205,7 +205,7 @@ just-created branch can be renamed via:
 
 : git branch -m NAME
 
-** External Merge Tool
+** External merge tool
 
 How to resolve merge conflicts in Git?  Try ~git mergetool~.
 
@@ -308,7 +308,7 @@ commenting out can be swapped over if I want to use the ~$BASE~ line instead.
     keepBackup = false
 #+end_src
 
-** External Diff Tool
+** External diff tool
 
 Select a diff tool to visualize the differences.
 
@@ -343,7 +343,7 @@ according to your preference and availability.
     path = /snap/bin/emacs
 #+end_src
 
-** External Editor
+** External editor
 
 You may edit your commit messages in your preferred external *text editor*.
 
@@ -386,7 +386,7 @@ Clean the byproducts of the merge conflict process:
 
 : find . -name "*.orig" -delete
 
-** Pager Support
+** Pager support
 
 Some Git commands can produce a lot of output, and Git will attempt to use
 a pager to make those commands more pleasant.
@@ -739,6 +739,13 @@ need to reconcile them:
       ff = only
   #+end_src
 
+
+Why using rebase?
+- Keeps history linear and clean.
+- Mimics CVS-style ~update~ behavior.
+- Merge conflicts are resolved similarly, but you finish with
+  ~git rebase --continue~ instead of ~git commit~.
+
 ** Push
 
 Push *only* the *current working branch* (sane pushing -- instead of pushing all
@@ -1037,7 +1044,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     }; f"
 #+end_src
 
-** Best Practices
+** Best practices in shell scripting
 
 *Sh* scripting can be a powerful tool for automating tasks, but it's important to
 follow best practices to ensure that your scripts are efficient, reliable, and
@@ -1045,7 +1052,7 @@ maintainable. Here are some best practices to keep in mind:
 
 - Use variables to store values used multiple times.
 
-- Rename variables to follow lowercase naming convention.
+- Use lowercase naming convention for local variables.
 
 - Enclose variables in double quotes to prevent word splitting and globbing.
 
@@ -1228,8 +1235,8 @@ Fetch URL: git@bitbucket.org-something:user/slug
     ##?
     ##? Get the default remote name, defaulting to 'origin' if not set.
     origin = "!f() { \
-        default_remote=$(git config --get clone.defaultRemoteName); \
-        printf \"%s\n\" \"${default_remote:-origin}\"; \
+        default_remote_name=$(git config --get clone.defaultRemoteName); \
+        printf \"%s\n\" \"${default_remote_name:-origin}\"; \
     }; f"
     ### git remote show
     ### git rev-parse --abbrev-ref @{u}
@@ -1434,9 +1441,9 @@ Search files in all branches.
         PATTERN=\"$1\"; \
         git remote-branches \
             | grep -v HEAD \
-            | while read -r branch; do \
-                  printf \"\n$(tput bold)$(tput setaf 2)$branch:$(tput sgr0)\n\"; \
-                  git ls-tree -r --name-only \"$branch\" | \
+            | while read -r branch_name; do \
+                  printf \"\n$(tput bold)$(tput setaf 2)$branch_name:$(tput sgr0)\n\"; \
+                  git ls-tree -r --name-only \"$branch_name\" | \
                   nl -bn -w3 | \
                   grep --color=auto \"$PATTERN\"; \
               done; \
@@ -1508,9 +1515,9 @@ extension*.
         EXTENSION=\"$1\"; \
         PATTERN=\"$2\"; \
         git local-branches | \
-        while read -r branch; do \
-            printf \"\n$(tput bold)$(tput setaf 2)Branch: $branch$(tput sgr0)\n\"; \
-            git grep -n -- \"$PATTERN\" \"$branch\" -- \":*.$EXTENSION\"; \
+        while read -r branch_name; do \
+            printf \"\n$(tput bold)$(tput setaf 2)Branch: $branch_name$(tput sgr0)\n\"; \
+            git grep -n -- \"$PATTERN\" \"$branch_name\" -- \":*.$EXTENSION\"; \
         done; \
     }; f"
 #+end_src
@@ -4313,6 +4320,15 @@ Alternatives:
 - https://trunkbaseddevelopment.com/ (and
   https://dev.to/alediaferia/git-tips-for-trunk-based-development-1i1g)
 
+** Multiple checkouts: isolated branch work
+
+Advantages of using separate directories for each branch:
+
+- Clear separation of contexts.
+- Reduced risk of accidental cross-branch contamination.
+
+/Ideal for parallel work across release lines./
+
 ** Create a branch
 
 Create a new branch (maximum 40-character name advised), and then switch to it:
@@ -4364,7 +4380,7 @@ Name of current branch (not so useful in itself, but used in other aliases):
     current-branch = "!f() { \
         branch_name=\"$(git branch --show-current 2> /dev/null)\"; \
         if [ -z \"$branch_name\" ]; then \
-            printf >&2 'Unable to determine current branch.\n'; \
+            printf >&2 'ERROR: Unable to determine current branch.\n'; \
             return 2; \
         fi; \
         printf '%s\n' \"$branch_name\"; \
@@ -6064,6 +6080,16 @@ See https://github.com/aiidateam/aiida-core/wiki/How-to-make-a-new-release
 Generate the ChangeLog (for your [[https://keepachangelog.com/][CHANGELOG.md]]) with all commit messages since
 the last tag.
 
+#+begin_note
+Although controversial for some projects, replacing manual =ChangeLog= files with
+logs generated from commits has pros and cons.
+
+*Important considerations:*
+- How to mark commits that should be excluded from =ChangeLog=.
+- Handling log corrections (e.g., via notes).
+- Need for clear documentation on this process.
+#+end_note
+
 A properly formed Git commit subject line should always be able to complete the
 following sentence:
 
@@ -6145,7 +6171,7 @@ current tag.  Useful for uploading to Elasticbeanstalk.
         main_branch=$(git main-branch); \
         changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
         if [ -z \"$changed_files\" ]; then \
-            printf >&2 'No changed files to export.\n'; \
+            printf >&2 'ERROR: No changed files to export.\n'; \
             return 2; \
         fi; \
         date=$(date +'%Y-%m-%d'); \
@@ -6549,11 +6575,19 @@ Run ~git show~ command in a temporary ~HOME~ directory set to ~/dev/null~.
 * Run on All repositories
 
 #+begin_src conf
-    # List all Git repositories by finding .git directories, sorting the
-    # output, and removing the '/.git' suffix and leading './'.
-    repos = !find . -type d -name '.git' -prune -print 2> /dev/null \
-            | sed 's|^\\./||' | sed 's|/\\.git$||' | sort
-    # FIXME: Local dir is outputted as '.git'...
+    ##? Usage: git repos
+    ##?
+    ##? List all Git repositories by finding .git directories, sorting the
+    ##? output, and removing the '/.git' suffix and leading './'.
+    repos = "!f() { \
+        find . -type d -name '.git' -prune -print 2> /dev/null | while read -r repo_path; do \
+            if [ \"$repo_path\" != \"./.git\" ]; then \
+                repo_path=\"${repo_path%/.git}\"; \
+                repo_path=\"${repo_path#./}\"; \
+                printf '%s\n' \"$repo_path\"; \
+            fi; \
+        done | sort; \
+    }; f"
 #+end_src
 
 #+begin_src conf
@@ -6887,7 +6921,7 @@ Merge strategy:
     merge-into-main = "!f() { \
         current_branch=\"$(git current-branch)\"; \
         if [ -z \"$current_branch\" ]; then \
-            printf >&2 'Unable to determine current branch.\n'; \
+            printf >&2 'ERROR: Unable to determine current branch.\n'; \
             return 2; \
         fi; \
         git checkout \"$(git main-branch)\" && \

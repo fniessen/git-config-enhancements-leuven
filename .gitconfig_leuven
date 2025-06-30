@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250630.1201>
+# .gitconfig, Time-stamp: <20250630.1333>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -297,8 +297,8 @@
     ##?
     ##? Get the default remote name, defaulting to 'origin' if not set.
     origin = "!f() { \
-        default_remote=$(git config --get clone.defaultRemoteName); \
-        printf \"%s\n\" \"${default_remote:-origin}\"; \
+        default_remote_name=$(git config --get clone.defaultRemoteName); \
+        printf \"%s\n\" \"${default_remote_name:-origin}\"; \
     }; f"
     ### git remote show
     ### git rev-parse --abbrev-ref @{u}
@@ -393,9 +393,9 @@
         PATTERN=\"$1\"; \
         git remote-branches \
             | grep -v HEAD \
-            | while read -r branch; do \
-                  printf \"\n$(tput bold)$(tput setaf 2)$branch:$(tput sgr0)\n\"; \
-                  git ls-tree -r --name-only \"$branch\" | \
+            | while read -r branch_name; do \
+                  printf \"\n$(tput bold)$(tput setaf 2)$branch_name:$(tput sgr0)\n\"; \
+                  git ls-tree -r --name-only \"$branch_name\" | \
                   nl -bn -w3 | \
                   grep --color=auto \"$PATTERN\"; \
               done; \
@@ -445,9 +445,9 @@
         EXTENSION=\"$1\"; \
         PATTERN=\"$2\"; \
         git local-branches | \
-        while read -r branch; do \
-            printf \"\n$(tput bold)$(tput setaf 2)Branch: $branch$(tput sgr0)\n\"; \
-            git grep -n -- \"$PATTERN\" \"$branch\" -- \":*.$EXTENSION\"; \
+        while read -r branch_name; do \
+            printf \"\n$(tput bold)$(tput setaf 2)Branch: $branch_name$(tput sgr0)\n\"; \
+            git grep -n -- \"$PATTERN\" \"$branch_name\" -- \":*.$EXTENSION\"; \
         done; \
     }; f"
 
@@ -1580,7 +1580,7 @@
     current-branch = "!f() { \
         branch_name=\"$(git branch --show-current 2> /dev/null)\"; \
         if [ -z \"$branch_name\" ]; then \
-            printf >&2 'Unable to determine current branch.\n'; \
+            printf >&2 'ERROR: Unable to determine current branch.\n'; \
             return 2; \
         fi; \
         printf '%s\n' \"$branch_name\"; \
@@ -2388,7 +2388,7 @@
         main_branch=$(git main-branch); \
         changed_files=$(git diff --name-only \"$main_branch\"...\"$current_branch\"); \
         if [ -z \"$changed_files\" ]; then \
-            printf >&2 'No changed files to export.\n'; \
+            printf >&2 'ERROR: No changed files to export.\n'; \
             return 2; \
         fi; \
         date=$(date +'%Y-%m-%d'); \
@@ -2524,11 +2524,19 @@
     ##? Show the path relative to the root directory of the Git repository.
     root-relative = rev-parse --show-prefix
 
-    # List all Git repositories by finding .git directories, sorting the
-    # output, and removing the '/.git' suffix and leading './'.
-    repos = !find . -type d -name '.git' -prune -print 2> /dev/null \
-            | sed 's|^\\./||' | sed 's|/\\.git$||' | sort
-    # FIXME: Local dir is outputted as '.git'...
+    ##? Usage: git repos
+    ##?
+    ##? List all Git repositories by finding .git directories, sorting the
+    ##? output, and removing the '/.git' suffix and leading './'.
+    repos = "!f() { \
+        find . -type d -name '.git' -prune -print 2> /dev/null | while read -r repo_path; do \
+            if [ \"$repo_path\" != \"./.git\" ]; then \
+                repo_path=\"${repo_path%/.git}\"; \
+                repo_path=\"${repo_path#./}\"; \
+                printf '%s\n' \"$repo_path\"; \
+            fi; \
+        done | sort; \
+    }; f"
 
     ##? Usage: git all-repos COMMAND [ARGS]
     ##?
@@ -2700,7 +2708,7 @@
     merge-into-main = "!f() { \
         current_branch=\"$(git current-branch)\"; \
         if [ -z \"$current_branch\" ]; then \
-            printf >&2 'Unable to determine current branch.\n'; \
+            printf >&2 'ERROR: Unable to determine current branch.\n'; \
             return 2; \
         fi; \
         git checkout \"$(git main-branch)\" && \

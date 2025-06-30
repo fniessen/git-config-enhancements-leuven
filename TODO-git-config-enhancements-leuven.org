@@ -169,3 +169,9 @@ The following sequence is here very helpful:
 
 After this, you can delete your local WIP branch and or if you pushed it the
 remote one too.
+
+** Commit hooks for sanity checks
+
+Set up Git commit hooks to:
+- Ensure file names are portable.
+- Enforce commit message conventions.
