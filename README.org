@@ -893,7 +893,7 @@ The first color given is the foreground; the second is the background.", e.g
 
 #+begin_src conf
 [format]
-    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(reset) %s%C(auto)%d%C(reset) %C(blue)<%an>%C(reset)
+    pretty = format:%C(green)%ad%C(reset) %C(yellow)%h%C(reset) %s%C(auto)%d%C(reset) %C(cyan)<%an>%C(reset)
 #+end_src
 
 This format is generally preferable because it maintains the prominence of the
