@@ -17,7 +17,7 @@ fi
 alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
 
 # Exclude .git directories/files from grep results.
-alias ng="grep -v '\.git/'"               # "No Git".
+alias ng="grep -v '\.git/'"             # "No Git".
 
 # Function to iterate over commit hashes and execute a given Git command.
 #
@@ -65,7 +65,7 @@ git-iterate-commits() {
 # Check if 'tig' command is installed.
 if command -v tig > /dev/null 2>&1; then
     # Aliases for 'tig' commands.
-    alias tigs='tig status'               # Use it all of the time!
+    alias tigs='tig status'             # Use it all of the time!
     alias tigb='tig blame'
     alias tigall='tig --all'
     alias tigreleases='tig --all --simplify-by-decoration'
