@@ -1,5 +1,5 @@
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <20250709.1135>
+# .gitconfig, Time-stamp: <20250729.1038>
 
 [checkout]
     # Preserve timestamps of checked out files.
@@ -859,7 +859,7 @@
 
     ##? Usage: git ll
     ##?
-    ##? Show medium formatted log with abbreviated commit hashes and file statistics.
+    ##? Show commit log with file statistics.
     ll = log --pretty=medium --abbrev-commit --stat
 
     ##? Usage: git log-unified-diff
@@ -1935,7 +1935,7 @@
             return 64; \
         fi; \
         BRANCH_NAME=\"$1\"; \
-        printf \"Are you sure you want to delete the remote branch '%s'? [y/N]\" \"$BRANCH_NAME\"; \
+        printf \"Are you sure you want to delete the remote branch '%s'? [y/N] \" \"$BRANCH_NAME\"; \
         read -r confirm; \
         if [ \"$confirm\" = \"y\" ] || [ \"$confirm\" = \"Y\" ]; then \
             git push $(git origin) --delete \"$BRANCH_NAME\"; \
@@ -1985,8 +1985,12 @@
     # Usage: git rename-branch OLD_BRANCH_NAME NEW_BRANCH_NAME
     # Rename both a local and remote branch.
     rename-branch = "!f() { \
-        git rename-local-branch \"$1\" $2 \
-            && git push --set-upstream $(git origin) $2 \
+        if [ $# -ne 2 ]; then \
+            printf >&2 'Usage: git rename-branch OLD_BRANCH_NAME NEW_BRANCH_NAME\n'; \
+            return 64; \
+        fi; \
+        git rename-local-branch \"$1\" \"$2\" \
+            && git push --set-upstream $(git origin) \"$2\" \
             && git delete-remote-branch \"$1\"; \
     }; f"
 
@@ -2117,22 +2121,26 @@
     # Usage: git missing [OTHER_BRANCH]
     # Show the missing commits between the current branch and another branch.
     missing = "!f() { \
+        if [ $# -gt 1 ]; then \
+            printf >&2 'Usage: git missing [OTHER_BRANCH]\n'; \
+            return 64; \
+        fi; \
         current_branch=$(git current-branch); \
         OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
-            printf >&2 \"ERROR: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
+            printf >&2 \"$(tput setaf 1)ERROR: Current branch '%s' is not a valid branch.\n$(tput sgr0)\" \"$current_branch\"; \
             return 2; \
         fi; \
         if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
-            printf >&2 \"ERROR: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
+            printf >&2 \"$(tput setaf 1)ERROR: Other branch '%s' is not a valid branch.\n$(tput sgr0)\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
         commits_missing_to_current=$(git rev-list --count \"$OTHER_BRANCH\"..\"$current_branch\"); \
         commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$OTHER_BRANCH\"); \
-        printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
+        printf \"$(tput bold)$(tput setaf 2)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
             \"$OTHER_BRANCH\" \"$current_branch\" \"$commits_missing_to_current\"; \
         git --no-pager log \"$OTHER_BRANCH\"..\"$current_branch\"; \
-        printf \"\n\n$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
+        printf \"\n\n$(tput bold)$(tput setaf 3)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
             \"$current_branch\" \"$OTHER_BRANCH\" \"$commits_missing_to_other\"; \
         git --no-pager log \"$current_branch\"..\"$OTHER_BRANCH\"; \
         printf \"\n\"; \
@@ -2614,6 +2622,7 @@
     ##? Usage: git incoming
     ##?
     ##? Fetch changes from the remote and shows incoming commits.
+    ##? Show commits that are in the remote but not in the local branch.
     incoming = "!f() { \
         git fetch \
             && git log HEAD..@{u}; \
@@ -2621,6 +2630,18 @@
 
     ##? Alias for 'incoming'.
     in = incoming
+
+    ##? Show incoming commits with file statistics.
+    inll = "!f() { \
+        git fetch \
+            && git log --pretty=medium --abbrev-commit --stat HEAD..@{u}; \
+    }; f"
+
+    ##? Show incoming commits with unified diffs.
+    inlll = "!f() { \
+        git fetch \
+            && git log -u HEAD..@{u}; \
+    }; f"
 
     # Usage: git incoming-on-branch BRANCH_NAME
     # Show new commits found in the remote repository.
@@ -2917,12 +2938,18 @@
 
     ##? Usage: git outgoing
     ##?
-    ##? Show the commits on the local branch that are not on the remote branch
-    ##? (local commits not pushed yet).
+    ##? Show commits that are in the local branch but not in the remote (unpushed).
+    ##? Useful after making local commits and before pushing.
     outgoing = log @{u}..HEAD
 
     ##? Alias for 'outgoing'.
     out = outgoing
+
+    ##? Show outgoing commits with file statistics.
+    outll = log --pretty=medium --abbrev-commit --stat @{u}..HEAD
+
+    ##? Show outgoing commits with unified diffs.
+    outlll = log -u @{u}..HEAD
 
     # Show new commits since the last rebase/reset/merge, with stats, excluding
     # merges.

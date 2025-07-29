@@ -77,7 +77,7 @@ alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
 
 #+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
 # Exclude .git directories/files from grep results.
-alias gng="grep -v '.git'"              # "grep no git".
+alias ng="grep -v '\.git/'"             # "No Git".
 #+end_src
 
 * Table of Contents                                                   :TOC_1_gh:
@@ -1767,7 +1767,7 @@ patterns):
     # Usage: git tracked-files
     # List all tracked files in the repository, sorted by last modification time.
     tracked-files = ls-files -t
-    #+end_src
+#+end_src
 
 ** Ignoring files
 
@@ -2663,9 +2663,9 @@ List commits *showing changed files* (prettier and more concise version of
 #+begin_src conf
     ##? Usage: git ll
     ##?
-    ##? Show medium formatted log with abbreviated commit hashes and file statistics.
+    ##? Show commit log with file statistics.
     ll = log --pretty=medium --abbrev-commit --stat
-    #+end_src
+#+end_src
 
 #+begin_src conf
     ##? Usage: git log-unified-diff
@@ -2945,7 +2945,7 @@ else
     alias -g GY=' --since=1.year.ago'
 
     # Global alias to exclude .git directories/files from grep results.
-    alias -g GNG="grep -v '.git'"       # "grep no git".
+    alias -g NG="grep -v '\.git/'"      # "No Git".
 fi
 #+end_src
 
@@ -3274,7 +3274,7 @@ Therefore, Git cannot determine "which branch was which" before merge commits.
             -i --author=\"$AUTHOR\" \
             --no-merges; \
     }; f"
-    #+end_src
+#+end_src
 
 *** Search commit messages
 
@@ -5013,7 +5013,7 @@ Delete a *remote* branch:
             return 64; \
         fi; \
         BRANCH_NAME=\"$1\"; \
-        printf \"Are you sure you want to delete the remote branch '%s'? [y/N]\" \"$BRANCH_NAME\"; \
+        printf \"Are you sure you want to delete the remote branch '%s'? [y/N] \" \"$BRANCH_NAME\"; \
         read -r confirm; \
         if [ \"$confirm\" = \"y\" ] || [ \"$confirm\" = \"Y\" ]; then \
             git push $(git origin) --delete \"$BRANCH_NAME\"; \
@@ -5120,8 +5120,12 @@ To rename a branch *locally and remotely*:
     # Usage: git rename-branch OLD_BRANCH_NAME NEW_BRANCH_NAME
     # Rename both a local and remote branch.
     rename-branch = "!f() { \
-        git rename-local-branch \"$1\" $2 \
-            && git push --set-upstream $(git origin) $2 \
+        if [ $# -ne 2 ]; then \
+            printf >&2 'Usage: git rename-branch OLD_BRANCH_NAME NEW_BRANCH_NAME\n'; \
+            return 64; \
+        fi; \
+        git rename-local-branch \"$1\" \"$2\" \
+            && git push --set-upstream $(git origin) \"$2\" \
             && git delete-remote-branch \"$1\"; \
     }; f"
 #+end_src
@@ -5446,22 +5450,26 @@ current branch and the specified branch.
     # Usage: git missing [OTHER_BRANCH]
     # Show the missing commits between the current branch and another branch.
     missing = "!f() { \
+        if [ $# -gt 1 ]; then \
+            printf >&2 'Usage: git missing [OTHER_BRANCH]\n'; \
+            return 64; \
+        fi; \
         current_branch=$(git current-branch); \
         OTHER_BRANCH=${1:-$(git main-branch)}; \
         if ! git verify-local-branch \"$current_branch\"; then \
-            printf >&2 \"ERROR: Current branch '%s' is not a valid branch.\n\" \"$current_branch\"; \
+            printf >&2 \"$(tput setaf 1)ERROR: Current branch '%s' is not a valid branch.\n$(tput sgr0)\" \"$current_branch\"; \
             return 2; \
         fi; \
         if ! git verify-local-branch \"$OTHER_BRANCH\"; then \
-            printf >&2 \"ERROR: Other branch '%s' is not a valid branch.\n\" \"$OTHER_BRANCH\"; \
+            printf >&2 \"$(tput setaf 1)ERROR: Other branch '%s' is not a valid branch.\n$(tput sgr0)\" \"$OTHER_BRANCH\"; \
             return 2; \
         fi; \
         commits_missing_to_current=$(git rev-list --count \"$OTHER_BRANCH\"..\"$current_branch\"); \
         commits_missing_to_other=$(git rev-list --count \"$current_branch\"..\"$OTHER_BRANCH\"); \
-        printf \"$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
+        printf \"$(tput bold)$(tput setaf 2)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
             \"$OTHER_BRANCH\" \"$current_branch\" \"$commits_missing_to_current\"; \
         git --no-pager log \"$OTHER_BRANCH\"..\"$current_branch\"; \
-        printf \"\n\n$(tput bold)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
+        printf \"\n\n$(tput bold)$(tput setaf 3)Commits missing in '%s' but present in '%s':$(tput sgr0) %d commits\n\" \
             \"$current_branch\" \"$OTHER_BRANCH\" \"$commits_missing_to_other\"; \
         git --no-pager log \"$current_branch\"..\"$OTHER_BRANCH\"; \
         printf \"\n\"; \
@@ -5632,7 +5640,7 @@ See example at https://gitlab.com/procps-ng/procps/-/network/master
 # Check if 'tig' command is installed.
 if command -v tig > /dev/null 2>&1; then
     # Aliases for 'tig' commands.
-    alias tigs='tig status'               # Use it all of the time!
+    alias tigs='tig status'             # Use it all of the time!
     alias tigb='tig blame'
     alias tigall='tig --all'
     alias tigreleases='tig --all --simplify-by-decoration'
@@ -6755,18 +6763,29 @@ What was going on, while you were away?
     ##? Usage: git incoming
     ##?
     ##? Fetch changes from the remote and shows incoming commits.
+    ##? Show commits that are in the remote but not in the local branch.
     incoming = "!f() { \
         git fetch \
             && git log HEAD..@{u}; \
     }; f"
-    #+end_src
 
-*************** TODO Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
-
-    #+begin_src conf
     ##? Alias for 'incoming'.
     in = incoming
+
+    ##? Show incoming commits with file statistics.
+    inll = "!f() { \
+        git fetch \
+            && git log --pretty=medium --abbrev-commit --stat HEAD..@{u}; \
+    }; f"
+
+    ##? Show incoming commits with unified diffs.
+    inlll = "!f() { \
+        git fetch \
+            && git log -u HEAD..@{u}; \
+    }; f"
 #+end_src
+
+*************** TODO Add optional argument BRANCH_NAME, and delete alias incoming-on-branch
 
 #+begin_tip
 Beginning with Git version 1.7.0, ~@{u}~ is a convenient shorthand notation for
@@ -7282,7 +7301,7 @@ cd "$(git root)"
 - *Commit the Changes:* If the changes are ready to be committed, you can commit
   them to your current branch before switching to the desired branch.
 
-#+begin_src shell :tangle no
+  #+begin_src shell :tangle no
   # Check if there are any changes to tracked files.
   if ! git diff --quiet; then
       # Commit changes.
@@ -7505,12 +7524,18 @@ the next time you do a push.
 #+begin_src conf
     ##? Usage: git outgoing
     ##?
-    ##? Show the commits on the local branch that are not on the remote branch
-    ##? (local commits not pushed yet).
+    ##? Show commits that are in the local branch but not in the remote (unpushed).
+    ##? Useful after making local commits and before pushing.
     outgoing = log @{u}..HEAD
 
     ##? Alias for 'outgoing'.
     out = outgoing
+
+    ##? Show outgoing commits with file statistics.
+    outll = log --pretty=medium --abbrev-commit --stat @{u}..HEAD
+
+    ##? Show outgoing commits with unified diffs.
+    outlll = log -u @{u}..HEAD
 #+end_src
 
 *************** TODO Fix missing newline at the end... Otherwise, wrong count of lines (with shell alias "W")...
