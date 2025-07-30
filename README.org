@@ -10,7 +10,7 @@
 #+SETUPFILE: ~/org/theme-readtheorg.setup
 
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+PROPERTY:  header-args :tangle .gitconfig_leuven :eval no
+#+PROPERTY:  header-args :tangle .gitconfig_gitboost :eval no
 
 #+name: current-time
 #+begin_src emacs-lisp :eval yes :results value :tangle no
@@ -7952,7 +7952,7 @@ Your =.gitconfig= file might look like the following configuration:
 
 #+begin_src conf :tangle no
 [include]
-    path = .gitconfig_leuven
+    path = .gitconfig_gitboost
 
 [user]
     name = Your Name
