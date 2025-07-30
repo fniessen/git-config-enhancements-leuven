@@ -2,75 +2,58 @@
 
 # Pull the latest changes for each Git repository found in the current directory.
 
-# Find all Git repositories under the current directory, using -prune to
-# optimize search.
-# Redirect stderr to /dev/null to avoid 'permission denied' errors.
-find . -type d -name ".git" -prune 2> /dev/null | sort -V | while read -r repo; do
-    repo_dir=$(dirname "$repo")
-    repo_name=$(basename "$repo_dir")
-    printf "\nPulling latest changes for repository '%s'...\n" "$(tput bold)$repo_name$(tput sgr0)"
+# Style definitions.
+BOLD=$(tput bold)
+RESET=$(tput sgr0)
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+GREY=$(tput setaf 7)
+BGRED=$(tput setab 1)
 
-    # Change to the repository directory.
-    cd "$repo_dir" \
-        || { printf "$(tput setaf 1)$(tput bold)Failed to change directory to '%s'$(tput sgr0)\n" "$repo_dir"; continue; }
+# Find all Git repositories under the current directory, using -prune to optimize search.
+# NOTE: Redirect stderr to /dev/null to avoid 'permission denied' errors.
+mapfile -t repos < <(find . -type d -name ".git" -prune 2> /dev/null | sort -V)
+
+if [[ ${#repos[@]} -eq 0 ]]; then
+    printf "%sNo Git repositories found.%s\n" "$YELLOW" "$RESET"
+    exit 0
+fi
+
+for repo in "${repos[@]}"; do
+    repo_dir=$(dirname "$repo")
+    [[ -r "$repo_dir" ]] || continue
+    # Get the repository name using Git's root path (more reliable than basename).
+    repo_name=$(git -C "$repo_dir" rev-parse --show-toplevel 2> /dev/null | xargs basename)
+    printf "\nPulling latest changes for repository '%s%s%s'...\n" "$BOLD" "$repo_name" "$RESET"
 
     # Run 'git pull' with a timeout of 10 seconds.
-    output=$(timeout 10 git pull 2>&1)
+    output=$(timeout 10 git -C "$repo_dir" pull 2>&1)
     exit_code=$?
 
-    if [ $exit_code -eq 124 ]; then
-        # Timeout occurred, use white bold on red background color.
-        printf "$(tput setaf 7)$(tput bold)$(tput setab 1)Timed out while pulling from repository '%s'$(tput sgr0)\n" "$repo_name"
-    elif [ $exit_code -ne 0 ]; then
-        printf "$(tput setaf 1)$(tput bold)%s$(tput sgr0)\n" "$output" \
-            | sed 's/^/        /'
+    case $exit_code in
+        0)
+            printf "%s%s%s\n" "$GREEN" "$output" "$RESET" | sed 's/^/        /'
+            ;;
+        124)
+            printf "%s%s%s\n" "${GREY}${BOLD}${BGRED}" "Timed out while pulling from repository '$repo_name'" "$RESET"
+            ;;
+        128)
+            printf "%sGit error: %s%s\n" "${RED}${BOLD}" "$output" "$RESET" | sed 's/^/        /'
+            ;;
+        *)
+            printf "%s%s%s\n" "${RED}${BOLD}" "$output" "$RESET" | sed 's/^/        /'
+            ;;
+    esac
+
+    # Show modified files in yellow if 'git status' succeeds
+    if modified_files=$(git -C "$repo_dir" status --porcelain 2>/dev/null); then
+        if [[ -n "$modified_files" ]]; then
+            while IFS= read -r line; do
+                printf "%s%s%s\n" "${YELLOW}${BOLD}" "$line" "$RESET" | sed 's/^/        /'
+            done <<< "$modified_files"
+        fi
     else
-        printf "$(tput setaf 2)%s$(tput sgr0)\n" "$output" \
-            | sed 's/^/        /'
+        printf "%s[!] Failed to read status for '%s'%s\n" "${RED}${BOLD}" "$repo_name" "$RESET"
     fi
-
-    # Display modified files in yellow bold if there are any.
-    modified_files=$(git status --porcelain)
-    if [[ -n "$modified_files" ]]; then
-        while IFS= read -r line; do
-            printf "$(tput setaf 3)$(tput bold)%s$(tput sgr0)\n" "$line" \
-                | sed 's/^/        /'
-        done <<< "$modified_files"
-    fi
-
-    # Return to the previous directory.
-    cd - > /dev/null \
-        || { printf "$(tput setaf 1)$(tput bold)Failed to return to the previous directory$(tput sgr0)\n"; exit 1; }
 done
-
-
-# #!/usr/bin/env bash
-#
-# # Pull the latest changes for each Git repository found in the current directory.
-#
-# # Find all Git repositories recursively and sort them alphabetically.
-# find . -type d -name ".git" -prune | sort | while read -r repo; do
-#     repo_dir=$(dirname "$repo")
-#     repo_name=$(basename "$repo_dir")
-#     printf "\nPulling latest changes for repository '%s'...\n" "$(tput bold)$repo_name$(tput sgr0)"
-#
-#     # Fetch changes from remote.
-#     printf "Fetching changes...\n"
-#     if ! git -C "$repo_dir" fetch --quiet; then
-#         printf "$(tput setaf 1)$(tput bold)Failed to fetch changes. Skipping.$(tput sgr0)\n"
-#         continue
-#     fi
-#
-#     # Check if there are changes to pull.
-#     if git -C "$repo_dir" status -uno | grep -q 'Your branch is behind'; then
-#         # Pull changes from remote.
-#         printf "Pulling changes from remote...\n"
-#         if ! output=$(git -C "$repo_dir" pull --ff-only); then
-#             printf "$(tput setaf 1)$(tput bold)%s$(tput sgr0)\n" "$output"
-#         else
-#             printf "$(tput setaf 2)Successfully pulled changes.$(tput sgr0)\n"
-#         fi
-#     else
-#         printf "$(tput setaf 2)Already up-to-date.$(tput sgr0)\n"
-#     fi
-# done
