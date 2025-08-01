@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# prepare-commit-message:
+# Add the name of the current Git branch to the beginning of the commit message.
+# Usage: This script is called automatically by Git as a prepare-commit-msg hook.
+
+# Customize which branches should be skipped when prepending commit message.
+BRANCHES_TO_SKIP=(master develop test)
+
+if [[ -z "$1" || ! -f "$1" ]]; then
+    echo "Error: No commit message file provided or file does not exist"
+    exit 1
+fi
+
+# Skip if it's a merge commit.
+if [[ "$2" == "merge" ]]; then
+    exit 0
+fi
+
+if ! BRANCH_NAME=$(git symbolic-ref --short HEAD 2> /dev/null); then
+    echo "Error: Not in a git repository"
+    exit 1
+fi
+
+BRANCH_NAME="${BRANCH_NAME##*/}"
+for skip in "${BRANCHES_TO_SKIP[@]}"; do
+    if [[ "$BRANCH_NAME" == "$skip" ]]; then
+        echo "Branch '$BRANCH_NAME' is in BRANCHES_TO_SKIP, skipping..."
+        exit 0
+    fi
+done
+
+if grep -qi "\[$BRANCH_NAME\]" "$1"; then
+    echo "Commit message already contains branch name, skipping..."
+    exit 0
+fi
+
+# Prepend branch name to the first line.
+sed -i.bak -e "1s/^/[$BRANCH_NAME] /" "$1" && rm -f "$1.bak"
