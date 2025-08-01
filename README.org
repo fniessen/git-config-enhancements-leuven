@@ -44,6 +44,7 @@ of ~git~ on the command line.
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
     printf >&2 "ERROR: 'git' is not installed. Please install it.\n"
+    exit 69                             # EX_UNAVAILABLE: Service unavailable.
 else
     # Set 'g' as an alias for 'git'.
     alias g=git
@@ -147,7 +148,7 @@ Customizing Git.
 
 #+begin_src conf :noweb yes
 # -*- mode: conf -*-
-# .gitconfig, Time-stamp: <<current-time()>>
+# .gitconfig_gitboost, Time-stamp: <<current-time()>>
 #+end_src
 
 #+begin_src conf
@@ -2939,7 +2940,8 @@ day, ~W~ for week, ~M~ for month, and ~Y~ for year.
 
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
-    printf >&2 "ERROR: The 'git' utility is not installed. Please install it.\n"
+    printf >&2 "ERROR: 'git' is not installed. Please install it.\n"
+    exit 69                             # EX_UNAVAILABLE: Service unavailable.
 else
     # Global aliases (for Zsh) with time-based filters.
     alias -g GD=' --since=1.day.ago'

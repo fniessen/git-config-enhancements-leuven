@@ -3,6 +3,7 @@
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
     printf >&2 "ERROR: 'git' is not installed. Please install it.\n"
+    exit 69                             # EX_UNAVAILABLE: Service unavailable.
 else
     # Set 'g' as an alias for 'git'.
     alias g=git
