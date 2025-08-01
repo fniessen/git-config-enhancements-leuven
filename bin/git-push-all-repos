@@ -2,14 +2,17 @@
 
 # Push the latest changes for each Git repository found in the current directory.
 
-# Style definitions.
-BOLD=$(tput bold)
-RESET=$(tput sgr0)
-RED=$(tput setaf 1)
-GREEN=$(tput setaf 2)
-YELLOW=$(tput setaf 3)
-GREY=$(tput setaf 7)
-BGRED=$(tput setab 1)
+# Define color and formatting variables using ANSI escape codes.
+RESET=$'\e[0m'
+BOLD=$'\e[1m'
+RED=$'\e[31m'
+GREEN=$'\e[32m'
+YELLOW=$'\e[33m'
+BLUE=$'\e[34m'
+WHITE=$'\e[37m'
+BGRED=$'\e[41m'
+ERROR="${BOLD}${WHITE}${BGRED}"
+WARN="${YELLOW}"
 
 # Find all Git repositories under the current directory, using -prune to optimize search.
 # NOTE: Redirect stderr to /dev/null to avoid 'permission denied' errors.
@@ -25,7 +28,7 @@ for repo in "${repos[@]}"; do
     [[ -r "$repo_dir" ]] || continue
     # Get the repository name using Git's root path (more reliable than basename).
     repo_name=$(git -C "$repo_dir" rev-parse --show-toplevel 2> /dev/null | xargs basename)
-    printf "\nPushing latest changes for repository '%s%s%s'...\n" "$BOLD" "$repo_name" "$RESET"
+    printf "\n%s▲ Pushing latest changes for repository '%s'...%s\n" "${BOLD}${BLUE}" "$repo_name" "${RESET}"
 
     # Push changes with a timeout of 10 seconds.
     output=$(timeout 10 git -C "$repo_dir" push 2>&1)
