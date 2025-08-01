@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-#? git-check-jar-changes, Time-stamp: <2025-04-08 Tue 14:19>
+#? git-check-java-jar-changes, Time-stamp: <2025-08-01 Fri 16:29>
 #? Copyright (C) 2025 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 #? This is free software: you are free to change and redistribute it.
 #? There is NO WARRANTY, to the extent permitted by law.
 
-##? Usage: git-check-jar-changes [options]
+##? Usage: git-check-java-jar-changes [options]
 ##?
 ##? Check if any JAR files have been added and removed in the last few commits
 ##? since a specified date, but only if those commits also contain changes to
@@ -19,8 +19,8 @@
 ##?   -V, --version                 display version information and exit
 ##?
 ##? Examples:
-##?   git-check-jar-changes         check changes since yesterday or last Friday
-##?   git-check-jar-changes --since="2 weeks ago"
+##?   git-check-java-jar-changes    check changes since yesterday or last Friday
+##?   git-check-java-jar-changes --since="2 weeks ago"
 ##?                                 check changes since 2 weeks ago
 
 # Set -uo pipefail for undefined variable check and pipeline failure propagation.
@@ -39,8 +39,7 @@ help=$(grep "^##?" "$0" | cut -c 5-)
 version=$(grep "^#?" "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
-args="$(docopts -h "$help" -V "$version" : "$@")"
-eval "$args"
+eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
 # Set -e to exit on non-zero command status.
 set -e
