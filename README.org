@@ -22,7 +22,7 @@
 # - https://documentation.help/Bazaar-help/revisionspec-help.html
 # - https://www.mercurial-scm.org/wiki/GitConcepts#Command_equivalence_table
 
-Welcome to git-config-enhancements-leuven!  This repository contains
+Welcome to gitboost!  This repository contains
 a collection of configuration settings and aliases to enhance your Git workflow.
 Whether you're a beginner or a seasoned Git user, you'll find time-saving
 shortcuts and customization options to *boost your productivity*.  Browse the
@@ -31,7 +31,7 @@ Let's make Git even better together!
 
 * Shell settings
 
-#+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
+#+begin_src shell :tangle bin/rc-common-settings-gitboost
 # Hey Emacs, this is a -*- sh -*- file ...
 #+end_src
 
@@ -40,7 +40,7 @@ Let's make Git even better together!
 If Git is installed on your system, an alias is set up so you can type ~g~ instead
 of ~git~ on the command line.
 
-#+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
+#+begin_src shell :tangle bin/rc-common-settings-gitboost
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
     printf >&2 "ERROR: 'git' is not installed. Please install it.\n"
@@ -55,7 +55,7 @@ fi
 If the ~zip~ command isn't found, you'll see an error message prompting you to
 install it.
 
-#+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
+#+begin_src shell :tangle bin/rc-common-settings-gitboost
 # Check if 'zip' command is available.
 if ! command -v zip > /dev/null 2>&1; then
     printf >&2 "ERROR: 'zip' is not installed. Please install it.\n"
@@ -68,14 +68,14 @@ This alias lets you switch to the root directory of your Git repository. It uses
 ~git rev-parse --show-toplevel~ to find the repository's root and won't throw an
 error if you're not in a Git repository.
 
-#+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
+#+begin_src shell :tangle bin/rc-common-settings-gitboost
 # Go to the root of your Git repository.
 alias cdroot='git rev-parse && cd "$(git rev-parse --show-toplevel)"'
 #+end_src
 
 ** Filtering ~.git~ from Grep output
 
-#+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
+#+begin_src shell :tangle bin/rc-common-settings-gitboost
 # Exclude .git directories/files from grep results.
 alias ng="grep -v '\.git/'"             # "No Git".
 #+end_src
@@ -2934,7 +2934,7 @@ directory across all local branches:
 These global aliases (for Zsh) use ~G~ (for Git) as the prefix, followed by ~D~ for
 day, ~W~ for week, ~M~ for month, and ~Y~ for year.
 
-#+begin_src shell :tangle bin/rc-zsh-specific-settings-git-config-enhancements-leuven
+#+begin_src shell :tangle bin/rc-zsh-specific-settings-gitboost
 # Hey Emacs, this is a -*- sh -*- file ...
 
 # Check if 'git' command is available.
@@ -3947,7 +3947,7 @@ which are obtained from the second column of a *previous command's output*, and
 execute a specified Git command on each commit. This is particularly useful when
 you need to perform operations on a series of commits.
 
-#+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
+#+begin_src shell :tangle bin/rc-common-settings-gitboost
 # Function to iterate over commit hashes and execute a given Git command.
 #
 # Example:
@@ -5417,7 +5417,7 @@ View all diffs.
         TO=\"$2\"; \
         git diff \"$FROM\"...\"$TO\"; \
     }; f"
-    # https://github.com/fniessen/git-leuven/compare/master@%7B1day%7D...master
+    # https://github.com/fniessen/gitboost/compare/master@%7B1day%7D...master
   #+end_src
 
   Compare a specific file between the main branch and the current branch:
@@ -5640,7 +5640,7 @@ See example at https://gitlab.com/procps-ng/procps/-/network/master
 
 [[https://jonas.github.io/tig/][Tig]]
 
-#+begin_src shell :tangle bin/rc-common-settings-git-config-enhancements-leuven
+#+begin_src shell :tangle bin/rc-common-settings-gitboost
 # Check if 'tig' command is installed.
 if command -v tig > /dev/null 2>&1; then
     # Aliases for 'tig' commands.
@@ -7980,7 +7980,7 @@ specify the configuration for those projects:
 ** Report issues and enhancements
 
 Found a bug or have an idea for a new feature?  Share your thoughts on the
-[[https://github.com/fniessen/git-leuven/issues/new][GitHub issue tracker]].
+[[https://github.com/fniessen/gitboost/issues/new][GitHub issue tracker]].
 
 ** Submit patches
 
@@ -7989,13 +7989,13 @@ project.
 
 ** Support development with a donation!
 
-If you find the "git-config-enhancements-leuven project" (or any of
+If you find the "gitboost project" (or any of
 [[https://github.com/fniessen/][my other projects]]) enhancing your Git experience and simplifying your workflow,
 seize the opportunity to express your appreciation!  Help fuel future
-development by making a [[https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=git%2dleuven&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted][donation]] through PayPal. Your support is invaluable --
+development by making a [[https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=gitboost&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted][donation]] through PayPal. Your support is invaluable --
 thank you!
 
-Remember, regardless of donations, "git-config-enhancements-leuven project" will
+Remember, regardless of donations, "gitboost project" will
 always remain freely accessible, both as in Belgian beer and as in speech.
 
 * License
@@ -8020,6 +8020,6 @@ this program.  If not, see http://www.gnu.org/licenses/.
 #+html: <a href="http://opensource.org/licenses/GPL-3.0">
 #+html:   <img src="http://img.shields.io/:license-gpl-blue.svg" alt=":license-gpl-blue.svg" />
 #+html: </a>
-#+html: <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=git%2dleuven&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted">
+#+html: <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VCVAS6KPDQ4JC&lc=BE&item_number=gitboost&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted">
 #+html:   <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="btn_donate_LG.gif" />
 #+html: </a>
