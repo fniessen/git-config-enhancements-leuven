@@ -1,9 +1,30 @@
 # Hey Emacs, this is a -*- sh -*- file ...
 
+# BSD sysexits.h codes.
+EX_USAGE=64                             # Command-line usage error.
+EX_UNAVAILABLE=69                       # Service unavailable.
+
+# NOTE: Source this file to make aliases available in the current shell.
+# Detect if the script is being sourced (Bash or Zsh compatible).
+if [ -n "${ZSH_EVAL_CONTEXT:-}" ]; then
+    if [[ "$ZSH_EVAL_CONTEXT" != *:file ]]; then
+        printf >&2 "Error: This script must be sourced. Use 'source $0' or '. $0'.\n"
+        return $EX_USAGE
+    fi
+elif [ -n "${BASH_SOURCE:-}" ]; then
+    if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+        printf >&2 "Error: This script must be sourced. Use 'source $0' or '. $0'.\n"
+        return $EX_USAGE
+    fi
+else
+    printf >&2 "Error: Unable to determine shell sourcing context.\n"
+    return $EX_USAGE
+fi
+
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
     printf >&2 "ERROR: 'git' is not installed. Please install it.\n"
-    exit 69                             # EX_UNAVAILABLE: Service unavailable.
+    return $EX_UNAVAILABLE
 else
     # Set 'g' as an alias for 'git'.
     alias g=git
@@ -33,13 +54,14 @@ git-iterate-commits() {
     local previous_command=$(fc -ln -1)
     previous_command="${previous_command##+([[:space:]])}"
 
-    # Display the last executed command for debug purposes.
-    printf "Last executed command: $(tput bold)%s$(tput sgr0)\n" "$previous_command"
+    # Define color and formatting variables using ANSI escape codes.
+    local reset=$'\e[0m'
+    local bold=$'\e[1m'
+    local gray=$'\e[90m'                # Bright black = gray.
+    local orange=$'\e[38;5;208m'        # Extended color (xterm 256-color orange).
 
-    # Define colors using tput.
-    local gray=$(tput setaf 8)          # Gray.
-    local orange=$(tput setaf 3)        # Orange.
-    local reset=$(tput sgr0)            # Reset to default color.
+    # Display the last executed command for debug purposes.
+    printf "Last executed command: ${bold}%s${reset}\n" "$previous_command"
 
     # Execute the previous command and loop through its output line by line,
     # processing each line immediately.
