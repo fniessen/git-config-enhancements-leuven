@@ -1,10 +1,10 @@
 # Hey Emacs, this is a -*- sh -*- file ...
+# NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
 # BSD sysexits.h codes.
 EX_USAGE=64                             # Command-line usage error.
 EX_UNAVAILABLE=69                       # Service unavailable.
 
-# NOTE: Source this file to make aliases available in the current shell.
 # Detect if the script is being sourced (Bash or Zsh compatible).
 if [ -n "${ZSH_EVAL_CONTEXT:-}" ]; then
     if [[ "$ZSH_EVAL_CONTEXT" != *:file ]]; then
