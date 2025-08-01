@@ -5,6 +5,8 @@
 
 * Tasks
 
+** TODO Vérifier que 'git unmodify' et 'git unadd' existent et fonctionnent bien
+
 ** TODO Fix alias 'delete-gone-branches'
 
 #+begin_src shell
