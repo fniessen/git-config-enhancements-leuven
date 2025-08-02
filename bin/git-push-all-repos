@@ -48,14 +48,6 @@ for repo in "${repos[@]}"; do
             ;;
     esac
 
-    # Show modified files in yellow if 'git status' succeeds
-    if modified_files=$(git -C "$repo_dir" status --porcelain 2>/dev/null); then
-        if [[ -n "$modified_files" ]]; then
-            while IFS= read -r line; do
-                printf "%s%s%s\n" "${YELLOW}${BOLD}" "$line" "${RESET}" | sed 's/^/        /'
-            done <<< "$modified_files"
-        fi
-    else
-        printf "%s[!] Failed to read status for '%s'%s\n" "${ERROR}" "$repo_name" "${RESET}"
-    fi
+    # Show modified files.
+    git -C "$repo_dir" -c color.status=always status --short | sed 's/^/        /'
 done
