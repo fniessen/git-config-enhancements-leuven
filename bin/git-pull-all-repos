@@ -9,6 +9,8 @@ RED=$'\e[31m'
 GREEN=$'\e[32m'
 YELLOW=$'\e[33m'
 BLUE=$'\e[34m'
+MAGENTA=$'\e[35m'
+CYAN=$'\e[36m'
 WHITE=$'\e[37m'
 BGRED=$'\e[41m'
 ERROR="${BOLD}${WHITE}${BGRED}"
@@ -28,7 +30,7 @@ for repo in "${repos[@]}"; do
     [[ -r "$repo_dir" ]] || continue
     # Get the repository name using Git's root path (more reliable than basename).
     repo_name=$(git -C "$repo_dir" rev-parse --show-toplevel 2> /dev/null | xargs basename)
-    printf "\n%s▼ Pulling latest changes for repository '%s'...%s\n" "${BOLD}${BLUE}" "$repo_name" "${RESET}"
+    printf "\n%s▼ Pulling latest changes for repository '%s'...%s\n" "${BOLD}${CYAN}" "$repo_name" "${RESET}"
 
     # Run 'git pull' with a timeout of 10 seconds.
     output=$(timeout 10 git -C "$repo_dir" pull 2>&1)
