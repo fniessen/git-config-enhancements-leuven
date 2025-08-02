@@ -21,7 +21,7 @@ WARN="${YELLOW}"
 mapfile -t repos < <(find . -type d -name ".git" -prune 2> /dev/null | sort -V)
 
 if [[ ${#repos[@]} -eq 0 ]]; then
-    printf "%sNo Git repositories found.%s\n" "$YELLOW" "$RESET"
+    printf "%sNo Git repositories found.%s\n" "${WARN}" "${RESET}"
     exit 0
 fi
 
@@ -38,16 +38,16 @@ for repo in "${repos[@]}"; do
 
     case $exit_code in
         0)
-            printf "%s%s%s\n" "$GREEN" "$output" "$RESET" | sed 's/^/        /'
+            printf "%s%s%s\n" "${GREEN}" "$output" "${RESET}" | sed 's/^/        /'
             ;;
         124)
-            printf "%s%s%s\n" "${GREY}${BOLD}${BGRED}" "Timed out while pushing to repository '$repo_name'" "$RESET"
+            printf "%s%s%s\n" "${ERROR}" "Timed out while pushing to repository '$repo_name'" "${RESET}"
             ;;
         128)
-            printf "%sGit error: %s%s\n" "${RED}${BOLD}" "$output" "$RESET" | sed 's/^/        /'
+            printf "Git error: %s%s%s\n" "${ERROR}" "$output" "${RESET}" | sed 's/^/        /'
             ;;
         *)
-            printf "%s%s%s\n" "${RED}${BOLD}" "$output" "$RESET" | sed 's/^/        /'
+            printf "%s%s%s\n" "${ERROR}" "$output" "${RESET}" | sed 's/^/        /'
             ;;
     esac
 
@@ -55,10 +55,10 @@ for repo in "${repos[@]}"; do
     if modified_files=$(git -C "$repo_dir" status --porcelain 2>/dev/null); then
         if [[ -n "$modified_files" ]]; then
             while IFS= read -r line; do
-                printf "%s%s%s\n" "${YELLOW}${BOLD}" "$line" "$RESET" | sed 's/^/        /'
+                printf "%s%s%s\n" "${YELLOW}${BOLD}" "$line" "${RESET}" | sed 's/^/        /'
             done <<< "$modified_files"
         fi
     else
-        printf "%s[!] Failed to read status for '%s'%s\n" "${RED}${BOLD}" "$repo_name" "$RESET"
+        printf "%s[!] Failed to read status for '%s'%s\n" "${ERROR}" "$repo_name" "${RESET}"
     fi
 done
