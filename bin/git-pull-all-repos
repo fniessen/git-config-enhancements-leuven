@@ -41,10 +41,7 @@ for repo in "${repos[@]}"; do
             printf "%s%s%s\n" "${GREEN}" "$output" "${RESET}" | sed 's/^/        /'
             ;;
         124)
-            printf "%s%s%s\n" "${ERROR}" "Timed out while pulling from repository '$repo_name'" "${RESET}"
-            ;;
-        128)
-            printf "Git error: %s%s%s\n" "${ERROR}" "$output" "${RESET}" | sed 's/^/        /'
+            printf "%s%s%s\n" "${ERROR}" "Timed out while pulling from repository '$repo_name'" "${RESET}" | sed 's/^/        /'
             ;;
         *)
             printf "%s%s%s\n" "${ERROR}" "$output" "${RESET}" | sed 's/^/        /'
