@@ -32,8 +32,8 @@ for repo in "${repos[@]}"; do
     repo_name=$(git -C "$repo_dir" rev-parse --show-toplevel 2> /dev/null | xargs basename)
     printf "\n%s▲ Pushing latest changes for repository '%s'...%s\n" "${BOLD}${MAGENTA}" "$repo_name" "${RESET}"
 
-    # Push changes with a timeout of 10 seconds.
-    output=$(timeout 10 git -C "$repo_dir" push 2>&1)
+    # Push changes with a timeout of 30 seconds.
+    output=$(timeout 30 git -C "$repo_dir" push 2>&1)
     exit_code=$?
 
     case $exit_code in
