@@ -10,9 +10,9 @@ fi
 filename="$1"
 base="${2:-master}"
 
-# Define tput formatting variables for reuse.
-BOLD=$(tput bold)
-RESET=$(tput sgr0)
+# Define color and formatting variables using ANSI escape codes.
+RESET=$'\e[0m'
+BOLD=$'\e[1m'
 
 printf "Searching for branches with changes to %s related to the %s branch\n" "$filename" "$base"
 

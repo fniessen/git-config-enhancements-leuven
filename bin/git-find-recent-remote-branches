@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? git-find-recent-branches, Time-stamp: <2025-06-20 Fri 11:05>
+#? git-find-recent-branches, Time-stamp: <2025-08-02 Sat 12:12>
 #? Copyright (C) 2024, 2025 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -30,15 +30,17 @@ EX_UNAVAILABLE=69
 # Set -uo pipefail for undefined variable check and pipeline failure propagation.
 set -uo pipefail
 
-# Define color and formatting variables.
-RESET=$(tput sgr0)
-BOLD=$(tput bold)
-RED=$(tput setaf 1)
-GREEN=$(tput setaf 2)
-BLUE=$(tput setaf 4)
-WHITE=$(tput setaf 7)
-RED_BG=$(tput setab 1)
-ERROR="${BOLD}${WHITE}${RED_BG}"
+# Define color and formatting variables using ANSI escape codes.
+RESET=$'\e[0m'
+BOLD=$'\e[1m'
+RED=$'\e[31m'
+GREEN=$'\e[32m'
+YELLOW=$'\e[33m'
+BLUE=$'\e[34m'
+WHITE=$'\e[37m'
+BGRED=$'\e[41m'
+ERROR="${BOLD}${WHITE}${BGRED}"
+WARN="${YELLOW}"
 
 # Check if 'docopts' command is available.
 if ! command -v docopts > /dev/null 2>&1; then
@@ -47,12 +49,11 @@ if ! command -v docopts > /dev/null 2>&1; then
 fi
 
 # Extract help and version information from the script.
-help=$(grep "^##?" "$0" | cut -c 5-)
-version=$(grep "^#?" "$0" | cut -c 4-)
+help=$(grep -E '^##\?' "$0" | cut -c 5-)
+version=$(grep -E '^#\?' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
-args="$(docopts -h "$help" -V "$version" : "$@")"
-eval "$args"
+eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
 # Set -e to exit on non-zero command status.
 set -e

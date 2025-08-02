@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#? git-find-dirty-repos, Time-stamp: <2025-02-19 Wed 11:41>
+#? git-find-dirty-repos, Time-stamp: <2025-08-02 Sat 12:12>
 #? Copyright (C) 2024-2025 Fabrice Niessen. All rights reserved.
 #?
 #? License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -33,12 +33,11 @@ if ! command -v docopts > /dev/null 2>&1; then
 fi
 
 # Extract help and version information from the script.
-help=$(grep "^##?" "$0" | cut -c 5-)
-version=$(grep "^#?" "$0" | cut -c 4-)
+help=$(grep -E '^##\?' "$0" | cut -c 5-)
+version=$(grep -E '^#\?' "$0" | cut -c 4-)
 
 # Parse command-line arguments using docopts.
-args="$(docopts -h "$help" -V "$version" : "$@")"
-eval "$args"
+eval "$(docopts -h "$help" -V "$version" : "$@")" || exit $?
 
 # Set -e to exit on non-zero command status.
 set -e

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Define ANSI color codes.
-BOLD=$(tput bold)
-RESET=$(tput sgr0)
+# Define color and formatting variables using ANSI escape codes.
+RESET=$'\e[0m'
+BOLD=$'\e[1m'
 
 # Fetch any changes from the remote repository.
 git fetch --prune
