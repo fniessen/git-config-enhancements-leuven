@@ -48,6 +48,9 @@ for repo in "${repos[@]}"; do
             ;;
     esac
 
-    # Show modified files.
-    git -C "$repo_dir" -c color.status=always status --short | sed 's/^/        /'
+    # Show modified files, if any.
+    modified_files=$(git -C "$repo_dir" -c color.status=always status --short)
+    if [[ -n "$modified_files" ]]; then
+        printf "Modified files:\n%s\n" "$modified_files" | sed 's/^/        /'
+    fi
 done
