@@ -33,6 +33,12 @@ Let's make Git even better together!
 
 #+begin_src shell :tangle bin/rc-common-settings-gitboost
 # Hey Emacs, this is a -*- sh -*- file ...
+# NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
+
+# BSD sysexits.h codes.
+EX_USAGE=64                             # Command-line usage error.
+EX_UNAVAILABLE=69                       # Service unavailable.
+
 #+end_src
 
 ** Alias setup
@@ -44,11 +50,11 @@ of ~git~ on the command line.
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
     printf >&2 "ERROR: 'git' is not installed. Please install it.\n"
-    exit 69                             # EX_UNAVAILABLE: Service unavailable.
-else
-    # Set 'g' as an alias for 'git'.
-    alias g=git
+    return $EX_UNAVAILABLE
 fi
+
+# Set 'g' as an alias for 'git'.
+alias g=git
 #+end_src
 
 ** Zip tool check
@@ -931,8 +937,7 @@ If you forget your aliases and don't want to open =.gitconfig= just to check, ty
     ##?
     ##? List all Git aliases in alphabetical order.
     aliases = "!f() { \
-        git config -l \
-            | grep '^alias\\.' \
+        git config --get-regexp '^alias\\.' \
             | cut -c 7- \
             | sort \
             | sed 's_=_ = _' \
@@ -2937,22 +2942,23 @@ day, ~W~ for week, ~M~ for month, and ~Y~ for year.
 
 #+begin_src shell :tangle bin/rc-zsh-specific-settings-gitboost
 # Hey Emacs, this is a -*- sh -*- file ...
+# NOTE: This file is meant to be sourced (e.g. from .bashrc or .zshrc)
 
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
     printf >&2 "ERROR: 'git' is not installed. Please install it.\n"
-    exit 69                             # EX_UNAVAILABLE: Service unavailable.
-else
-    # Global aliases (for Zsh) with time-based filters.
-    alias -g GD=' --since=1.day.ago'
-    alias -g GW=' --since=1.week.ago'
-    alias -g GM=' --since=1.month.ago'
-    alias -g G3M=' --since=3.months.ago'
-    alias -g GY=' --since=1.year.ago'
-
-    # Global alias to exclude .git directories/files from grep results.
-    alias -g NG="grep -v '\.git/'"      # "No Git".
+    return 69                           # EX_UNAVAILABLE: Service unavailable.
 fi
+
+# Global aliases (for Zsh) with time-based filters.
+alias -g GD=' --since=1.day.ago'
+alias -g GW=' --since=1.week.ago'
+alias -g GM=' --since=1.month.ago'
+alias -g G3M=' --since=3.months.ago'
+alias -g GY=' --since=1.year.ago'
+
+# Global alias to exclude .git directories/files from grep results.
+alias -g NG="grep -v '\.git/'"          # "No Git".
 #+end_src
 
 You can use these aliases in Git commands to filter commits based on time, for
@@ -3963,13 +3969,14 @@ git-iterate-commits() {
     local previous_command=$(fc -ln -1)
     previous_command="${previous_command##+([[:space:]])}"
 
-    # Display the last executed command for debug purposes.
-    printf "Last executed command: $(tput bold)%s$(tput sgr0)\n" "$previous_command"
+    # Define color and formatting variables using ANSI escape codes.
+    local reset=$'\e[0m'
+    local bold=$'\e[1m'
+    local gray=$'\e[90m'                # Bright black = gray.
+    local orange=$'\e[38;5;208m'        # Extended color (xterm 256-color orange).
 
-    # Define colors using tput.
-    local gray=$(tput setaf 8)          # Gray.
-    local orange=$(tput setaf 3)        # Orange.
-    local reset=$(tput sgr0)            # Reset to default color.
+    # Display the last executed command for debug purposes.
+    printf "Last executed command: ${bold}%s${reset}\n" "$previous_command"
 
     # Execute the previous command and loop through its output line by line,
     # processing each line immediately.
@@ -3989,7 +3996,8 @@ git-iterate-commits() {
         fi
 
         # Execute the provided Git command with the commit hash.
-        git "$git_command" "$commit_hash"
+        git "$git_command" "$commit_hash" \
+            || printf >&2 "ERROR: Failed to execute 'git %s %s'\n" "$git_command" "$commit_hash"
     done
 }
 #+end_src

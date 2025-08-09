@@ -5,30 +5,14 @@
 EX_USAGE=64                             # Command-line usage error.
 EX_UNAVAILABLE=69                       # Service unavailable.
 
-# Detect if the script is being sourced (Bash or Zsh compatible).
-if [ -n "${ZSH_EVAL_CONTEXT:-}" ]; then
-    if [[ "$ZSH_EVAL_CONTEXT" != *:file ]]; then
-        printf >&2 "Error: This script must be sourced. Use 'source $0' or '. $0'.\n"
-        return $EX_USAGE
-    fi
-elif [ -n "${BASH_SOURCE:-}" ]; then
-    if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
-        printf >&2 "Error: This script must be sourced. Use 'source $0' or '. $0'.\n"
-        return $EX_USAGE
-    fi
-else
-    printf >&2 "Error: Unable to determine shell sourcing context.\n"
-    return $EX_USAGE
-fi
-
 # Check if 'git' command is available.
 if ! command -v git > /dev/null 2>&1; then
     printf >&2 "ERROR: 'git' is not installed. Please install it.\n"
     return $EX_UNAVAILABLE
-else
-    # Set 'g' as an alias for 'git'.
-    alias g=git
 fi
+
+# Set 'g' as an alias for 'git'.
+alias g=git
 
 # Check if 'zip' command is available.
 if ! command -v zip > /dev/null 2>&1; then
