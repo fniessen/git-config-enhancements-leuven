@@ -81,7 +81,8 @@ git-iterate-commits() {
         fi
 
         # Execute the provided Git command with the commit hash.
-        git "$git_command" "$commit_hash"
+        git "$git_command" "$commit_hash" \
+            || printf >&2 "ERROR: Failed to execute 'git %s %s'\n" "$git_command" "$commit_hash"
     done
 }
 
